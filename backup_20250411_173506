@@ -1,0 +1,99 @@
+{
+    "default": {
+        "colours": {
+            "normal_bg": "#282828",
+            "hovered_bg": "#3c3c3c",
+            "disabled_bg": "#141414",
+            "selected_bg": "#505050",
+            "normal_text": "#ffffff",
+            "hovered_text": "#ffffff",
+            "disabled_text": "#808080",
+            "selected_text": "#ffffff",
+            "normal_border": "#505050",
+            "hovered_border": "#646464",
+            "disabled_border": "#282828",
+            "selected_border": "#787878"
+        },
+        "font": {
+            "name": "freesansbold.ttf",
+            "size": 14,
+            "bold": 0,
+            "italic": 0
+        },
+        "misc": {
+            "shadow_width": 2,
+            "border_width": 1,
+            "shape": "rounded_rectangle",
+            "shape_corner_radius": "2",
+            "padding": [2, 2, 2, 2]
+        }
+    },
+    "panel": {
+        "colours": {
+            "normal_bg": "#1e1e1e",
+            "normal_border": "#3c3c3c"
+        },
+        "misc": {
+            "border_width": 1,
+            "shadow_width": 0,
+            "shape": "rectangle",
+            "padding": [5, 5, 5, 5]
+        }
+    },
+    "button": {
+        "colours": {
+            "normal_bg": "#323232",
+            "hovered_bg": "#464646",
+            "disabled_bg": "#1e1e1e",
+            "selected_bg": "#5a5a5a",
+            "normal_border": "#505050",
+            "hovered_border": "#646464",
+            "disabled_border": "#282828",
+            "selected_border": "#787878"
+        },
+        "misc": {
+            "border_width": 1,
+            "shadow_width": 2,
+            "shape": "rounded_rectangle",
+            "shape_corner_radius": "4",
+            "padding": [5, 5, 5, 5]
+        }
+    },
+    "label": {
+        "colours": {
+            "normal_text": "#ffffff",
+            "disabled_text": "#808080"
+        },
+        "font": {
+            "name": "freesansbold.ttf",
+            "size": 14,
+            "bold": 0,
+            "italic": 0
+        },
+        "misc": {
+            "shadow_width": 0,
+            "border_width": 0,
+            "shape": "rectangle",
+            "padding": [2, 2, 2, 2]
+        }
+    },
+    "scroll_bar": {
+        "colours": {
+            "normal_bg": "#282828",
+            "hovered_bg": "#323232",
+            "disabled_bg": "#1e1e1e",
+            "normal_slider": "#3c3c3c",
+            "hovered_slider": "#464646",
+            "disabled_slider": "#282828",
+            "normal_border": "#505050",
+            "hovered_border": "#5a5a5a",
+            "disabled_border": "#3c3c3c"
+        },
+        "misc": {
+            "border_width": 1,
+            "shadow_width": 0,
+            "shape": "rectangle",
+            "padding": [2, 2, 2, 2]
+        }
+    }
+} 

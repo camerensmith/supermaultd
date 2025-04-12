@@ -1,0 +1,93 @@
+{
+    "armor_types": [
+      {
+        "name": "Unarmored",
+        "damage_modifiers": {
+          "normal": 1.0,
+          "piercing": 1.2,
+          "chaos": 1.0,
+          "siege": 0.8,
+          "arcane": 1.0
+        },
+        "description": "Weak against piercing attacks, moderate resistance to siege."
+      },
+      {
+        "name": "Light",
+        "damage_modifiers": {
+          "normal": 1.0,
+          "piercing": 1.5,
+          "chaos": 1.0,
+          "siege": 0.7,
+          "arcane": 1.1
+        },
+        "description": "Highly vulnerable to piercing damage."
+      },
+      {
+        "name": "Medium",
+        "damage_modifiers": {
+          "normal": 1.0,
+          "piercing": 1.0,
+          "chaos": 1.0,
+          "siege": 1.0,
+          "arcane": 1.0
+        },
+        "description": "Balanced resistance to all damage types."
+      },
+      {
+        "name": "Heavy",
+        "damage_modifiers": {
+          "normal": 0.8,
+          "piercing": 0.6,
+          "chaos": 1.0,
+          "siege": 1.3,
+          "arcane": 0.9
+        },
+        "description": "Strong against piercing and normal attacks, vulnerable to siege."
+      },
+      {
+        "name": "Fortified",
+        "damage_modifiers": {
+          "normal": 0.5,
+          "piercing": 0.3,
+          "chaos": 1.0,
+          "siege": 2.0,
+          "arcane": 0.7
+        },
+        "description": "Extremely resistant to normal and piercing, vulnerable to siege."
+      },
+      {
+        "name": "Ethereal",
+        "damage_modifiers": {
+          "normal": 0.2,
+          "piercing": 0.2,
+          "chaos": 1.0,
+          "siege": 0.5,
+          "arcane": 2.0
+        },
+        "description": "Highly resistant to physical attacks, vulnerable to arcane."
+      },
+      {
+        "name": "Magic Resistant",
+        "damage_modifiers": {
+          "normal": 1.0,
+          "piercing": 1.0,
+          "chaos": 0.7,
+          "siege": 1.0,
+          "arcane": 0.5
+        },
+        "description": "Reduces damage from arcane and chaos attacks."
+      },
+      {
+        "name": "Normal",
+        "damage_modifiers": {
+          "normal": 1.0,
+          "piercing": 1.0,
+          "chaos": 1.0,
+          "siege": 1.0,
+          "arcane": 1.0
+        },
+        "description": "Takes full damage from all types."
+      }
+    ]
+  }
+  
