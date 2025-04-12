@@ -314,7 +314,7 @@ ENEMY_DATA = {
         "type": "air"
     },
     "doomlord": {
-        "health": 800,
+        "health": 80000,
         "speed": 1.0,
         "value": 50,
         "armor_type": "medium",
