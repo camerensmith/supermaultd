@@ -84,8 +84,6 @@
         "crystal_cannon": {
           "name": "Crystal Cannon",
           "cost": 90,
-          "grid_width": 2,
-          "grid_height": 2,
           "damage_min": 60,
           "damage_max": 80,
           "damage_type": "chaos",
@@ -101,6 +99,8 @@
         "crystal_fury": {
           "name": "Crystal Fury",
           "cost": 135,
+          "grid_width": 2,
+          "grid_height": 2,
           "damage_min": 120,
           "damage_max": 150,
           "damage_type": "chaos",
@@ -170,15 +170,22 @@
           "damage_max": 13,
           "damage_type": "normal",
           "range": 700,
-          "attack_interval": 1.95,
+          "attack_interval": 0.8,
           "projectile_speed": 450,
           "attack_type": "projectile",
-          "splash_radius": 150
+          "splash_radius": 550,
+          "special": {
+            "effect": "burn", 
+            "dot_damage": 10,
+            "dot_interval": 0.3,
+            "dot_duration": 3,
+            "description": "Burns enemies."
+          } 
         },
         "pyro_fire_trap": {
           "name": "Fire Trap", 
           "description": "A fire trap that burns enemies that walk over it.",
-          "grid_width": 1, "grid_height": 1, "cost": 20,
+          "grid_width": 1, "grid_height": 1, "cost": 28,
           "damage_min": 0, "damage_max": 0,
           "damage_type": "normal", 
           "traversable": true,
@@ -186,10 +193,10 @@
           "attack_interval": 999, 
           "projectile_speed": null,
           "splash_radius": null,
-          "targets": ["ground"], 
+          "targets": ["ground", "air"], 
           "special": {
             "effect": "burn", 
-            "dot_damage": 30,
+            "dot_damage": 40,
             "dot_interval": 0.3,
             "dot_duration": 3,
             "description": "Burns ground enemies that walk over it."
@@ -199,41 +206,58 @@
           "name": "Flame Dancer",
           "description": "A skilled flame dancer that slashes with a fiery blade.",
           "size": "small",
-          "cost": 100,
-          "damage_min": 295,
-          "damage_max": 345,
+          "cost": 133,
+          "grid_width": 2,
+          "grid_height": 2,
+          "damage_min": 220,
+          "damage_max": 305,
           "damage_type": "piercing",
-          "range": 800,
+          "range": 390,
           "attack_interval": 2.0,
-          "projectile_speed": 250,
+          "projectile_speed": null,
           "attack_type": "instant",
-          "splash_radius": 300
+          "splash_radius": 575,
+          "targets": ["ground"],
+          "special": {
+            "effect": "burn", 
+            "dot_damage": 26,
+            "dot_interval": 0.3,
+            "dot_duration": 3,
+            "description": "Burns enemies."
+          }
         },
         "pyro_pyromaniac": {
           "name": "Pyromaniac",
           "description": "A deranged pyromaniac that torches enemies with a flamethrower. Large splash radius. Can target air units.",
           "size": "small",
           "cost": 150,
-          "damage_min": 40,
-          "damage_max": 50,
+          "damage_min": 30,
+          "damage_max": 35,
           "damage_type": "chaos",
           "range": 500,
           "attack_interval": 0.1,
           "projectile_speed": null,
           "attack_type": "beam",
           "beam_color": [255, 165, 0],
-          "splash_radius": 500,
-          "targets": ["ground", "air"]
+          "splash_radius": 600,
+          "targets": ["ground", "air"],
+          "special": {
+            "effect": "burn", 
+            "dot_damage": 50,
+            "dot_interval": 0.3,
+            "dot_duration": 3,
+            "description": "Burns enemies."
+          }
         },
         "pyro_searing_tower": {
           "name": "Searing Tower",
           "description": "A searing tower that blasts enemies with fireballs. Large splash radius. Can target air units.",
           "size": "small",
           "cost": 350,
-          "damage_min": 795,
+          "damage_min": 643,
           "damage_max": 795,
           "damage_type": "normal",
-          "range": 900,
+          "range": 650,
           "attack_interval": 2.5,
           "projectile_speed": null,
           "attack_type": "instant",
@@ -242,8 +266,11 @@
           "targets": ["ground", "air"],
           "attack_visual_effect": "fire_burst",
           "special": {
-            "effect": "stun",
-            "stun_duration": 0.1
+            "effect": "burn", 
+            "dot_damage": 75,
+            "dot_interval": 0.3,
+            "dot_duration": 3,
+            "description": "Burns ground enemies that walk over it."
           }
         },
         "pyro_incinerator": {
@@ -256,13 +283,19 @@
           "damage_max": 450,
           "damage_type": "normal",
           "range": 700,
-          "attack_interval": 0.2,
+          "attack_interval": 0.5,
           "traversable": true,
           "trigger_on_walkover": true,
           "projectile_speed": null,
           "attack_type": "instant",
           "splash_radius": null,
-          "targets": ["ground"]
+          "targets": ["ground"],
+          "special": {
+            "effect": "damage_pulse_aura",
+            "aura_radius": 700,
+            "pulse_damage": 75,
+            "interval": 0.2
+          }
         }
       }
     },
