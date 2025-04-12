@@ -1528,36 +1528,61 @@ class GameScene:
                     tower_pixel_width = grid_width * config.GRID_SIZE
                     tower_pixel_height = grid_height * config.GRID_SIZE
                     
-                    snapped_center_x = (grid_x * config.GRID_SIZE) + (config.GRID_SIZE // 2) + grid_offset_x
-                    snapped_center_y = (grid_y * config.GRID_SIZE) + (config.GRID_SIZE // 2) + grid_offset_y
+                    # Calculate the center point using the same method as tower placement
+                    offset_x = (grid_width - 1) // 2
+                    offset_y = (grid_height - 1) // 2
+                    start_x = grid_x - offset_x
+                    start_y = grid_y - offset_y
                     
-                    preview_pixel_x = snapped_center_x - (tower_pixel_width // 2)
-                    preview_pixel_y = snapped_center_y - (tower_pixel_height // 2)
+                    # Convert to pixel coordinates
+                    tower_left = (start_x * config.GRID_SIZE) + config.UI_PANEL_PADDING
+                    tower_top = (start_y * config.GRID_SIZE) + config.UI_PANEL_PADDING
+                    
+                    # Calculate the absolute center point in pixels
+                    center_pixel_x = tower_left + (tower_pixel_width // 2)
+                    center_pixel_y = tower_top + (tower_pixel_height // 2)
+                    
+                    # Calculate preview position so cursor is at true center
+                    preview_pixel_x = center_pixel_x - (tower_pixel_width // 2)
+                    preview_pixel_y = center_pixel_y - (tower_pixel_height // 2)
                     
                     # Draw tower call (Level 4)
-                self.tower_assets.draw_tower(screen, selected_tower_id,
-                                          preview_pixel_x, preview_pixel_y,
-                                          is_preview=True)
+                    self.tower_assets.draw_tower(screen, selected_tower_id,
+                                              preview_pixel_x, preview_pixel_y,
+                                              is_preview=True)
 
                     # --- Draw cell outlines based on snapped grid position --- 
-                    # Ensure this block is aligned correctly relative to draw_tower call or parent if
-                indicator_color = config.GREEN if is_valid_placement else config.RED
-                offset_x = (grid_width - 1) // 2
-                offset_y = (grid_height - 1) // 2
-                start_x = grid_x - offset_x
-                start_y = grid_y - offset_y
-                for y_offset in range(grid_height):
+                    indicator_color = config.GREEN if is_valid_placement else config.RED
+                    for y_offset in range(grid_height):
                         for x_offset in range(grid_width):
                             cell_x = start_x + x_offset
                             cell_y = start_y + y_offset
                             if 0 <= cell_x < self.grid_width and 0 <= cell_y < self.grid_height:
                                 cell_rect = pygame.Rect(
-                                    (cell_x * config.GRID_SIZE) + grid_offset_x, 
-                                    (cell_y * config.GRID_SIZE) + grid_offset_y, 
+                                    (cell_x * config.GRID_SIZE) + config.UI_PANEL_PADDING, 
+                                    (cell_y * config.GRID_SIZE) + config.UI_PANEL_PADDING, 
                                     config.GRID_SIZE, 
                                     config.GRID_SIZE
                                 )
                                 pygame.draw.rect(screen, indicator_color, cell_rect, 2)
+
+                    # --- Draw Range Preview ---
+                    tower_data = self.available_towers.get(selected_tower_id)
+                    if tower_data and tower_data.get('attack_type') != 'aura':
+                        range_units = tower_data.get('range', 0)
+                        if range_units > 0:
+                            range_pixels = int(range_units * (config.GRID_SIZE / 200.0))
+                            range_color = (0, 255, 0, 100)  # Green, semi-transparent
+                            
+                            # Use the exact same center point as the tower preview
+                            pygame.draw.circle(screen, range_color, (int(center_pixel_x), int(center_pixel_y)), range_pixels, 2)
+                            
+                            # Draw min range if applicable
+                            min_range_units = tower_data.get('range_min', 0)
+                            if min_range_units > 0:
+                                min_range_pixels = int(min_range_units * (config.GRID_SIZE / 200.0))
+                                min_range_color = (255, 100, 0, 100)  # Orange, semi-transparent
+                                pygame.draw.circle(screen, min_range_color, (int(center_pixel_x), int(center_pixel_y)), min_range_pixels, 2)
 
         # --- Draw Enemy Preview Area Placeholder ---
         pygame.draw.rect(screen, (40, 40, 40), self.objective_area_rect) # Dark gray placeholder
@@ -1586,9 +1611,11 @@ class GameScene:
         if self.hovered_tower:
             grid_offset_x = config.UI_PANEL_PADDING # Get grid offset
             grid_offset_y = config.UI_PANEL_PADDING
-            center_x_offset = self.hovered_tower.x + grid_offset_x
-            center_y_offset = self.hovered_tower.y + grid_offset_y
-            center_pos = (int(center_x_offset), int(center_y_offset))
+            
+            # Calculate the tower's center point in pixels
+            tower_center_x = (self.hovered_tower.top_left_grid_x * config.GRID_SIZE) + (self.hovered_tower.grid_width * config.GRID_SIZE) // 2 + grid_offset_x
+            tower_center_y = (self.hovered_tower.top_left_grid_y * config.GRID_SIZE) + (self.hovered_tower.grid_height * config.GRID_SIZE) // 2 + grid_offset_y
+            center_pos = (int(tower_center_x), int(tower_center_y))
 
             # --- Draw Aura Radius (if applicable) --- 
             if (self.hovered_tower.attack_type == 'aura' or self.hovered_tower.attack_type == 'hybrid') and self.hovered_tower.special: 
