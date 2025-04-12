@@ -1478,6 +1478,28 @@ class GameScene:
                                         apply_effects_now = True
                                         # Reset paint time after firing to require re-charge
                                         tower.paint_start_time = 0.0 
+                                else:
+                                    # For non-painter towers (normal beams), effects apply every frame
+                                    apply_effects_now = True
+                                    
+                                # Calculate buffed damage (only needed when applying effects)
+                                buffed_stats = tower.get_buffed_stats(current_game_time, self.tower_buff_auras, self.towers) 
+                                damage_multiplier = buffed_stats.get('damage_multiplier', 1.0)
+                                
+                                # Only apply damage if enough time has passed since last attack
+                                if current_game_time - tower.last_attack_time >= tower.attack_interval:
+                                    # Calculate and apply beam damage
+                                    damage_min = tower.base_damage_min
+                                    damage_max = tower.base_damage_max
+                                    damage = random.uniform(damage_min, damage_max) * damage_multiplier
+                                    
+                                    # Apply damage to the target
+                                    target_enemy.take_damage(damage, tower.damage_type)
+                                    print(f"Beam tower {tower.tower_id} dealt {damage} {tower.damage_type} damage to {target_enemy.enemy_id}")
+                                    
+                                    # Update last attack time
+                                    tower.last_attack_time = current_game_time
+                                
                 else:
                     # For non-painter towers (normal beams), effects apply every frame
                     apply_effects_now = True
