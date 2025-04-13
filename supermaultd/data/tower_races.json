@@ -213,7 +213,7 @@
           "damage_max": 305,
           "damage_type": "piercing",
           "range": 390,
-          "attack_interval": 2.0,
+          "attack_interval": 1.6,
           "projectile_speed": null,
           "attack_type": "instant",
           "splash_radius": 575,

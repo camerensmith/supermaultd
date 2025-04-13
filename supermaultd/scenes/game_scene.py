@@ -316,8 +316,33 @@ class GameScene:
                     # Calculate grid coordinates relative to the grid's top-left
                     grid_x = (mouse_x - grid_offset_x) // config.GRID_SIZE
                     grid_y = (mouse_y - grid_offset_y) // config.GRID_SIZE
-                    print(f"Right-clicked grid position: ({grid_x}, {grid_y})")
-                    self.sell_tower_at(grid_x, grid_y)
+                    
+                    # --- Check if a tower exists at the clicked location ---
+                    tower_at_location = None
+                    for tower in self.towers:
+                        if (tower.top_left_grid_x <= grid_x < tower.top_left_grid_x + tower.grid_width and
+                            tower.top_left_grid_y <= grid_y < tower.top_left_grid_y + tower.grid_height):
+                            tower_at_location = tower
+                            break # Found the tower
+
+                    # --- Check if currently previewing a tower ---
+                    is_previewing = self.tower_selector.get_selected_tower() is not None
+                    
+                    # --- Decide action based on findings ---
+                    if tower_at_location:
+                        # Existing behavior: Tower exists, try to sell it
+                        print(f"Right-clicked grid position: ({grid_x}, {grid_y}) - Found Tower {tower_at_location.tower_id}. Attempting sell.")
+                        self.sell_tower_at(grid_x, grid_y)
+                    elif is_previewing:
+                        # New behavior: No tower here, but we are previewing, so cancel preview
+                        print(f"Right-clicked empty grid position: ({grid_x}, {grid_y}) while previewing. Cancelling placement.")
+                        self.tower_selector.clear_selection()
+                        self.selected_tower = None 
+                        self.tower_preview = None
+                        # Optional: Play cancel sound
+                    else:
+                        # No tower here, and not previewing anything. Do nothing.
+                        print(f"Right-clicked empty grid position: ({grid_x}, {grid_y}) - Not previewing. Doing nothing.")
                 
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1: # Left mouse button release

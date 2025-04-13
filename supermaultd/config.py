@@ -138,7 +138,7 @@ ENEMY_DATA = {
         "armor_type": "Unarmored",
         "type": "ground"
     },
-    "gnoll": { #wave 12, 25 units, 60 gold for wave completion
+    "gnoll_berserker": { #wave 12, 25 units, 60 gold for wave completion
         "health": 1385,
         "speed": 2.5, 
         "value": 2,
@@ -147,10 +147,11 @@ ENEMY_DATA = {
         "type": "ground",
     },
     "archon": {
-        "health": 120,
+        "health": 2310,
         "speed": 1.8,
-        "value": 20,
-        "armor_type": "Magic Resistant",
+        "value": 2,
+        "armor_type": "Magic_Resistant",
+        "armor_value": 18,
         "type": "ground"
     },
     "skeleton_warrior": {
@@ -161,17 +162,19 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "fire_elemental": {
-        "health": 150,
-        "speed": 2.2,
-        "value": 18,
+        "health": 3623,
+        "speed": 0.8,
+        "value": 2,
         "armor_type": "Ethereal", 
+        "armor_value": 13,
         "type": "ground"
     },
     "tormentor": {
-        "health": 150,
-        "speed": 3.1,
-        "value": 18,
+        "health": 2473,
+        "speed": 0.8,
+        "value": 2,
         "armor_type": "Light",
+        "armor_value": 8,
         "type": "ground"
     },
     "iron_golem": {
@@ -203,10 +206,11 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "centaur_strider": {
-        "health": 190,
+        "health": 2700,
         "speed": 2.7,
         "value": 18,
         "armor_type": "Light",
+        "armor_value": 18,
         "type": "ground"
     },
     "soldier": {
@@ -258,7 +262,7 @@ ENEMY_DATA = {
         "armor_type": "Medium",
         "type": "air"
     },
-    "cyborg": {
+    "infernal_demon": {
         "health": 280,
         "speed": 1.6,
         "value": 22,
