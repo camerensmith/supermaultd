@@ -105,7 +105,7 @@ ENEMY_DATA = {
     },
     "large_crab": { #wave 3, 25 units, 28 gold for wave completion
         "health": 310,
-        "speed": 1.1,
+        "speed": 0.8,
         "value": 1, "armor_value": 7,
         "armor_type": "Medium",
         "type": "ground"

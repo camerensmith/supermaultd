@@ -1306,6 +1306,8 @@ class GameScene:
         # Fill background - Cover the whole screen first
         screen.fill((0, 0, 0)) # Black background
         
+        # --- Draw Lives Display (Removed from here) --- 
+        
         # Draw grid background 
         grid_bg_surface = pygame.Surface((self.usable_grid_pixel_width, self.usable_grid_pixel_height))
         if self.grid_background_texture:
@@ -1647,10 +1649,24 @@ class GameScene:
             screen.blit(text_surface, text_rect)
         # -------------------------
 
-        # Draw UI on top
-        self.tower_selector.draw(screen)
+        # --- Draw UI elements --- 
         self.ui_manager.draw_ui(screen)
-        
+
+        # --- Draw Lives Display (AFTER UI) --- 
+        try:
+            lives_font = pygame.font.Font(None, 24) # Create smaller, local font
+            if lives_font: 
+                # print(f"DEBUG: Drawing Lives = {self.lives}, Type = {type(self.lives)}") # REMOVED DEBUG
+                lives_text = f"Lives: {self.lives}"
+                lives_surface = lives_font.render(lives_text, True, config.WHITE) # Use white color
+                lives_rect = lives_surface.get_rect(topleft=(10, 10)) # Position with padding
+                screen.blit(lives_surface, lives_rect)
+            else:
+                print("DEBUG: Failed to create local lives_font.")
+        except Exception as e:
+             print(f"ERROR drawing lives: {e}")
+        # --- End Lives Display ---
+
         # --- Draw Hovered Tower Range Indicator ---
         if self.hovered_tower:
             grid_offset_x = config.UI_PANEL_PADDING # Get grid offset
