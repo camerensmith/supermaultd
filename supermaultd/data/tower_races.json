@@ -56,7 +56,7 @@
       "towers": {
         "crystal_shooter": {
           "name": "Crystal Shooter",
-          "cost": 12,
+          "cost": 9,
           "damage_min": 8,
           "damage_max": 22,
           "damage_type": "chaos",
@@ -68,7 +68,7 @@
         },
         "diamond_cutter": {
           "name": "Diamond Cutter",
-          "cost": 70,
+          "cost": 50,
           "grid_width": 1,
           "grid_height": 1,
           "damage_min": 20,
@@ -83,12 +83,12 @@
         },
         "crystal_cannon": {
           "name": "Crystal Cannon",
-          "cost": 90,
+          "cost": 70,
           "damage_min": 60,
-          "damage_max": 80,
+          "damage_max": 110,
           "damage_type": "chaos",
           "range": 1000,
-          "attack_interval": 1.0,
+          "attack_interval": 0.9,
           "projectile_speed": 350,
           "attack_type": "projectile",
           "splash_radius": null,
@@ -108,6 +108,7 @@
           "attack_interval": 0.5,
           "projectile_speed": 300,
           "splash_radius  ": null,
+          "targets": ["ground", "air"],
           "bounce": 1,
           "critical_chance": 0.20,
           "critical_multiplier": 2.0
@@ -230,7 +231,7 @@
           "name": "Pyromaniac",
           "description": "A deranged pyromaniac that torches enemies with a flamethrower. Large splash radius. Can target air units.",
           "size": "small",
-          "cost": 150,
+          "cost": 157,
           "damage_min": 30,
           "damage_max": 35,
           "damage_type": "chaos",

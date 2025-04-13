@@ -31,7 +31,7 @@
       "delay_before_wave": 25.0,
       "wave_completion_bonus": 35,
       "enemies": [
-        { "type": "wyvern", "count": 15, "spawn_interval": 0.8, "initial_delay": 0.0 }
+        { "type": "dragon_whelp", "count": 15, "spawn_interval": 0.8, "initial_delay": 0.0 }
       ]
     },
     {
@@ -52,7 +52,7 @@
       "delay_before_wave": 25.0,
       "wave_completion_bonus": 48,
       "enemies": [
-        { "type": "tomb_builder", "count": 25, "spawn_interval": 0.8, "initial_delay": 0.0 }
+        { "type": "tomb_keeper", "count": 25, "spawn_interval": 0.8, "initial_delay": 0.0 }
       ]
     },
     {
@@ -67,6 +67,49 @@
       "wave_completion_bonus": 53,
       "enemies": [
         { "type": "war_machine", "count": 25, "spawn_interval": 0.8, "initial_delay": 0.0 }
+      ]
+    },
+    {
+      "delay_before_wave": 25.0,
+      "wave_completion_bonus": 55,
+      "enemies": [
+        { "type": "witch_doctor", "count": 25, "spawn_interval": 0.8, "initial_delay": 0.0 }
+      ]
+    },
+    {
+      "delay_before_wave": 25.0,
+      "wave_completion_bonus": 53,
+      "enemies": [
+        { "type": "gnoll_berserker", "count": 25, "spawn_interval": 0.8, "initial_delay": 0.0 }
+      ]
+    },
+    {
+      "delay_before_wave": 25.0,
+      "wave_completion_bonus": 65,
+      "enemies": [
+        { "type": "pixie", "count": 20, "spawn_interval": 0.8, "initial_delay": 0.0 },
+        { "type": "tormentor", "count": 20, "spawn_interval": 0.8, "initial_delay": 0.0 }
+      ]
+    },
+    {
+      "delay_before_wave": 25.0,
+      "wave_completion_bonus": 68,
+      "enemies": [
+        { "type": "fire_elemental", "count": 20, "spawn_interval": 0.8, "initial_delay": 0.0 }
+      ]
+    },
+    {
+      "delay_before_wave": 25.0,
+      "wave_completion_bonus": 70,
+      "enemies": [
+        { "type": "centaur_strider", "count": 20, "spawn_interval": 0.8, "initial_delay": 0.0 }
+      ]
+    },
+    {
+      "delay_before_wave": 25.0,
+      "wave_completion_bonus": 70,
+      "enemies": [
+        { "type": "archon", "count": 20, "spawn_interval": 0.8, "initial_delay": 0.0 }
       ]
     },
     {

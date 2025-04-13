@@ -92,6 +92,45 @@ class Game:
             print(f"[Game Init] Error loading placement sound: {e}")
         # --- End Placement Sound Loading --- 
         
+        # --- Load Cancel Sound --- 
+        self.cancel_sound = None
+        try:
+            cancel_sound_path = os.path.join("assets", "sounds", "cancel.mp3")
+            if os.path.exists(cancel_sound_path):
+                self.cancel_sound = pygame.mixer.Sound(cancel_sound_path)
+                print(f"[Game Init] Loaded cancel sound: {cancel_sound_path}")
+            else:
+                print(f"[Game Init] Warning: Cancel sound file not found: {cancel_sound_path}")
+        except pygame.error as e:
+            print(f"[Game Init] Error loading cancel sound: {e}")
+        # --- End Cancel Sound Loading --- 
+        
+        # --- Load Sell Sound --- 
+        self.sell_sound = None
+        try:
+            sell_sound_path = os.path.join("assets", "sounds", "sell.mp3")
+            if os.path.exists(sell_sound_path):
+                self.sell_sound = pygame.mixer.Sound(sell_sound_path)
+                print(f"[Game Init] Loaded sell sound: {sell_sound_path}")
+            else:
+                print(f"[Game Init] Warning: Sell sound file not found: {sell_sound_path}")
+        except pygame.error as e:
+            print(f"[Game Init] Error loading sell sound: {e}")
+        # --- End Sell Sound Loading --- 
+        
+        # --- Load Invalid Placement Sound --- 
+        self.invalid_placement_sound = None
+        try:
+            invalid_sound_path = os.path.join("assets", "sounds", "invalid.mp3")
+            if os.path.exists(invalid_sound_path):
+                self.invalid_placement_sound = pygame.mixer.Sound(invalid_sound_path)
+                print(f"[Game Init] Loaded invalid placement sound: {invalid_sound_path}")
+            else:
+                print(f"[Game Init] Warning: Invalid placement sound file not found: {invalid_sound_path}")
+        except pygame.error as e:
+            print(f"[Game Init] Error loading invalid placement sound: {e}")
+        # --- End Invalid Placement Sound Loading --- 
+        
         # --- Load and Play Menu Music --- 
         try:
             music_path = os.path.join("assets", "sounds", "Theme.mp3") 
@@ -280,10 +319,13 @@ class Game:
                             
                             try:
                                 # Create the actual GameScene instance
-                                self.active_game_scene = GameScene(self, selected_race, 
-                                                       self.screen_width, self.screen_height, 
-                                                       self.click_sound, 
-                                                       self.placement_sound)
+                                self.active_game_scene = GameScene(self, selected_race,
+                                                       self.screen_width, self.screen_height,
+                                                       self.click_sound,        # Pass click sound
+                                                       self.placement_sound,   # Pass placement sound
+                                                       self.cancel_sound,      # Pass cancel sound
+                                                       self.sell_sound,        # Pass sell sound
+                                                       self.invalid_placement_sound) # Pass invalid placement sound
                                 self.game_state = "playing"
                                 print("[Game Event] Game scene initialized successfully")
                             except Exception as e:

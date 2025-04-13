@@ -27,7 +27,7 @@ WAVE_STATE_ALL_DONE = "ALL_WAVES_COMPLETE"
 WAVE_STATE_INTERMISSION = "INTERMISSION" # Added new state
 
 class GameScene:
-    def __init__(self, game, selected_race, screen_width, screen_height, click_sound, placement_sound):
+    def __init__(self, game, selected_race, screen_width, screen_height, click_sound, placement_sound, cancel_sound, sell_sound, invalid_placement_sound):
         """
         Initialize the game scene with new layout using actual screen dimensions.
         
@@ -35,16 +35,23 @@ class GameScene:
         :param selected_race: The race selected by the player
         :param screen_width: Actual width of the screen/window
         :param screen_height: Actual height of the screen/window
-        :param click_sound: Loaded pygame.mixer.Sound object for UI clicks
-        :param placement_sound: Loaded pygame.mixer.Sound object for tower placement
+        :param click_sound: Sound to play when clicking on the UI
+        :param placement_sound: Sound to play when placing a tower
+        :param cancel_sound: Sound to play when canceling placement
+        :param sell_sound: Sound to play when selling a tower
+        :param invalid_placement_sound: Sound to play when tower placement is invalid
         """
         print(f"Initializing GameScene with race: {selected_race}")
         self.game = game
         self.selected_race = selected_race
         self.screen_width = screen_width # Store actual dimensions
         self.screen_height = screen_height
-        self.click_sound = click_sound # Store UI click sound
-        self.placement_sound = placement_sound # Store placement sound
+        # Restore sounds from arguments
+        self.click_sound = click_sound
+        self.placement_sound = placement_sound
+        self.cancel_sound = cancel_sound
+        self.sell_sound = sell_sound
+        self.invalid_placement_sound = invalid_placement_sound
         
         # Get race data
         self.race_data = self.game.get_race_info(selected_race)
@@ -339,7 +346,9 @@ class GameScene:
                         self.tower_selector.clear_selection()
                         self.selected_tower = None 
                         self.tower_preview = None
-                        # Optional: Play cancel sound
+                        # Play cancel sound
+                        if self.cancel_sound:
+                            self.cancel_sound.play()
                     else:
                         # No tower here, and not previewing anything. Do nothing.
                         print(f"Right-clicked empty grid position: ({grid_x}, {grid_y}) - Not previewing. Doing nothing.")
@@ -386,8 +395,8 @@ class GameScene:
                 self.spawn_test_enemy("doomlord")
                 print("Spawned Doom Lord (press '2')")
             elif event.key == pygame.K_3: # 3 for pixie
-                self.spawn_test_enemy("pixie")
-                print("Spawned Pixie (press '3')")
+                self.spawn_test_enemy("dragon_whelp")
+                print("Spawned Dragon Whelp (press '3')")
             elif event.key == pygame.K_4: # 4 for bloodfist ogre
                 self.spawn_test_enemy("bloodfist_ogre")
                 print("Spawned Bloodfist Ogre (press '4')")
@@ -474,9 +483,12 @@ class GameScene:
 
         # --- Validation Checks ---
         # Use the comprehensive validation method which includes pathfinding
-        if not self.is_valid_tower_placement(grid_x, grid_y, grid_width, grid_height):
-             print("Invalid tower placement location.") # is_valid prints specific reason
-             return
+        is_valid = self.is_valid_tower_placement(grid_x, grid_y, grid_width, grid_height)
+        if not is_valid:
+            print("Invalid tower placement location.") # is_valid prints specific reason
+            if self.invalid_placement_sound:
+                self.invalid_placement_sound.play()
+            return
 
         # Check if player has enough money (separate from positional validation)
         if self.money < tower_data['cost']:
@@ -487,10 +499,10 @@ class GameScene:
         # Calculate footprint again (needed for marking the grid)
         offset_x = (grid_width - 1) // 2
         offset_y = (grid_height - 1) // 2
-        start_x = grid_x - offset_x
-        end_x = grid_x + offset_x
-        start_y = grid_y - offset_y
-        end_y = grid_y + offset_y
+        new_start_x = grid_x - offset_x
+        new_end_x = new_start_x + grid_width - 1 # Corrected calculation
+        new_start_y = grid_y - offset_y
+        new_end_y = new_start_y + grid_height - 1 # Corrected calculation
 
         # Check if tower is traversable
         is_traversable = tower_data.get('traversable', False)
@@ -1729,9 +1741,9 @@ class GameScene:
         offset_x = (grid_width - 1) // 2
         offset_y = (grid_height - 1) // 2
         new_start_x = grid_x - offset_x
-        new_end_x = grid_x + offset_x
+        new_end_x = new_start_x + grid_width - 1 # Corrected calculation
         new_start_y = grid_y - offset_y
-        new_end_y = grid_y + offset_y
+        new_end_y = new_start_y + grid_height - 1 # Corrected calculation
 
         # 1. Check Grid Bounds
         if not (0 <= new_start_x < self.grid_width and 0 <= new_end_x < self.grid_width and
@@ -1857,7 +1869,11 @@ class GameScene:
             sell_value = int(tower_to_sell.cost * 0.5) # 50% sell value, rounded down
             self.money += sell_value
             print(f"Sold {tower_to_sell.tower_id} for ${sell_value}. Current Money: ${self.money}")
-            
+
+            # Play sell sound
+            if self.sell_sound:
+                self.sell_sound.play()
+
             # Update UI display
             self.tower_selector.update_money(self.money)
             
@@ -2276,10 +2292,15 @@ class GameScene:
         armor_info = self.armor_data.get(armor_type_name, {})
         damage_modifiers = armor_info.get('damage_modifiers', {})
 
-        # Find initial path
-        # Use the logical path start coordinates
+        # --- Determine if enemy is air unit ---
+        is_air = enemy_base_data.get("type", "ground") == "air"
+        print(f"DEBUG Spawn: Spawning {enemy_id}, Type={enemy_base_data.get('type', 'ground')}, Is Air? {is_air}") # DEBUG
+        # -------------------------------------
+
+        # Find initial path, passing air unit status
         path = find_path(self.path_start_x, self.path_start_y, 
-                         self.path_end_x, self.path_end_y, self.grid)
+                         self.path_end_x, self.path_end_y, self.grid,
+                         is_air_unit=is_air) # Pass the flag
 
         if path:
             # Use VISUAL spawn coordinates for initial position

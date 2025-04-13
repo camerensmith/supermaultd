@@ -176,7 +176,14 @@ class MenuScene:
         selected_text = self.main_options[self.selected_main_option]
         if selected_text == "Start Game":
             if self.selected_race_id:
-                self.game.scene = GameScene(self.game, self.selected_race_id, self.screen_width, self.screen_height)
+                # We need to access the sounds loaded in the main Game object
+                click_s = self.game.click_sound if hasattr(self.game, 'click_sound') else None
+                place_s = self.game.placement_sound if hasattr(self.game, 'placement_sound') else None
+                cancel_s = self.game.cancel_sound if hasattr(self.game, 'cancel_sound') else None
+                sell_s = self.game.sell_sound if hasattr(self.game, 'sell_sound') else None
+                invalid_s = self.game.invalid_placement_sound if hasattr(self.game, 'invalid_placement_sound') else None
+                self.game.scene = GameScene(self.game, self.selected_race_id, self.screen_width, self.screen_height, 
+                                            click_s, place_s, cancel_s, sell_s, invalid_s)
             else:
                 print("Error: No race selected!")
         elif selected_text == "Select Race":
