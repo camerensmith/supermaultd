@@ -841,7 +841,7 @@ class GameScene:
                     # --- End Flamethrower Management ---
 
                     # --- Acid Spew Effect Management ---
-                    elif tower.tower_id == 'zork_bile_spewer': # CORRECTED TOWER ID
+                    elif tower.tower_id == 'zork_slime_spewer': # CORRECTED TOWER ID
                         # Initialize acid effect attribute if missing
                         if not hasattr(tower, 'active_acid_effect'): # Indentation Level 4 (24 spaces)
                             tower.active_acid_effect = None
@@ -883,7 +883,7 @@ class GameScene:
                         tower.active_flame_effect.stop_spawning()
                         tower.active_flame_effect = None
                     # Clear acid spew if not acid spewer
-                    if hasattr(tower, 'active_acid_effect') and tower.active_acid_effect and tower.tower_id != 'zork_bile_spewer': # CORRECTED TOWER ID
+                    if hasattr(tower, 'active_acid_effect') and tower.active_acid_effect and tower.tower_id != 'zork_slime_spewer': # CORRECTED TOWER ID
                         tower.active_acid_effect.stop_spawning()
                         tower.active_acid_effect = None
                     # ------------------------------------------------------------------------

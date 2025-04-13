@@ -417,11 +417,11 @@
     "zork": {
       "description": "A rapidly multiplying swarm, large AOE, overwhelming foes with sheer numbers of cheap, expendable units.",
       "towers": {
-        "zork_spore_shooter": {
-          "name": "Spore Shooter",
+        "zork_zorkling_spawner": {
+          "name": "Zorkling Spawner",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 5,
+          "cost": 8,
           "damage_min": 3,
           "damage_max": 4,
           "damage_type": "normal",
@@ -429,23 +429,23 @@
           "attack_interval": 0.3,
           "projectile_speed": 400,
           "attack_type": "projectile",
-          "splash_radius": 450,
+          "splash_radius": 250,
           "targets": ["ground", "air"]
         },
-        "zork_bile_spewer": {
-          "name": "Bile Spewer",
+        "zork_slime_spewer": {
+          "name": "Slime Spewer",
           "grid_width": 1,
           "grid_height": 1,
           "cost": 15,
           "damage_min": 5,
           "damage_max": 7,
-          "damage_type": "piercing",
+          "damage_type": "normal",
           "range": 500,
           "attack_interval": 0.5,
           "projectile_speed": 350,
           "attack_type": "beam",
           "beam_color": [50, 205, 50],
-          "splash_radius": 50,
+          "splash_radius": 680,
           "targets": ["ground", "air"],
           "special": {"visual_effect": "acid_spew"}
         },
@@ -454,7 +454,7 @@
           "description": "An eerie pitted terrain, breeding grounds for the Zork Swarm.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 10,
+          "cost": 30,
           "damage_min": 0,
           "damage_max": 0,
           "damage_type": "normal",
@@ -467,7 +467,7 @@
           "special": {
             "effect": "slow_aura",
             "targets": ["ground"],
-            "slow_percentage": 35,
+            "slow_percentage": 25,
             "aura_radius": 800
           }
         },
@@ -477,8 +477,8 @@
           "grid_width": 1,
           "grid_height": 1,
           "cost": 50,
-          "damage_min": 10,
-          "damage_max": 12,
+          "damage_min": 89,
+          "damage_max": 129,
           "damage_type": "chaos",
           "range": 600,
           "attack_interval": 2.15,
@@ -489,37 +489,38 @@
         },
         "zork_swarmers": {
           "name": "Swarmers",
-          "grid_width": 1,
-          "grid_height": 1,
+          "grid_width": 2,
+          "grid_height": 2,
           "cost": 60,
           "damage_min": 25,
           "damage_max": 30,
-          "damage_type": "piercing",
+          "damage_type": "normal",
           "range": 700,
-          "attack_interval": 0.8,
-          "projectile_speed": 400,
+          "attack_interval": 0.3,
+          "projectile_speed": 300,
           "attack_type": "projectile",
-          "splash_radius": 75,
+          "splash_radius": 775,
           "targets": ["air"]
         },
-        "zork_brood_lord_spire": {
-          "name": "Brood Lord Spire",
-          "grid_width": 2,
-          "grid_height": 2,
-          "cost": 180,
-          "damage_min": 50,
-          "damage_max": 60,
-          "damage_type": "chaos",
-          "range": 750,
+        "zork_brood_lord": {
+          "name": "Zork Brood Lord",
+          "grid_width": 3,
+          "grid_height": 3,
+          "cost": 285,
+          "damage_min": 847,
+          "damage_max": 913,
+          "damage_type": "normal",
+          "range": 820,
           "attack_interval": 1.0,
-          "projectile_speed": 400,
-          "attack_type": "projectile",
+          "projectile_speed": null,
+          "attack_type": "instant",
           "splash_radius": 100,
-          "targets": ["ground", "air"],
+          "targets": ["ground"],
           "special": {
             "effect": "attack_speed_aura",
-            "attack_speed_multiplier": 0.5,
-            "aura_radius": 300
+            "attack_speed_multiplier": 1.3,
+            "aura_radius": 300,
+            "required_race": "zork"
           }
         }
       }
