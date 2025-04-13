@@ -316,7 +316,7 @@
           "projectile_speed": 200,
           "attack_type": "projectile",
           "splash_radius": 600,
-          "targets": ["ground"],
+          "targets": ["ground", "air"],
           "special": {
             "effect": "distance_damage_bonus",
             "max_bonus_percentage": 0.50,

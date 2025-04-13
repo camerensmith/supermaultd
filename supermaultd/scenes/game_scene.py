@@ -1344,6 +1344,16 @@ class GameScene:
         
         grid_bg_surface.blit(restricted_surface, (0, 0))
 
+        # Draw grid lines (on grid_bg_surface)
+        for x_line in range(0, self.usable_grid_pixel_width + 1, config.GRID_SIZE):
+            pygame.draw.line(grid_bg_surface, (80, 80, 80), (x_line, 0), (x_line, self.usable_grid_pixel_height))
+        for y_line in range(0, self.usable_grid_pixel_height + 1, config.GRID_SIZE):
+            pygame.draw.line(grid_bg_surface, (80, 80, 80), (0, y_line), (self.usable_grid_pixel_width, y_line))
+            
+        # Blit the completed grid surface onto the main screen at top-left
+        screen.blit(grid_bg_surface, (config.UI_PANEL_PADDING, config.UI_PANEL_PADDING)) # Add top/left padding
+
+        # --- Draw Spawn and Objective Areas (AFTER grid background is blitted) ---
         # Draw spawn area
         spawn_outline_color = (100, 255, 100) # Light green outline
         spawn_surface = pygame.Surface((self.spawn_area_rect.width, self.spawn_area_rect.height))
@@ -1359,15 +1369,7 @@ class GameScene:
         objective_surface.set_alpha(200)  # Increased opacity
         screen.blit(objective_surface, self.objective_area_rect)
         pygame.draw.rect(screen, objective_outline_color, self.objective_area_rect, 2) # Add outline
-        
-        # Draw grid lines (Keep this part)
-        for x_line in range(0, self.usable_grid_pixel_width + 1, config.GRID_SIZE):
-            pygame.draw.line(grid_bg_surface, (80, 80, 80), (x_line, 0), (x_line, self.usable_grid_pixel_height))
-        for y_line in range(0, self.usable_grid_pixel_height + 1, config.GRID_SIZE):
-            pygame.draw.line(grid_bg_surface, (80, 80, 80), (0, y_line), (self.usable_grid_pixel_width, y_line))
-            
-        # Blit the grid surface onto the main screen at top-left
-        screen.blit(grid_bg_surface, (config.UI_PANEL_PADDING, config.UI_PANEL_PADDING)) # Add top/left padding
+        # --- End Spawn/Objective Drawing ---
 
         # Draw towers (coordinates are relative to grid, need offset)
         grid_offset_x = config.UI_PANEL_PADDING

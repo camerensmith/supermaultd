@@ -47,15 +47,15 @@ SKY_BLUE = (135, 206, 235)
 
 # Game settings
 GRID_SIZE = 32  # Size of each grid cell in pixels
-STARTING_MONEY = 1000
+STARTING_MONEY = 100
 STARTING_LIVES = 10
 RESTRICTED_TOWER_AREA_HEIGHT = 1  # Number of rows at top and bottom where towers cannot be placed
 RESTRICTED_TOWER_AREA_WIDTH = 1   # Number of columns at left and right where towers cannot be placed
 
 # Spawn area settings
-SPAWN_AREA_WIDTH = 3  # Width of spawn area in grid cells
-SPAWN_AREA_HEIGHT = 2  # Height of spawn area in grid cells
-SPAWN_AREA_COLOR = (128, 0, 128)  # Purple color for spawn area
+SPAWN_AREA_WIDTH = 2  # Width of spawn area in grid cells
+SPAWN_AREA_HEIGHT = 1  # Height of spawn area in grid cells
+SPAWN_AREA_COLOR = (105, 105, 105)  # Purple color for spawn area
 
 # Objective area settings
 OBJECTIVE_AREA_WIDTH = 2  # Width of objective area in grid cells
@@ -147,7 +147,7 @@ ENEMY_DATA = {
         "type": "ground",
     },
     "archon": {
-        "health": 2310,
+        "health": 2150,
         "speed": 1.8,
         "value": 2,
         "armor_type": "Magic_Resistant",
