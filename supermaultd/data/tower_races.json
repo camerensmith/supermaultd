@@ -300,7 +300,7 @@
       }
     },
     "cauldron_tank_command": {
-      "description": "The Tank Command is a special, heavily ordinance detachment from Earth's planetary defense 'Codename: Cauldron' initiative.  Masters of armored warfare, fielding incredibly expensive but devastatingly powerful tanks with slow-firing cannons.",
+      "description": "Masters of armored warfare, fielding incredibly expensive but large and slow firing devastatingly powerful tanks with slow-firing cannons.",
       "towers": {
         "tank_defender": {
           "name": "Tank Defender",
@@ -312,8 +312,8 @@
           "damage_max": 40,
           "damage_type": "piercing",
           "range": 1300,
-          "attack_interval": 2.0,
-          "projectile_speed": 400,
+          "attack_interval": 1.44,
+          "projectile_speed": 200,
           "attack_type": "projectile",
           "splash_radius": 600,
           "targets": ["ground"],
@@ -323,8 +323,8 @@
             "description": "Deals more damage the further the target is upon impact."
           }
         },
-        "tank_steam_tank": {
-          "name": "Steam Tank",
+        "tank_mk_i": {
+          "name": "MK I",
           "grid_width": 3,
           "grid_height": 3,
           "cost": 65,
@@ -333,13 +333,13 @@
           "damage_type": "siege",
           "range": 1400,
           "attack_interval": 3.0,
-          "projectile_speed": 400,
+          "projectile_speed": 200,
           "attack_type": "projectile",
           "splash_radius": 100,
           "targets": ["ground"]
         },
         "tank_aegis_flak_cannon": {
-          "name": "Aegis Flak Cannon",
+          "name": "Aegis Flak Tank",
           "description": "A flak cannon that devasta",
           "grid_width": 3,
           "grid_height": 3,
@@ -348,7 +348,7 @@
           "damage_max": 850,
           "damage_type": "normal",
           "range": 1600,
-          "attack_interval": 2.8,
+          "attack_interval": 2.4,
           "projectile_speed": null,
           "attack_type": "instant",
           "splash_radius": 800,
@@ -356,24 +356,24 @@
           "attack_visual_effect": "tank_aegis_flak_cannon"
         },
         "tank_blasto_mortar": {
-          "name": "Blasto Siege Mortar", 
-          "description": "A powerful siege mortar that can deals massive AOE damage.",
+          "name": "Blasto Mortar Tank", 
+          "description": "Powerful artillery that can deals massive AOE damage.",
           "grid_width": 3,
           "grid_height": 3,
-          "cost": 120,
+          "cost": 220,
           "damage_min": 500,
-          "damage_max": 800,
+          "damage_max": 1000,
           "damage_type": "siege",
-          "range": 900,
-          "range_min": 200,
+          "range": 2200,
+          "range_min": 1100,
           "attack_interval": 4.0,
-          "projectile_speed": 300,
+          "projectile_speed": 225,
           "attack_type": "projectile",
-          "splash_radius": 350,
+          "splash_radius": 550,
           "targets": ["ground"],
           "special": {
             "effect": "blast_zone",
-            "radius": 100,
+            "radius": 200,
             "targets": ["ground"],
             "description": "Impact deals full damage in a small area."
           }
@@ -381,16 +381,17 @@
         "tank_hercules_javelin_tank": {
           "name": "Hercules Javelin Tank",
           "description": "A massive tank with a powerful javeling launcher that can deal massive damage to enemies.",
-          "grid_width": 3,
-          "grid_height": 3,
+          "grid_width": 4,
+          "grid_height": 4,
           "cost": 390,
           "damage_min": 900,
           "damage_max": 1000,
           "damage_type": "normal",
           "range_min": 500,
-          "range": 600,
-          "attack_interval": 4.5,
-          "projectile_speed": 400,
+          "range": 800,
+          "attack_interval": 2.8,
+          "pierce_adjacent": 5,
+          "projectile_speed": 210,
           "attack_type": "projectile",
           "splash_radius": null,
           "targets": ["ground"]
@@ -398,24 +399,18 @@
         "tank_cauldron_juggernaut": {
           "name": "Cauldron Juggernaut",
           "description": "A powerful tank that fires a massive corrosive shell to shred armor of even the toughest enemies.",
-          "grid_width": 3,
-          "grid_height": 3,
-          "cost": 447,
-          "damage_min": 200,
-          "damage_max": 250,
+          "grid_width": 5,
+          "grid_height": 5,
+          "cost": 1887,
+          "damage_min": 4500,
+          "damage_max": 5675,
           "damage_type": "chaos",
-          "range": 700,
-          "attack_interval": 5.5,
-          "projectile_speed": 100,
+          "range": 1400,
+          "attack_interval": 3.87,
+          "projectile_speed": 150,
           "attack_type": "projectile",
           "splash_radius": 250,
-          "targets": ["ground"],
-          "special": {
-            "effect": "corrosion",
-            "dot_damage": 100,
-            "dot_interval": 0.5,
-            "duration": 3.0
-          }
+          "targets": ["ground"]
         }
       }
     },

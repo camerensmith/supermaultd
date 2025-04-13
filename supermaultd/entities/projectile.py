@@ -76,34 +76,34 @@ class Projectile:
         self.vy = 0.0 # Velocity y
         self.distance_traveled_sq = 0.0
         self.max_distance_sq = max_distance**2 if max_distance is not None else float('inf')
-        self.current_angle_degrees = 0.0 # Initialize angle
+        self.world_angle_degrees = 0.0 # Store the world angle (0=right, 90=up)
+        self._drawn_once = False # Debug flag for initial draw
 
-        # Determine movement type and initial angle (Assuming base image points UP)
-        if direction_angle is not None and target_enemy is None:
-            # Straight-flying projectile based on angle
-            self.target = None # Ensure target is None for non-homing
-            angle_rad = math.radians(direction_angle)
-            self.vx = math.cos(angle_rad) * self.speed
-            self.vy = math.sin(angle_rad) * self.speed
-            # Adjust angle for UP-pointing sprite: 90 - world_angle
-            self.current_angle_degrees = 90.0 - direction_angle 
-            # print(f"INIT Non-Homing Proj: angle={direction_angle}, speed={self.speed}, vx={self.vx:.2f}, vy={self.vy:.2f}")
-        elif target_enemy is not None:
-            # Homing projectile (vx/vy will be recalculated in move)
-            # Calculate initial angle towards target
+        # Determine movement type and initial angle
+        if target_enemy is not None:
+            # Homing projectile: Calculate initial world angle towards target
             initial_dx = target_enemy.x - self.x
             initial_dy = target_enemy.y - self.y
-            if initial_dx != 0 or initial_dy != 0: # Avoid atan2(0,0)
-                initial_angle_rad = math.atan2(initial_dy, initial_dx)
-                initial_angle_deg = math.degrees(initial_angle_rad)
-                # Adjust angle for UP-pointing sprite: 90 - world_angle
-                self.current_angle_degrees = 90.0 - initial_angle_deg 
-            # print(f"INIT Homing Proj: target={target_enemy.enemy_id}, speed={self.speed}, Initial Angle: {self.current_angle_degrees:.1f}")
-            pass # Keep self.target, vx/vy are calculated dynamically
+            if abs(initial_dx) > 0.001 or abs(initial_dy) > 0.001:
+                initial_angle_rad = math.atan2(-initial_dy, initial_dx) # Use -dy for Pygame coords
+                self.world_angle_degrees = math.degrees(initial_angle_rad)
+                print(f"[Projectile Init Homing] Target: {target_enemy.enemy_id}, Initial World Angle: {self.world_angle_degrees:.1f}")
+            else:
+                print(f"[Projectile Init Homing] Warning: Starting exactly on target {target_enemy.enemy_id}. Using default angle 0.")
+                self.world_angle_degrees = 0.0 # Default to pointing right if starting on target
+        elif direction_angle is not None:
+            # Straight-flying projectile based on angle
+            self.target = None 
+            self.world_angle_degrees = direction_angle # Assume direction_angle is world angle
+            angle_rad = math.radians(self.world_angle_degrees) 
+            self.vx = math.cos(angle_rad) * self.speed
+             # Use -sin because Pygame Y is inverted
+            self.vy = -math.sin(angle_rad) * self.speed
+            print(f"[Projectile Init Straight] World Angle: {self.world_angle_degrees}, vx: {self.vx:.1f}, vy: {self.vy:.1f}")
         else:
             # Invalid state - needs either target or direction
-            print("Warning: Projectile created without target or direction. Will not move.")
-            self.collided = True # Mark as collided immediately if no movement defined
+            print("[Projectile Init] Warning: Projectile created without target OR direction. Will not move.")
+            self.collided = True # Mark as collided immediately
 
         # --- Store Special Data if Relevant --- 
         self.special_on_kill_data = None
@@ -135,15 +135,22 @@ class Projectile:
             # else: print(f"DEBUG Projectile Init: Effect '{effect}' not handled for special data.") # Optional else debug
         # --- End Store Special Data ---
 
-        # --- Load Impact Effect Image (Specific for Nuke) --- 
+        # --- Load Impact Effect Image (General) --- 
         self.impact_effect_surface = None
-        if self.projectile_id == "tech_nuclear_silo" and self.asset_loader:
-            # Convention: Effect name matches projectile ID, looks in assets/effects/
+        if self.asset_loader:
+            # Try to load an effect image based on projectile ID
             effect_image_path = os.path.join("assets", "effects", f"{self.projectile_id}.png")
-            self.impact_effect_surface = self.asset_loader(effect_image_path)
-            if not self.impact_effect_surface:
-                 print(f"Warning: Failed to load impact effect for {self.projectile_id} from {effect_image_path}")
-        # --------------------------------------------------
+            # Check if the file exists before attempting to load
+            if os.path.exists(effect_image_path):
+                print(f"[Projectile Init] Found potential impact effect: {effect_image_path}. Loading...")
+                self.impact_effect_surface = self.asset_loader(effect_image_path)
+                if self.impact_effect_surface:
+                    print(f"[Projectile Init] Successfully loaded impact effect surface for {self.projectile_id}.")
+                else:
+                    print(f"[Projectile Init] Warning: Failed to load impact effect for {self.projectile_id} from {effect_image_path}")
+            # else: # Optional: print if effect file not found
+            #    print(f"[Projectile Init] No specific impact effect found for {self.projectile_id} at {effect_image_path}")
+        # --------------------------------------------
 
     def move(self, time_delta, enemies):
         """Move the projectile towards its target (if homing) or in a straight line."""
@@ -164,7 +171,7 @@ class Projectile:
 
             # Check for max range expiry
             if self.distance_traveled_sq >= self.max_distance_sq:
-                print(f"Non-homing projectile {self.projectile_id} expired (max range).")
+                #print(f"Non-homing projectile {self.projectile_id} expired (max range).")
                 self.collided = True
                 return # <<< RETURN HERE
 
@@ -176,7 +183,7 @@ class Projectile:
                     dy = enemy.y - self.y
                     dist_sq = dx**2 + dy**2
                     if dist_sq <= collision_radius_sq:
-                        print(f"Non-homing projectile {self.projectile_id} collided with {enemy.enemy_id}.")
+                        #print(f"Non-homing projectile {self.projectile_id} collided with {enemy.enemy_id}.")
                         self.collided = True
                         self.hit_enemy = enemy # Store the enemy that was actually hit
                         # Optional: Snap position to enemy center on collision
@@ -218,52 +225,78 @@ class Projectile:
             self.x += self.vx * time_delta
             self.y += self.vy * time_delta
             
-            # Update rotation angle for drawing (assuming sprite points UP by default)
-            angle_rad = math.atan2(dy, dx)
-            angle_deg = math.degrees(angle_rad)
-            self.current_angle_degrees = 90.0 - angle_deg  # Adjust for UP-pointing sprite
+            # Update world angle towards target
+            angle_rad = math.atan2(-dy, dx) # Use -dy for Pygame coords
+            self.world_angle_degrees = math.degrees(angle_rad)
 
     def draw(self, screen, projectile_assets, offset_x=0, offset_y=0):
         """Draw the projectile using its asset image, rotated to face its direction."""
         if not self.collided:
             base_image = projectile_assets.get_projectile_image(self.projectile_id)
             if not base_image:
-                return # Cannot draw if image not loaded
+                return 
             
-            # Calculate the logical center position with offset for drawing
             draw_center_x = self.x + offset_x
             draw_center_y = self.y + offset_y
             
-            # Rotate the base image
-            # Assuming base image points UP (90 degrees)
-            # The angle calculation already accounts for this offset and pygame's CCW rotation
-            rotated_image = pygame.transform.rotate(base_image, self.current_angle_degrees)
+            # Calculate rotation needed for Pygame (counter-clockwise)
+            # *** REVERTING ASSUMPTION: Base image points UP (world 90) ***
+            # Rotation needed = world_angle - 90
+            angle_for_pygame = self.world_angle_degrees - 90.0
             
-            # Get the rectangle of the rotated image and set its center to the draw position
+            if not self._drawn_once and self.target:
+                # Update debug print to reflect the reverted assumption
+                print(f"[Projectile Draw FIRST (Assume Up Base)] Proj: {self.projectile_id}, Target: {self.target.enemy_id}, World Angle: {self.world_angle_degrees:.1f}, Pygame Angle Used: {angle_for_pygame:.1f}")
+                self._drawn_once = True
+                
+            rotated_image = pygame.transform.rotate(base_image, angle_for_pygame)
             rotated_rect = rotated_image.get_rect(center=(draw_center_x, draw_center_y))
-            
-            # Blit the rotated image using its top-left corner
             screen.blit(rotated_image, rotated_rect.topleft)
-
-            # Optional: Add crit glow/effect here too
-            # if self.is_crit:
-            #     pass # Add some visual indication for crits
 
     def on_collision(self, enemies, current_time):
         """Handles what happens when the projectile collides with an enemy or reaches its target location.
-           Returns a dictionary: {'new_projectiles': [], 'new_effects': []}.
+           Returns a dictionary containing results like damage dealt, new effects, etc.
         """
         # --- Visual Only Check --- 
         if self.is_visual_only:
             print(f"DEBUG: Visual projectile {self.projectile_id} collided, ignoring.") # Optional debug
-            return # Do nothing if it's just visual
+            # Return an empty results dict for visual projectiles
+            return {
+                'damage_dealt': [], 
+                'special_effects_applied': [], 
+                'new_projectiles': [], 
+                'new_effects': [], 
+                'enemies_killed': [],
+                'gold_added': 0
+            }
         # --- END Visual Only Check ---
 
-        results = {'new_projectiles': [], 'new_effects': [], 'gold_added': 0}
+        # Initialize results dictionary with all expected keys
+        results = {
+            'damage_dealt': [], 
+            'special_effects_applied': [], 
+            'new_projectiles': [], 
+            'new_effects': [], 
+            'enemies_killed': [],
+            'gold_added': 0
+        }
         
         # Mark as collided first
-        self.collided = True 
+        self.collided = True
         impact_pos = (self.x, self.y) # Use current position as impact point
+
+        # --- Create Impact Visual Effect (If image loaded) --- 
+        if self.impact_effect_surface:
+            # Set effect size to approximately 2 grid squares diameter
+            effect_diameter = 2 * GRID_SIZE 
+            effect_duration = 0.75 # Seconds - Adjust duration as needed
+            impact_effect = Effect(impact_pos[0], impact_pos[1], 
+                                     self.impact_effect_surface, 
+                                     duration=effect_duration, 
+                                     target_size=(effect_diameter, effect_diameter))
+            results['new_effects'].append(impact_effect)
+            print(f"[Projectile Collision] Created impact effect for {self.projectile_id} at ({int(impact_pos[0])}, {int(impact_pos[1])}) size {effect_diameter} (2x GRID_SIZE)")
+        # --- End Impact Visual --- 
 
         # --- Get Initial Target (if exists) --- 
         initial_target = self.target if self.target else None 
@@ -289,7 +322,7 @@ class Projectile:
             max_bonus = self.source_tower.special.get("max_bonus_percentage", 0.0)
             tower_range = self.source_tower.range # Use tower's actual range
             
-            if tower_range > 0 and max_bonus > 0:
+            if tower_range > 0 and max_bonus > 0 and collided_enemy: # Added check for collided_enemy
                 # Calculate distance at impact using 'collided_enemy'
                 dx = collided_enemy.x - self.source_tower.x
                 dy = collided_enemy.y - self.source_tower.y
@@ -403,18 +436,6 @@ class Projectile:
                  print(f"... splashed {enemies_splashed} enemies.")
         # --- End Splash --- 
         
-        # --- Create Impact Visual Effect (e.g., for Nuke) --- 
-        if self.impact_effect_surface:
-            # Determine size - maybe based on splash radius or a fixed value?
-            effect_size = (int(self.splash_radius * 2), int(self.splash_radius * 2)) if self.splash_radius > 0 else (GRID_SIZE * 2, GRID_SIZE * 2)
-            impact_effect = Effect(impact_pos[0], impact_pos[1], 
-                                     self.impact_effect_surface, 
-                                     duration=4.0, # Increased duration to 4 seconds
-                                     target_size=effect_size)
-            results['new_effects'].append(impact_effect)
-            print(f"... created impact effect for {self.projectile_id}")
-        # --- End Impact Visual --- 
-        
         # --- Bounce Logic --- 
         if self.bounces_remaining > 0 and collided_enemy:
             # Find potential bounce targets
@@ -449,116 +470,110 @@ class Projectile:
                     speed=self.speed,
                     projectile_id=self.projectile_id,
                     target_enemy=bounce_target,
-                    splash_radius=self.splash_radius, # Keep original splash radius? Or maybe reduce/remove? Keeping for now.
+                    splash_radius=self.splash_radius,
                     source_tower=self.source_tower,
-                    is_crit=False, # Bounces generally don't crit
-                    special_effect=None, # Bounces generally don't re-apply special effects
+                    is_crit=self.is_crit,
+                    special_effect=self.special_effect,
                     damage_type=self.damage_type,
-                    pierce_adjacent=0, # Bounce overrides pierce
+                    pierce_adjacent=0, 
                     bounces_remaining=self.bounces_remaining - 1,
                     bounce_range_pixels=self.bounce_range_pixels,
                     bounce_damage_falloff=self.bounce_damage_falloff,
-                    hit_enemies_in_sequence=self.hit_enemies_in_sequence # Pass the set of already hit enemies
+                    hit_enemies_in_sequence=self.hit_enemies_in_sequence.union({collided_enemy}), # Pass updated history
+                    asset_loader=self.asset_loader,
+                    is_visual_only=self.is_visual_only
                 )
                 results['new_projectiles'].append(new_projectile)
             else:
                  print(f"... no valid bounce targets found for {collided_enemy.enemy_id}.")
 
-        # --- End Bounce --- 
-            
         # --- Pierce Adjacent Logic --- 
-        # Pierce happens only if bounce didn't occur (no new projectiles created)
-        if not results['new_projectiles'] and self.pierce_adjacent > 0 and collided_enemy:
-            print(f"... projectile {self.projectile_id} checking for pierce targets (Max: {self.pierce_adjacent})")
+        if self.pierce_adjacent > 0 and collided_enemy and not results['new_projectiles']: # Only pierce if direct hit and didn't bounce
             pierced_count = 0
-            pierce_damage = self.damage * 0.75 # Apply 75% damage
-            
-            # Use a small search radius around the impact point to find adjacent targets
-            # Increase this if you want pierce to hit enemies slightly farther behind
-            pierce_search_radius_sq = (GRID_SIZE * 0.6)**2 
-            
-            potential_targets = []
+            potential_pierce_targets = []
+            # Set pierce search radius to 175 pixels (squared for efficiency)
+            pierce_range_sq = 175**2 
+            # print(f"[Pierce Check] Search Radius Squared: {pierce_range_sq:.1f}") # DEBUG
             for enemy in enemies:
-                # Check if enemy is valid, alive, within search range, and NOT the collided one or already hit
-                if (enemy != collided_enemy and 
-                    enemy.health > 0 and
-                    enemy.type in self.source_tower.targets and
-                    enemy not in self.hit_enemies_in_sequence and
-                    (enemy.x - impact_pos[0])**2 + (enemy.y - impact_pos[1])**2 <= pierce_search_radius_sq):
-                    
+                 if (enemy.health > 0 and 
+                     enemy != collided_enemy and 
+                     enemy not in self.hit_enemies_in_sequence and
+                     enemy.type in self.source_tower.targets):
                     dist_sq = (enemy.x - impact_pos[0])**2 + (enemy.y - impact_pos[1])**2
-                    potential_targets.append((dist_sq, enemy))
-            
-            if potential_targets:
-                # Sort by distance to hit the closest ones first
-                potential_targets.sort(key=lambda item: item[0])
-                
-                # Hit up to self.pierce_adjacent targets
-                for _, pierce_target in potential_targets:
+                    if dist_sq <= pierce_range_sq:
+                        potential_pierce_targets.append((dist_sq, enemy))
+                        # print(f"[Pierce Check]   -> Potential Target: {enemy.enemy_id} (DistSq: {dist_sq:.1f})") # DEBUG
+            if potential_pierce_targets:
+                potential_pierce_targets.sort()
+                for dist_sq, enemy_to_pierce in potential_pierce_targets:
                     if pierced_count >= self.pierce_adjacent:
-                        break # Reached pierce limit
-                    
-                    print(f"...... piercing {pierce_target.enemy_id} for {pierce_damage:.2f}")
-                    # Apply damage (overriding crit, special effects for pierce)
-                    self.apply_damage(pierce_target, damage_override=pierce_damage)
-                    self.hit_enemies_in_sequence.add(pierce_target) # Mark as hit to prevent re-hitting/bouncing
-                    pierced_count += 1
-                    
-            if pierced_count > 0:
-                print(f"... pierced {pierced_count} adjacent enemies.")
-            # else: print(f"... no adjacent targets found to pierce.") # Optional log
-        # --- End Pierce --- 
-            
+                        break
+                    if enemy_to_pierce.health > 0:
+                        damage_dealt, was_killed = self.apply_damage(enemy_to_pierce)
+                        self.hit_enemies_in_sequence.add(enemy_to_pierce) # Track pierce hits for bounce logic
+                        if damage_dealt > 0:
+                            results['damage_dealt'].append((enemy_to_pierce, damage_dealt, self.damage_type))
+                            # Apply standard effects to pierced target?
+                            if self.special_effect:
+                                effect_result = self.apply_special_effects(enemy_to_pierce, current_time)
+                                if effect_result:
+                                   results['special_effects_applied'].append((enemy_to_pierce, effect_result))
+                            # Apply tower-specific on-hit effects?
+                            # ... add logic if needed ...
+                        if was_killed:
+                            results['enemies_killed'].append(enemy_to_pierce)
+                            # Gold on kill for pierced?
+                            if self.special_on_kill_data:
+                                chance = self.special_on_kill_data.get("chance_percent", 0)
+                                amount = self.special_on_kill_data.get("gold_amount", 0)
+                                if amount > 0 and random.random() * 100 < chance:
+                                    results['gold_added'] = results.get('gold_added', 0) + amount
+                        pierced_count += 1
+        # --- End Pierce Adjacent --- 
+        
+        # self.collided = True # Already set at the start
         return results
 
     def apply_damage(self, enemy, damage_override=None):
-        """Applies damage to the enemy, handling critical hits. Returns damage dealt."""
-        actual_damage = damage_override if damage_override is not None else self.damage
-        # Critical Strike Check (only if not overriding damage)
-        crit_multiplier = 1.0
-        if damage_override is None and self.source_tower and hasattr(self.source_tower, 'crit_chance') and hasattr(self.source_tower, 'crit_multiplier'):
-            if random.random() * 100 < self.source_tower.crit_chance:
-                crit_multiplier = self.source_tower.crit_multiplier
-                print(f"*** CRITICAL HIT by {self.projectile_id}! Multiplier: {crit_multiplier:.1f}x")
-                # TODO: Maybe add a visual indicator for crits?
+        """Applies damage to an enemy, considering damage type, crits, and effects.
+        Returns tuple (actual_damage_dealt, was_killed)
+        """
+        if not enemy or enemy.health <= 0:
+            return 0, False
 
-        damage_to_apply = actual_damage * crit_multiplier
-
-        # --- Chance to Ignore Armor --- 
-        armor_to_ignore_this_hit = 0
-        if self.ignore_armor_data:
-            chance = self.ignore_armor_data.get("chance_percent", 0)
-            if random.random() * 100 < chance:
-                armor_to_ignore_this_hit = self.ignore_armor_data.get("ignore_amount", 0)
-                if armor_to_ignore_this_hit > 0: # Only log if ignoring a positive amount
-                    print(f"### ARMOR IGNORE Triggered! Proj: {self.projectile_id}, Target: {enemy.enemy_id}, Ignoring: {armor_to_ignore_this_hit}")
-        # --- End Chance to Ignore Armor ---
-
-        # --- Shatter Check --- 
-        bonus_multiplier = 1.0 # Default to no bonus
-        # --- DETAILED SHATTER DEBUG ---
-        if self.shatter_data:
-            print(f"DEBUG Shatter Check: Proj {self.projectile_id} hitting Enemy {enemy.enemy_id}. \
-                  Shatter Data: {bool(self.shatter_data)}, \
-                  Requires: '{self.shatter_data.get("shatter_target_debuff", "N/A")}', \
-                  Enemy Effects: {list(enemy.status_effects.keys())}")
-        # --- END DETAILED DEBUG ---
-        if self.shatter_data:
-            target_debuff = self.shatter_data.get("shatter_target_debuff", "")
-            # Revert back to the original check using 'in'
-            if target_debuff and target_debuff in enemy.status_effects:
-                bonus_multiplier = self.shatter_data.get("shatter_damage_multiplier", 1.0)
-                print(f"### SHATTER Activated! Target {enemy.enemy_id} has {target_debuff}. Bonus Multiplier: {bonus_multiplier:.2f}")
-            else:
-                if target_debuff:
-                    # Keep the failure log
-                    print(f"--- Shatter FAILED: Enemy {enemy.enemy_id} did NOT have '{target_debuff}'. Effects: {list(enemy.status_effects.keys())}")
-        # --- End Shatter Check ---
-
-        # Pass the calculated armor_to_ignore_this_hit to take_damage
-        enemy.take_damage(damage_to_apply, self.damage_type, bonus_multiplier=bonus_multiplier, ignore_armor_amount=armor_to_ignore_this_hit)
+        base_damage = damage_override if damage_override is not None else self.damage
         
-        return damage_to_apply
+        # --- Check Chance Ignore Armor --- 
+        ignore_armor_flag = False # Use a distinct name for the boolean flag
+        if self.ignore_armor_data and random.random() < self.ignore_armor_data.get("chance", 0):
+            ignore_armor_flag = True
+            print(f"DEBUG: Armor ignore CHANCE triggered for hit on {enemy.enemy_id} by {self.projectile_id}")
+        # --- End Check Ignore Armor ---
+
+        # --- Calculate ignore_armor_amount based on the flag --- 
+        ignore_armor_amount = 0
+        if ignore_armor_flag:
+            # Check if enemy has armor value attribute before accessing
+            if hasattr(enemy, 'current_armor_value'):
+                 ignore_armor_amount = enemy.current_armor_value
+                 print(f"DEBUG: Armor ignore AMOUNT set to {ignore_armor_amount} for {enemy.enemy_id}")
+            else:
+                 print(f"DEBUG: Warning - Tried to ignore armor, but enemy {enemy.enemy_id} lacks 'current_armor_value' attribute.")
+        # --- End Calculate ignore_armor_amount ---
+        
+        # Pass the calculated ignore_armor_amount to enemy.take_damage
+        # Assuming enemy.take_damage signature is: (base_damage, damage_type, bonus_multiplier, ignore_armor_amount)
+        # We are not passing bonus_multiplier from here, so it uses default 1.0 in take_damage
+        actual_damage, was_killed = enemy.take_damage(base_damage, self.damage_type, 
+                                                    ignore_armor_amount=ignore_armor_amount)
+        
+        # Optional: Add visual effect for crit damage
+        if self.is_crit:
+            # Need access to Effect class and potentially a way to add effects to a list
+            # Example: Add a small flash effect
+            pass 
+            
+        return actual_damage, was_killed
 
     def apply_special_effects(self, enemy, current_time):
         """Applies special effects defined in self.special_effect to the enemy."""

@@ -124,6 +124,10 @@ class Tower:
         self.bounce_damage_falloff = tower_data.get('bounce_damage_falloff', 0.5) # Changed default from 0.7 to 0.5
         # --- End Bounce Parameters ---
         
+        # --- Pierce Parameter --- 
+        self.pierce_adjacent = tower_data.get('pierce_adjacent', 0) # Load pierce amount
+        # --- End Pierce Parameter ---
+        
         # self.range = tower_data.get('range', 3) * GRID_SIZE # Old category logic removed
         self.cost = tower_data['cost']
         self.description = tower_data.get('description', '')
@@ -519,6 +523,10 @@ class Tower:
                                                 splash_radius=effective_splash_radius_pixels, # Use buffed splash 
                                                 source_tower=self, is_crit=is_crit, 
                                                 damage_type=self.damage_type,
+                                                bounces_remaining=self.bounce,
+                                                bounce_range_pixels=self.bounce_range_pixels,
+                                                bounce_damage_falloff=self.bounce_damage_falloff,
+                                                pierce_adjacent=self.pierce_adjacent,
                                                 asset_loader=self.asset_loader)
                 results['projectiles'].append(first_projectile)
                 
@@ -576,6 +584,10 @@ class Tower:
                                                    splash_radius=effective_splash_radius_pixels, 
                                                    source_tower=self, is_crit=is_crit, 
                                                    damage_type=self.damage_type, 
+                                                   bounces_remaining=self.bounce,
+                                                   bounce_range_pixels=self.bounce_range_pixels,
+                                                   bounce_damage_falloff=self.bounce_damage_falloff,
+                                                   pierce_adjacent=self.pierce_adjacent,
                                                    asset_loader=self.asset_loader, 
                                                    is_visual_only=False)
                     results['projectiles'].append(real_projectile)
@@ -586,6 +598,10 @@ class Tower:
                                                      splash_radius=0, # No splash for visual 
                                                      source_tower=self, is_crit=False, # No crit visual 
                                                      damage_type=self.damage_type, # Type doesn't matter much
+                                                     bounces_remaining=self.bounce,
+                                                     bounce_range_pixels=self.bounce_range_pixels,
+                                                     bounce_damage_falloff=self.bounce_damage_falloff,
+                                                     pierce_adjacent=self.pierce_adjacent,
                                                      asset_loader=self.asset_loader, 
                                                      is_visual_only=True) # Mark as visual only
                     results['projectiles'].append(visual_projectile)
@@ -600,6 +616,10 @@ class Tower:
                                       splash_radius=effective_splash_radius_pixels, 
                                       source_tower=self, is_crit=is_crit, 
                                       damage_type=self.damage_type,
+                                      bounces_remaining=self.bounce,
+                                      bounce_range_pixels=self.bounce_range_pixels,
+                                      bounce_damage_falloff=self.bounce_damage_falloff,
+                                      pierce_adjacent=self.pierce_adjacent,
                                       asset_loader=self.asset_loader,
                                       is_visual_only=False) 
                 results['projectiles'].append(projectile)
@@ -1027,6 +1047,10 @@ class Tower:
                                       splash_radius=splash_rad_pixels,
                                       source_tower=self, is_crit=is_crit, 
                                       damage_type=self.damage_type,
+                                      bounces_remaining=self.bounce,
+                                      bounce_range_pixels=self.bounce_range_pixels,
+                                      bounce_damage_falloff=self.bounce_damage_falloff,
+                                      pierce_adjacent=self.pierce_adjacent,
                                       asset_loader=self.asset_loader)
                 game_scene_add_projectile_callback(projectile)
 

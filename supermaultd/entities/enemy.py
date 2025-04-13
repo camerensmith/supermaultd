@@ -222,7 +222,9 @@ class Enemy:
               f" (Base: {base_damage:.1f}, Type: {damage_type}, TypeMod: {type_modifier:.2f}, {log_armor_part}, ArmorMod: {armor_multiplier:.2f}, BonusMult: {bonus_multiplier:.2f})."
               f" Health: {self.health:.2f}/{self.max_health}")
         
-        return self.health <= 0
+        # Return both the damage dealt and whether it was killed
+        was_killed = self.health <= 0
+        return final_damage, was_killed
         
     def reduce_armor(self, amount):
         """Reduces the enemy's current armor value by the specified amount."""
