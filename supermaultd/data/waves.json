@@ -1,14 +1,72 @@
 [
     {
-      "delay_before_wave": 60.0,
+      "delay_before_wave": 5.0,
+      "wave_completion_bonus": 25,
       "enemies": [
-        { "type": "village_peasant", "count": 5, "spawn_interval": 1.0, "initial_delay": 0.0 }
+        { "type": "village_peasant", "count": 25, "spawn_interval": 1.0, "initial_delay": 0.0 }
       ]
     },
     {
       "delay_before_wave": 25.0,
+      "wave_completion_bonus": 28,
       "enemies": [
-        { "type": "fruit_crab", "count": 8, "spawn_interval": 0.8, "initial_delay": 0.0 }
+        { "type": "mudrunner", "count": 25, "spawn_interval": 0.8, "initial_delay": 0.0 }
+      ]
+    },
+        {
+      "delay_before_wave": 25.0,
+      "wave_completion_bonus": 30,
+      "enemies": [
+        { "type": "large_crab", "count": 25, "spawn_interval": 0.8, "initial_delay": 0.0 }
+      ]
+    },
+    {
+      "delay_before_wave": 25.0,
+      "wave_completion_bonus": 31,
+      "enemies": [
+        { "type": "heavily_armored_piglet", "count": 25, "spawn_interval": 0.8, "initial_delay": 0.0 }
+      ]
+    },
+    {
+      "delay_before_wave": 25.0,
+      "wave_completion_bonus": 35,
+      "enemies": [
+        { "type": "wyvern", "count": 15, "spawn_interval": 0.8, "initial_delay": 0.0 }
+      ]
+    },
+    {
+      "delay_before_wave": 25.0,
+      "wave_completion_bonus": 38,
+      "enemies": [
+        { "type": "wild_boar", "count": 25, "spawn_interval": 0.8, "initial_delay": 0.0 }
+      ]
+    },
+    {
+      "delay_before_wave": 25.0,
+      "wave_completion_bonus": 40,
+      "enemies": [
+        { "type": "armored_lizard", "count": 25, "spawn_interval": 0.8, "initial_delay": 0.0 }
+      ]
+    },
+    {
+      "delay_before_wave": 25.0,
+      "wave_completion_bonus": 48,
+      "enemies": [
+        { "type": "tomb_builder", "count": 25, "spawn_interval": 0.8, "initial_delay": 0.0 }
+      ]
+    },
+    {
+      "delay_before_wave": 25.0,
+      "wave_completion_bonus": 50,
+      "enemies": [
+        { "type": "bloodfist_ogre", "count": 25, "spawn_interval": 0.8, "initial_delay": 0.0 }
+      ]
+    },
+    {
+      "delay_before_wave": 25.0,
+      "wave_completion_bonus": 53,
+      "enemies": [
+        { "type": "war_machine", "count": 25, "spawn_interval": 0.8, "initial_delay": 0.0 }
       ]
     },
     {

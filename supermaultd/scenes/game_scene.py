@@ -469,15 +469,29 @@ class GameScene:
 
         # Check if tower is traversable
         is_traversable = tower_data.get('traversable', False)
+        print(f"DEBUG PLACEMENT: Tower {selected_tower_id} is_traversable = {is_traversable}") # DEBUG
 
         # Mark occupied grid cells ONLY if not traversable
         if not is_traversable:
-            for y in range(start_y, end_y + 1):
-                for x in range(start_x, end_x + 1):
+            # --- CORRECTED FOOTPRINT CALCULATION for grid marking ---
+            # Calculate the true top-left corner based on center and dimensions
+            actual_top_left_x = grid_x - (grid_width - 1) // 2
+            actual_top_left_y = grid_y - (grid_height - 1) // 2
+            print(f"  DEBUG PLACEMENT: Calculated Top-Left ({actual_top_left_x},{actual_top_left_y}). Width={grid_width}, Height={grid_height}") # DEBUG
+            # --------------------------------------------------------
+            
+            # Loop from the calculated top-left for the full width/height
+            for y_offset in range(grid_height):
+                for x_offset in range(grid_width):
+                    mark_x = actual_top_left_x + x_offset
+                    mark_y = actual_top_left_y + y_offset
                     # Check bounds within loop for safety
-                    if 0 <= y < self.grid_height and 0 <= x < self.grid_width:
-                        self.grid[y][x] = 1 # Mark as obstacle
-            print(f"Marked grid for non-traversable tower at ({grid_x}, {grid_y})")
+                    if 0 <= mark_y < self.grid_height and 0 <= mark_x < self.grid_width:
+                        print(f"    DEBUG PLACEMENT: Marking grid cell ({mark_x},{mark_y}) = 1") # DEBUG
+                        self.grid[mark_y][mark_x] = 1 # Mark as obstacle
+                    else:
+                        print(f"    DEBUG PLACEMENT: SKIPPING grid cell ({mark_x},{mark_y}) - out of bounds") # DEBUG
+            # print(f"Marked grid for non-traversable tower at ({grid_x}, {grid_y})") # Old Print
         else:
             print(f"Skipping grid mark for traversable tower at ({grid_x}, {grid_y})")
 
@@ -514,6 +528,7 @@ class GameScene:
 
         # Recalculate paths for all existing enemies ONLY if the placed tower is NOT traversable
         if not is_traversable:
+            print(f"  DEBUG PLACEMENT: Recalculating enemy paths because {selected_tower_id} is not traversable.") # DEBUG
             for enemy in self.enemies[:]:  # Use slice copy
                 # Get enemy's current grid position
                 current_grid_x = int(enemy.x // config.GRID_SIZE)
@@ -535,6 +550,7 @@ class GameScene:
                     self.enemies.remove(enemy)
         else:
             print("Skipping path recalculation for traversable tower placement.")
+            print(f"  DEBUG PLACEMENT: Skipping enemy path recalculation because {selected_tower_id} is traversable.") # DEBUG
 
         # Clear selection
         self.tower_selector.clear_selection()
@@ -1253,6 +1269,7 @@ class GameScene:
                     
                 # TODO: Add money/score for killing enemy?
                 self.money += enemy.value # Add enemy value to player money
+                self.tower_selector.update_money(self.money) # UPDATE UI DISPLAY
                 print(f"*** ENEMY KILLED: {enemy.enemy_id}. Decrementing wave counter from {self.enemies_alive_this_wave}...") # DEBUG
                 if self.enemies_alive_this_wave > 0: self.enemies_alive_this_wave -= 1 
                 self.enemies.remove(enemy)
@@ -2176,6 +2193,19 @@ class GameScene:
             print(f"DEBUG: In INTERMISSION. Checking enemies_alive_this_wave: {self.enemies_alive_this_wave}") # DEBUG
             if self.enemies_alive_this_wave <= 0:
                 print(f"Wave {self.current_wave_index + 1} cleared!")
+                
+                # --- Award Wave Completion Bonus --- 
+                # Make sure we have a valid current wave index
+                if 0 <= self.current_wave_index < len(self.all_wave_data):
+                    completed_wave_data = self.all_wave_data[self.current_wave_index]
+                    bonus = completed_wave_data.get("wave_completion_bonus", 0)
+                    if bonus > 0:
+                        self.money += bonus
+                        self.tower_selector.update_money(self.money) # Update UI
+                        print(f"$$$ Wave Bonus Added: +{bonus}. Current Money: {self.money}")
+                        # Optional: Add a floating text effect for the bonus?
+                # --- End Bonus Award --- 
+                
                 # Current wave is fully cleared, prepare for the next one
                 self.wave_state = WAVE_STATE_IDLE # Transition back to IDLE
                 self.current_wave_index += 1

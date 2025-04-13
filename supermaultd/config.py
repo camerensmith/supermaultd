@@ -47,7 +47,7 @@ SKY_BLUE = (135, 206, 235)
 
 # Game settings
 GRID_SIZE = 32  # Size of each grid cell in pixels
-STARTING_MONEY = 10000
+STARTING_MONEY = 1000
 STARTING_LIVES = 10
 RESTRICTED_TOWER_AREA_HEIGHT = 1  # Number of rows at top and bottom where towers cannot be placed
 RESTRICTED_TOWER_AREA_WIDTH = 1   # Number of columns at left and right where towers cannot be placed
@@ -58,7 +58,7 @@ SPAWN_AREA_HEIGHT = 2  # Height of spawn area in grid cells
 SPAWN_AREA_COLOR = (128, 0, 128)  # Purple color for spawn area
 
 # Objective area settings
-OBJECTIVE_AREA_WIDTH = 3  # Width of objective area in grid cells
+OBJECTIVE_AREA_WIDTH = 2  # Width of objective area in grid cells
 OBJECTIVE_AREA_HEIGHT = 1  # Height of objective area in grid cells
 OBJECTIVE_AREA_COLOR = (255, 0, 0)  # Red color for objective area
 
@@ -75,7 +75,7 @@ BLOOD_SPLATTER_HOLD_DURATION = 0.2 # Seconds to keep splatter fully visible befo
 
 # --- Enemy Data --- 
 ENEMY_DATA = {
-    "dust_mite": { 
+    "dust_mite": {  # these will be a bonus fun wave
         "health": 60,
         "speed": 5,
         "value": 1, "armor_value": 0,
@@ -84,28 +84,28 @@ ENEMY_DATA = {
     },
     "village_peasant": { #wave 1, 25 units
         "health": 150,
-        "speed": 2.0, 
+        "speed": 1.3, 
         "value": 1, "armor_value": 1,
         "armor_type": "light",
         "type": "ground"
     },
     "heavily_armored_piglet": { #wave 4, 25 units
         "health": 222,
-        "speed": 2.4,
+        "speed": 2.1,
         "value": 1, "armor_value": 5,
         "armor_type": "heavy",
         "type": "ground"
     },
-    "pixie": {
+    "pixie": {  #wave 13, 25 units, 62 gold
         "health": 70,
         "speed": 3.0,
         "value": 2,
         "armor_type": "ethereal", 
         "type": "air"
     },
-    "fruit_crab": { #wave 3, 25 units
+    "large_crab": { #wave 3, 25 units, 28 gold for wave completion
         "health": 310,
-        "speed": 1.6,
+        "speed": 1.1,
         "value": 1, "armor_value": 7,
         "armor_type": "medium",
         "type": "ground"
@@ -117,35 +117,36 @@ ENEMY_DATA = {
         "armor_type": "ethereal",
         "type": "ground",
     },
-    "imp": {
+    "vampire": {
         "health": 90,
-        "speed": 2.9,
+        "speed": 2,
         "value": 8,
         "armor_type": "unarmored",
         "type": "ground"
     },
     "frost_imp": {
         "health": 100,
-        "speed": 2.9,
+        "speed": 2,
         "value": 10,
         "armor_type": "ethereal", 
         "type": "ground"
     },
     "witch_doctor": { #wave 11, 25 units, 55 gold for wave completion
         "health": 1500,
-        "speed": 3.2,
-        "value": 9, "armor_value": 10,
+        "speed": 2.1,
+        "value": 2, "armor_value": 10,
         "armor_type": "unarmored",
         "type": "ground"
     },
     "gnoll": { #wave 12, 25 units, 60 gold for wave completion
-        "health": 120,
-        "speed": 2.0, 
-        "value": 8,
+        "health": 1385,
+        "speed": 2.5, 
+        "value": 2,
         "armor_type": "medium",
+        "armor_value": 12,
         "type": "ground",
     },
-    "magus": {
+    "archon": {
         "health": 120,
         "speed": 1.8,
         "value": 20,
@@ -156,7 +157,7 @@ ENEMY_DATA = {
         "health": 130,
         "speed": 1.5,
         "value": 12,
-        "armor_type": "light", # Could be medium too
+        "armor_type": "light", 
         "type": "ground"
     },
     "fire_elemental": {
@@ -166,7 +167,7 @@ ENEMY_DATA = {
         "armor_type": "ethereal", 
         "type": "ground"
     },
-    "vampire": {
+    "tormentor": {
         "health": 150,
         "speed": 3.1,
         "value": 18,
@@ -180,7 +181,7 @@ ENEMY_DATA = {
         "armor_type": "fortified",
         "type": "ground"
     },
-    "dark_elf": {
+    "hell_guard": {
         "health": 170,
         "speed": 2.2,
         "value": 17,
@@ -188,13 +189,13 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "mudrunner": { # wave 2, 25 units
-        "health": 120,
+        "health": 175,
         "speed": 1.8,
-        "value": 14, "armor_value": 3,
+        "value": 1, "armor_value": 3,
         "armor_type": "medium",
         "type": "ground"
     },
-    "hired_goon": {
+    "martyr": {
         "health": 180,
         "speed": 1.8,
         "value": 15,
@@ -215,14 +216,14 @@ ENEMY_DATA = {
         "armor_type": "medium",
         "type": "ground",
     },
-    "wyvern": { #wave 5, 15 units
+    "dragon_whelp": { #wave 5, 15 units, 30 gold for wave completion
         "health": 200,
-        "speed": 2.8,
+        "speed": 2,
         "value": 1, "armor_value": 8,
         "armor_type": "light",
         "type": "air" # Flying
     },
-    "disgusting_ooze": {
+    "giant_ooze": {
         "health": 200,
         "speed": 1.0, # Slow ooze
         "value": 15,
@@ -250,7 +251,7 @@ ENEMY_DATA = {
         "armor_type": "normal",
         "type": "ground"
     },
-    "dragon_whelp": {
+    "wyvern": {
         "health": 250,
         "speed": 2.4,
         "value": 28,
@@ -272,7 +273,7 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "bloodfist_ogre": { #wave 9, 50 units, 50 gold for wave completion
-        "health": 950,
+        "health": 1950,
         "speed": 2,
         "value": 1, "armor_value": 9,
         "armor_type": "heavy",
@@ -328,7 +329,7 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "lord_supermaul": {
-        "health": 5000, # Boss
+        "health": 235000, # Boss
         "speed": 1.0,
         "value": 250, # Big reward
         "armor_type": "normal",
@@ -348,7 +349,6 @@ ENEMY_DATA = {
         "armor_type": "magic_resistant",
         "type": "air"
     },
-    # --- New Enemies ---
     "zombie": {
         "health": 200,
         "speed": 1.0,
@@ -358,7 +358,7 @@ ENEMY_DATA = {
     },
     "wild_boar": { #wave 6, 25 units, 38 gold for wave completion
         "health": 440,
-        "speed": 3.0,
+        "speed": 2.7,
         "value": 10, "armor_value": 8,
         "armor_type": "light",
         "type": "ground"
@@ -384,8 +384,8 @@ ENEMY_DATA = {
         "armor_type": "ethereal",
         "type": "ground"
     },
-    "battlemech": { #wave 10, 25 units, 53 gold for wave completion
-        "name": "Battlemech", "health": 1540, "speed": 0.8, "value": 2, "armor_value": 24,
+    "war_machine": { #wave 10, 25 units, 53 gold for wave completion
+        "name": "War Machine", "health": 1540, "speed": 0.8, "value": 2, "armor_value": 24,
         "armor_type": "fortified", "type": "ground"
     },
     "spaceship": {
@@ -396,12 +396,12 @@ ENEMY_DATA = {
         "name": "Crazy Panda", "health": 220, "speed": 2.0, "value": 18, 
         "armor_type": "medium", "type": "ground" 
     },
-    "mutant_roach": { #wave 7, 25 units, 40 gold for wave completion
-        "name": "Mutant Roach", "health": 440, "speed": 2, "value": 2,  "armor_value": 20,
+    "armored_lizard": { #wave 7, 25 units, 40 gold for wave completion
+        "name": "Armored Lizard", "health": 440, "speed": 2.3, "value": 1,  "armor_value": 20,
         "armor_type": "fortified", "type": "ground" 
     },
-    "evil_clown": { #wave 8, 25 units, 48 gold for wave completion
-        "name": "Evil Clown", "health": 200, "speed": 3.5, "value": 22, "armor_value": 8,
+    "tomb_keeper": { #wave 8, 25 units, 48 gold for wave completion
+        "name": "Tomb Keeper", "health": 811, "speed": 1.7, "value": 2, "armor_value": 8,
         "armor_type": "unarmored", "type": "ground"
     }
 }
