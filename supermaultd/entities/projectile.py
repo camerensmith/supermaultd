@@ -253,7 +253,7 @@ class Projectile:
             rotated_rect = rotated_image.get_rect(center=(draw_center_x, draw_center_y))
             screen.blit(rotated_image, rotated_rect.topleft)
 
-    def on_collision(self, enemies, current_time):
+    def on_collision(self, enemies, current_time, tower_buff_auras=None):
         """Handles what happens when the projectile collides with an enemy or reaches its target location.
            Returns a dictionary containing results like damage dealt, new effects, etc.
         """
@@ -284,6 +284,10 @@ class Projectile:
         # Mark as collided first
         self.collided = True
         impact_pos = (self.x, self.y) # Use current position as impact point
+
+        # --- Get Tower Buff Auras (needed for DoT amplification) ---
+        # Default to empty list if not provided
+        tower_buff_auras = tower_buff_auras if tower_buff_auras is not None else [] 
 
         # --- Create Impact Visual Effect (If image loaded) --- 
         if self.impact_effect_surface:
@@ -370,6 +374,50 @@ class Projectile:
                 #else: # Optional debug for failed roll
                     #print(f"Gold on Kill rolled {random.random()*100:.1f} vs {chance}, failed.")
             # --- End Gold On Kill ---
+
+            # --- DEBUG: Check special_effect before DoT block ---
+            print(f"DEBUG COLLISION: self.special_effect is: {self.special_effect}")
+            if self.special_effect:
+                print(f"DEBUG COLLISION: 'dot_damage' in special?: {'dot_damage' in self.special_effect}")
+                print(f"DEBUG COLLISION: 'dot_interval' in special?: {'dot_interval' in self.special_effect}")
+                print(f"DEBUG COLLISION: 'duration' in special?: {'duration' in self.special_effect}")
+            print(f"DEBUG COLLISION: collided_enemy is not None?: {collided_enemy is not None}")
+            # --- END DEBUG ---
+
+            # --- NEW: Generic DoT Application on Impact --- 
+            # Check if the special effect block contains DoT parameters
+            if (self.special_effect and # First check if special_effect exists
+                "dot_damage" in self.special_effect and 
+                "dot_interval" in self.special_effect and 
+                "duration" in self.special_effect and # Use "duration" from JSON for direct DoTs
+                collided_enemy): # Make sure we actually hit something
+
+                # Extract DoT parameters
+                dot_name = self.special_effect.get("effect", "unknown_dot") # Use 'effect' as the DoT name
+                base_dot_damage = self.special_effect.get("dot_damage", 0)
+                dot_interval = self.special_effect.get("dot_interval", 1.0)
+                dot_duration = self.special_effect.get("duration", 1.0) # Use "duration" from JSON
+                dot_damage_type = self.special_effect.get("dot_damage_type", "normal")
+
+                # Apply amplification (if source tower and aura system exist)
+                amplified_dot_damage = base_dot_damage
+                if self.source_tower and hasattr(self.source_tower, 'get_dot_amplification_multiplier'):
+                    amp_multiplier = self.source_tower.get_dot_amplification_multiplier(tower_buff_auras)
+                    amplified_dot_damage = base_dot_damage * amp_multiplier
+
+                # --- Add DoT Apply Debugging --- 
+                print(f"DEBUG DoT Apply Values: name='{dot_name}', dmg={amplified_dot_damage:.1f}, int={dot_interval}, dur={dot_duration}, type='{dot_damage_type}', time={current_time:.1f}")
+                # --- End Debugging ---
+
+                # Apply the DoT to the enemy that was hit
+                if amplified_dot_damage > 0: # Only apply if damage is positive
+                    collided_enemy.apply_dot_effect(
+                        dot_name, amplified_dot_damage, dot_interval, 
+                        dot_duration, dot_damage_type, current_time
+                    )
+                    print(f"... projectile applied {dot_name} DoT ({amplified_dot_damage:.1f}/{dot_interval}s for {dot_duration}s) to {collided_enemy.enemy_id}")
+                    # Record that this effect was applied in results (optional)
+                    results['special_effects_applied'].append(f'{dot_name}_dot')
 
         else:
             print(f"Projectile reached max distance or target location ({int(impact_pos[0])}, {int(impact_pos[1])}) without hitting valid enemy.")

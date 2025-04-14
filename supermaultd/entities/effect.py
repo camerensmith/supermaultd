@@ -978,3 +978,102 @@ class PulseImageEffect:
             self.finished = True # Stop trying to draw if error occurs
 
 # --- End Pulse Image Effect --- 
+
+# --- NEW: Expanding Circle Effect --- 
+class ExpandingCircleEffect:
+    def __init__(self, x, y, max_radius, duration, color, thickness=2):
+        self.x = x
+        self.y = y
+        self.max_radius = max_radius
+        self.duration = max(0.01, duration) # Avoid division by zero
+        self.color = color # Should be RGBA tuple like (R, G, B, Alpha)
+        self.thickness = thickness
+        self.start_time = pygame.time.get_ticks() / 1000.0
+        self.current_radius = 0
+        self.finished = False
+
+    def update(self, time_delta):
+        if self.finished:
+            return True
+            
+        current_time = pygame.time.get_ticks() / 1000.0
+        elapsed_time = current_time - self.start_time
+
+        if elapsed_time >= self.duration:
+            self.finished = True
+            return True
+        else:
+            # Linear expansion
+            self.current_radius = self.max_radius * (elapsed_time / self.duration)
+            return False
+
+    def draw(self, screen, offset_x=0, offset_y=0):
+        if not self.finished and self.current_radius > 0:
+            draw_x = int(self.x + offset_x)
+            draw_y = int(self.y + offset_y)
+            # Draw the circle - pygame handles alpha in the color tuple if surface supports it
+            pygame.draw.circle(screen, self.color, (draw_x, draw_y), int(self.current_radius), self.thickness)
+# --- End Expanding Circle Effect ---
+
+class FloatingTextEffect:
+    def __init__(self, x, y, text, color=(255, 255, 255), duration=1.0, rise_speed=30, font_size=24):
+        self.x = x
+        self.initial_y = y
+        self.current_y = y
+        self.text = text
+        self.duration = max(0.1, duration)
+        self.color = color
+        self.rise_speed = rise_speed
+        self.timer = 0.0
+        self.finished = False
+
+        # Load font (Consider loading fonts centrally in GameScene/main later)
+        try:
+            self.font = pygame.font.Font(None, font_size)
+        except Exception as e:
+            print(f"Error loading font for FloatingTextEffect: {e}")
+            self.font = pygame.font.Font(pygame.font.get_default_font(), font_size)
+        
+        self.text_surf = None # Will be rendered in draw
+        self.text_rect = None
+        
+        # Base Effect attributes needed for loop compatibility
+        self.image = None 
+        self.rect = None # Will be updated in draw
+        
+        print(f"FloatingTextEffect created: '{text}' at ({x},{y})")
+
+    def update(self, time_delta):
+        """Update timer, position, and alpha. Returns True if finished."""
+        if self.finished:
+            return True
+            
+        self.timer += time_delta
+        if self.timer >= self.duration:
+            self.finished = True
+            return True
+            
+        # Update position
+        self.current_y = self.initial_y - (self.timer * self.rise_speed)
+        
+        return False
+
+    def draw(self, screen):
+        """Draw the floating text with fade."""
+        if self.finished:
+            return
+
+        # Calculate alpha (linear fade out)
+        alpha_multiplier = max(0, 1.0 - (self.timer / self.duration))
+        current_alpha = int(255 * alpha_multiplier)
+        
+        # Render text surface with current alpha
+        # Creating surface each frame might be inefficient, but handles alpha easily
+        try:
+             current_color_with_alpha = (*self.color[:3], current_alpha)
+             self.text_surf = self.font.render(self.text, True, self.color) # Render without alpha first
+             self.text_surf.set_alpha(current_alpha) # Apply alpha to the surface
+             self.rect = self.text_surf.get_rect(center=(int(self.x), int(self.current_y)))
+             screen.blit(self.text_surf, self.rect)
+        except Exception as e:
+            print(f"Error rendering/drawing FloatingTextEffect: {e}") 

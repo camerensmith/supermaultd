@@ -492,7 +492,7 @@
           "name": "Swarmers",
           "grid_width": 2,
           "grid_height": 2,
-          "cost": 60,
+          "cost": 35,
           "damage_min": 25,
           "damage_max": 30,
           "damage_type": "normal",
@@ -564,12 +564,12 @@
         "gaia_treant_boulder_thrower": {
           "name": "Treant Boulder Thrower",
           "description": "A treant that throws boulders at the enemy, dealing damage to both ground and air units in a large area.",
-          "grid_width": 1,
-          "grid_height": 1,
+          "grid_width": 3,
+          "grid_height": 3,
           "cost": 40,
           "damage_min": 55,
           "damage_max": 127,
-          "attack_interval": 1.2,
+          "attack_interval": 1,
           "range": 850,
           "bounce": 1,
           "splash_radius": 600,
@@ -580,8 +580,8 @@
         },
         "gaia_gaias_box": {
           "name": "Gaia's Box",
-          "grid_width": 1,
-          "grid_height": 1,
+          "grid_width": 2,
+          "grid_height": 2,
           "cost": 100,
           "damage_min": 99,
           "damage_max": 99,
@@ -593,17 +593,17 @@
           "beam_color": [218, 165, 32],
           "projectile_speed": 400,
           "targets": ["ground", "air"],
-          "beam_max_targets": 2
+          "beam_max_targets": 3
         },
         "gaia_ursa": {
           "name": "Ursa",
-          "grid_width": 1,
-          "grid_height": 1,
-          "cost": 50,
-          "damage_min": 198,
-          "damage_max": 198,
+          "grid_width": 4,
+          "grid_height": 4,
+          "cost": 236,
+          "damage_min": 582,
+          "damage_max": 618,
           "attack_interval": 0.2,
-          "range": 250,
+          "range": 550,
           "splash_radius": 120,
           "damage_type": "siege",
           "attack_type": "instant",
@@ -616,7 +616,7 @@
           "grid_height": 1,
           "cost": 200,
           "damage_min": 1,
-          "damage_max": 500,
+          "damage_max": 1000,
           "attack_interval": 1, 
           "range": 700,
           "splash_radius": 100,
@@ -629,26 +629,27 @@
         },
         "gaia_gift_of_gaia": {
           "name": "Gift of Gaia",
-          "grid_width": 1,
-          "grid_height": 1,
+          "grid_width": 4,
+          "grid_height": 4,
           "cost": 350,
-          "damage_min": 599,
-          "damage_max": 599,
+          "damage_min": 1800,
+          "damage_max": 2300,
           "attack_interval": 0.6,
-          "range": 750,
+          "range": 900,
           "splash_radius": 100,
           "damage_type": "chaos",
-          "attack_type": "instant",
+          "attack_type": "beam",
           "projectile_speed": null,
-          "targets": ["ground", "air"]
+          "targets": ["ground", "air"],
+          "beam_max_targets": 3
         },
         "gaia_urthshaker": {
           "name": "Urthshaker",
           "grid_width": 3,
           "grid_height": 3,
           "cost": 550,
-          "damage_min": 850,
-          "damage_max": 850,
+          "damage_min": 3550,
+          "damage_max": 3850,
           "attack_interval": 0.4,
           "range": 1000,
           "splash_radius": 150,
@@ -863,64 +864,71 @@
     "alchemists_guild": {
       "description": "Experimenters wielding volatile concoctions and corrupted magic that melt armor, poison foes, and transmute reality.",
       "towers": {
-        "alchemist_acid_dart_thrower": {
-          "name": "Acid Dart Thrower", "grid_width": 1, "grid_height": 1, "cost": 10,
-          "damage_min": 4, "damage_max": 5, "damage_type": "piercing", "bounce": 1,
-          "range": 500, "attack_interval": 0.6, "projectile_speed": 400,
+        "alchemists_poison_dart_launcher": {
+          "name": "Poison Dart Launcher", "grid_width": 1, "grid_height": 1, "cost": 11,
+          "damage_min": 5, "damage_max": 7, "damage_type": "arcane", "bounce": 1,
+          "range": 1300, "attack_interval": 0.6, "projectile_speed": 400,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
-          "special": {
-              "effect": "pierce",
-              "dot_damage": 20, 
-              "dot_interval": 0.5, 
-              "duration": 2.0, 
-              "dot_damage_type": "piercing"
-          }
+          "special": {"effect": "poison", "dot_damage": 8, "dot_interval": 0.5, 
+          "duration": 5.0, "dot_damage_type": "arcane"}
         },
-        "alchemist_miasma_pillar": {
+        "alchemists_miasma_pillar": {
           "name": "Miasma Pillar", 
-          "grid_width": 1, "grid_height": 1, "cost": 55,
-          "damage_min": 200, 
-          "damage_max": 200, 
+          "grid_width": 1, "grid_height": 2, "cost": 67,
+          "damage_min": 12, 
+          "damage_max": 25, 
           "attack_speed": 1.0,
-          "range": 550, 
+          "range": 650, 
           "damage_type": "arcane", 
           "targets": ["air"], 
           "attack_type": "hybrid",
           "projectile_speed": 400,
           "splash_radius": null,
           "special": {
-              "effect": "attack_speed_aura", 
-              "targets": "towers",
-              "aura_radius": 300,
-              "speed_increase_percentage": 15,
-              "description": "Attacks air units and increases nearby tower attack speed by 15%."
+            "effect": "dot_pulse_aura",
+            "interval": 2.0,
+            "aura_radius": 650,
+            "targets": ["ground", "air"],
+            "dot_effect_name": "miasma",
+            "dot_damage": 18,
+            "dot_interval": 0.5,
+            "dot_duration": 5.0,
+            "dot_damage_type": "arcane"
           }
         },
-        "alchemist_arcanum_tower": {
-          "name": "Arcanum Tower", "grid_width": 1, "grid_height": 1, "cost": 90,
-          "damage_min": 45, "damage_max": 55, "damage_type": "arcane",
-          "range": 700, "attack_interval": 0.8, "projectile_speed": 450,
-          "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
-        },
-        "alchemist_caustic_blast": {
-          "name": "Caustic Blast", "grid_width": 2, "grid_height": 2, "cost": 160,
-          "damage_min": 30, "damage_max": 35, "damage_type": "chaos",
-          "range": 650, "attack_interval": 1.5, "projectile_speed": 300,
+        "alchemists_toxin_lab": {
+          "name": "Toxin Lab", "grid_width": 2, "grid_height": 2, "cost": 98,
+          "damage_min": 5, "damage_max": 26, "damage_type": "arcane",
+          "range": 700, "attack_interval": 0.8, "projectile_speed": 180, "target_selection": "random",
           "attack_type": "projectile", "splash_radius": 120, "targets": ["ground", "air"],
-           "special": {"effect": "caustic_dot", "dot_damage": 25, "dot_interval": 0.5, "duration": 4.0, "dot_damage_type": "chaos"}
+          "special": {"effect": "toxin", "dot_damage": 87, "dot_interval": 0.5, 
+          "duration": 5.0, "dot_damage_type": "arcane"}
         },
-        "alchemist_chaos_beam": {
-          "name": "Chaos Beam", "grid_width": 2, "grid_height": 2, "cost": 300,
-          "damage_min": 120, "damage_max": 120, "damage_type": "chaos",
-          "range": 800, "attack_interval": 0.2, "projectile_speed": null,
-          "attack_type": "beam", "splash_radius": null, "targets": ["ground", "air"]
+        "alchemists_caustic_cannon": {
+          "name": "Caustic Cannon", "grid_width": 2, "grid_height": 2, "cost": 260,
+          "damage_min": 452, "damage_max": 790, "damage_type": "chaos",
+          "range": 650, "attack_interval": 1.5, "projectile_speed": 300,
+          "attack_type": "projectile", "splash_radius": 120, "targets": ["ground", "air"]
         },
-        "alchemist_plague_reactor": {
-          "name": "Plague Reactor", "grid_width": 3, "grid_height": 3, "cost": 480,
-          "damage_min": 50, "damage_max": 60, "damage_type": "chaos",
-          "range": 700, "attack_interval": 2.0, "projectile_speed": 300,
-          "attack_type": "projectile", "splash_radius": 200, "targets": ["ground", "air"],
-          "special": {"effect": "virulent_plague", "dot_damage": 75, "dot_interval": 0.4, "duration": 5.0, "dot_damage_type": "chaos"}
+        "alchemists_chemical_plant": {
+          "name": "Chemical Plant", "grid_width": 3, "grid_height": 3, "cost": 411,
+          "damage_min": 80, "damage_max": 120, "damage_type": "chaos", "target_selection": "random",
+          "range": 800, "attack_interval": 0.2, "projectile_speed": 200,
+          "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
+          "special": {"effect": "vile_chemical", "dot_damage": 388, "dot_interval": 0.5, 
+          "duration": 5.0, "dot_damage_type": "chaos"}
+        },
+        "alchemists_plague_reactor": {
+          "name": "Plague Reactor", "grid_width": 2, "grid_height": 2, "cost": 533,
+          "damage_min": 0, "damage_max": 0, "damage_type": "chaos",
+          "range": 1000, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "aura", "splash_radius": null, "targets": ["ground", "air"],
+          "special": {
+            "effect": "dot_amplification_aura",
+            "aura_radius": 1000,
+            "dot_damage_multiplier": 2.5,
+            "targets": ["towers"]
+          }
         }
       }
     },

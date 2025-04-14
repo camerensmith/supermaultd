@@ -89,7 +89,7 @@ ENEMY_DATA = {
         "armor_type": "Light",
         "type": "ground"
     },
-    "heavily_armored_piglet": { #wave 4, 25 units
+    "quillpig": { #wave 4, 25 units
         "health": 222,
         "speed": 2.1,
         "value": 1, "armor_value": 5,
@@ -198,7 +198,7 @@ ENEMY_DATA = {
         "armor_type": "Medium",
         "type": "ground"
     },
-    "martyr": {
+    "gremlin": {
         "health": 180,
         "speed": 1.8,
         "value": 15,
@@ -381,7 +381,7 @@ ENEMY_DATA = {
         "armor_type": "Magic_Resistant",
         "type": "ground"
     },
-    "wisp": {
+    "hexer": {
         "health": 40,
         "speed": 4.0,
         "value": 8,
@@ -396,8 +396,8 @@ ENEMY_DATA = {
         "name": "Spaceship", "health": 600, "speed": 2.5, "value": 50, 
         "armor_type": "Fortified", "type": "air"
     },
-    "crazy_panda": {
-        "name": "Crazy Panda", "health": 220, "speed": 2.0, "value": 18, 
+    "bugbear": {
+        "name": "Bugbear", "health": 220, "speed": 2.0, "value": 18, 
         "armor_type": "Medium", "type": "ground" 
     },
     "armored_lizard": { #wave 7, 25 units, 40 gold for wave completion

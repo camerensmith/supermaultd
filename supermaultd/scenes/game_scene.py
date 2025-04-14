@@ -13,7 +13,7 @@ from utils.pathfinding import find_path # Import pathfinding function
 from entities.enemy import Enemy # Import Enemy class
 from entities.projectile import Projectile # Import Projectile class
 # Import all necessary effect classes at the top level
-from entities.effect import Effect, FloatingTextEffect, ChainLightningVisual, RisingFadeEffect, GroundEffectZone, FlamethrowerParticleEffect, SuperchargedZapEffect, AcidSpewParticleEffect, PulseImageEffect # Added AcidSpewParticleEffect and PulseImageEffect
+from entities.effect import Effect, FloatingTextEffect, ChainLightningVisual, RisingFadeEffect, GroundEffectZone, FlamethrowerParticleEffect, SuperchargedZapEffect, AcidSpewParticleEffect, PulseImageEffect, ExpandingCircleEffect # Added AcidSpewParticleEffect, PulseImageEffect, and ExpandingCircleEffect
 from entities.orbiting_damager import OrbitingDamager # NEW IMPORT
 from entities.pass_through_exploder import PassThroughExploder # NEW IMPORT
 import json # Import json for loading armor data
@@ -175,7 +175,7 @@ class GameScene:
         # Ensure it's not negative if grid/restricted areas are large
         self.path_end_y = max(self.path_start_y, self.path_end_y) # Must be at least start_y
 
-        # --- DEBUG: Check Final Path Start/End Coords and Grid Value ---
+
         # Check grid value *before* potentially modifying start/end if they land on tower (unlikely here)
         start_val = self.grid[self.path_start_y][self.path_start_x] if 0 <= self.path_start_y < self.grid_height and 0 <= self.path_start_x < self.grid_width else -1
         end_val = self.grid[self.path_end_y][self.path_end_x] if 0 <= self.path_end_y < self.grid_height and 0 <= self.path_end_x < self.grid_width else -1
@@ -212,7 +212,7 @@ class GameScene:
         self.armor_data = self.load_armor_data(armor_file_path)
         # Load Damage Type Data (still from tower_races.json, but use correct path)
         self.damage_type_data = self.load_damage_types(damage_file_path)
-       # print(f"DEBUG GameScene init: Loaded damage types keys: {list(self.damage_type_data.keys())}")
+       
         # --- End Data Loading --- 
         
         # --- Load Wave Data ---
@@ -288,10 +288,7 @@ class GameScene:
         print(f"UI Panel Area (Pixels): {self.panel_pixel_width}x{self.panel_pixel_height} at ({self.panel_x},{self.panel_y})")
         print(f"Enemy Preview Area: {self.objective_area_rect}")
         
-        # --- Initial Tower Link Calculation --- REMOVED
-        # print("DEBUG: Calling initial update_tower_links() from __init__") 
-        # self.update_tower_links()
-        # --- End Initial Link Calc --- 
+
         
     def handle_event(self, event):
         """Handle pygame events"""
@@ -621,17 +618,24 @@ class GameScene:
         # Store as instance variable for use in draw method
         self.tower_buff_auras = [] 
         for tower in self.towers:
-            # Include 'hybrid' type check here
-            if (tower.attack_type == 'aura' or tower.attack_type == 'hybrid') and tower.special and tower.special.get('targets') == 'towers':
-                aura_radius_units = tower.special.get('aura_radius', 0)
-                if aura_radius_units > 0:
-                    aura_radius_pixels = aura_radius_units * (config.GRID_SIZE / 200.0)
-                    aura_radius_sq = aura_radius_pixels ** 2
-                    self.tower_buff_auras.append({
-                        'tower': tower,
-                        'radius_sq': aura_radius_sq,
-                        'special': tower.special
-                    })
+            # Check if the tower has a special block and targets towers
+            if tower.special and "towers" in tower.special.get('targets', []):
+                is_standard_aura = (tower.attack_type == 'aura' or tower.attack_type == 'hybrid')
+                is_dot_amp_aura = tower.special.get('effect') == 'dot_amplification_aura'
+                
+                # Process if it's a standard buff aura OR the new DoT amp aura
+                if is_standard_aura or is_dot_amp_aura:
+                    aura_radius_units = tower.special.get('aura_radius', 0)
+                    if aura_radius_units > 0:
+                        aura_radius_pixels = aura_radius_units * (config.GRID_SIZE / 200.0)
+                        aura_radius_sq = aura_radius_pixels ** 2
+                        self.tower_buff_auras.append({
+                            'tower': tower,
+                            'radius_sq': aura_radius_sq,
+                            'special': tower.special
+                        })
+                        if is_dot_amp_aura:
+                            print(f"DEBUG: Added {tower.tower_id} (dot_amp_aura) to tower_buff_auras.") # Optional debug
 
         # --- BEGIN Adjacency Buff Calculation --- 
         hq_towers = [t for t in self.towers if t.tower_id == 'police_police_hq']
@@ -760,7 +764,8 @@ class GameScene:
                             'special': tower.special
                         })
                         # Debug print to confirm inclusion
-                        print(f"DEBUG: Included {tower.tower_id} (Type: {tower.attack_type}, Effect: {effect_type}) in enemy_aura_towers.") 
+                        print(f"DEBUG: Included {tower.tower_id} (Type: {tower.attack_type}, Effect: {effect_type}) in enemy_aura_towers.")
+
         
         # --- Update Towers --- 
         for tower in self.towers:
@@ -977,24 +982,31 @@ class GameScene:
                 interval = special.get('interval', 1.0)
                 # Check pulse timing ONCE per tower
                 if current_game_time - tower.last_pulse_time >= interval:
-                    # print(f"PULSE TRIGGER: {tower.tower_id} pulsing (Effect: {effect_type})") # DEBUG REMOVED
+                  
                     tower.last_pulse_time = current_game_time # Update time immediately
                     radius_sq = aura_data['radius_sq']
                     allowed_targets = special.get('targets', [])
-
-                    # --- NEW: Create Pulse Visual Effect for Specific Tower ---
-                    if tower.tower_id == 'igloo_glacial_heart' and self.glacial_heart_pulse_image:
-                        # Use tower's game grid coordinates (x, y)
-                        pulse_effect = PulseImageEffect(
-                            x=tower.x, 
-                            y=tower.y, 
-                            image=self.glacial_heart_pulse_image,
-                            duration=0.4, # Slightly shorter than interval?
-                            start_scale=0.1, # Start small
-                            end_scale=aura_data['radius_sq']**0.5 / (self.glacial_heart_pulse_image.get_width()/2) # Scale roughly to radius
-                        )
-                        self.effects.append(pulse_effect)
-                    # --- END: Create Pulse Visual Effect ---
+                   
+                    # --- Create Visual Pulse Effect --- 
+                    if tower.tower_id == 'alchemists_miasma_pillar': # <<< CORRECTED TYPO HERE
+                       
+                        try:
+                            # Import math if not already imported at the top
+                            import math 
+                            pulse_radius_pixels = math.sqrt(radius_sq)
+                            pulse_color = (0, 255, 0, 100) # Faint green (RGBA)
+                            pulse_duration = 0.5 # seconds
+                            pulse_effect = ExpandingCircleEffect(tower.x, tower.y, 
+                                                                 pulse_radius_pixels, 
+                                                                 pulse_duration, 
+                                                                 pulse_color, thickness=2)
+                            self.effects.append(pulse_effect)
+                    
+                        except NameError: # Catch if ExpandingCircleEffect wasn't imported
+                            print("ERROR: ExpandingCircleEffect class not found. Please ensure it's defined and imported.")
+                        except Exception as e:
+                            print(f"Error creating Miasma Pillar pulse effect: {e}")
+                    # --- Other Pulse Visuals (e.g., Glacial Heart) ---
 
                     # Now find and affect ALL valid enemies in range
                     for enemy in self.enemies: # Iterate through all current enemies
@@ -1018,18 +1030,18 @@ class GameScene:
                                     if pulse_damage is not None and pulse_damage > 0:
                                         damage_type = special.get('pulse_damage_type', 'normal')
                                         enemy.take_damage(pulse_damage, damage_type)
-                                    # print(f"... applied slow/damage pulse to {enemy.enemy_id}") # DEBUG REMOVED
+                                    
 
                                 elif effect_type == 'damage_pulse_aura':
                                     pulse_damage = special.get('pulse_damage', 0)
                                     damage_type = special.get('pulse_damage_type', 'normal')
                                     enemy.take_damage(pulse_damage, damage_type)
-                                    # print(f"... applied damage pulse to {enemy.enemy_id}") # DEBUG REMOVED
+                   
 
                                 elif effect_type == 'stun_pulse_aura':
                                     duration = special.get('duration', 0.5)
                                     enemy.apply_status_effect('stun', duration, None, current_game_time)
-                                    # print(f"... applied stun pulse to {enemy.enemy_id}") # DEBUG REMOVED
+    
                                 
                                 # --- NEW: Bonechill Pulse --- 
                                 elif effect_type == 'bonechill_pulse_aura':
@@ -1038,13 +1050,26 @@ class GameScene:
                                     # --- ADDED BONECHILL APPLICATION LOG ---
                                     print(f"$$$ BONECHILL APPLIED by {tower.tower_id} to {enemy.enemy_id} for {duration}s at {current_game_time:.2f}s")
                                     # --- END LOG ---
-                                    # print(f"... applied bonechill pulse to {enemy.enemy_id} for {duration}s") # DEBUG REMOVED
-                                    # Optional: Add slow component here too if desired
-                                    # slow_percentage = special.get('slow_percentage', 0)
-                                    # if slow_percentage > 0:
-                                    #    slow_multiplier = 1.0 - (slow_percentage / 100.0)
-                                    #    enemy.apply_status_effect('slow', duration, slow_multiplier, current_time)
+
                                 # --- End Bonechill Pulse --- 
+
+                                # --- NEW: DoT Pulse Aura --- 
+                                elif effect_type == 'dot_pulse_aura':
+                                    dot_name = special.get('dot_effect_name', 'unnamed_dot')
+                                    base_dot_damage = special.get('dot_damage', 0)
+                                    dot_interval = special.get('dot_interval', 1.0)
+                                    dot_duration = special.get('dot_duration', 1.0)
+                                    dot_damage_type = special.get('dot_damage_type', 'normal')
+                                    
+                                    # Get amplification from nearby Plague Reactors
+                                    amp_multiplier = tower.get_dot_amplification_multiplier(self.tower_buff_auras)
+                                    amplified_dot_damage = base_dot_damage * amp_multiplier
+                                    
+                                    # Apply the DoT to the enemy
+                                    enemy.apply_dot_effect(dot_name, amplified_dot_damage, dot_interval, dot_duration, dot_damage_type, current_game_time)
+
+                                   
+                                # --- End DoT Pulse Aura ---
 
         # --- Update Projectiles --- 
         newly_created_projectiles = [] # List to hold projectiles from bounces/splits etc.
@@ -1054,7 +1079,7 @@ class GameScene:
             proj.move(time_delta, self.enemies) 
             if proj.collided:
                 # on_collision now returns a dictionary with new projectiles/effects/gold
-                collision_results = proj.on_collision(self.enemies, current_game_time)
+                collision_results = proj.on_collision(self.enemies, current_game_time, self.tower_buff_auras)
                 
                 if collision_results:
                     # Check for and add gold
@@ -1080,13 +1105,13 @@ class GameScene:
                     new_projs = collision_results.get('new_projectiles', [])
                     if new_projs:
                         newly_created_projectiles.extend(new_projs)
-                        # print(f"Collision generated {len(new_projs)} new projectiles.") # Optional debug
+                      
                     
                     # Add any new effects (e.g., fallout zone)
                     new_effects = collision_results.get('new_effects', [])
                     if new_effects:
                         newly_created_effects.extend(new_effects)
-                        # print(f"Collision generated {len(new_effects)} new effects.") # Optional debug
+                       
                 
                 # Always remove the original projectile after collision is processed
                 try:
@@ -1235,21 +1260,27 @@ class GameScene:
                             if tower.special:
                                 effect_type = tower.special.get("effect")
                                 if effect_type == "burn":
-                                    dot_damage = tower.special.get("dot_damage", 0)
+                                    base_dot_damage = tower.special.get("dot_damage", 0)
                                     dot_interval = tower.special.get("dot_interval", 1.0)
                                     dot_duration = tower.special.get("dot_duration", 1.0)
                                     dot_damage_type = tower.special.get("dot_damage_type", tower.damage_type)
+                                    # Get amplification
+                                    amp_multiplier = tower.get_dot_amplification_multiplier(self.tower_buff_auras)
+                                    amplified_dot_damage = base_dot_damage * amp_multiplier
                                     # Apply the burn DoT
-                                    enemy.apply_dot_effect(effect_type, dot_damage, dot_interval, dot_duration, dot_damage_type, current_game_time)
+                                    enemy.apply_dot_effect(effect_type, amplified_dot_damage, dot_interval, dot_duration, dot_damage_type, current_game_time)
                                     print(f"Enemy {enemy.enemy_id} walked over Fire Pit {tower.tower_id}, applied burn.")
                                 # --- Add check for Earth Spine --- 
                                 elif effect_type == "ground_spike_dot":
-                                    dot_damage = tower.special.get("dot_damage", 0)
+                                    base_dot_damage = tower.special.get("dot_damage", 0)
                                     dot_interval = tower.special.get("dot_interval", 1.0)
                                     dot_duration = tower.special.get("dot_duration", 1.0)
                                     dot_damage_type = tower.special.get("dot_damage_type", tower.damage_type)
+                                    # Get amplification
+                                    amp_multiplier = tower.get_dot_amplification_multiplier(self.tower_buff_auras)
+                                    amplified_dot_damage = base_dot_damage * amp_multiplier
                                     # Apply the spike DoT
-                                    enemy.apply_dot_effect(effect_type, dot_damage, dot_interval, dot_duration, dot_damage_type, current_game_time)
+                                    enemy.apply_dot_effect(effect_type, amplified_dot_damage, dot_interval, dot_duration, dot_damage_type, current_game_time)
                                     print(f"Enemy {enemy.enemy_id} walked over Earth Spine {tower.tower_id}, applied {effect_type}.")
                                 # Add other walkover effects here if needed (e.g., instant damage)
                                 # elif effect_type == "walkover_damage": ... 
@@ -1273,9 +1304,7 @@ class GameScene:
         # Check remaining enemies for death AFTER objective check
         for enemy in self.enemies[:]: 
             if enemy.health <= 0: # Check health AFTER objective check
-                # --- DEBUG START ---
-                # print(f"DEBUG Update: Enemy {enemy.enemy_id} health <= 0. Preparing effect.")
-                # --- DEBUG END ---
+
                 
                 # Create blood splatter effect at enemy's current position
                 # Need to adjust for grid offset to get absolute screen coords
@@ -1284,15 +1313,11 @@ class GameScene:
                 effect_x = enemy.x + grid_offset_x 
                 effect_y = enemy.y + grid_offset_y
                 
-                # --- DEBUG START ---
-                # print(f"DEBUG Update: Calculated effect pos: ({effect_x}, {effect_y})")
-                # --- DEBUG END ---
+
                 
                 # if self.blood_splatter_frames: # Only create if frames loaded (Old check)
                 if self.blood_splatter_base_image: # Check if base image loaded
-                    # --- DEBUG START ---
-                    # print(f"DEBUG Update: Base image exists. Attempting Effect creation...")
-                    # --- DEBUG END ---
+
                     # Create a fading effect instead of frame-based
                     splatter = Effect(effect_x, effect_y, 
                                       self.blood_splatter_base_image, # Pass base image
@@ -1300,9 +1325,7 @@ class GameScene:
                                       (config.GRID_SIZE * 3, config.GRID_SIZE * 3), # Pass target size (3x3 grid cells)
                                       hold_duration=config.BLOOD_SPLATTER_HOLD_DURATION) # Pass hold duration
                     self.effects.append(splatter)
-                    # --- DEBUG START ---
-                    # print(f"DEBUG Update: Effect appended. self.effects length = {len(self.effects)}")
-                    # --- DEBUG END ---
+
                     
                 # TODO: Add money/score for killing enemy?
                 self.money += enemy.value # Add enemy value to player money
@@ -1422,6 +1445,8 @@ class GameScene:
                 effect.draw(screen, grid_offset_x, grid_offset_y) # Pass offsets
             elif isinstance(effect, AcidSpewParticleEffect): # Added check for AcidSpew
                 effect.draw(screen, grid_offset_x, grid_offset_y) # Pass offsets
+            elif isinstance(effect, ExpandingCircleEffect): # Handle new effect type
+                effect.draw(screen, grid_offset_x, grid_offset_y) # Pass offsets
             elif hasattr(effect, 'draw'):
                 effect.draw(screen)
             
@@ -1449,9 +1474,7 @@ class GameScene:
                     
                     if adjacent_count < required_count:
                         proceed_with_beam = False # Check failed, do not draw/damage
-                        # Optional: Visual indicator? Could draw tower differently if inactive
-                        # print(f"DEBUG: Beam tower {tower.tower_id} inactive due to adjacency.")
-                # --- End Adjacency Check ---
+
                         
                 if proceed_with_beam: # Only draw/damage if check passed
                     # Indent this entire block
@@ -1652,11 +1675,11 @@ class GameScene:
             timer_text = f"Next Wave: {max(0, self.wave_timer):.1f}s"
             gold_color = (255, 215, 0) # Define gold color
             text_surface = self.timer_font.render(timer_text, True, gold_color)
-            
-            # Calculate position: Centered horizontally above grid, below top padding
+
+            # Calculate position: Centered horizontally, vertically centered in top restricted area
             text_rect = text_surface.get_rect(
                 centerx=(config.UI_PANEL_PADDING + self.usable_grid_pixel_width // 2),
-                top=(config.UI_PANEL_PADDING + 10) # 10 pixels below top padding
+                centery=(config.UI_PANEL_PADDING + (config.RESTRICTED_TOWER_AREA_HEIGHT * config.GRID_SIZE) // 2)
             )
             screen.blit(text_surface, text_rect)
         # -------------------------
@@ -1668,7 +1691,7 @@ class GameScene:
         try:
             lives_font = pygame.font.Font(None, 24) # Create smaller, local font
             if lives_font: 
-                # print(f"DEBUG: Drawing Lives = {self.lives}, Type = {type(self.lives)}") # REMOVED DEBUG
+
                 lives_text = f"Lives: {self.lives}"
                 lives_surface = lives_font.render(lives_text, True, config.WHITE) # Use white color
                 lives_rect = lives_surface.get_rect(topleft=(10, 10)) # Position with padding

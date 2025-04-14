@@ -237,6 +237,26 @@ class Tower:
         
         return within_max_range and outside_min_range
         
+    def get_dot_amplification_multiplier(self, tower_buff_auras):
+        """Check buff auras for nearby DoT amplification and return the highest multiplier."""
+        highest_multiplier = 1.0 # Default: no amplification
+        for aura_data in tower_buff_auras:
+            # Check if the aura is the correct type
+            if aura_data['special'].get('effect') == 'dot_amplification_aura':
+                buff_tower = aura_data['tower']
+                aura_radius_sq = aura_data['radius_sq']
+                
+                # Check if this tower (self) is within the buff tower's aura range
+                dist_sq = (self.x - buff_tower.x)**2 + (self.y - buff_tower.y)**2
+                if dist_sq <= aura_radius_sq:
+                    # Get the multiplier from this specific aura
+                    multiplier = aura_data['special'].get('dot_damage_multiplier', 1.0)
+                    # Keep the highest multiplier found
+                    highest_multiplier = max(highest_multiplier, multiplier)
+                    # print(f"DEBUG: Tower {self.tower_id} affected by {buff_tower.tower_id} DoT amp aura. Multiplier: {multiplier}") # Optional debug
+        
+        return highest_multiplier
+
     def get_stats_for_target(self, target_type):
         """Return the appropriate damage/speed values for the target type."""
         damage_min = self.base_damage_min
@@ -491,13 +511,15 @@ class Tower:
                 proj_l = Projectile(origin_x_left, origin_y, initial_damage, proj_speed, projectile_id,
                                    direction_angle=left_dir_angle, max_distance=self.range,
                                    splash_radius=effective_splash_radius_pixels, source_tower=self, is_crit=is_crit,
-                                      damage_type=self.damage_type, asset_loader=self.asset_loader)
+                                   special_effect=self.special,
+                                   damage_type=self.damage_type, asset_loader=self.asset_loader)
                 results['projectiles'].append(proj_l)
                 
                 # Create right projectile (fires right from RIGHT side)
                 proj_r = Projectile(origin_x_right, origin_y, initial_damage, proj_speed, projectile_id,
                                    direction_angle=right_dir_angle, max_distance=self.range,
                                    splash_radius=effective_splash_radius_pixels, source_tower=self, is_crit=is_crit,
+                                   special_effect=self.special,
                                    damage_type=self.damage_type, asset_loader=self.asset_loader)
                 results['projectiles'].append(proj_r)
             return results # Broadside handled
@@ -522,6 +544,7 @@ class Tower:
                                                 target_enemy=target, 
                                                 splash_radius=effective_splash_radius_pixels, # Use buffed splash 
                                                 source_tower=self, is_crit=is_crit, 
+                                                special_effect=self.special,
                                                 damage_type=self.damage_type,
                                                 bounces_remaining=self.bounce,
                                                 bounce_range_pixels=self.bounce_range_pixels,
@@ -583,6 +606,7 @@ class Tower:
                                                    projectile_asset_id, target_enemy=target, 
                                                    splash_radius=effective_splash_radius_pixels, 
                                                    source_tower=self, is_crit=is_crit, 
+                                                   special_effect=self.special,
                                                    damage_type=self.damage_type, 
                                                    bounces_remaining=self.bounce,
                                                    bounce_range_pixels=self.bounce_range_pixels,
@@ -597,6 +621,7 @@ class Tower:
                                                      projectile_asset_id, target_enemy=target, 
                                                      splash_radius=0, # No splash for visual 
                                                      source_tower=self, is_crit=False, # No crit visual 
+                                                     special_effect=self.special,
                                                      damage_type=self.damage_type, # Type doesn't matter much
                                                      bounces_remaining=self.bounce,
                                                      bounce_range_pixels=self.bounce_range_pixels,
@@ -615,6 +640,7 @@ class Tower:
                                       target_enemy=target, 
                                       splash_radius=effective_splash_radius_pixels, 
                                       source_tower=self, is_crit=is_crit, 
+                                      special_effect=self.special,
                                       damage_type=self.damage_type,
                                       bounces_remaining=self.bounce,
                                       bounce_range_pixels=self.bounce_range_pixels,
@@ -1046,6 +1072,7 @@ class Tower:
                                       target_enemy=self.salvo_target, 
                                       splash_radius=splash_rad_pixels,
                                       source_tower=self, is_crit=is_crit, 
+                                      special_effect=self.special,
                                       damage_type=self.damage_type,
                                       bounces_remaining=self.bounce,
                                       bounce_range_pixels=self.bounce_range_pixels,
