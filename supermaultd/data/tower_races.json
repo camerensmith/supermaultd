@@ -1129,8 +1129,8 @@
             "quill_count": 8
           }
         },
-        "goblin_ripper_mech": {
-          "name": "Ripper Mech", "grid_width": 1, "grid_height": 1, "cost": 140,
+        "goblin_ripper_mekk": {
+          "name": "Ripper Mekk", "grid_width": 1, "grid_height": 1, "cost": 140,
           "damage_min": 44, "damage_max": 312, "damage_type": "normal",
           "range": 350, "attack_interval": 0.7, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": null, "targets": ["ground"],
@@ -1377,33 +1377,33 @@
             "description": "Has a 25% chance on hit to ignore 15 armor for this attack."
           }
         },
-        "titan_skybreaker_platform": {
-          "name": "Skybreaker Platform", "grid_width": 2, "grid_height": 2, "cost": 150,
+        "titan_jaguar_mech": {
+          "name": "Jaguar Mech", "grid_width": 2, "grid_height": 2, "cost": 150,
           "damage_min": 200, "damage_max": 220, "damage_type": "piercing",
           "range": 900, "attack_interval": 2.0, "projectile_speed": 600,
           "attack_type": "projectile", "splash_radius": 100, "targets": ["air"]
         },
-        "titan_quake_hammer": {
-          "name": "Quake Hammer", "grid_width": 2, "grid_height": 2, "cost": 200,
+        "titan_bio_mech": {
+          "name": "Bio Mech", "grid_width": 2, "grid_height": 2, "cost": 200,
           "damage_min": 100, "damage_max": 120, "damage_type": "siege",
           "range": 500, "attack_interval": 2.5, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 180, "targets": ["ground"],
           "special": {"effect": "stun", "duration": 1.0}
         },
-        "titan_athena_long_range_cannon": {
-          "name": "Athena Long-Range Cannon", "grid_width": 3, "grid_height": 3, "cost": 350,
+        "titan_athena_mech": {
+          "name": "Athena Mech", "grid_width": 3, "grid_height": 3, "cost": 350,
           "damage_min": 600, "damage_max": 650, "damage_type": "siege",
           "range": 1400, "range_min": 300, "attack_interval": 4.0, "projectile_speed": 500,
           "attack_type": "projectile", "splash_radius": 150, "targets": ["ground"]
         },
-        "titan_fortress_core": {
-          "name": "Fortress Core", "grid_width": 3, "grid_height": 3, "cost": 450,
+        "titan_apocalypse_mech": {
+          "name": "Apocalypse Mech", "grid_width": 3, "grid_height": 3, "cost": 450,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
           "range": 400, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "aura", "splash_radius": null, "targets": []
         },
-        "titan_world_engine": {
-          "name": "World Engine", "grid_width": 3, "grid_height": 3, "cost": 800,
+        "titan_obliterator_mech": {
+          "name": "Obliterator Mech", "grid_width": 3, "grid_height": 3, "cost": 800,
           "damage_min": 2500, "damage_max": 3000, "damage_type": "siege",
           "range": 1000, "attack_interval": 6.0, "projectile_speed": 300,
           "attack_type": "projectile", "splash_radius": 400, "targets": ["ground"]
@@ -1413,8 +1413,8 @@
     "police_station": {
       "description": "Maintaining order with non-lethal tactics and precision takedowns.",
       "towers": {
-        "police_patrol_post": {
-          "name": "Patrol Post", "grid_width": 1, "grid_height": 1, "cost": 9,
+        "police_peacekeeper": {
+          "name": "Peacekeeper", "grid_width": 1, "grid_height": 1, "cost": 9,
           "damage_min": 6, "damage_max": 8, "damage_type": "normal",
           "range": 550, "attack_interval": 0.5, "projectile_speed": 500,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]

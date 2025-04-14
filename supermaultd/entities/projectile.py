@@ -95,11 +95,11 @@ class Projectile:
             # Straight-flying projectile based on angle
             self.target = None 
             self.world_angle_degrees = direction_angle # Assume direction_angle is world angle
-            angle_rad = math.radians(self.world_angle_degrees) 
+            # Convert initial angle to velocity components
+            angle_rad = math.radians(self.world_angle_degrees)
             self.vx = math.cos(angle_rad) * self.speed
-             # Use -sin because Pygame Y is inverted
-            self.vy = -math.sin(angle_rad) * self.speed
-            print(f"[Projectile Init Straight] World Angle: {self.world_angle_degrees}, vx: {self.vx:.1f}, vy: {self.vy:.1f}")
+            self.vy = math.sin(angle_rad) * self.speed # Use sin for y
+            self.world_angle_degrees = self.world_angle_degrees # Store for drawing
         else:
             # Invalid state - needs either target or direction
             print("[Projectile Init] Warning: Projectile created without target OR direction. Will not move.")
@@ -375,15 +375,6 @@ class Projectile:
                     #print(f"Gold on Kill rolled {random.random()*100:.1f} vs {chance}, failed.")
             # --- End Gold On Kill ---
 
-            # --- DEBUG: Check special_effect before DoT block ---
-            print(f"DEBUG COLLISION: self.special_effect is: {self.special_effect}")
-            if self.special_effect:
-                print(f"DEBUG COLLISION: 'dot_damage' in special?: {'dot_damage' in self.special_effect}")
-                print(f"DEBUG COLLISION: 'dot_interval' in special?: {'dot_interval' in self.special_effect}")
-                print(f"DEBUG COLLISION: 'duration' in special?: {'duration' in self.special_effect}")
-            print(f"DEBUG COLLISION: collided_enemy is not None?: {collided_enemy is not None}")
-            # --- END DEBUG ---
-
             # --- NEW: Generic DoT Application on Impact --- 
             # Check if the special effect block contains DoT parameters
             if (self.special_effect and # First check if special_effect exists
@@ -404,10 +395,6 @@ class Projectile:
                 if self.source_tower and hasattr(self.source_tower, 'get_dot_amplification_multiplier'):
                     amp_multiplier = self.source_tower.get_dot_amplification_multiplier(tower_buff_auras)
                     amplified_dot_damage = base_dot_damage * amp_multiplier
-
-                # --- Add DoT Apply Debugging --- 
-                print(f"DEBUG DoT Apply Values: name='{dot_name}', dmg={amplified_dot_damage:.1f}, int={dot_interval}, dur={dot_duration}, type='{dot_damage_type}', time={current_time:.1f}")
-                # --- End Debugging ---
 
                 # Apply the DoT to the enemy that was hit
                 if amplified_dot_damage > 0: # Only apply if damage is positive

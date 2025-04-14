@@ -563,9 +563,97 @@ class Tower:
                 
                 return results # Return immediately after first shot
             # --- END Salvo Check --- 
-            # else: # Only run standard logic if NOT a salvo tower
-            # --- Standard Projectile / Instant Attack Logic (if not salvo) --- 
-            # (The check for is_salvo_tower above prevents this running for salvo towers)
+
+            # --- Shotgun Logic --- 
+            elif self.special and self.special.get("effect") == "shotgun":
+                self.last_attack_time = current_time
+                pellets = self.special.get("pellets", 1)
+                spread_angle_degrees = self.special.get("spread_angle", 15)
+                spread_angle_rad = math.radians(spread_angle_degrees)
+
+                # Calculate base damage ONCE for all pellets in this shot
+                initial_damage, is_crit = self.calculate_damage(target, buffed_stats, current_time, damage_multiplier=damage_multiplier)
+
+                # Calculate base direction towards the target
+                dx = target.x - self.x
+                dy = target.y - self.y
+                base_angle_rad = math.atan2(dy, dx) # Use dy, dx for atan2
+
+                projectile_id = self.tower_data.get('projectile_asset_id', self.tower_id)
+
+                print(f"Tower {self.tower_id} firing SHOTGUN ({pellets} pellets, spread {spread_angle_degrees} deg) at {target.enemy_id}")
+
+                for _ in range(pellets):
+                    # Calculate random offset within the spread angle
+                    angle_offset = random.uniform(-spread_angle_rad / 2, spread_angle_rad / 2)
+                    pellet_angle_rad = base_angle_rad + angle_offset
+                    # Convert to degrees for the Projectile constructor
+                    pellet_angle_degrees = math.degrees(pellet_angle_rad)
+
+                    # Create a non-homing projectile for each pellet
+                    pellet_projectile = Projectile(
+                        self.x, self.y, initial_damage, self.projectile_speed,
+                        projectile_id,
+                        target_enemy=None, # Not homing
+                        direction_angle=pellet_angle_degrees, # Fire in calculated direction
+                        max_distance=self.range,
+                        splash_radius=0, # Pellets typically don't splash individually
+                        source_tower=self, is_crit=is_crit,
+                        special_effect=None, # Pellets don't inherit the shotgun special
+                        damage_type=self.damage_type,
+                        # Pellets generally don't bounce/pierce unless specified
+                        bounces_remaining=0, 
+                        pierce_adjacent=0,
+                        asset_loader=self.asset_loader,
+                        is_visual_only=False
+                    )
+                    results['projectiles'].append(pellet_projectile)
+                
+                return results # Shotgun attack handled
+            # --- END Shotgun Logic ---
+            
+            # --- NEW: Quillspray Logic ---
+            elif self.special and self.special.get("effect") == "quillspray":
+                self.last_attack_time = current_time # Update attack time
+                quill_count = self.special.get("quill_count", 1) # Get count, default to 1 if missing
+                # Use specific projectile asset if defined, otherwise default
+                projectile_id = self.tower_data.get('projectile_asset_id', self.tower_id) 
+                projectile_speed = self.projectile_speed if self.projectile_speed is not None else 100 # Default speed if None
+
+                # Calculate base damage ONCE for all quills in this spray
+                initial_damage, is_crit = self.calculate_damage(target, buffed_stats, current_time, damage_multiplier=damage_multiplier)
+
+                print(f"Tower {self.tower_id} firing QUILLSPRAY ({quill_count} quills, ProjID: {projectile_id})")
+
+                angle_increment = 360.0 / quill_count # Spread evenly in 360 degrees
+
+                for i in range(quill_count):
+                    quill_angle_degrees = angle_increment * i
+
+                    # Create a non-homing projectile for each quill
+                    quill_projectile = Projectile(
+                        self.x, self.y, initial_damage, projectile_speed,
+                        projectile_id,
+                        target_enemy=None, # Not homing
+                        direction_angle=quill_angle_degrees, # Fire in calculated direction
+                        max_distance=self.range, # Use tower's range
+                        splash_radius=0, # Quills typically don't splash individually
+                        source_tower=self,
+                        is_crit=is_crit,
+                        special_effect=None, # Special is the firing pattern, not on the quill itself
+                        damage_type=self.damage_type,
+                        asset_loader=self.asset_loader,
+                        is_visual_only=False
+                    )
+                    results['projectiles'].append(quill_projectile)
+
+                return results # Quillspray attack handled
+            # --- END Quillspray Logic ---
+
+            # else: # Only run standard logic if NOT a salvo, shotgun, or quillspray tower
+            # --- Standard Projectile / Instant Attack Logic --- 
+            # (The check for is_salvo_tower above prevents this running for salvo towers) #<- This comment is slightly wrong now, fixed below
+            # (The checks above prevent this running for special attack types like salvo, shotgun, quillspray)
             self.last_attack_time = current_time # Update attack time HERE for standard attacks
             initial_damage, is_crit = self.calculate_damage(target, buffed_stats, current_time, damage_multiplier=damage_multiplier)
 
