@@ -1704,7 +1704,7 @@
         }
       }
     },
-    "wandering_nomads": {
+    "nomad_clans": {
       "description": "A nomadic people with versatile skills, relying on resourcefulness and knowledge of the land rather than advanced technology.",
       "towers": {
         "nomad_pathfinder": {
@@ -1713,8 +1713,8 @@
           "range": 1050, "attack_interval": 0.7, "projectile_speed": 450,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
         },
-        "nomad_bird_tamer": {
-          "name": "Bird Tamer", "grid_width": 1, "grid_height": 1, "cost": 15,
+        "nomad_boomeranger": {
+          "name": "Boomeranger", "grid_width": 1, "grid_height": 1, "cost": 15,
           "damage_min": 3, "damage_max": 3, "damage_type": "normal",
           "range": 500, "attack_interval": 1.0, "projectile_speed": 350,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground"],
@@ -1746,14 +1746,22 @@
           "target_armor_type": ["Ethereal"],
           "special": {"effect": "reveal", "duration": 5.0}
         },
+        "nomad_bounty_hunter": {
+          "name": "Bounty Hunter", "grid_width": 1, "grid_height": 1, "cost": 50,
+          "damage_min": 999, "damage_max": 999, "damage_type": "arcane",
+          "range": 600, "attack_interval": 0.2, "projectile_speed": null,
+          "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
+          "target_armor_type": ["Ethereal"],
+          "special": {"effect": "reveal", "duration": 5.0}
+        },
         "nomad_caravan_guard": {
           "name": "Caravan Guard", "grid_width": 1, "grid_height": 1, "cost": 60,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
           "range": 400, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "aura", "splash_radius": null, "targets": []
         },
-        "nomad_caravan": {
-          "name": "Caravan", "grid_width": 2, "grid_height": 2, "cost": 120,
+        "nomad_caravan_outpost": {
+          "name": "Caravan Outpost", "grid_width": 2, "grid_height": 2, "cost": 120,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",   
           "range": 1800, "attack_interval": 8.5, "projectile_speed": null, 
           "attack_type": "none", "splash_radius": null, "targets": ["ground", "air"], 
@@ -1772,8 +1780,8 @@
             "description": "Launches a fixed-distance caravan that damages enemies it passes through and explodes at its destination."
           }
         },
-        "nomad_trading_post": {
-          "name": "Trading Post", "grid_width": 2, "grid_height": 2, "cost": 75,
+        "nomad_bazaar": {
+          "name": "Bazaar", "grid_width": 2, "grid_height": 2, "cost": 75,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": [],
