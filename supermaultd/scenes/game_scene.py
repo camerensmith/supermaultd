@@ -13,7 +13,7 @@ from utils.pathfinding import find_path # Import pathfinding function
 from entities.enemy import Enemy # Import Enemy class
 from entities.projectile import Projectile # Import Projectile class
 # Import all necessary effect classes at the top level
-from entities.effect import Effect, FloatingTextEffect, ChainLightningVisual, RisingFadeEffect, GroundEffectZone, FlamethrowerParticleEffect, SuperchargedZapEffect, AcidSpewParticleEffect, PulseImageEffect, ExpandingCircleEffect # Added AcidSpewParticleEffect, PulseImageEffect, and ExpandingCircleEffect
+from entities.effect import Effect, FloatingTextEffect, ChainLightningVisual, RisingFadeEffect, GroundEffectZone, FlamethrowerParticleEffect, SuperchargedZapEffect, AcidSpewParticleEffect, PulseImageEffect, ExpandingCircleEffect, DrainParticleEffect # Added AcidSpewParticleEffect, PulseImageEffect, and ExpandingCircleEffect, DrainParticleEffect
 from entities.orbiting_damager import OrbitingDamager # NEW IMPORT
 from entities.pass_through_exploder import PassThroughExploder # NEW IMPORT
 import json # Import json for loading armor data
@@ -926,6 +926,35 @@ class GameScene:
                             tower.active_acid_effect = acid_effect
                     # --- End Acid Spew Management ---
 
+                    # --- NEW: Drain Particle Effect Management (Husk Void Leecher) ---
+                    elif tower.tower_id == 'husk_void_leecher':
+                        # Ensure the attribute exists (safe check)
+                        if not hasattr(tower, 'active_drain_effect'):
+                            tower.active_drain_effect = None
+                            
+                        target_for_effect = tower.beam_targets[0] if tower.beam_targets else None
+                        
+                        if target_for_effect and not tower.active_drain_effect:
+                            # Start new drain effect
+                            print(f"Void Leecher starting drain effect from {target_for_effect.enemy_id}")
+                            drain_effect = DrainParticleEffect(tower, target_for_effect)
+                            self.effects.append(drain_effect)
+                            tower.active_drain_effect = drain_effect
+                        elif not target_for_effect and tower.active_drain_effect:
+                            # Target lost, stop spawning drain particles
+                            print(f"Void Leecher lost target, stopping drain effect spawning.")
+                            tower.active_drain_effect.stop_spawning()
+                            tower.active_drain_effect = None # Remove reference
+                        elif target_for_effect and tower.active_drain_effect and \
+                             target_for_effect != tower.active_drain_effect.target_enemy:
+                            # Target changed, stop old drain effect, start new one
+                            print(f"Void Leecher changed target, restarting drain effect from {target_for_effect.enemy_id}")
+                            tower.active_drain_effect.stop_spawning() # Stop old one
+                            drain_effect = DrainParticleEffect(tower, target_for_effect) # Start new one
+                            self.effects.append(drain_effect)
+                            tower.active_drain_effect = drain_effect
+                    # --- END Drain Particle Effect Management ---
+
                 elif potential_targets: # Indentation Level 2 (16 spaces) - Aligned with 'if tower.attack_type == beam:'
                     if target_selection_mode == "random":
                         actual_targets = [random.choice(potential_targets)]
@@ -944,6 +973,10 @@ class GameScene:
                     if hasattr(tower, 'active_acid_effect') and tower.active_acid_effect and tower.tower_id != 'zork_slime_spewer': # CORRECTED TOWER ID
                         tower.active_acid_effect.stop_spawning()
                         tower.active_acid_effect = None
+                    # Clear drain effect if not void leecher
+                    if hasattr(tower, 'active_drain_effect') and tower.active_drain_effect and tower.tower_id != 'husk_void_leecher':
+                        tower.active_drain_effect.stop_spawning()
+                        tower.active_drain_effect = None
                     # ------------------------------------------------------------------------
 
                 # --- 2. Handle Attack Execution (If Targets Found & Interval Ready) ---
@@ -1180,6 +1213,11 @@ class GameScene:
                     try: self.effects.remove(effect) 
                     except ValueError: pass
             elif isinstance(effect, AcidSpewParticleEffect): # Added check for AcidSpew
+                effect.update(time_delta)
+                if effect.finished:
+                    try: self.effects.remove(effect) 
+                    except ValueError: pass
+            elif isinstance(effect, DrainParticleEffect): # NEW: Check for DrainParticleEffect
                 effect.update(time_delta)
                 if effect.finished:
                     try: self.effects.remove(effect) 
@@ -1444,6 +1482,8 @@ class GameScene:
             elif isinstance(effect, FlamethrowerParticleEffect):
                 effect.draw(screen, grid_offset_x, grid_offset_y) # Pass offsets
             elif isinstance(effect, AcidSpewParticleEffect): # Added check for AcidSpew
+                effect.draw(screen, grid_offset_x, grid_offset_y) # Pass offsets
+            elif isinstance(effect, DrainParticleEffect): # NEW: Check for DrainParticleEffect
                 effect.draw(screen, grid_offset_x, grid_offset_y) # Pass offsets
             elif isinstance(effect, ExpandingCircleEffect): # Handle new effect type
                 effect.draw(screen, grid_offset_x, grid_offset_y) # Pass offsets

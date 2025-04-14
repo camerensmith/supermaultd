@@ -342,59 +342,93 @@ class OrbitingOrbsEffect(Effect):
         screen.blit(temp_surface, (0, 0)) 
 
 class DrainParticleEffect:
-    def __init__(self, start_pos, end_pos, duration, num_particles=10, speed=150, color=(128, 0, 128), start_size=4, end_size=1):
-        self.start_pos = start_pos
-        self.end_pos = end_pos
-        self.duration = duration
-        self.num_particles = num_particles
-        self.speed = speed
-        self.base_color = color
+    """Visual effect simulating life force being drained from an enemy to a tower."""
+    def __init__(self, source_tower, target_enemy, 
+                 particle_rate=30, # particles per second
+                 particle_life_base=0.8, # Base lifetime, will be adjusted by distance
+                 particle_speed=120, 
+                 start_color=(180, 0, 255), # Start color (at enemy) - Bright Purple
+                 end_color=(80, 0, 120),   # End color (fade towards tower) - Dark Purple
+                 start_size=4, 
+                 end_size=1):
+        
+        self.source_tower = source_tower
+        self.target_enemy = target_enemy
+        self.particle_rate = particle_rate
+        self.particle_life_base = particle_life_base
+        self.particle_speed = particle_speed
+        self.start_color = start_color
+        self.end_color = end_color
         self.start_size = start_size
         self.end_size = end_size
         
         self.particles = []
-        self.life_remaining = duration
-        
-        dx = end_pos[0] - start_pos[0]
-        dy = end_pos[1] - start_pos[1]
-        distance = max(1, (dx**2 + dy**2)**0.5) # Avoid division by zero
-        self.base_vx = (dx / distance) * speed
-        self.base_vy = (dy / distance) * speed
-        
-        self._spawn_initial_particles()
+        self.spawn_accumulator = 0.0
+        self.is_spawning = True # Controls if new particles are generated
+        self.finished = False # For removal from GameScene effects list
 
-    def _spawn_initial_particles(self):
-        for _ in range(self.num_particles):
-            # Slight randomization around start position
-            offset_x = random.uniform(-5, 5)
-            offset_y = random.uniform(-5, 5)
-            px = self.start_pos[0] + offset_x
-            py = self.start_pos[1] + offset_y
-            
-            # Slight randomization in speed/direction (optional)
-            # speed_mult = random.uniform(0.8, 1.2)
-            vx = self.base_vx # * speed_mult 
-            vy = self.base_vy # * speed_mult
-            
-            # Individual particle lifetime (can vary slightly)
-            life = self.duration * random.uniform(0.8, 1.0)
-            
-            self.particles.append({
-                'x': px,
-                'y': py,
-                'vx': vx,
-                'vy': vy,
-                'life': life,
-                'max_life': life
-            })
+    def stop_spawning(self):
+        """Signal the effect to stop creating new particles."""
+        self.is_spawning = False
 
     def update(self, time_delta):
-        self.life_remaining -= time_delta
-        if self.life_remaining <= 0:
-             # Force remove all particles if effect duration expires
-             self.particles = []
-             return True
-             
+        """Update particle positions, lifetimes, and spawn new ones."""
+        if self.finished:
+            return True # Already finished
+
+        # Check if target is still valid for spawning more particles
+        if not self.target_enemy or self.target_enemy.health <= 0:
+            self.stop_spawning() # Stop spawning if target is gone
+
+        # --- Spawn New Particles --- 
+        if self.is_spawning:
+            self.spawn_accumulator += self.particle_rate * time_delta
+            num_new_particles = int(self.spawn_accumulator)
+            if num_new_particles > 0:
+                self.spawn_accumulator -= num_new_particles
+                
+                # Spawn Origin: Target Enemy's position
+                start_x = self.target_enemy.x
+                start_y = self.target_enemy.y
+                # Destination: Source Tower's position
+                target_x = self.source_tower.x
+                target_y = self.source_tower.y
+                
+                dx = target_x - start_x
+                dy = target_y - start_y
+                distance = max(1, math.hypot(dx, dy))
+                
+                # Calculate base velocity vector TOWARDS the tower
+                base_vx = (dx / distance) * self.particle_speed
+                base_vy = (dy / distance) * self.particle_speed
+                
+                # Estimate lifetime based on distance and speed
+                estimated_travel_time = distance / self.particle_speed if self.particle_speed > 0 else self.particle_life_base
+                particle_life = max(0.1, estimated_travel_time) # Ensure a minimum lifetime
+
+                for _ in range(num_new_particles):
+                    # Optional: Slight randomization around spawn position
+                    px = start_x + random.uniform(-5, 5)
+                    py = start_y + random.uniform(-5, 5)
+                    
+                    # Optional: Slight randomization in speed/direction (could make it look less uniform)
+                    speed_mult = random.uniform(0.9, 1.1)
+                    vx = base_vx * speed_mult
+                    vy = base_vy * speed_mult
+                    
+                    # Individual particle lifetime variation
+                    life = particle_life * random.uniform(0.8, 1.2)
+                    
+                    self.particles.append({
+                        'x': px,
+                        'y': py,
+                        'vx': vx,
+                        'vy': vy,
+                        'life': life,
+                        'max_life': life 
+                    })
+        
+        # --- Update Existing Particles --- 
         active_particles = []
         for p in self.particles:
             p['x'] += p['vx'] * time_delta
@@ -405,20 +439,46 @@ class DrainParticleEffect:
                 active_particles.append(p)
                 
         self.particles = active_particles
-        return not self.particles # Return True if no particles left
+        
+        # Check if effect is finished (no more spawning AND no particles left)
+        if not self.is_spawning and not self.particles:
+            self.finished = True
+            return True # Signal finished
+            
+        return False # Effect still active
 
-    def draw(self, screen):
+    def draw(self, screen, grid_offset_x, grid_offset_y):
+        """Draw all active particles."""
+        if self.finished:
+            return
+            
         for p in self.particles:
-            life_ratio = max(0, p['life'] / p['max_life'])
-            current_alpha = int(255 * life_ratio)
+            # Life ratio: 0 when dead, 1 when full life. We want color/size to go from start->end as life decreases.
+            life_ratio = max(0, p['life'] / p['max_life']) 
+            
+            # Interpolate color (starts purple, fades darker)
+            r = int(self.start_color[0] + (self.end_color[0] - self.start_color[0]) * (1 - life_ratio))
+            g = int(self.start_color[1] + (self.end_color[1] - self.start_color[1]) * (1 - life_ratio))
+            b = int(self.start_color[2] + (self.end_color[2] - self.start_color[2]) * (1 - life_ratio))
+            
+            # Interpolate size (starts larger, shrinks)
             current_size = int(self.start_size + (self.end_size - self.start_size) * (1 - life_ratio))
+            current_alpha = int(255 * life_ratio**0.5) # Fade out slightly slower than linearly
             
             if current_alpha > 0 and current_size > 0:
-                # Create a surface for the circle to handle alpha properly
-                particle_surf = pygame.Surface((current_size * 2, current_size * 2), pygame.SRCALPHA)
-                pygame.draw.circle(particle_surf, (*self.base_color, current_alpha), 
-                                   (current_size, current_size), current_size)
-                screen.blit(particle_surf, (int(p['x']) - current_size, int(p['y']) - current_size)) 
+                try:
+                    # Draw simple circles for particles
+                    pos_x = int(p['x'] + grid_offset_x)
+                    pos_y = int(p['y'] + grid_offset_y)
+                    
+                    # Use SRCALPHA surface for better alpha blending
+                    particle_surf = pygame.Surface((current_size * 2, current_size * 2), pygame.SRCALPHA)
+                    # Clamp color components to valid range [0, 255]
+                    color = (max(0, min(255, r)), max(0, min(255, g)), max(0, min(255, b)), current_alpha)
+                    pygame.draw.circle(particle_surf, color, (current_size, current_size), current_size)
+                    screen.blit(particle_surf, (pos_x - current_size, pos_y - current_size))
+                except Exception as e:
+                    print(f"Error drawing drain particle: {e}")
 
 class RisingFadeEffect:
     """An effect where an image scales up and fades out simultaneously."""
@@ -837,61 +897,6 @@ class AcidSpewParticleEffect:
                  print(f"Error drawing AcidSpew particle: {e}")
 
 # --- End Acid Spew --- 
-
-class SuperchargedZapEffect(Effect):
-    """Visual effect for the final high-damage zap from a tower chain."""
-    def __init__(self, start_pos, end_pos, duration=0.2, color=(255, 255, 150), thickness=6):
-        """
-        Initialize the zap visual.
-        
-        :param start_pos: Tuple (x, y) of the starting tower (absolute screen coords).
-        :param end_pos: Tuple (x, y) of the target enemy (absolute screen coords).
-        :param duration: How long the visual effect lasts in seconds (should be short).
-        :param color: The color of the zap.
-        :param thickness: The thickness of the zap line.
-        """
-        self.start_pos = start_pos
-        self.end_pos = end_pos
-        self.duration = max(0.01, duration)
-        self.timer = 0.0
-        self.finished = False
-        self.color = color
-        self.thickness = thickness
-        
-        # Base Effect attributes needed for loop compatibility
-        self.image = None 
-        self.rect = None 
-        
-        # print(f"SuperchargedZapEffect created from {start_pos} to {end_pos}") # Debug
-
-    def update(self, time_delta):
-        """Update the effect timer. Returns True if finished."""
-        if self.finished:
-            return True
-            
-        self.timer += time_delta
-        if self.timer >= self.duration:
-            self.finished = True
-            
-        return self.finished
-
-    def draw(self, screen):
-        """Draw the zap line with fade."""
-        if self.finished:
-            return
-            
-        # Calculate alpha based on remaining duration (linear fade)
-        alpha_multiplier = max(0, 1.0 - (self.timer / self.duration))
-        current_alpha = int(255 * alpha_multiplier)
-        current_color = (*self.color[:3], current_alpha) 
-
-        try:
-            # Draw a single thick anti-aliased line
-            pygame.draw.aaline(screen, current_color, self.start_pos, self.end_pos, self.thickness)
-            # Optional: Draw a slightly thinner inner line of brighter color?
-            # pygame.draw.aaline(screen, (255,255,255,current_alpha), self.start_pos, self.end_pos, max(1, self.thickness - 2))
-        except Exception as e:
-            print(f"Error drawing SuperchargedZapEffect: {e}") 
 
 # --- NEW Pulse Image Effect ---
 import pygame

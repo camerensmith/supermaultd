@@ -62,6 +62,7 @@ class Tower:
         self.beam_max_targets = tower_data.get('beam_max_targets', 1) # Max simultaneous beam targets
         self.beam_targets = [] # List of current Enemy objects being targeted
         self.next_damage_time = 0 
+        self.active_drain_effect = None # NEW: Store active drain particle effect instance
         # Laser Painter State
         self.painting_target = None # Current enemy being painted (for laser_painter)
         self.paint_start_time = 0.0 # Game time when painting started on current target
