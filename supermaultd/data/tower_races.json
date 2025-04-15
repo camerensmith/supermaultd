@@ -1532,6 +1532,7 @@
           "targets": ["ground"],
           "special": {
               "effect": "fallout",
+              "explosion_visual_diameter": 800,
               "radius": 900,
               "duration": 15.0,
               "dot_damage": 150,

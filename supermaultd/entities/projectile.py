@@ -291,15 +291,25 @@ class Projectile:
 
         # --- Create Impact Visual Effect (If image loaded) --- 
         if self.impact_effect_surface:
-            # Set effect size to approximately 2 grid squares diameter
-            effect_diameter = 2 * GRID_SIZE 
+            effect_diameter = 2 * GRID_SIZE # Default diameter
+            # --- Check for Nuke Custom Visual Size --- 
+            if self.special_effect and self.special_effect.get("effect") == "fallout":
+                custom_diameter = self.special_effect.get("explosion_visual_diameter")
+                if custom_diameter and isinstance(custom_diameter, (int, float)) and custom_diameter > 0:
+                    effect_diameter = custom_diameter
+                    print(f"[Projectile Collision] Using custom Nuke visual diameter: {effect_diameter}")
+                else:
+                    print(f"[Projectile Collision] Warning: Nuke fallout effect missing or invalid 'explosion_visual_diameter'. Using default: {effect_diameter}")
+            # --- End Nuke Check ---
+            
             effect_duration = 0.75 # Seconds - Adjust duration as needed
             impact_effect = Effect(impact_pos[0], impact_pos[1], 
                                      self.impact_effect_surface, 
                                      duration=effect_duration, 
-                                     target_size=(effect_diameter, effect_diameter))
+                                     target_size=(int(effect_diameter), int(effect_diameter))) # Use the determined diameter
             results['new_effects'].append(impact_effect)
-            print(f"[Projectile Collision] Created impact effect for {self.projectile_id} at ({int(impact_pos[0])}, {int(impact_pos[1])}) size {effect_diameter} (2x GRID_SIZE)")
+            # Update print statement to reflect potentially custom size
+            print(f"[Projectile Collision] Created impact effect for {self.projectile_id} at ({int(impact_pos[0])}, {int(impact_pos[1])}) size {int(effect_diameter)}")
         # --- End Impact Visual --- 
 
         # --- Get Initial Target (if exists) --- 
