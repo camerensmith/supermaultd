@@ -1067,67 +1067,62 @@ class GameScene:
                         tower.active_drain_effect = None
                     # ------------------------------------------------------------------------
 
-                    # --- Attack Check and Execution for Standard Towers ---
+                    # --- Attack Check and Execution for Standard/Special Towers ---
                     if actual_targets and current_game_time >= tower.last_attack_time + effective_interval:
-                        target_enemy = actual_targets[0] # Assuming single target for now
+                        target_enemy = actual_targets[0] # Assuming single target for most non-beam
 
-                        # --- Prepare Visual Assets (The Fix!) ---
-                        visual_assets = {}
-                        # Check if the tower has animations defined and the dict is not empty
-                        if hasattr(tower, 'animations') and tower.animations:
-                            # Determine current animation state
-                            current_state = 'attack' # Assume attack state when firing
-                            # Use tower's current direction or default to 'down'
-                            direction_suffix = tower.current_direction_str if hasattr(tower, 'current_direction_str') else 'down'
-                            idle_key = f"idle_{direction_suffix}"
-                            attack_key = f"{current_state}_{direction_suffix}"
-
-                            # Get specific animation lists, provide fallbacks
-                            visual_assets['idle_surface_list'] = tower.animations.get(idle_key, [])
-                            visual_assets['attack_surface_list'] = tower.animations.get(attack_key, tower.animations.get(idle_key, [])) # Fallback to idle if attack missing
-
-                            # Ensure lists are not empty before use, fallback to base tower image if needed
-                            if not visual_assets['idle_surface_list'] and tower.image:
-                                visual_assets['idle_surface_list'] = [tower.image]
-                            if not visual_assets['attack_surface_list']:
-                                visual_assets['attack_surface_list'] = visual_assets['idle_surface_list'] # Fallback to idle list
-
-                        else:
-                            # Fallback if no 'animations' attribute or it's empty
-                            # --- MODIFIED FALLBACK ---
-                            if hasattr(tower, 'image') and tower.image: # Check if image exists AND is loaded
-                                visual_assets['idle_surface_list'] = [tower.image]
-                            else:
-                                visual_assets['idle_surface_list'] = [] # Use empty list if neither animations nor image exist
-                            # --- END MODIFIED FALLBACK ---
-                            visual_assets['attack_surface_list'] = visual_assets['idle_surface_list'] # Fallback to idle
-
-                        # Add projectile assets regardless of tower animation setup
-                        # --- MODIFIED to safely access attributes --- 
-                        visual_assets['projectile_surface'] = getattr(tower, 'projectile_image_override', None) or getattr(tower, 'projectile_surface', None)
-                        visual_assets['projectile_animation_frames'] = getattr(tower, 'projectile_animation_frames', [])
-                        visual_assets['projectile_animation_speed'] = getattr(tower, 'projectile_animation_speed', 0.1)
-                        # --- END MODIFICATION ---
-                        # --- End Prepare Visual Assets ---
-
-                        # --- Perform Attack ---
                         grid_offset_x = config.UI_PANEL_PADDING
                         grid_offset_y = config.UI_PANEL_PADDING
-                        # Call the tower's attack method, passing the prepared visual assets
-                        attack_results = tower.attack(
-                            target_enemy,
-                            current_game_time,
-                            self.enemies,           # Pass all enemies for potential AoE/pierce logic
-                            self.tower_buff_auras,  # Pass buffs for calculation within attack
-                            grid_offset_x,
-                            grid_offset_y,
-                            visual_assets=visual_assets # Crucial: pass the visuals
-                        )
 
-                        # --- Process Attack Results ---
-                        # Use the helper function to handle adding new projectiles, effects, gold, etc.
-                        self.process_attack_results(attack_results, grid_offset_x, grid_offset_y)
-                    # --- End Attack Check for Standard Towers ---
+                        # --- Specific Handling for Tower Chain --- 
+                        if tower.tower_id == 'spark_arc_tower':
+                            # Call the specific chain zap attempt logic
+                            # This function handles its own cooldowns and results
+                            self.attempt_chain_zap(tower, current_game_time, self.enemies, grid_offset_x, grid_offset_y)
+                            # We might not need to process results further here if attempt_chain_zap handles effects/sounds
+                        else:
+                            # --- Generic Attack Call for other non-beam towers ---
+                            # --- Prepare Visual Assets --- 
+                            visual_assets = {}
+                            # ... (Rest of the visual asset preparation logic remains the same) ...
+                            if hasattr(tower, 'animations') and tower.animations:
+                                # ... (animation loading logic) ...
+                                direction_suffix = tower.current_direction_str if hasattr(tower, 'current_direction_str') else 'down'
+                                idle_key = f"idle_{direction_suffix}"
+                                attack_key = f"attack_{direction_suffix}"
+                                visual_assets['idle_surface_list'] = tower.animations.get(idle_key, [])
+                                visual_assets['attack_surface_list'] = tower.animations.get(attack_key, tower.animations.get(idle_key, []))
+                                if not visual_assets['idle_surface_list'] and tower.image:
+                                    visual_assets['idle_surface_list'] = [tower.image]
+                                if not visual_assets['attack_surface_list']:
+                                    visual_assets['attack_surface_list'] = visual_assets['idle_surface_list']
+                            else:
+                                if hasattr(tower, 'image') and tower.image:
+                                    visual_assets['idle_surface_list'] = [tower.image]
+                                else:
+                                    visual_assets['idle_surface_list'] = []
+                                visual_assets['attack_surface_list'] = visual_assets['idle_surface_list']
+
+                            visual_assets['projectile_surface'] = getattr(tower, 'projectile_image_override', None) or getattr(tower, 'projectile_surface', None)
+                            visual_assets['projectile_animation_frames'] = getattr(tower, 'projectile_animation_frames', [])
+                            visual_assets['projectile_animation_speed'] = getattr(tower, 'projectile_animation_speed', 0.1)
+                            # --- End Prepare Visual Assets ---
+
+                            # Call the tower's generic attack method
+                            attack_results = tower.attack(
+                                target_enemy,
+                                current_game_time,
+                                self.enemies,           # Pass all enemies
+                                self.tower_buff_auras,  # Pass buffs
+                                grid_offset_x,
+                                grid_offset_y,
+                                visual_assets=visual_assets # Pass the visuals
+                            )
+
+                            # --- Process Generic Attack Results ---
+                            self.process_attack_results(attack_results, grid_offset_x, grid_offset_y)
+                            # --- End Processing ---
+                    # --- End Attack Check ---
 
         # --- Process Pulsed Auras (Affecting Enemies) ---
         for aura_data in enemy_aura_towers: 

@@ -1276,6 +1276,10 @@
           "range": 800, "attack_interval": 1.2, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
           "special": {
+            "effect": "chain_lightning",
+            "chain_targets": 3,
+            "chain_radius": 250,
+            "chain_damage_falloff": 0.3
           }
         },
         "spark_shock_node": {

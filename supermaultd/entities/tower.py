@@ -903,7 +903,57 @@ class Tower:
                         if enemies_splashed > 0:
                              print(f"... splashed {enemies_splashed} enemies.")
                     # --- End Instant Splash ---
-                     
+
+                    # --- Chain Lightning Logic (for instant attack) ---
+                    if self.special and self.special.get("effect") == "chain_lightning":
+                        max_jumps = self.special.get("chain_targets", 3)
+                        radius_units = self.special.get("chain_radius", 250)
+                        damage_falloff = self.special.get("chain_damage_falloff", 0.3)
+                        radius_pixels_sq = (radius_units * (GRID_SIZE / 200.0)) ** 2
+
+                        current_chain_target = target # Start chain from the initial target
+                        current_chain_damage = initial_damage # Use damage dealt to primary target
+                        targets_hit = {target} # Keep track of enemies already hit
+                        # Start visual path from tower to first target
+                        chain_path_visual = [(self.x, self.y), (current_chain_target.x, current_chain_target.y)] 
+
+                        print(f"... Initiating chain lightning from {current_chain_target.enemy_id} (Radius: {math.sqrt(radius_pixels_sq):.1f}px)")
+
+                        for _ in range(max_jumps):
+                            next_target = None
+                            min_dist_sq = float('inf')
+
+                            # Find the closest valid enemy within range of the *current chain target*
+                            for enemy in all_enemies:
+                                if enemy not in targets_hit and enemy.health > 0:
+                                    # Check if enemy type is valid for this tower
+                                    if enemy.type not in self.targets:
+                                        continue
+                                    # Check distance from the *current* chain target
+                                    dist_sq = (enemy.x - current_chain_target.x)**2 + (enemy.y - current_chain_target.y)**2
+                                    if dist_sq <= radius_pixels_sq and dist_sq < min_dist_sq:
+                                        min_dist_sq = dist_sq
+                                        next_target = enemy
+
+                            if next_target:
+                                # Apply falloff
+                                current_chain_damage *= (1.0 - damage_falloff)
+                                print(f"    ... chaining to {next_target.enemy_id} for {current_chain_damage:.2f} damage")
+                                next_target.take_damage(current_chain_damage, self.damage_type)
+                                targets_hit.add(next_target)
+                                chain_path_visual.append((next_target.x, next_target.y)) # Add position for visual
+                                current_chain_target = next_target # Move to the next link
+                            else:
+                                break # No more valid targets found
+
+                        # Create the visual effect if chain jumped at least once
+                        if len(chain_path_visual) > 2: 
+                            # Adjust coordinates for screen offset before creating visual
+                            adjusted_path = [(int(x + grid_offset_x), int(y + grid_offset_y)) for x, y in chain_path_visual]
+                            chain_effect = ChainLightningVisual(adjusted_path, duration=0.3) # Use existing visual
+                            results['effects'].append(chain_effect)
+                    # --- End Chain Lightning Logic ---
+
                 # --- Apply effects common to both standard projectile/instant that are triggered ON ATTACK (not collision) --- 
                 # Example: Rampage Stacks - This should happen *when* the tower attacks, regardless of projectile hit
                 if self.special and self.special.get("effect") == "rampage_damage_stack":
