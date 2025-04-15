@@ -107,6 +107,7 @@
           "range": 500,
           "attack_interval": 0.5,
           "projectile_speed": 300,
+          "attack_type": "projectile",
           "splash_radius  ": null,
           "targets": ["ground", "air"],
           "bounce": 1,
@@ -140,6 +141,7 @@
           "range": 420,
           "attack_interval": 1.1,
           "projectile_speed": 250,
+          "attack_type": "projectile",
           "splash_radius": null,
           "targets": ["ground", "air"]
         },
