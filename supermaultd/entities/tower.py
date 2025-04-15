@@ -1,6 +1,7 @@
 import pygame
 import math
 import random
+import os # <<< ADDED IMPORT
 from config import *
 # from .unique import UNIQUE_ABILITIES # Commented out
 from entities.projectile import Projectile # Ensure Projectile is imported
@@ -196,6 +197,42 @@ class Tower:
         self.asset_loader = None
         
         self.broadside_angle_offset = tower_data.get('broadside_angle_offset', 0)
+
+        # --- Load Attack Sound ---
+        self.attack_sound = None
+        sound_dir = os.path.join("assets", "sounds") # <<< CORRECT
+        sound_basename = self.tower_id
+        # Try MP3 first, then WAV
+        possible_paths = [
+            os.path.join(sound_dir, f"{sound_basename}.mp3"),
+            os.path.join(sound_dir, f"{sound_basename}.wav")
+        ]
+        
+        found_path = None
+        for path in possible_paths:
+            # --- Added Debug Print ---
+            print(f"  Checking for sound file at: {os.path.abspath(path)}") # <<< Let's add this
+            # ------------------------
+            if os.path.isfile(path): # <<< Potential Issue 2
+                found_path = path
+                break
+
+        if found_path: # <<< This block is likely not being entered
+            try:
+                self.attack_sound = pygame.mixer.Sound(found_path)
+                print(f"DEBUG Tower INIT: Loaded attack sound '{os.path.basename(found_path)}' for {self.tower_id}")
+            except pygame.error as e:
+                print(f"Warning: Failed to load sound file '{os.path.basename(found_path)}' for tower {self.tower_id}: {e}")
+        else:
+             # --- Added Else Print ---
+             print(f"  DEBUG: NO sound file found for {self.tower_id} after checking paths.") # <<< Let's add this
+             # -----------------------
+             pass
+        # --- End Load Attack Sound ---
+
+        # --- Beam Sound State ---
+        self.is_beam_sound_playing = False
+        # --- End Beam Sound State ---
 
     def calculate_derived_stats(self):
         """Calculates pixel dimensions and ranges based on grid size and tower data."""
@@ -482,6 +519,10 @@ class Tower:
         # --- Special Broadside Handling (No Target Needed) --- 
         is_broadside = self.special and self.special.get("effect") == "broadside"
         if is_broadside:
+            # <<< PLAY SOUND >>>
+            if self.attack_sound:
+                self.attack_sound.play()
+            # <<< END PLAY SOUND >>>
             self.last_attack_time = current_time # Update time since we are firing
             initial_damage = random.uniform(self.base_damage_min, self.base_damage_max) * damage_multiplier 
             is_crit = False 
@@ -538,6 +579,10 @@ class Tower:
 
             # --- Check for Salvo Attack Initiation --- 
             if is_salvo_tower:
+                # <<< PLAY SOUND (First Shot) >>>
+                if self.attack_sound:
+                    self.attack_sound.play()
+                # <<< END PLAY SOUND >>>
                 # Only start a new salvo if one isn't already in progress (checked above)
                 print(f"Tower {self.tower_id} initiating SALVO attack on {target.enemy_id}")
                 # Calculate damage for the *first* shot
@@ -571,6 +616,10 @@ class Tower:
 
             # --- Shotgun Logic --- 
             elif self.special and self.special.get("effect") == "shotgun":
+                # <<< PLAY SOUND >>>
+                if self.attack_sound:
+                    self.attack_sound.play()
+                # <<< END PLAY SOUND >>>
                 self.last_attack_time = current_time
                 pellets = self.special.get("pellets", 1)
                 spread_angle_degrees = self.special.get("spread_angle", 15)
@@ -619,6 +668,10 @@ class Tower:
             
             # --- NEW: Quillspray Logic ---
             elif self.special and self.special.get("effect") == "quillspray":
+                # <<< PLAY SOUND >>>
+                if self.attack_sound:
+                    self.attack_sound.play()
+                # <<< END PLAY SOUND >>>
                 self.last_attack_time = current_time # Update attack time
                 quill_count = self.special.get("quill_count", 1) # Get count, default to 1 if missing
                 # Use specific projectile asset if defined, otherwise default
@@ -655,24 +708,13 @@ class Tower:
                 return results # Quillspray attack handled
             # --- END Quillspray Logic ---
 
-            # else: # Only run standard logic if NOT a salvo, shotgun, or quillspray tower
-            # --- Standard Projectile / Instant Attack Logic --- 
-            # (The check for is_salvo_tower above prevents this running for salvo towers) #<- This comment is slightly wrong now, fixed below
-            # (The checks above prevent this running for special attack types like salvo, shotgun, quillspray)
-            self.last_attack_time = current_time # Update attack time HERE for standard attacks
-            initial_damage, is_crit = self.calculate_damage(target, buffed_stats, current_time, damage_multiplier=damage_multiplier)
-
-            # --- Specific Tower Effect Creation (On Attack) --- 
-            # Re-add Zork Horde Hurler Orb Effect
-            if self.tower_id == "zork_horde_hurler":
-                orb_effect = OrbitingOrbsEffect(target, duration=2.0, num_orbs=4)
-                results['effects'].append(orb_effect)
-            # Add other specific on-attack effect creations here if needed (like Void Leecher drain)
-            # --- END Specific Tower Effect Creation ---
-
             # --- Gattling Level Up & Visual Effect Logic --- 
             is_gattling = self.special and self.special.get("effect") == "gattling_spin_up"
             if is_gattling:
+                # <<< PLAY SOUND >>>
+                if self.attack_sound:
+                    self.attack_sound.play()
+                # <<< END PLAY SOUND >>>
                 # --- Gattling Level Up Logic --- 
                 self.gattling_last_attack_time = current_time 
                 max_level = self.special.get("levels", 0)
@@ -727,127 +769,154 @@ class Tower:
             # --- END Gattling Logic --- 
             
             # --- Standard Projectile Creation / Instant Damage (if NOT gattling projectile) --- 
-            if self.attack_type == 'projectile' and not is_gattling:
-                # --- Check for Offset Boomerang ---
-                if self.special and self.special.get("effect") == "offset_boomerang_path":
-                    self.last_attack_time = current_time # Update attack time
-                    # Calculate direction angle to the initial target
-                    if not target:
-                        print(f"Warning: Boomeranger {self.tower_id} has no target for initial angle.")
-                        return results # Cannot fire without target for angle
-                    dx = target.x - self.x
-                    dy = target.y - self.y
-                    initial_angle_degrees = math.degrees(math.atan2(dy, dx))
+            else: # This else now correctly signifies it's NOT broadside, salvo, shotgun, quillspray
+                # <<< INSERT DAMAGE CALCULATION HERE >>>
+                self.last_attack_time = current_time # Update attack time HERE for standard attacks
+                initial_damage, is_crit = self.calculate_damage(target, buffed_stats, current_time, damage_multiplier=damage_multiplier)
+                # <<< END INSERT DAMAGE CALCULATION >>>
 
-                    # Get specific boomerang parameters from special
-                    hit_cooldown = self.special.get("hit_cooldown", 0.5)
-                    offset_distance = self.special.get("return_offset_distance", 50)
-                    projectile_asset_id = self.special.get("projectile_asset_id", self.tower_id) # Use specific or default
-                    
-                    # Damage is calculated per-hit inside the boomerang class, so pass min/max
-                    # Use base damage from tower, buffs don't apply directly to boomerang creation
-                    damage_min = self.base_damage_min
-                    damage_max = self.base_damage_max
-                    
-                    print(f"Tower {self.tower_id} firing OFFSET BOOMERANG (ProjID: {projectile_asset_id})")
+                # --- Specific Tower Effect Creation (On Attack) --- 
+                if self.tower_id == "zork_horde_hurler":
+                    orb_effect = OrbitingOrbsEffect(target, duration=2.0, num_orbs=4)
+                    results['effects'].append(orb_effect)
+                # --- END Specific Tower Effect Creation ---
 
-                    boomerang = OffsetBoomerangProjectile(
-                        source_tower=self,
-                        initial_direction_angle=initial_angle_degrees,
-                        range_pixels=self.range, # Use tower's range
-                        speed=self.projectile_speed,
-                        damage_min=damage_min,
-                        damage_max=damage_max,
-                        damage_type=self.damage_type,
-                        hit_cooldown=hit_cooldown,
-                        asset_id=projectile_asset_id,
-                        offset_distance=offset_distance,
-                        asset_loader=self.asset_loader # Pass the loader function
-                    )
-                    results['projectiles'].append(boomerang)
-                else:
-                    # --- Normal Projectile Creation ---
-                    # Update attack time here if it's NOT a boomerang
-                    self.last_attack_time = current_time 
-                    projectile = Projectile(self.x, self.y, initial_damage, self.projectile_speed, 
-                                          self.tower_data.get('projectile_asset_id', self.tower_id),
-                                          target_enemy=target, 
-                                          splash_radius=effective_splash_radius_pixels, 
-                                          source_tower=self, is_crit=is_crit, 
-                                          special_effect=self.special,
-                                          damage_type=self.damage_type,
-                                          bounces_remaining=self.bounce,
-                                          bounce_range_pixels=self.bounce_range_pixels,
-                                          bounce_damage_falloff=self.bounce_damage_falloff,
-                                          pierce_adjacent=self.pierce_adjacent,
-                                          asset_loader=self.asset_loader,
-                                          is_visual_only=False) 
-                    results['projectiles'].append(projectile)
-            elif self.attack_type == 'instant':
-                # Apply instant damage if needed (some instant types might only apply effects)
-                # Example: Simple instant damage (adjust if specific instant towers have no base damage)
-                if initial_damage > 0: 
-                   target.take_damage(initial_damage, self.damage_type) 
-                   results['damage_dealt'] = initial_damage # Track damage for results if needed
-                # Apply INSTANT special effects (like stun from instant attacks) - if not handled by collision
-                self.apply_instant_special_effects(target, current_time) 
-                
-                # --- Create Instant Attack Visual Effect --- 
-                visual_effect_name = self.tower_data.get("attack_visual_effect")
-                if visual_effect_name and visual_assets: # Check if name and assets exist
-                    visual_img = visual_assets.get(visual_effect_name)
-                    if visual_img:
-                        print(f"... creating instant visual effect '{visual_effect_name}' at target {target.enemy_id}")
-                        # Calculate screen coordinates
-                        effect_x = target.x + grid_offset_x
-                        effect_y = target.y + grid_offset_y
-                        # Create a standard fading effect (adjust duration/size as needed)
-                        vis_effect = Effect(effect_x, effect_y, visual_img, 
-                                            duration=0.5, # Example duration
-                                            target_size=(GRID_SIZE, GRID_SIZE), # Example size
-                                            hold_duration=0.1)
-                        results['effects'].append(vis_effect)
+                # Check attack type *after* calculating damage
+                # <<< FIX INDENTATION START >>>
+                if self.attack_type == 'projectile' and not is_gattling:
+                    # --- Check for Offset Boomerang ---
+                    if self.special and self.special.get("effect") == "offset_boomerang_path":
+                        # <<< PLAY SOUND >>>
+                        if self.attack_sound:
+                            self.attack_sound.play()
+                        # <<< END PLAY SOUND >>>
+                        self.last_attack_time = current_time # Update attack time
+                        # Calculate direction angle to the initial target
+                        if not target:
+                            print(f"Warning: Boomeranger {self.tower_id} has no target for initial angle.")
+                            return results # Cannot fire without target for angle
+                        dx = target.x - self.x
+                        dy = target.y - self.y
+                        initial_angle_degrees = math.degrees(math.atan2(dy, dx))
+
+                        # Get specific boomerang parameters from special
+                        hit_cooldown = self.special.get("hit_cooldown", 0.5)
+                        offset_distance = self.special.get("return_offset_distance", 50)
+                        projectile_asset_id = self.special.get("projectile_asset_id", self.tower_id) # Use specific or default
+                        
+                        # Damage is calculated per-hit inside the boomerang class, so pass min/max
+                        # Use base damage from tower, buffs don't apply directly to boomerang creation
+                        damage_min = self.base_damage_min
+                        damage_max = self.base_damage_max
+                        
+                        print(f"Tower {self.tower_id} firing OFFSET BOOMERANG (ProjID: {projectile_asset_id})")
+
+                        boomerang = OffsetBoomerangProjectile(
+                            source_tower=self,
+                            initial_direction_angle=initial_angle_degrees,
+                            range_pixels=self.range, # Use tower's range
+                            speed=self.projectile_speed,
+                            damage_min=damage_min,
+                            damage_max=damage_max,
+                            damage_type=self.damage_type,
+                            hit_cooldown=hit_cooldown,
+                            asset_id=projectile_asset_id,
+                            offset_distance=offset_distance,
+                            asset_loader=self.asset_loader # Pass the loader function
+                        )
+                        results['projectiles'].append(boomerang)
                     else:
-                        print(f"Warning: Could not load visual asset '{visual_effect_name}' for tower {self.tower_id}")
-                # --- End Instant Visual Effect ---
-                
-                # --- Instant Splash Damage Logic --- 
-                effective_splash_radius_pixels = buffed_stats.get('splash_radius_pixels', 0)
-                if effective_splash_radius_pixels > 0 and initial_damage > 0: # Only splash if radius > 0 and damage > 0
-                    splash_damage = initial_damage * 0.25 # 25% splash damage
-                    splash_radius_sq = effective_splash_radius_pixels ** 2
-                    primary_target_pos = (target.x, target.y)
-                    print(f"... Applying INSTANT splash (Radius: {effective_splash_radius_pixels:.1f}, Dmg: {splash_damage:.2f})")
+                        # --- Normal Projectile Creation ---
+                        # <<< PLAY SOUND >>>
+                        if self.attack_sound:
+                            self.attack_sound.play()
+                        # <<< END PLAY SOUND >>>
+                        # Update attack time here if it's NOT a boomerang
+                        # self.last_attack_time = current_time # Already set above this else block
+                        projectile = Projectile(self.x, self.y, initial_damage, self.projectile_speed, 
+                                              self.tower_data.get('projectile_asset_id', self.tower_id),
+                                              target_enemy=target, 
+                                              splash_radius=effective_splash_radius_pixels, 
+                                              source_tower=self, is_crit=is_crit, 
+                                              special_effect=self.special,
+                                              damage_type=self.damage_type,
+                                              bounces_remaining=self.bounce,
+                                              bounce_range_pixels=self.bounce_range_pixels,
+                                              bounce_damage_falloff=self.bounce_damage_falloff,
+                                              pierce_adjacent=self.pierce_adjacent,
+                                              asset_loader=self.asset_loader,
+                                              is_visual_only=False) 
+                        results['projectiles'].append(projectile)
+                elif self.attack_type == 'instant':
+                    # <<< PLAY SOUND >>>
+                    if self.attack_sound:
+                        self.attack_sound.play()
+                    # <<< END PLAY SOUND >>>
+                    # Apply instant damage if needed (some instant types might only apply effects)
+                    # Example: Simple instant damage (adjust if specific instant towers have no base damage)
+                    if initial_damage > 0: 
+                       target.take_damage(initial_damage, self.damage_type) 
+                       results['damage_dealt'] = initial_damage # Track damage for results if needed
+                    # Apply INSTANT special effects (like stun from instant attacks) - if not handled by collision
+                    self.apply_instant_special_effects(target, current_time) 
                     
-                    enemies_splashed = 0
-                    for enemy in all_enemies:
-                        # Skip primary target and dead enemies
-                        if enemy == target or enemy.health <= 0:
-                            continue
-                            
-                        dist_sq = (enemy.x - primary_target_pos[0])**2 + (enemy.y - primary_target_pos[1])**2
-                        if dist_sq <= splash_radius_sq:
-                            print(f"    ... splashing {enemy.enemy_id} for {splash_damage:.2f}")
-                            enemy.take_damage(splash_damage, self.damage_type)
-                            # Also apply instant special effects (like stun) to splashed targets?
-                            self.apply_instant_special_effects(enemy, current_time) 
-                            enemies_splashed += 1
-                    if enemies_splashed > 0:
-                         print(f"... splashed {enemies_splashed} enemies.")
-                # --- End Instant Splash ---
-                 
-            # --- Apply effects common to both standard projectile/instant that are triggered ON ATTACK (not collision) --- 
-            # Example: Rampage Stacks - This should happen *when* the tower attacks, regardless of projectile hit
-            if self.special and self.special.get("effect") == "rampage_damage_stack":
-                self.rampage_stacks = min(self.special.get('max_stacks', 10), self.rampage_stacks + 1)
-                self.rampage_last_hit_time = current_time
-                print(f"Tower {self.tower_id} gained rampage stack. Stacks: {self.rampage_stacks}")
-            # NOTE: Armor shred, pierce adjacent usually happen on COLLISION (handled in Projectile/Enemy)
-            #       Or need specific logic here if INSTANT attacks should trigger them.
-            #       Let's assume they are handled on collision for now unless specified otherwise.
+                    # --- Create Instant Attack Visual Effect --- 
+                    visual_effect_name = self.tower_data.get("attack_visual_effect")
+                    if visual_effect_name and visual_assets: # Check if name and assets exist
+                        visual_img = visual_assets.get(visual_effect_name)
+                        if visual_img:
+                            print(f"... creating instant visual effect '{visual_effect_name}' at target {target.enemy_id}")
+                            # Calculate screen coordinates
+                            effect_x = target.x + grid_offset_x
+                            effect_y = target.y + grid_offset_y
+                            # Create a standard fading effect (adjust duration/size as needed)
+                            vis_effect = Effect(effect_x, effect_y, visual_img, 
+                                                duration=0.5, # Example duration
+                                                target_size=(GRID_SIZE, GRID_SIZE), # Example size
+                                                hold_duration=0.1)
+                            results['effects'].append(vis_effect)
+                        else:
+                            print(f"Warning: Could not load visual asset '{visual_effect_name}' for tower {self.tower_id}")
+                    # --- End Instant Visual Effect ---
+                    
+                    # --- Instant Splash Damage Logic --- 
+                    effective_splash_radius_pixels = buffed_stats.get('splash_radius_pixels', 0)
+                    if effective_splash_radius_pixels > 0 and initial_damage > 0: # Only splash if radius > 0 and damage > 0
+                        splash_damage = initial_damage * 0.25 # 25% splash damage
+                        splash_radius_sq = effective_splash_radius_pixels ** 2
+                        primary_target_pos = (target.x, target.y)
+                        print(f"... Applying INSTANT splash (Radius: {effective_splash_radius_pixels:.1f}, Dmg: {splash_damage:.2f})")
+                        
+                        enemies_splashed = 0
+                        for enemy in all_enemies:
+                            # Skip primary target and dead enemies
+                            if enemy == target or enemy.health <= 0:
+                                continue
+                                
+                            dist_sq = (enemy.x - primary_target_pos[0])**2 + (enemy.y - primary_target_pos[1])**2
+                            if dist_sq <= splash_radius_sq:
+                                print(f"    ... splashing {enemy.enemy_id} for {splash_damage:.2f}")
+                                enemy.take_damage(splash_damage, self.damage_type)
+                                # Also apply instant special effects (like stun) to splashed targets?
+                                self.apply_instant_special_effects(enemy, current_time) 
+                                enemies_splashed += 1
+                        if enemies_splashed > 0:
+                             print(f"... splashed {enemies_splashed} enemies.")
+                    # --- End Instant Splash ---
+                     
+                # --- Apply effects common to both standard projectile/instant that are triggered ON ATTACK (not collision) --- 
+                # Example: Rampage Stacks - This should happen *when* the tower attacks, regardless of projectile hit
+                if self.special and self.special.get("effect") == "rampage_damage_stack":
+                    self.rampage_stacks = min(self.special.get('max_stacks', 10), self.rampage_stacks + 1)
+                    self.rampage_last_hit_time = current_time
+                    print(f"Tower {self.tower_id} gained rampage stack. Stacks: {self.rampage_stacks}")
+                # NOTE: Armor shred, pierce adjacent usually happen on COLLISION (handled in Projectile/Enemy)
+                #       Or need specific logic here if INSTANT attacks should trigger them.
+                #       Let's assume they are handled on collision for now unless specified otherwise.
+                # <<< FIX INDENTATION END >>>
 
         # --- Beam Logic --- 
-        # ... (existing beam logic) ...
+        # ... (existing beam logic - sound doesn't make sense here) ...
 
         return results
 

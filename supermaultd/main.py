@@ -18,6 +18,7 @@ def load_game_data(file_path):
 def main():
     # Initialize Pygame
     pygame.init()
+    pygame.mixer.init()
     
     game_data = {} # Default to empty data
     try:

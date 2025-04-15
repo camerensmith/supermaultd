@@ -19,6 +19,7 @@ from entities.orbiting_damager import OrbitingDamager # NEW IMPORT
 from entities.pass_through_exploder import PassThroughExploder # NEW IMPORT
 import json # Import json for loading armor data
 
+
 # Define wave states
 WAVE_STATE_IDLE = "IDLE"
 WAVE_STATE_WAITING = "WAITING_DELAY"
@@ -53,13 +54,26 @@ class GameScene:
         self.cancel_sound = cancel_sound
         self.sell_sound = sell_sound
         self.invalid_placement_sound = invalid_placement_sound
-        
+
+        # --- Load Death Sound --- 
+        self.death_sound = None
+        try:
+            death_sound_path = os.path.join("assets", "sounds", "death.mp3") 
+            if os.path.exists(death_sound_path):
+                self.death_sound = pygame.mixer.Sound(death_sound_path)
+                print(f"[GameScene Init] Loaded death sound: {death_sound_path}")
+            else:
+                print(f"[GameScene Init] Warning: Death sound file not found: {death_sound_path}")
+        except pygame.error as e:
+            print(f"[GameScene Init] Error loading death sound: {e}")
+        # --- End Death Sound Loading ---
+
         # Get race data
         self.race_data = self.game.get_race_info(selected_race)
         if not self.race_data:
             raise ValueError(f"Race data not found for {selected_race}")
-        self.available_towers = self.race_data.get("towers", {})
-        
+        self.available_towers = self.race_data.get("towers", {}) # <<< MOVED HERE
+
         # --- Get Base Directory for Path Construction ---
         # Get the directory where this game_scene.py file is located
         current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -856,6 +870,23 @@ class GameScene:
                     tower.beam_targets = actual_targets
                     current_primary_target = actual_targets[0] if actual_targets else None
 
+                    # --- START Beam Sound Management ---
+                    if tower.attack_sound: # Only manage if sound exists
+                        if tower.beam_targets: # Beam is active (has targets)
+                            if not tower.is_beam_sound_playing:
+                                try:
+                                    tower.attack_sound.play(loops=-1) # Start looping
+                                    tower.is_beam_sound_playing = True
+                                    print(f"DEBUG: Started looping beam sound for {tower.tower_id}")
+                                except pygame.error as e:
+                                    print(f"Error playing beam sound for {tower.tower_id}: {e}")
+                        else: # Beam is inactive (no targets)
+                            if tower.is_beam_sound_playing:
+                                tower.attack_sound.stop()
+                                tower.is_beam_sound_playing = False
+                                print(f"DEBUG: Stopped looping beam sound for {tower.tower_id}")
+                    # --- END Beam Sound Management ---
+
                     # --- Laser Painter Target Tracking ---
                     is_painter = tower.special and tower.special.get('effect') == 'laser_painter'
                     if is_painter: # Indentation Level 3 (20 spaces)
@@ -1451,7 +1482,11 @@ class GameScene:
         for enemy in self.enemies[:]: 
             if enemy.health <= 0: # Check health AFTER objective check
 
-                
+                # <<< PLAY DEATH SOUND >>>
+                if self.death_sound:
+                    self.death_sound.play()
+                # <<< END PLAY DEATH SOUND >>>
+
                 # Create blood splatter effect at enemy's current position
                 # Need to adjust for grid offset to get absolute screen coords
                 grid_offset_x = config.UI_PANEL_PADDING
@@ -2044,6 +2079,12 @@ class GameScene:
             # Play sell sound
             if self.sell_sound:
                 self.sell_sound.play()
+
+            # --- Stop Beam Sound If Playing ---
+            if hasattr(tower_to_sell, 'is_beam_sound_playing') and tower_to_sell.is_beam_sound_playing and tower_to_sell.attack_sound:
+                tower_to_sell.attack_sound.stop()
+                print(f"DEBUG: Stopped beam sound for sold tower {tower_to_sell.tower_id}")
+            # --- End Stop Beam Sound ---
 
             # Update UI display
             self.tower_selector.update_money(self.money)
