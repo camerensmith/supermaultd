@@ -1710,12 +1710,38 @@
     "nomad_clans": {
       "description": "A nomadic people with versatile skills, relying on resourcefulness and knowledge of the land rather than advanced technology.",
       "towers": {
+        "nomad_dune_dweller": {
+          "name": "Dune Dweller", "grid_width": 1, "grid_height": 1, "cost": 13,
+          "damage_min": 11, "damage_max": 20, "damage_type": "normal", 
+          "range": 325, "attack_interval": 0.9, "projectile_speed": 400, 
+          "attack_type": "instant", "splash_radius": null, "targets": ["ground"]
+        },
+        "nomad_seer": {
+          "name": "Seer", "grid_width": 2, "grid_height": 2, "cost": 72,
+            "damage_min": 56, "damage_max": 83, "damage_type": "piercing",
+            "range": 785, "attack_interval": 1.0, "projectile_speed": 550,
+          "attack_type": "beam", "beam_color": [165, 42, 42], "splash_radius": null, "targets": ["ground", "air"]
+        }, 
+        "nomad_spirit_ward": {
+          "name": "Spirit Ward", "grid_width": 1, "grid_height": 1, "cost": 72,
+          "damage_min": 999, "damage_max": 999, "damage_type": "arcane",
+          "range": 600, "attack_interval": 0.3, "projectile_speed": null,
+          "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
+          "target_armor_type": ["Ethereal"],
+          "special": {"effect": "reveal", "duration": 5.0}
+        },
+        "nomad_caravan_guard": {
+          "name": "Caravan Guard", "grid_width": 2, "grid_height": 2, "cost": 164,
+          "damage_min": 165, "damage_max": 226, "damage_type": "normal",
+          "range": 600, "attack_interval": 1, "projectile_speed": 412,
+          "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
+        },
         "nomad_boomeranger": {
           "name": "Boomeranger", 
-          "grid_width": 1, "grid_height": 1, "cost": 11,
-          "damage_min": 15, 
-          "damage_max": 26, 
-          "damage_type": "piercing",
+          "grid_width": 2, "grid_height": 2, "cost": 243,
+          "damage_min": 375, 
+          "damage_max": 466, 
+          "damage_type": "normal",
           "range": 600,
           "attack_interval": 1.5,
           "projectile_speed": 400,
@@ -1725,49 +1751,18 @@
           "special": {
             "effect": "offset_boomerang_path",
             "projectile_asset_id": "nomad_boomerang",
-            "hit_cooldown": 0.2, 
+            "hit_cooldown": 0.1, 
             "return_offset_distance": 150, 
             "description": "Throws a boomerang that travels out and returns along an offset path, damaging enemies."
           }
         },
-        "nomad_seer": {
-          "name": "Seer", "grid_width": 2, "grid_height": 2, "cost": 87,
-          "damage_min": 66, "damage_max": 93, "damage_type": "piercing",
-          "range": 785, "attack_interval": 1.0, "projectile_speed": 550,
-          "attack_type": "beam", "beam_color": [165, 42, 42], "splash_radius": null, "targets": ["ground", "air"]
-        },
-        "nomad_beast_den_WIP": {
-          "name": "Beast Den", "grid_width": 3, "grid_height": 3, "cost": 108,
-          "damage_min": 245, "damage_max": 378, "damage_type": "normal", 
-          "range": 400, "attack_interval": 0.5, "projectile_speed": 400, 
-          "attack_type": "projectile", "splash_radius": null, "targets": ["ground"],
-          "special": { 
-              "effect": "quillspray",
-              "quill_count": 6,
-              "description": "Sprays 6 quills in all directions."
-          }
-        },
-        "nomad_spirit_ward": {
-          "name": "Spirit Ward", "grid_width": 1, "grid_height": 1, "cost": 50,
-          "damage_min": 999, "damage_max": 999, "damage_type": "arcane",
-          "range": 600, "attack_interval": 0.2, "projectile_speed": null,
-          "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
-          "target_armor_type": ["Ethereal"],
-          "special": {"effect": "reveal", "duration": 5.0}
-        },
         "nomad_bounty_hunter": {
           "name": "Bounty Hunter", "grid_width": 2, "grid_height": 2, "cost": 50,
-          "damage_min": 999, "damage_max": 999, "damage_type": "arcane",
-          "range": 600, "attack_interval": 0.2, "projectile_speed": null,
-          "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
-          "target_armor_type": ["Ethereal"],
-          "special": {"effect": "reveal", "duration": 5.0}
-        },
-        "nomad_caravan_guard": {
-          "name": "Caravan Guard", "grid_width": 2, "grid_height": 2, "cost": 60,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
-          "range": 400, "attack_interval": 999, "projectile_speed": null,
-          "attack_type": "aura", "splash_radius": null, "targets": []
+          "damage_min": 890, "damage_max": 1013, "damage_type": "normal",
+          "range": 530, "attack_interval": 0.3, "projectile_speed": 525,
+          "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
+          "critical_chance": 0.20,
+          "critical_multiplier": 2.0
         },
         "nomad_caravan_depot": {
           "name": "Caravan Depot", "grid_width": 3, "grid_height": 3, "cost": 120,
