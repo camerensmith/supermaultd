@@ -7,6 +7,10 @@ from entities.projectile import Projectile # Ensure Projectile is imported
 from entities.effect import Effect, FloatingTextEffect, ChainLightningVisual, OrbitingOrbsEffect, DrainParticleEffect, RisingFadeEffect # Import new class
 import json # Import json for loading armor data
 from .pass_through_exploder import PassThroughExploder # ADD THIS IMPORT
+from entities.offset_boomerang_projectile import OffsetBoomerangProjectile # <<< ADDED IMPORT
+from entities.orbiting_damager import OrbitingDamager
+# from entities.orbiting_orbs_effect import OrbitingOrbsEffect # Removed import
+from entities.effect import Effect, FloatingTextEffect, ChainLightningVisual, RisingFadeEffect, GroundEffectZone # Added GroundEffectZone
 
 class Tower:
     def __init__(self, x, y, tower_id, tower_data):
@@ -724,20 +728,61 @@ class Tower:
             
             # --- Standard Projectile Creation / Instant Damage (if NOT gattling projectile) --- 
             if self.attack_type == 'projectile' and not is_gattling:
-                projectile = Projectile(self.x, self.y, initial_damage, self.projectile_speed, 
-                                      self.tower_data.get('projectile_asset_id', self.tower_id),
-                                      target_enemy=target, 
-                                      splash_radius=effective_splash_radius_pixels, 
-                                      source_tower=self, is_crit=is_crit, 
-                                      special_effect=self.special,
-                                      damage_type=self.damage_type,
-                                      bounces_remaining=self.bounce,
-                                      bounce_range_pixels=self.bounce_range_pixels,
-                                      bounce_damage_falloff=self.bounce_damage_falloff,
-                                      pierce_adjacent=self.pierce_adjacent,
-                                      asset_loader=self.asset_loader,
-                                      is_visual_only=False) 
-                results['projectiles'].append(projectile)
+                # --- Check for Offset Boomerang ---
+                if self.special and self.special.get("effect") == "offset_boomerang_path":
+                    self.last_attack_time = current_time # Update attack time
+                    # Calculate direction angle to the initial target
+                    if not target:
+                        print(f"Warning: Boomeranger {self.tower_id} has no target for initial angle.")
+                        return results # Cannot fire without target for angle
+                    dx = target.x - self.x
+                    dy = target.y - self.y
+                    initial_angle_degrees = math.degrees(math.atan2(dy, dx))
+
+                    # Get specific boomerang parameters from special
+                    hit_cooldown = self.special.get("hit_cooldown", 0.5)
+                    offset_distance = self.special.get("return_offset_distance", 50)
+                    projectile_asset_id = self.special.get("projectile_asset_id", self.tower_id) # Use specific or default
+                    
+                    # Damage is calculated per-hit inside the boomerang class, so pass min/max
+                    # Use base damage from tower, buffs don't apply directly to boomerang creation
+                    damage_min = self.base_damage_min
+                    damage_max = self.base_damage_max
+                    
+                    print(f"Tower {self.tower_id} firing OFFSET BOOMERANG (ProjID: {projectile_asset_id})")
+
+                    boomerang = OffsetBoomerangProjectile(
+                        source_tower=self,
+                        initial_direction_angle=initial_angle_degrees,
+                        range_pixels=self.range, # Use tower's range
+                        speed=self.projectile_speed,
+                        damage_min=damage_min,
+                        damage_max=damage_max,
+                        damage_type=self.damage_type,
+                        hit_cooldown=hit_cooldown,
+                        asset_id=projectile_asset_id,
+                        offset_distance=offset_distance,
+                        asset_loader=self.asset_loader # Pass the loader function
+                    )
+                    results['projectiles'].append(boomerang)
+                else:
+                    # --- Normal Projectile Creation ---
+                    # Update attack time here if it's NOT a boomerang
+                    self.last_attack_time = current_time 
+                    projectile = Projectile(self.x, self.y, initial_damage, self.projectile_speed, 
+                                          self.tower_data.get('projectile_asset_id', self.tower_id),
+                                          target_enemy=target, 
+                                          splash_radius=effective_splash_radius_pixels, 
+                                          source_tower=self, is_crit=is_crit, 
+                                          special_effect=self.special,
+                                          damage_type=self.damage_type,
+                                          bounces_remaining=self.bounce,
+                                          bounce_range_pixels=self.bounce_range_pixels,
+                                          bounce_damage_falloff=self.bounce_damage_falloff,
+                                          pierce_adjacent=self.pierce_adjacent,
+                                          asset_loader=self.asset_loader,
+                                          is_visual_only=False) 
+                    results['projectiles'].append(projectile)
             elif self.attack_type == 'instant':
                 # Apply instant damage if needed (some instant types might only apply effects)
                 # Example: Simple instant damage (adjust if specific instant towers have no base damage)

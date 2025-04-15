@@ -27,6 +27,12 @@ class Enemy:
         self.enemy_id = enemy_id
         self.image = None  # Will be set during draw based on assets
 
+        # --- ADDED: Rect for Collision Detection ---
+        # Initialize rect with placeholder size, then center it
+        self.rect = pygame.Rect(0, 0, GRID_SIZE, GRID_SIZE) # Default size
+        self.rect.center = (self.x, self.y) # Center on initial position
+        # ------------------------------------------
+
         # Enemy properties from data
         self.max_health = enemy_data.get("health", 100) # Use .get for default values
         self.health = self.max_health
@@ -190,6 +196,10 @@ class Enemy:
                 # If we're already at the target, move to next waypoint
                 self.path_index += 1
                 # print(f"Enemy {self.enemy_id} already at waypoint {self.path_index-1}, moving to next waypoint") # Less noisy
+        
+        # --- ADDED: Update Rect Position ---
+        self.rect.center = (int(self.x), int(self.y)) # Keep rect centered on enemy
+        # ------------------------------------
         
     def take_damage(self, base_damage, damage_type="normal", bonus_multiplier=1.0, ignore_armor_amount=0):
         """Apply damage to the enemy, considering armor type, armor value, bonus multipliers, and armor ignore."""

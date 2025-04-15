@@ -1707,31 +1707,37 @@
     "nomad_clans": {
       "description": "A nomadic people with versatile skills, relying on resourcefulness and knowledge of the land rather than advanced technology.",
       "towers": {
-        "nomad_pathfinder": {
-          "name": "Pathfinder", "grid_width": 1, "grid_height": 1, "cost": 8,
-          "damage_min": 6, "damage_max": 8, "damage_type": "normal",
-          "range": 1050, "attack_interval": 0.7, "projectile_speed": 450,
-          "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
-        },
         "nomad_boomeranger": {
-          "name": "Boomeranger", "grid_width": 1, "grid_height": 1, "cost": 15,
-          "damage_min": 3, "damage_max": 3, "damage_type": "normal",
-          "range": 500, "attack_interval": 1.0, "projectile_speed": 350,
-          "attack_type": "projectile", "splash_radius": null, "targets": ["ground"],
-          "special": {"effect": "slow", "slow_percentage": 25, "duration": 1.5}
+          "name": "Boomeranger", 
+          "grid_width": 1, "grid_height": 1, "cost": 11,
+          "damage_min": 15, 
+          "damage_max": 26, 
+          "damage_type": "piercing",
+          "range": 600,
+          "attack_interval": 1.5,
+          "projectile_speed": 400,
+          "attack_type": "projectile",
+          "splash_radius": null, 
+          "targets": ["ground", "air"],
+          "special": {
+            "effect": "offset_boomerang_path",
+            "projectile_asset_id": "nomad_boomerang",
+            "hit_cooldown": 0.2, 
+            "return_offset_distance": 150, 
+            "description": "Throws a boomerang that travels out and returns along an offset path, damaging enemies."
+          }
         },
-        "nomad_dervish": {
-          "name": "Dervish", "grid_width": 1, "grid_height": 1, "cost": 25,
-          "damage_min": 18, "damage_max": 22, "damage_type": "piercing",
-          "range": 700, "attack_interval": 0.9, "projectile_speed": 550,
-          "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
+        "nomad_seer": {
+          "name": "Seer", "grid_width": 2, "grid_height": 2, "cost": 87,
+          "damage_min": 66, "damage_max": 93, "damage_type": "piercing",
+          "range": 785, "attack_interval": 1.0, "projectile_speed": 550,
+          "attack_type": "beam", "beam_color": [165, 42, 42], "splash_radius": null, "targets": ["ground", "air"]
         },
-        "nomad_beast_den": {
-          "name": "Beast Den", "grid_width": 1, "grid_height": 1, "cost": 40,
-          "damage_min": 7, "damage_max": 9, "damage_type": "normal", 
+        "nomad_beast_den_WIP": {
+          "name": "Beast Den", "grid_width": 3, "grid_height": 3, "cost": 108,
+          "damage_min": 245, "damage_max": 378, "damage_type": "normal", 
           "range": 400, "attack_interval": 0.5, "projectile_speed": 400, 
-          "attack_type": "projectile", "splash_radius": null, "targets": ["ground"], 
-          "projectile_asset_id": "nomad_quill", 
+          "attack_type": "projectile", "splash_radius": null, "targets": ["ground"],
           "special": { 
               "effect": "quillspray",
               "quill_count": 6,
@@ -1747,7 +1753,7 @@
           "special": {"effect": "reveal", "duration": 5.0}
         },
         "nomad_bounty_hunter": {
-          "name": "Bounty Hunter", "grid_width": 1, "grid_height": 1, "cost": 50,
+          "name": "Bounty Hunter", "grid_width": 2, "grid_height": 2, "cost": 50,
           "damage_min": 999, "damage_max": 999, "damage_type": "arcane",
           "range": 600, "attack_interval": 0.2, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
@@ -1755,13 +1761,13 @@
           "special": {"effect": "reveal", "duration": 5.0}
         },
         "nomad_caravan_guard": {
-          "name": "Caravan Guard", "grid_width": 1, "grid_height": 1, "cost": 60,
+          "name": "Caravan Guard", "grid_width": 2, "grid_height": 2, "cost": 60,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
           "range": 400, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "aura", "splash_radius": null, "targets": []
         },
-        "nomad_caravan_outpost": {
-          "name": "Caravan Outpost", "grid_width": 2, "grid_height": 2, "cost": 120,
+        "nomad_caravan_depot": {
+          "name": "Caravan Depot", "grid_width": 3, "grid_height": 3, "cost": 120,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",   
           "range": 1800, "attack_interval": 8.5, "projectile_speed": null, 
           "attack_type": "none", "splash_radius": null, "targets": ["ground", "air"], 
@@ -1772,7 +1778,7 @@
             "pass_through_damage_type": "normal",     
             "pass_through_hit_cooldown": 0.1,      
             "explosion_radius_units": 450,         
-            "explosion_damage": 4050,                
+            "explosion_damage": 6050,                
             "explosion_damage_type": "siege",       
             "pass_through_asset_id": "nomad_caravan", 
             "explosion_effect_asset_id": "nomad_caravan",
