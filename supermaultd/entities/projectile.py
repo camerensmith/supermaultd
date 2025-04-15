@@ -357,7 +357,8 @@ class Projectile:
             # --- Killing Blow Check --- 
             health_before = collided_enemy.health
             # --- End Killing Blow Check ---
-            primary_damage_dealt = self.apply_damage(collided_enemy) # Apply damage to the one hit first
+            damage_applied_tuple = self.apply_damage(collided_enemy)
+            primary_damage_dealt = damage_applied_tuple[0] # Get the first element (damage)
             self.hit_enemies_in_sequence.add(collided_enemy) # Track hit for bounce/pierce
 
             # --- Apply On-Hit Special Effects from Tower (BEFORE processing projectile effects) ---
