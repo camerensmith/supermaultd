@@ -1428,7 +1428,7 @@
         "police_taser_turret": {
           "name": "Taser Turret", "grid_width": 1, "grid_height": 1, "cost": 50,
           "damage_min": 5, "damage_max": 5, "damage_type": "normal",
-          "range": 400, "attack_interval": 1.2, "projectile_speed": null,
+          "range": 400, "attack_interval": 1.3, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
           "special": {"effect": "stun", "duration": 1.0}
         },
@@ -1517,7 +1517,7 @@
           "range": 1000, "attack_interval": 0.1, "projectile_speed": null,
           "attack_type": "beam", "beam_color": "SKY_BLUE",
            "splash_radius": null, "targets": ["ground", "air"],
-          "special": {"effect": "slow", "slow_percentage": 85}
+          "special": {"effect": "slow", "slow_percentage": 75}
         },
         "tech_nuclear_silo": {
           "name": "Nuclear Silo", "grid_width": 3, "grid_height": 3, "cost": 2500,

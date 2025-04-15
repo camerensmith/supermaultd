@@ -955,6 +955,62 @@ class GameScene:
                             self.effects.append(drain_effect)
                             tower.active_drain_effect = drain_effect
                     # --- END Drain Particle Effect Management ---
+                    
+                    # --- NEW: Apply Beam Effects (Damage & Slow) --- 
+                    # Check adjacency requirements first
+                    proceed_with_beam_effects = True
+                    if tower.special and tower.special.get("effect") == "requires_solar_adjacency":
+                        required_count = tower.special.get("required_count", 3)
+                        race_to_check = tower.special.get("race_to_check", "solar")
+                        # Assuming self.towers is accessible here
+                        adjacent_count = tower.count_adjacent_race_towers(self.towers, race_to_check)
+                        if adjacent_count < required_count:
+                            proceed_with_beam_effects = False
+                            
+                    if proceed_with_beam_effects:
+                        # Apply effects if interval allows (mimics the damage logic interval)
+                        if current_game_time >= tower.last_attack_time + effective_interval:
+                            effects_applied_this_tick = False # Flag to update attack time once
+                            for target_enemy in tower.beam_targets:
+                                if target_enemy.health > 0:
+                                    # --- Apply Damage (Logic moved from draw) ---
+                                    # Check if painter and charged
+                                    apply_damage_now = False
+                                    if is_painter:
+                                        if target_enemy == tower.painting_target and tower.paint_start_time > 0 and \
+                                           (current_game_time - tower.paint_start_time >= tower.special.get('charge_duration', 2.0)):
+                                            apply_damage_now = True
+                                            tower.paint_start_time = 0.0 # Reset charge
+                                    else:
+                                        apply_damage_now = True # Non-painters apply damage based on interval
+                                        
+                                    if apply_damage_now:
+                                        dmg_min, dmg_max, _ = tower.get_stats_for_target(target_enemy.type)
+                                        # <<< FIX: Get damage_multiplier from buffed_stats >>>
+                                        current_damage_multiplier = buffed_stats.get('damage_multiplier', 1.0)
+                                        damage = random.uniform(dmg_min, dmg_max) * current_damage_multiplier # Use the retrieved multiplier
+                                        target_enemy.take_damage(damage, tower.damage_type)
+                                        print(f"Beam tower {tower.tower_id} dealt {damage:.2f} {tower.damage_type} damage to {target_enemy.enemy_id}")
+                                        effects_applied_this_tick = True
+                                    # --- End Apply Damage ---
+                                    
+                                    # --- Apply Slow Effect --- 
+                                    if tower.special and tower.special.get('effect') == 'slow':
+                                        slow_percentage = tower.special.get('slow_percentage', 0)
+                                        if slow_percentage > 0:
+                                            slow_multiplier = 1.0 - (slow_percentage / 100.0)
+                                            # <<< FIX: Use a small fixed duration instead of time_delta >>>
+                                            fixed_slow_duration = 0.2 # Apply slow for 0.2 seconds each frame beam hits
+                                            target_enemy.apply_status_effect('slow', fixed_slow_duration, slow_multiplier, current_game_time)
+                                            # print(f"DEBUG: Freeze ray applying slow {slow_percentage}% to {target_enemy.enemy_id}") # Optional Debug
+                                            effects_applied_this_tick = True
+                                    # --- End Apply Slow --- 
+                                    
+                                    # Add other beam effects here (e.g., DoTs if beams can apply them per tick)
+                            
+                            # Update last attack time ONCE if any effect/damage was applied this tick
+                            if effects_applied_this_tick:
+                                tower.last_attack_time = current_game_time
 
                 elif potential_targets: # Indentation Level 2 (16 spaces) - Aligned with 'if tower.attack_type == beam:'
                     if target_selection_mode == "random":
@@ -979,31 +1035,6 @@ class GameScene:
                         tower.active_drain_effect.stop_spawning()
                         tower.active_drain_effect = None
                     # ------------------------------------------------------------------------
-
-                # --- 2. Handle Attack Execution (If Targets Found & Interval Ready) ---
-                if actual_targets: # Indentation Level 2 (16 spaces) - Aligned with 'elif potential_targets:'
-                    target = actual_targets[0] # Currently handles single target for non-beam
-                    grid_offset_x = config.UI_PANEL_PADDING
-                    grid_offset_y = config.UI_PANEL_PADDING
-
-                    # --- Check for Tower Chain Attack ---
-                    if tower.attack_type == 'tower_chain': # Indentation Level 3 (20 spaces)
-                        # Instead of direct attack, attempt to initiate a chain zap
-                        self.attempt_chain_zap(tower, current_game_time, self.enemies, grid_offset_x, grid_offset_y)
-                        # Chain zap logic handles cooldowns and potential fallback attack internally
-                    else:
-                        # --- Standard Attack for non-chain towers --- 
-                        # --- Prepare Visual Assets --- 
-                        visual_assets = {}
-                        if tower.tower_id == "seadog_kraken_caller" and self.kraken_effect_image:
-                             visual_assets['kraken'] = self.kraken_effect_image
-                        visual_assets.update(self.attack_visuals) 
-                        # --- End Visual Assets ---
-                             
-                        # Pass visual_assets dictionary and self.towers to attack method
-                        attack_results = tower.attack(target, current_game_time, self.enemies, self.tower_buff_auras, grid_offset_x, grid_offset_y, visual_assets=visual_assets, all_towers=self.towers)
-                        # --- Process Standard Attack Results --- 
-                        self.process_attack_results(attack_results, grid_offset_x, grid_offset_y)
 
         # --- Process Pulsed Auras (Affecting Enemies) ---
         for aura_data in enemy_aura_towers: 
