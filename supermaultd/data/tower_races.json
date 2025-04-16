@@ -77,7 +77,7 @@
           "cost": 40,
           "grid_width": 1,
           "grid_height": 1,
-          "damage_min": 20,
+          "damage_min": 25,
           "damage_max": 32,
           "damage_type": "chaos",
           "range": 850,
@@ -157,8 +157,8 @@
           "range": 800,
           "grid_width": 3,
           "grid_height": 3,
-          "damage_min": 3000,
-          "damage_max": 3300,
+          "damage_min": 2500,
+          "damage_max": 2500,
           "damage_type": "chaos",
           "attack_interval": 0.66,
           "projectile_speed": null,
@@ -200,7 +200,7 @@
         "pyro_fire_trap": {
           "name": "Fire Trap", 
           "description": "A fire trap that burns enemies that walk over it.",
-          "grid_width": 1, "grid_height": 1, "cost": 28,
+          "grid_width": 1, "grid_height": 1, "cost": 30,
           "damage_min": 0, "damage_max": 0,
           "damage_type": "normal", 
           "traversable": true,
@@ -212,8 +212,8 @@
           "special": {
             "effect": "burn", 
             "dot_damage": 40,
-            "dot_interval": 0.3,
-            "dot_duration": 3,
+            "dot_interval": 0.33,
+            "dot_duration": 1,
             "description": "Burns ground enemies that walk over it."
           }
         },
@@ -423,8 +423,8 @@
           "grid_width": 5,
           "grid_height": 5,
           "cost": 1887,
-          "damage_min": 4500,
-          "damage_max": 5675,
+          "damage_min": 3500,
+          "damage_max": 3675,
           "damage_type": "chaos",
           "range": 1400,
           "attack_interval": 3.87,
@@ -448,7 +448,7 @@
           "name": "Zorkling Spawner",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 8,
+          "cost": 6,
           "damage_min": 3,
           "damage_max": 4,
           "damage_type": "normal",
@@ -631,9 +631,9 @@
           "grid_width": 4,
           "grid_height": 4,
           "cost": 236,
-          "damage_min": 582,
-          "damage_max": 618,
-          "attack_interval": 0.2,
+          "damage_min": 282,
+          "damage_max": 318,
+          "attack_interval": 1,
           "range": 550,
           "splash_radius": 120,
           "damage_type": "siege",
@@ -673,58 +673,39 @@
           "projectile_speed": null,
           "targets": ["ground", "air"],
           "beam_max_targets": 3
-        },
-        "gaia_urthshaker": {
-          "name": "Urthshaker",
-          "grid_width": 3,
-          "grid_height": 3,
-          "cost": 550,
-          "damage_min": 3550,
-          "damage_max": 3850,
-          "attack_interval": 0.4,
-          "range": 1000,
-          "splash_radius": 150,
-          "damage_type": "chaos",
-          "attack_type": "projectile",
-          "projectile_speed": 400,
-          "targets": ["ground", "air"],
-          "stats_air": {
-            "damage_type": "piercing",
-            "splash_radius": 200
-          }
         }
       }
     },
     "knights_keep": {
       "description": "A disciplined order relying on sturdy defenses, sharp steel, and powerful siege engines.",
       "towers": {
-        "knights_militia": {
-          "name": "Militia", "grid_width": 1, "grid_height": 1, "cost": 12,
-          "damage_min": 8, "damage_max": 10, "damage_type": "piercing",
-          "range": 650, "attack_interval": 0.7, "projectile_speed": 500,
-          "attack_type": "projectile", "splash_radius": null, "targets": ["ground"]
-        },
         "knights_castle_wall": {
           "name": "Castle Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": []
         },
+        "knights_militia": {
+          "name": "Militia", "grid_width": 1, "grid_height": 1, "cost": 9,
+          "damage_min": 8, "damage_max": 10, "damage_type": "piercing",
+          "range": 350, "attack_interval": 1, "projectile_speed": null,
+          "attack_type": "instant", "splash_radius": 200, "targets": ["ground"]
+        },
         "knights_arrow_tower": {
-          "name": "Arrow Tower", "grid_width": 2, "grid_height": 2, "cost": 30,
+          "name": "Arrow Tower", "grid_width": 2, "grid_height": 2, "cost": 26,
           "damage_min": 25, "damage_max": 30, "damage_type": "piercing", "pierce_adjacent": 1,
-          "range": 750, "attack_interval": 1.0, "projectile_speed": 450,
+          "range": 750, "attack_interval": 0.8, "projectile_speed": 450,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
         },
         "knights_arcane_tower": {
-          "name": "Arcane Tower", "grid_width": 2, "grid_height": 2, "cost": 80,
+          "name": "Arcane Tower", "grid_width": 2, "grid_height": 2, "cost": 75,
           "damage_min": 70, "damage_max": 80, "damage_type": "arcane",
           "range": 700, "attack_interval": 1.2, "projectile_speed": 330,
           "attack_type": "projectile", "splash_radius": 50, "targets": ["ground", "air"]
         },
         "knights_marksman_tower": {
-            "name": "Marksman Tower", "grid_width": 2, "grid_height": 2, "cost": 120,
-            "damage_min": 60, "damage_max": 65, "damage_type": "piercing",
+            "name": "Marksman Tower", "grid_width": 1, "grid_height": 1, "cost": 175,
+            "damage_min": 221, "damage_max": 410, "damage_type": "piercing",
             "range_min": 1000, "range": 2000, "attack_interval": 1.6, "projectile_speed": null,
             "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
             "critical_chance": 0.1, "critical_multiplier": 15
@@ -736,9 +717,9 @@
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground"]
         },
         "knights_knight": {
-          "name": "Knight", "grid_width": 1, "grid_height": 1, "cost": 230,
+          "name": "Knight", "grid_width": 1, "grid_height": 1, "cost": 325,
           "damage_min": 476, "damage_max": 501, "damage_type": "normal",
-          "range": 800, "attack_interval": 1, "projectile_speed": 400,
+          "range": 350, "attack_interval": 0.8, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 150, "targets": ["ground"]
         }
       }
@@ -747,7 +728,7 @@
       "description": "Masters of demolition and area denial, wielding unstable explosives with devastating effect.",
       "towers": {
         "bomb_wall": {
-          "name": "Bomb Barrier", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "name": "Barricade", "grid_width": 1, "grid_height": 1, "cost": 1,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": []
@@ -839,7 +820,7 @@
           "attack_type": "none", "splash_radius": null, "targets": []
         },
         "stone_pebble_tosser": {
-          "name": "Pebble Tosser", "grid_width": 1, "grid_height": 1, "cost": 8,
+          "name": "Pebble Tosser", "grid_width": 1, "grid_height": 1, "cost": 6,
           "damage_min": 5, "damage_max": 6, "damage_type": "normal",
           "range": 550, "attack_interval": 0.5, "projectile_speed": 400,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
@@ -1003,7 +984,7 @@
         }
         },
         "igloo_snowman": {
-          "name": "Snowman", "grid_width": 1, "grid_height": 1, "cost": 28,
+          "name": "Snowman", "grid_width": 1, "grid_height": 1, "cost": 24,
           "damage_min": 15, "damage_max": 18, "damage_type": "piercing",
           "range": 600, "attack_interval": 0.6, "projectile_speed": 500,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
@@ -1043,8 +1024,8 @@
         },
         "igloo_yeti": {
           "name": "Yeti", "grid_width": 1, "grid_height": 1, "cost": 210,
-          "damage_min": 435, "damage_max": 505, "damage_type": "normal",
-          "range": 350, "attack_interval": 1.0, "projectile_speed": null,
+          "damage_min": 388, "damage_max": 505, "damage_type": "normal",
+          "range": 350, "attack_interval": 1.3, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 300, "targets": ["ground"]
         },
         "igloo_glacial_heart": {
@@ -1158,7 +1139,7 @@
             "interval": 7.0,
             "slow_percentage": 75,
             "duration": 2.5,
-            "pulse_damage": 2800,
+            "pulse_damage": 4000,
             "pulse_damage_type": "chaos"
           }
         }
@@ -1174,7 +1155,7 @@
           "attack_type": "none", "splash_radius": null, "targets": []
         },
         "goblin_snotlings": {
-          "name": "Snotlings", "grid_width": 1, "grid_height": 1, "cost": 8,
+          "name": "Snotlings", "grid_width": 1, "grid_height": 1, "cost": 7,
           "damage_min": 2, "damage_max": 14, "damage_type": "normal",
           "range": 750, "attack_interval": 1, "projectile_speed": 400,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]

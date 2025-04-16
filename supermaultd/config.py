@@ -47,7 +47,7 @@ SKY_BLUE = (135, 206, 235)
 
 # Game settings
 GRID_SIZE = 32  # Size of each grid cell in pixels
-STARTING_MONEY = 10000
+STARTING_MONEY = 100
 STARTING_LIVES = 10
 RESTRICTED_TOWER_AREA_HEIGHT = 1  # Number of rows at top and bottom where towers cannot be placed
 RESTRICTED_TOWER_AREA_WIDTH = 1   # Number of columns at left and right where towers cannot be placed
