@@ -82,330 +82,299 @@ ENEMY_DATA = {
         "armor_type": "Unarmored",
         "type": "air"
     },
-    "village_peasant": { #wave 1, 25 units
-        "health": 150,
-        "speed": 1.3, 
-        "value": 1, "armor_value": 1,
+    "ratling": { #wave 1, 25 units
+        "health": 54,
+        "speed": 1, 
+        "value": 1, "armor_value": 0,
+        "armor_type": "Unarmored",
+        "type": "ground"
+    },
+    "mudrunner": {  
+        "health": 110,
+        "speed": 1.0,
+        "value": 1, "armor_value": 3,
         "armor_type": "Light",
         "type": "ground"
     },
-    "quillpig": { #wave 4, 25 units
-        "health": 222,
-        "speed": 2.1,
-        "value": 1, "armor_value": 5,
-        "armor_type": "Heavy",
-        "type": "ground"
-    },
-    "pixie": {  #wave 13, 25 units, 62 gold
-        "health": 70,
-        "speed": 3.0,
-        "value": 2,
-        "armor_type": "Ethereal", 
-        "type": "air"
-    },
-    "large_crab": { #wave 3, 25 units, 28 gold for wave completion
-        "health": 310,
-        "speed": 0.8,
+    "quillpig": {  
+        "health": 308,
+        "speed": 1,
         "value": 1, "armor_value": 7,
-        "armor_type": "Medium",
+        "armor_type": "Light",
         "type": "ground"
     },
-    "spectre": {
-        "health": 80, 
-        "speed": 2.5,
-        "value": 12,
-        "armor_type": "Ethereal",
-        "type": "ground",
-    },
-    "vampire": {
-        "health": 90,
-        "speed": 2,
-        "value": 8,
-        "armor_type": "Unarmored",
+    "bugbear": {  
+        "health": 264,
+        "speed": 1,
+        "value": 1,
+        "armor_type": "Heavy", 
+        "armor_value": 5,
         "type": "ground"
     },
-    "frost_imp": {
-        "health": 100,
-        "speed": 2,
-        "value": 10,
-        "armor_type": "Ethereal", 
+    "red_flyer": { 
+        "health": 440,
+        "speed": 1,
+        "value": 1, "armor_value": 6,
+        "armor_type": "Light",
         "type": "ground"
     },
-    "witch_doctor": { #wave 11, 25 units, 55 gold for wave completion
-        "health": 1500,
-        "speed": 2.1,
-        "value": 2, "armor_value": 10,
-        "armor_type": "Unarmored",
-        "type": "ground"
-    },
-    "gnoll_berserker": { #wave 12, 25 units, 60 gold for wave completion
-        "health": 1385,
-        "speed": 2.5, 
+    "brawler": {
+        "health": 440, 
+        "speed": 0.5,
         "value": 2,
-        "armor_type": "Medium",
-        "armor_value": 12,
+        "armor_type": "Fortified",
+        "armor_value": 20,
         "type": "ground",
     },
-    "archon": {
-        "health": 2150,
-        "speed": 1.8,
+    "mongoose": {
+        "health": 660,
+        "speed": 1.3,
+        "value": 2,
+        "armor_type": "Unarmored",
+        "armor_value": 11,
+        "type": "ground"
+    },
+    "manboar": {
+        "health": 1000,
+        "speed": 1.2,
+        "value": 2,
+        "armor_type": "Heavy", 
+        "armor_value": 10,
+        "type": "ground"
+    },
+    "groundhogger": {
+        "health": 1540,
+        "speed": 0.4,
+        "value": 2, "armor_value": 24,
+        "armor_type": "Fortified",
+        "type": "ground"
+    },
+    "djinn": { 
+        "health": 1400,
+        "speed": 1.3, 
         "value": 2,
         "armor_type": "Magic_Resistant",
-        "armor_value": 18,
-        "type": "ground"
+        "armor_value": 10,
+        "type": "ground",
     },
-    "skeleton_warrior": {
-        "health": 130,
-        "speed": 1.5,
-        "value": 12,
-        "armor_type": "Light", 
-        "type": "ground"
-    },
-    "fire_elemental": {
-        "health": 3623,
-        "speed": 0.8,
+    "gnoll_berserker": {
+        "health": 1980,
+        "speed": 1.4,
         "value": 2,
-        "armor_type": "Ethereal", 
-        "armor_value": 13,
-        "type": "ground"
-    },
-    "tormentor": {
-        "health": 2473,
-        "speed": 0.8,
-        "value": 2,
-        "armor_type": "Light",
+        "armor_type": "Medium",
         "armor_value": 8,
         "type": "ground"
     },
-    "iron_golem": {
-        "health": 160,
-        "speed": 2.1,
-        "value": 15,
-        "armor_type": "Fortified",
+    "fire_elemental ": {
+        "health": 8800,
+        "speed": 0.3,
+        "value": 2,
+        "armor_type": "Ethereal", 
         "type": "ground"
     },
-    "hell_guard": {
-        "health": 170,
-        "speed": 2.2,
-        "value": 17,
-        "armor_type": "Medium",
-        "type": "ground"
-    },
-    "mudrunner": { # wave 2, 25 units
-        "health": 175,
-        "speed": 1.8,
-        "value": 1, "armor_value": 3,
-        "armor_type": "Medium",
-        "type": "ground"
-    },
-    "gremlin": {
-        "health": 180,
-        "speed": 1.8,
-        "value": 15,
-        "armor_type": "Medium",
-        "type": "ground"
-    },
-    "centaur_strider": {
-        "health": 2700,
-        "speed": 2.7,
-        "value": 18,
-        "armor_type": "Light",
-        "armor_value": 18,
-        "type": "ground"
-    },
-    "soldier": {
-        "health": 200, 
-        "speed": 1.5, 
-        "value": 15,
-        "armor_type": "Medium",
-        "type": "ground",
-    },
-    "dragon_whelp": { #wave 5, 15 units, 30 gold for wave completion
-        "health": 200,
-        "speed": 2,
-        "value": 1, "armor_value": 8,
-        "armor_type": "Light",
-        "type": "air" # Flying
-    },
-    "giant_ooze": {
-        "health": 200,
-        "speed": 1.0, # Slow ooze
-        "value": 15,
-        "armor_type": "Magic_Resistant",
-        "type": "ground"
-    },
-    "orc": {
-        "health": 220,
-        "speed": 1.7,
-        "value": 16,
-        "armor_type": "Medium",
-        "type": "ground"
-    },
-    "scarlet_rider": {
-        "health": 220,
-        "speed": 2.9,
-        "value": 20,
-        "armor_type": "Light",
-        "type": "ground"
-    },
-    "fel_orc": {
-        "health": 250,
-        "speed": 1.9,
-        "value": 25,
-        "armor_type": "Normal",
-        "type": "ground"
-    },
-    "wyvern": {
-        "health": 250,
-        "speed": 2.4,
-        "value": 28,
-        "armor_type": "Medium",
+    "green_dragon": { #gold increase after wave
+        "health": 2000,
+        "speed": 1,
+        "value": 2,
+        "armor_type": "Unarmored", 
+        "armor_value": 15,
         "type": "air"
     },
-    "infernal_demon": {
-        "health": 280,
-        "speed": 1.6,
-        "value": 22,
+    "bruiser": {
+        "health": 3200,
+        "speed": 1,
+        "value": 3,
+        "armor_type": "Heavy",
+        "armor_value": 15,
+        "type": "ground"
+    },
+    "goblin_renegade": {
+        "health": 3600,
+        "speed": 1.5,
+        "value": 3,
+        "armor_type": "Medium",
+        "armor_value": 10,
+        "type": "ground"
+    },
+    "goon": {
+        "health": 5000,
+        "speed": 0.4,
+        "value": 3,
+        "armor_type": "Fortified",
+        "armor_value": 30,
+        "type": "ground"
+    },
+    "war_turtle": { 
+        "health": 40000,
+        "speed": 0.1,
+        "value": 3, "armor_value": 0,
+        "armor_type": "Light",
+        "type": "ground"
+    },
+    "gremlin": { #gold increase
+        "health": 5000,
+        "speed": 1.8,
+        "value": 3,
+        "armor_type": "Medium",
+        "armor_value": 22,
+        "type": "ground"
+    },
+    "witch_doctor": {
+        "health": 6000,
+        "speed": 2,
+        "value": 4,
+        "armor_type": "Heavy",
+        "armor_value": 20,
+        "type": "ground"
+    },
+    "spectral_dog": {
+        "health": 13000, 
+        "speed": 0.5, 
+        "value": 4,
+        "armor_type": "Ethereal",
+        "armor_value": 28,
+        "type": "ground",
+    },
+    "polywog": {
+        "health": 9000,
+        "speed": 1.4, 
+        "value": 4,
         "armor_type": "Medium",
         "type": "ground"
     },
-    "granite_golem": {
-        "health": 300,
-        "speed": 1.5,
-        "value": 25,
+    "blue_dragon": { 
+        "health": 4600,
+        "speed": 1,
+        "value": 4, "armor_value": 30,
+        "armor_type": "Unarmored",
+        "type": "air" # Flying
+    },
+    "hexer": {
+        "health": 13600,
+        "speed": 0.4,
+        "value": 5,
         "armor_type": "Magic_Resistant",
+        "armor_value": 35,
         "type": "ground"
     },
-    "bloodfist_ogre": { #wave 9, 50 units, 50 gold for wave completion
-        "health": 1950,
-        "speed": 2,
-        "value": 1, "armor_value": 9,
-        "armor_type": "Heavy",
+    "satyr": {
+        "health": 12000,
+        "speed": 1.8,
+        "value": 5,
+        "armor_type": "Unarmored",
+        "armor_value": 35,
         "type": "ground"
     },
-    "cenobite": { 
-        "health": 400,
-        "speed": 1.4,
-        "value": 35,
-        "armor_type": "Ethereal",
-        "type": "ground"
-    },
-    "black_guard": {
-        "health": 450,
-        "speed": 1.6,
-        "value": 40,
-        "armor_type": "Heavy",
-        "type": "ground"
-    },
-    "war_machine": {
-        "health": 500,
-        "speed": 0.8,
-        "value": 30,
-        "armor_type": "Fortified",
+    "hellasaur": {
+        "health": 75000,
+        "speed": 0.2,
+        "value": 5,
+        "armor_type": "Medium",
+        "armor_value": 0,
         "type": "ground"
     },
     "hill_troll": {
-        "health": 600,
-        "speed": 1.1,
-        "value": 38,
-        "armor_type": "Unarmored",
-        "type": "ground"
-    },
-    "green_dragon": {
-        "health": 700,
-        "speed": 2.0,
-        "value": 60,
+        "health": 14000,
+        "speed": 1.6,
+        "value": 5,
         "armor_type": "Heavy",
-        "type": "air"
-    },
-    "doomlord": {
-        "health": 80000,
-        "speed": 1.0,
-        "value": 50,
-        "armor_type": "Medium",
+        "armor_value": 50,
         "type": "ground"
     },
-    "crazed_treant": {
-        "health": 900,
-        "speed": 0.7,
-        "value": 45,
-        "armor_type": "Light",
-        "type": "ground"
-    },
-    "lord_supermaul": {
-        "health": 235000, # Boss
-        "speed": 1.0,
-        "value": 250, # Big reward
-        "armor_type": "Normal",
-        "type": "ground"
-    },
-    "red_dragon": {
-        "health": 650,
-        "speed": 2.2,
-        "value": 55,
-        "armor_type": "Unarmored",
-        "type": "air"
-    },
-    "blue_dragon": {
-        "health": 650,
-        "speed": 2.0,
-        "value": 65,
-        "armor_type": "Magic_Resistant",
-        "type": "air"
-    },
-    "zombie": {
-        "health": 200,
-        "speed": 1.0,
+    "crone": {
+        "health": 7000,
+        "speed": 1.6,
         "value": 5,
         "armor_type": "Unarmored",
+        "armor_value": 38,
+        "type": "air"
+    },
+    "scarlet_knight": {
+        "health": 16000,
+        "speed": 1.5,
+        "value": 5,
+        "armor_type": "Fortified",
+        "armor_value": 50,
         "type": "ground"
     },
-    "wild_boar": { #wave 6, 25 units, 38 gold for wave completion
-        "health": 440,
-        "speed": 2.7,
-        "value": 10, "armor_value": 8,
-        "armor_type": "Light",
+    "ice_demon": {
+        "health": 37000,
+        "speed": 1.5,
+        "value": 5, "armor_value": 9,
+        "armor_type": "Ethereal",
+        "armor_value": 13,
         "type": "ground"
+    },
+    "black_bear": {
+        "health": 23300,
+        "speed": 2,
+        "value": 5,
+        "armor_type": "Unarmored",
+        "armor_value": 0,
+        "type": "air"
+    },
+    "orc": {
+        "health": 120000,
+        "speed": 0.6,
+        "value": 5,
+        "armor_type": "Light",
+        "armor_value": 0,
+        "type": "air"
     },
     "tusken_fighter": {
-        "health": 180,
-        "speed": 1.8,
-        "value": 15,
+        "health": 73000,
+        "speed": 1.3,
+        "value": 6,
+        "armor_type": "Unarmored",
+        "armor_value": 0,
+        "type": "ground"
+    },
+    "spike_lizard": {
+        "health": 67875,
+        "speed": 1.5,
+        "value": 6,
+        "armor_type": "Heavy",
+        "armor_value": 23,
+        "type": "ground"
+    },
+    "swamp_monster": {
+        "health": 95575,
+        "speed": 1,
+        "value": 6,
         "armor_type": "Medium",
+        "armor_value": 35,
+        "type": "ground"
+    },
+    "cave_troll": {
+        "health": 145000,
+        "speed": 1,
+        "value": 6,
+        "armor_type": "Magic_Resistant",
+        "armor_value": 28,
         "type": "ground"
     },
     "wendigo": {
-        "health": 250,
-        "speed": 3.5,
-        "value": 25,
-        "armor_type": "Magic_Resistant",
-        "type": "ground"
-    },
-    "hexer": {
-        "health": 40,
-        "speed": 4.0,
-        "value": 8,
+        "health": 200000,
+        "speed": 0.9,
+        "value": 6,
         "armor_type": "Ethereal",
+        "armor_value": 0,
         "type": "ground"
     },
-    "war_machine": { #wave 10, 25 units, 53 gold for wave completion
-        "name": "War Machine", "health": 1540, "speed": 0.8, "value": 2, "armor_value": 24,
-        "armor_type": "Fortified", "type": "ground"
+    "captain": {
+        "health": 90000,
+        "speed": 1,
+        "value": 6,
+        "armor_type": "Heavy",
+        "armor_value": 50,
+        "type": "ground"
     },
-    "spaceship": {
-        "name": "Spaceship", "health": 600, "speed": 2.5, "value": 50, 
-        "armor_type": "Fortified", "type": "air"
-    },
-    "bugbear": {
-        "name": "Bugbear", "health": 220, "speed": 2.0, "value": 18, 
-        "armor_type": "Medium", "type": "ground" 
-    },
-    "armored_lizard": { #wave 7, 25 units, 40 gold for wave completion
-        "name": "Armored Lizard", "health": 440, "speed": 2.3, "value": 1,  "armor_value": 20,
-        "armor_type": "fortified", "type": "ground" 
-    },
-    "tomb_keeper": { #wave 8, 25 units, 48 gold for wave completion
-        "name": "Tomb Keeper", "health": 811, "speed": 1.7, "value": 2, "armor_value": 8,
-        "armor_type": "Unarmored", "type": "ground"
+    "lord_supermaul": {
+        "health": 255000, # Boss
+        "speed": 2,
+        "value": 250, # Big reward
+        "armor_type": "Heavy",
+        "armor_value": 100,
+        "type": "ground"
     }
 }

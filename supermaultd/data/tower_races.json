@@ -54,21 +54,27 @@
     "crystal_castle": {
       "description": "A crystalline faction using refractive energies to deal Chaos damage and chain effects.",
       "towers": {
+        "crystal_wall": {
+          "name": "Crystal Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 0, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "none", "splash_radius": null, "targets": []
+        },
         "crystal_shooter": {
           "name": "Crystal Shooter",
           "cost": 9,
-          "damage_min": 8,
+          "damage_min": 11,
           "damage_max": 22,
           "damage_type": "chaos",
           "range": 600,
-          "attack_interval": 0.6,
+          "attack_interval": 0.3,
           "projectile_speed": 350,
           "attack_type": "projectile",
           "splash_radius": null
         },
         "diamond_cutter": {
           "name": "Diamond Cutter",
-          "cost": 50,
+          "cost": 40,
           "grid_width": 1,
           "grid_height": 1,
           "damage_min": 20,
@@ -88,7 +94,7 @@
           "damage_max": 110,
           "damage_type": "chaos",
           "range": 1000,
-          "attack_interval": 0.9,
+          "attack_interval": 0.7,
           "projectile_speed": 350,
           "attack_type": "projectile",
           "splash_radius": null,
@@ -166,6 +172,12 @@
     "pyro": {
       "description": "A fiery faction specializing in burning damage over time and wide-area splash attacks.",
       "towers": {
+        "pyro_wall": {
+          "name": "Fire Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 0, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "none", "splash_radius": null, "targets": []
+        },
         "pyro_flare_tower": {
           "name": "Flare Tower",
           "cost": 10,
@@ -305,6 +317,12 @@
     "cauldron_tank_command": {
       "description": "Masters of armored warfare, fielding incredibly expensive but large and slow firing devastatingly powerful tanks with slow-firing cannons.",
       "towers": {
+        "tank_wall": {
+          "name": "Tank Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 0, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "none", "splash_radius": null, "targets": []
+        },
         "tank_defender": {
           "name": "Tank Defender",
           "description": "A tank defender equipped with a rocket launcher that defends the tank command.",
@@ -420,6 +438,12 @@
     "zork": {
       "description": "A rapidly multiplying swarm, large AOE, overwhelming foes with sheer numbers of cheap, expendable units.",
       "towers": {
+        "zork_wall": {
+          "name": "Zork Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 0, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "none", "splash_radius": null, "targets": []
+        },
         "zork_zorkling_spawner": {
           "name": "Zorkling Spawner",
           "grid_width": 1,
@@ -541,7 +565,7 @@
           "description": "A sturdy, impassable toadstool that blocks enemy pathing.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 5,            
+          "cost": 1,            
           "damage_min": 0,
           "damage_max": 0,
           "damage_type": "normal",
@@ -680,8 +704,8 @@
           "range": 650, "attack_interval": 0.7, "projectile_speed": 500,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground"]
         },
-        "knights_castle_walls": {
-          "name": "Castle Walls", "grid_width": 1, "grid_height": 1, "cost": 10,
+        "knights_castle_wall": {
+          "name": "Castle Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": []
@@ -722,6 +746,12 @@
     "bomb_brigade": {
       "description": "Masters of demolition and area denial, wielding unstable explosives with devastating effect.",
       "towers": {
+        "bomb_wall": {
+          "name": "Bomb Barrier", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 0, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "none", "splash_radius": null, "targets": []
+        },
         "bomb_lobber": {
           "name": "Bomb Lobber", "grid_width": 1, "grid_height": 1, "cost": 15,
           "damage_min": 10, "damage_max": 12, "damage_type": "siege",
@@ -802,6 +832,12 @@
     "stone_summoners": {
       "description": "Channeling the power of the earth, these summoners command stone and soil to crush their foes.",
       "towers": {
+        "stone_wall": {
+          "name": "Stone Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 0, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "none", "splash_radius": null, "targets": []
+        },
         "stone_pebble_tosser": {
           "name": "Pebble Tosser", "grid_width": 1, "grid_height": 1, "cost": 8,
           "damage_min": 5, "damage_max": 6, "damage_type": "normal",
@@ -871,6 +907,12 @@
     "alchemists_guild": {
       "description": "Experimenters wielding volatile concoctions and corrupted magic that melt armor, poison foes, and transmute reality.",
       "towers": {
+        "alchemists_wall": {
+          "name": "Mercurial Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 0, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "none", "splash_radius": null, "targets": []
+        },
         "alchemists_poison_dart_launcher": {
           "name": "Poison Dart Launcher", "grid_width": 1, "grid_height": 1, "cost": 11,
           "damage_min": 5, "damage_max": 7, "damage_type": "arcane", "bounce": 1,
@@ -942,6 +984,12 @@
     "igloo": {
       "description": "Harnessing the biting cold, these structures slow and shatter foes with ice and frost.",
       "towers": {
+        "igloo_wall": {
+          "name": "Ice Brick", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 0, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "none", "splash_radius": null, "targets": []
+        },
         "igloo_snowball_tosser": {
           "name": "Snowball Tosser", "grid_width": 1, "grid_height": 1, "cost": 9,
           "damage_min": 6, "damage_max": 7, "damage_type": "piercing",
@@ -1041,6 +1089,12 @@
     "alien": {
       "description": "Wielders of cosmic energies, manipulating starlight, nebulas, and the void itself.",
       "towers": {
+        "alien_wall": {
+          "name": "Alien Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 0, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "none", "splash_radius": null, "targets": []
+        },
         "alien_alien_drone": {
           "name": "Alien Drone", "grid_width": 1, "grid_height": 1, "cost": 14,
           "damage_min": 9, "damage_max": 11, "damage_type": "arcane",
@@ -1113,6 +1167,12 @@
     "goblin_hovel": {
       "description": "A ramshackle collection of crude contraptions and sneaky goblins. Wild min max.",
       "towers": {
+        "goblin_wall": {
+          "name": "Scrapheap", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 0, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "none", "splash_radius": null, "targets": []
+        },
         "goblin_snotlings": {
           "name": "Snotlings", "grid_width": 1, "grid_height": 1, "cost": 8,
           "damage_min": 2, "damage_max": 14, "damage_type": "normal",
@@ -1185,6 +1245,12 @@
     "deepseers": {
       "description": "Mysterious beings from the ocean depths, wielding crushing pressure and arcane sea magic.",
       "towers": {
+        "deepseer_wall": {
+          "name": "Altar of the Deep", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 0, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "none", "splash_radius": null, "targets": []
+        },
         "deepseer_coral_trident": {
           "name": "Coral Trident", "grid_width": 1, "grid_height": 1, "cost": 12,
           "damage_min": 10, "damage_max": 13, "damage_type": "piercing",
@@ -1248,6 +1314,12 @@
     "spark": {
       "description": "Harnessing raw electrical energy to shock, stun, and overload enemies.",
       "towers": {
+        "spark_wall": {
+          "name": "Electric Fence", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 0, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "none", "splash_radius": null, "targets": []
+        },
         "spark_static_post": {
           "name": "Static Post", "grid_width": 1, "grid_height": 1, "cost": 8,
           "damage_min": 7, "damage_max": 9, "damage_type": "normal", "bounce": 1,
@@ -1317,6 +1389,12 @@
     "space_husks": {
       "description": "Undead remnants animated by void energy, draining the lifeforce of their foes.",
       "towers": {
+        "husk_wall": {
+          "name": "Unstable Barrier", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 0, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "none", "splash_radius": null, "targets": []
+        },
         "husk_void_leecher": {
           "name": "Void Leecher", "grid_width": 2, "grid_height": 2, "cost": 14,
           "damage_min": 1, "damage_max": 15, "damage_type": "arcane",
@@ -1375,6 +1453,12 @@
     "titan_assembly_command": {
       "description": "Massive constructs of ancient design, slow but immensely powerful.",
       "towers": {
+        "titan_wall": {
+          "name": "Titan Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 0, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "none", "splash_radius": null, "targets": []
+        },
         "titan_assembly_golem": {
           "name": "Assembly Golem", "grid_width": 2, "grid_height": 2, "cost": 75,
           "damage_min": 90, "damage_max": 110, "damage_type": "normal",
@@ -1423,6 +1507,12 @@
     "police_station": {
       "description": "Maintaining order with non-lethal tactics and precision takedowns.",
       "towers": {
+        "police_wall": {
+          "name": "Police Barricade", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 0, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "none", "splash_radius": null, "targets": []
+        },
         "police_peacekeeper": {
           "name": "Peacekeeper", "grid_width": 1, "grid_height": 1, "cost": 9,
           "damage_min": 6, "damage_max": 8, "damage_type": "normal",
@@ -1490,6 +1580,12 @@
     "tech_center": {
       "description": "Advanced scientists pushing the boundaries of range and firepower, culminating in the ultimate weapon.",
       "towers": {
+        "tech_wall": {
+          "name": "Energy Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 0, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "none", "splash_radius": null, "targets": []
+        },
         "tech_laser": {
           "name": "Laser", "grid_width": 1, "grid_height": 1, "cost": 15,
           "damage_min": 4, "damage_max": 5, "damage_type": "normal",
@@ -1558,6 +1654,12 @@
     "seadogs": {
       "description": "Swashbuckling pirates wielding crude cannons, cutlasses, and a thirst for gold.",
       "towers": {
+        "seadog_wall": {
+          "name": "Ship Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 0, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "none", "splash_radius": null, "targets": []
+        },
         "seadog_saltwater_soundrel": {
           "name": "Saltwater Scoundrel", "grid_width": 1, "grid_height": 1, "cost": 6,
           "damage_min": 4, "damage_max": 5, "damage_type": "normal",
@@ -1619,6 +1721,12 @@
     "heaven": {
       "description": "Angelic defenders wielding divine light and celestial power to smite evil and protect allies.",
       "towers": {
+        "heaven_wall": {
+          "name": "Angelic Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 0, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "none", "splash_radius": null, "targets": []
+        },
         "heaven_guard_tower": {
           "name": "Heaven Guard Tower", "grid_width": 1, "grid_height": 1, "cost": 8,
           "damage_min": 11, "damage_max": 17, "damage_type": "piercing",
@@ -1660,6 +1768,12 @@
     "solar": {
       "description": "Harnessing the power of stars, these towers incinerate foes with focused beams and radiant heat.",
       "towers": {
+        "solar_wall": {
+          "name": "Solar Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 0, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "none", "splash_radius": null, "targets": []
+        },
         "solar_sun_spot": {
           "name": "Sun Spot", "grid_width": 1, "grid_height": 1, "cost": 12,
           "damage_min": 6, "damage_max": 7, "damage_type": "piercing",
@@ -1719,6 +1833,12 @@
     "nomad_clans": {
       "description": "A nomadic people with versatile skills, relying on resourcefulness and knowledge of the land rather than advanced technology.",
       "towers": {
+        "nomad_wall": {
+          "name": "Sand Dune", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 0, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "none", "splash_radius": null, "targets": []
+        },
         "nomad_dune_dweller": {
           "name": "Dune Dweller", "grid_width": 1, "grid_height": 1, "cost": 13,
           "damage_min": 11, "damage_max": 20, "damage_type": "normal", 
@@ -1809,6 +1929,12 @@
     "ogre_stronghold": {
       "description": "Brutish ogres wielding massive clubs and fists. They hit hard but slowly, striking only adjacent foes.",
       "towers": {
+        "ogre_wall": {
+          "name": "Spike Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 0, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "none", "splash_radius": null, "targets": []
+        },
         "ogre_kin": {
           "name": "Ogrekin",
           "grid_width": 1,
@@ -1922,6 +2048,12 @@
     "industrialists": {
       "description": "Industrialists are a race of people who are skilled in the art of building and manufacturing. They are known for their ability to create powerful machines and structures.",
       "towers": {
+        "industrialists_wall": {
+          "name": "Factory Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 0, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "none", "splash_radius": null, "targets": []
+        },
         "industrialists_factory_worker": {
           "name": "Factory Worker",
           "grid_width": 1,

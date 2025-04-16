@@ -395,8 +395,8 @@ class GameScene:
                 self.spawn_test_enemy("gnoll")
                 print("Spawned Gnoll (press 'G')")
             elif event.key == pygame.K_s: # S for Spectre
-                self.spawn_test_enemy("spectre")
-                print("Spawned Spectre (press 'S')")
+                self.spawn_test_enemy("quillpig")
+                print("Spawned Quillpig (press 'S')")
             elif event.key == pygame.K_t: # T for Soldier (replacing generic test)
                 self.spawn_test_enemy("soldier")
                 print("Spawned Soldier (press 'T')")

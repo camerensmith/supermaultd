@@ -1,121 +1,334 @@
 [
-    {
-      "delay_before_wave": 5.0,
-      "wave_completion_bonus": 25,
-      "enemies": [
-        { "type": "village_peasant", "count": 25, "spawn_interval": 1.0, "initial_delay": 0.0 }
-      ]
-    },
-    {
-      "delay_before_wave": 25.0,
-      "wave_completion_bonus": 28,
-      "enemies": [
-        { "type": "mudrunner", "count": 25, "spawn_interval": 0.8, "initial_delay": 0.0 }
-      ]
-    },
-        {
-      "delay_before_wave": 25.0,
-      "wave_completion_bonus": 30,
-      "enemies": [
-        { "type": "large_crab", "count": 25, "spawn_interval": 0.8, "initial_delay": 0.0 }
-      ]
-    },
-    {
-      "delay_before_wave": 25.0,
-      "wave_completion_bonus": 31,
-      "enemies": [
-        { "type": "heavily_armored_piglet", "count": 25, "spawn_interval": 0.8, "initial_delay": 0.0 }
-      ]
-    },
-    {
-      "delay_before_wave": 25.0,
-      "wave_completion_bonus": 35,
-      "enemies": [
-        { "type": "dragon_whelp", "count": 15, "spawn_interval": 0.8, "initial_delay": 0.0 }
-      ]
-    },
-    {
-      "delay_before_wave": 25.0,
-      "wave_completion_bonus": 38,
-      "enemies": [
-        { "type": "wild_boar", "count": 25, "spawn_interval": 0.8, "initial_delay": 0.0 }
-      ]
-    },
-    {
-      "delay_before_wave": 25.0,
-      "wave_completion_bonus": 40,
-      "enemies": [
-        { "type": "armored_lizard", "count": 25, "spawn_interval": 0.8, "initial_delay": 0.0 }
-      ]
-    },
-    {
-      "delay_before_wave": 25.0,
-      "wave_completion_bonus": 48,
-      "enemies": [
-        { "type": "tomb_keeper", "count": 25, "spawn_interval": 0.8, "initial_delay": 0.0 }
-      ]
-    },
-    {
-      "delay_before_wave": 25.0,
-      "wave_completion_bonus": 50,
-      "enemies": [
-        { "type": "bloodfist_ogre", "count": 25, "spawn_interval": 0.8, "initial_delay": 0.0 }
-      ]
-    },
-    {
-      "delay_before_wave": 25.0,
-      "wave_completion_bonus": 53,
-      "enemies": [
-        { "type": "war_machine", "count": 25, "spawn_interval": 0.8, "initial_delay": 0.0 }
-      ]
-    },
-    {
-      "delay_before_wave": 25.0,
-      "wave_completion_bonus": 55,
-      "enemies": [
-        { "type": "witch_doctor", "count": 25, "spawn_interval": 0.8, "initial_delay": 0.0 }
-      ]
-    },
-    {
-      "delay_before_wave": 25.0,
-      "wave_completion_bonus": 53,
-      "enemies": [
-        { "type": "gnoll_berserker", "count": 25, "spawn_interval": 0.8, "initial_delay": 0.0 }
-      ]
-    },
-    {
-      "delay_before_wave": 25.0,
-      "wave_completion_bonus": 65,
-      "enemies": [
-        { "type": "pixie", "count": 20, "spawn_interval": 0.8, "initial_delay": 0.0 },
-        { "type": "tormentor", "count": 20, "spawn_interval": 0.8, "initial_delay": 0.0 }
-      ]
-    },
-    {
-      "delay_before_wave": 25.0,
-      "wave_completion_bonus": 68,
-      "enemies": [
-        { "type": "fire_elemental", "count": 20, "spawn_interval": 0.8, "initial_delay": 0.0 }
-      ]
-    },
-    {
-      "delay_before_wave": 25.0,
-      "wave_completion_bonus": 70,
-      "enemies": [
-        { "type": "centaur_strider", "count": 20, "spawn_interval": 0.8, "initial_delay": 0.0 }
-      ]
-    },
-    {
-      "delay_before_wave": 25.0,
-      "wave_completion_bonus": 70,
-      "enemies": [
-        { "type": "archon", "count": 20, "spawn_interval": 0.8, "initial_delay": 0.0 }
-      ]
-    },
-    {
-      "delay_before_wave": 25.0,
-      "enemies": [
-        { "type": "spectre", "count": 6, "spawn_interval": 1.5, "initial_delay": 0.0 }
-      ]
-    }
-  ]
+
+  {
+    "delay_before_wave": 15.0,
+    "wave_completion_bonus": 18,
+    "enemies": [
+      { "type": "ratling", "count": 30, "spawn_interval": 0.8, "initial_delay": 0.0 }
+    ]
+  },
+  {
+    "delay_before_wave": 15.0,
+    "wave_completion_bonus": 22,
+    "enemies": [
+      { "type": "quillpig", "count": 30, "spawn_interval": 0.8, "initial_delay": 0.0 }
+    ]
+  },
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 30,
+    "enemies": [
+      { "type": "mudrunner", "count": 30, "spawn_interval": 0.8, "initial_delay": 0.0 }
+    ]
+  },
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 31,
+    "enemies": [
+      { "type": "bugbear", "count": 30, "spawn_interval": 0.8, "initial_delay": 0.0 }
+    ]
+  },
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 35,
+    "enemies": [
+      { "type": "red_flyer", "count": 15, "spawn_interval": 0.8, "initial_delay": 0.0 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 38,
+    "enemies": [
+      { "type": "brawler", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 42,
+    "enemies": [
+      { "type": "mongoose", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 45,
+    "enemies": [
+      { "type": "manboar", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 48,
+    "enemies": [
+      { "type": "groundhogger", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 52,
+    "enemies": [
+      { "type": "djinn", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 56,
+    "enemies": [
+      { "type": "gnoll_berserker", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 58,
+    "enemies": [
+      { "type": "fire_elemental ", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 60,
+    "enemies": [
+      { "type": "green_dragon", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 64,
+    "enemies": [
+      { "type": "bruiser", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 70,
+    "enemies": [
+      { "type": "goblin_renegade", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 74,
+    "enemies": [
+      { "type": "goon", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 78,
+    "enemies": [
+      { "type": "war_turtle", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 80,
+    "enemies": [
+      { "type": "gremlin", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 84,
+    "enemies": [
+      { "type": "witch_doctor", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 88,
+    "enemies": [
+      { "type": "spectral_dog", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 92,
+    "enemies": [
+      { "type": "polywog", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 96,
+    "enemies": [
+      { "type": "blue_dragon", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 100,
+    "enemies": [
+      { "type": "hexer", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 104,
+    "enemies": [
+      { "type": "satyr", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 110,
+    "enemies": [
+      { "type": "hellasaur", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 115,
+    "enemies": [
+      { "type": "hill_troll", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 120,
+    "enemies": [
+      { "type": "crone", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 125,
+    "enemies": [
+      { "type": "scarlet_knight", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 130,
+    "enemies": [
+      { "type": "ice_demon", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+ 
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 135,
+    "enemies": [
+      { "type": "black_bear", "count": 15, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 140,
+    "enemies": [
+      { "type": "orc", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 145,
+    "enemies": [
+      { "type": "tusken_fighter", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 150,
+    "enemies": [
+      { "type": "spike_lizard", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 155,
+    "enemies": [
+      { "type": "tusken_fighter", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 160,
+    "enemies": [
+      { "type": "cave_troll", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 170,
+    "enemies": [
+      { "type": "wendigo", "count": 30, "spawn_interval": 0.8 }
+    ]
+  },
+
+  {
+    "delay_before_wave": 20.0,
+    "wave_completion_bonus": 180,
+    "enemies": [
+      { "type": "captain", "count": 15, "spawn_interval": 0.8 }
+    ]
+  },
+
+
+  {
+    "delay_before_wave": 30.0,
+    "wave_completion_bonus": 300,
+    "enemies": [
+      { "type": "lord_supermaul", "count": 1, "spawn_interval": 0.8 }
+    ]
+  }
+]
