@@ -367,6 +367,34 @@ class Tower:
                     total_splash_radius_increase += aura_special.get('splash_radius_increase', 0)
                 # Add other buff types like range here
 
+        # --- Swarm Power Check (Specific to zork_swarmers) ---
+        if self.tower_id == "zork_swarmers" and self.special and self.special.get("effect") == "swarm_power":
+            nearby_swarmer_count = 0
+            check_radius_units = self.special.get("check_radius", 0)
+            bonus_per_swarmer = self.special.get("attack_speed_bonus_per_swarmer", 0)
+
+            if check_radius_units > 0 and bonus_per_swarmer > 0:
+                # Convert check radius to pixels squared
+                check_radius_pixels = check_radius_units * (GRID_SIZE / 200.0)
+                check_radius_sq = check_radius_pixels ** 2
+
+                for other_tower in all_towers:
+                    # Skip self and non-swarmers
+                    if other_tower == self or other_tower.tower_id != "zork_swarmers":
+                        continue
+                    
+                    # Check distance
+                    dist_sq = (self.x - other_tower.x)**2 + (self.y - other_tower.y)**2
+                    if dist_sq <= check_radius_sq:
+                        nearby_swarmer_count += 1
+                
+                # Calculate and add the bonus
+                if nearby_swarmer_count > 0:
+                    swarm_bonus_percent = nearby_swarmer_count * bonus_per_swarmer
+                    print(f"DEBUG: {self.tower_id} ({self.center_grid_x},{self.center_grid_y}) found {nearby_swarmer_count} nearby swarmers. Applying +{swarm_bonus_percent}% speed bonus.") # Debug
+                    total_speed_bonus_percent += swarm_bonus_percent
+        # --- End Swarm Power Check ---
+
         # Calculate final multipliers and effective stats
         speed_multiplier = 1.0 + (total_speed_bonus_percent / 100.0)
         if speed_multiplier <= 0: speed_multiplier = 0.01 

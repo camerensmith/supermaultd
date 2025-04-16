@@ -1116,7 +1116,8 @@ class GameScene:
                                 self.tower_buff_auras,  # Pass buffs
                                 grid_offset_x,
                                 grid_offset_y,
-                                visual_assets=visual_assets # Pass the visuals
+                                visual_assets=visual_assets, # Pass the visuals
+                                all_towers=self.towers      # <<< ADD THIS ARGUMENT
                             )
 
                             # --- Process Generic Attack Results ---

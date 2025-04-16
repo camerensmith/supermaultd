@@ -503,7 +503,12 @@
           "projectile_speed": 300,
           "attack_type": "projectile",
           "splash_radius": 775,
-          "targets": ["air"]
+          "targets": ["air"],
+          "special": {
+            "effect": "swarm_power",
+            "check_radius": 400,
+            "attack_speed_bonus_per_swarmer": 5
+          }
         },
         "zork_brood_lord": {
           "name": "Zork Brood Lord",
@@ -560,7 +565,7 @@
           "splash_radius": 75,
           "damage_type": "siege",
           "attack_type": "projectile",
-          "projectile_speed": 300,
+          "projectile_speed": 380,
           "targets": ["ground", "air"]
         },
         "gaia_treant_boulder_thrower": {
