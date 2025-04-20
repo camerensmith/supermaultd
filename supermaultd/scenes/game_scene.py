@@ -1361,6 +1361,29 @@ class GameScene:
                 try: self.effects.remove(effect)
                 except ValueError: pass
             
+        # --- NEW: Apply Enemy Aura Effects --- 
+        # Reset aura effects on all enemies first
+        for enemy in self.enemies:
+            enemy.aura_armor_reduction = 0
+            # Reset other potential enemy aura effects here
+        
+        # Find towers with enemy-affecting auras
+        enemy_aura_towers_to_process = [t for t in self.towers if t.special and t.special.get("targets") and ("enemies" in t.special.get("targets") or "ground" in t.special.get("targets") or "air" in t.special.get("targets")) and t.special.get("effect") == "enemy_armor_reduction_aura"]
+        
+        # Apply effects
+        for aura_tower in enemy_aura_towers_to_process:
+            reduction_amount = aura_tower.special.get("reduction_amount", 0)
+            if reduction_amount > 0:
+                aura_radius_sq = aura_tower.aura_radius_pixels ** 2
+                for enemy in self.enemies:
+                    if enemy.health > 0:
+                        dist_sq = (enemy.x - aura_tower.x)**2 + (enemy.y - aura_tower.y)**2
+                        if dist_sq <= aura_radius_sq:
+                            # Apply the reduction - use max if multiple auras could stack, or just set if non-stacking
+                            enemy.aura_armor_reduction = max(enemy.aura_armor_reduction, reduction_amount)
+                            # print(f"DEBUG: Applied aura reduction {reduction_amount} from {aura_tower.tower_id} to {enemy.enemy_id}. Current total: {enemy.aura_armor_reduction}") # Optional Debug
+        # --- END Enemy Aura Effects ---
+        
         # --- Update Enemies (Main Loop) --- 
         for enemy in self.enemies[:]:
             # --- Apply Continuous Auras (Affecting Enemies) --- 

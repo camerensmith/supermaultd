@@ -1775,7 +1775,14 @@
           "name": "Radiant Tower", "grid_width": 1, "grid_height": 1, "cost": 120,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
           "range": 400, "attack_interval": 999, "projectile_speed": null,
-          "attack_type": "aura", "splash_radius": null, "targets": []
+          "attack_type": "aura", "splash_radius": null, "targets": [],
+          "special": {
+            "effect": "enemy_armor_reduction_aura",
+            "aura_radius": 400, 
+            "reduction_amount": 1,
+            "targets": ["enemies"], 
+            "description": "Enemies within the aura have their armor reduced by 1."
+          }
         },
         "heaven_archangel": {
           "name": "Archangel", "grid_width": 2, "grid_height": 2, "cost": 300,

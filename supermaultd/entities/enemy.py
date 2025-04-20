@@ -47,6 +47,10 @@ class Enemy:
         self.current_armor_value = self.base_armor_value # Initialize current value
         # ------------------------
         
+        # --- NEW: Aura Armor Reduction State ---
+        self.aura_armor_reduction = 0 # Amount of armor reduction currently applied by auras
+        # ---------------------------------------
+        
         # Determine enemy type (e.g., ground, air) - needed for tower targeting/stats
         self.type = enemy_data.get("type", "ground") # Default to ground if not specified
         
@@ -221,6 +225,12 @@ class Enemy:
             ignore_armor_amount += ignore_amount_from_source # Add to existing ignore amount
             print(f"... Applying ignore_armor_on_hit ({ignore_amount_from_source}) from source. Total ignore: {ignore_armor_amount}")
         # --- END NEW CHECK ---
+
+        # --- Apply Aura Armor Reduction ---
+        if self.aura_armor_reduction > 0:
+            ignore_armor_amount += self.aura_armor_reduction
+            print(f"... Applying aura armor reduction ({self.aura_armor_reduction}). Total ignore: {ignore_armor_amount}")
+        # --- End Aura Armor Reduction ---
 
         # 2. Apply Armor Value reduction/amplification
         # Calculate effective armor using the potentially increased ignore_amount
