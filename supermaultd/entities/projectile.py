@@ -357,8 +357,14 @@ class Projectile:
             # --- Killing Blow Check --- 
             health_before = collided_enemy.health
             # --- End Killing Blow Check ---
-            damage_applied_tuple = self.apply_damage(collided_enemy)
-            primary_damage_dealt = damage_applied_tuple[0] # Get the first element (damage)
+            # Capture the full result dictionary from apply_damage
+            damage_result = self.apply_damage(collided_enemy)
+            primary_damage_dealt = damage_result.get('damage_dealt', 0)
+            was_killed_by_this_hit = damage_result.get('was_killed', False)
+            bounty_triggered = damage_result.get('bounty_triggered', False)
+            gold_penalty = damage_result.get('gold_penalty', 0)
+            # --- End capture result ---
+            
             self.hit_enemies_in_sequence.add(collided_enemy) # Track hit for bounce/pierce
 
             # --- Apply On-Hit Special Effects from Tower (BEFORE processing projectile effects) ---
@@ -375,16 +381,20 @@ class Projectile:
             # --- End On-Hit Tower Special Effects ---
 
             # --- Trigger Gold On Kill (After damage applied) ---
-            is_kill = (health_before > 0 and collided_enemy.health <= 0)
-            if is_kill and self.special_on_kill_data:
+            if was_killed_by_this_hit and self.special_on_kill_data:
                 chance = self.special_on_kill_data.get("chance_percent", 0)
                 amount = self.special_on_kill_data.get("gold_amount", 0)
                 if amount > 0 and random.random() * 100 < chance:
                     print(f"$$$ Gold on Kill triggered for {self.source_tower.tower_id}! Adding {amount} gold.")
                     results['gold_added'] = amount # Add gold amount to results dictionary
-                #else: # Optional debug for failed roll
-                    #print(f"Gold on Kill rolled {random.random()*100:.1f} vs {chance}, failed.")
             # --- End Gold On Kill ---
+
+            # --- NEW: Handle Bounty Gold Penalty ---
+            if bounty_triggered and gold_penalty > 0:
+                # Add the penalty to the results dictionary (GameScene will handle deduction)
+                results['gold_penalty'] = gold_penalty
+                print(f"!!! Bounty Hunter Penalty triggered! Adding {gold_penalty} gold penalty to results.")
+            # --- END Bounty Gold Penalty ---
 
             # --- NEW: Generic DoT Application on Impact --- 
             # Check if the special effect block contains DoT parameters
@@ -582,10 +592,16 @@ class Projectile:
 
     def apply_damage(self, enemy, damage_override=None):
         """Applies damage to an enemy, considering damage type, crits, and effects.
-        Returns tuple (actual_damage_dealt, was_killed)
+        Returns the full result dictionary from enemy.take_damage
         """
         if not enemy or enemy.health <= 0:
-            return 0, False
+            # Return a default dictionary structure if no damage is applied
+            return {
+                "damage_dealt": 0,
+                "was_killed": False,
+                "bounty_triggered": False,
+                "gold_penalty": 0
+            }
 
         base_damage = damage_override if damage_override is not None else self.damage
         
@@ -607,19 +623,20 @@ class Projectile:
                  print(f"DEBUG: Warning - Tried to ignore armor, but enemy {enemy.enemy_id} lacks 'current_armor_value' attribute.")
         # --- End Calculate ignore_armor_amount ---
         
-        # Pass the calculated ignore_armor_amount to enemy.take_damage
-        # Also pass the projectile's special_effect data
-        actual_damage, was_killed = enemy.take_damage(base_damage, self.damage_type,
-                                                    ignore_armor_amount=ignore_armor_amount,
-                                                    source_special=self.special_effect) # Pass special effect dict
+        # Call enemy.take_damage and store the returned dictionary
+        # Pass self.source_tower.special, NOT self.special_effect for bounty check
+        # Because the bounty effect is defined on the TOWER, not the projectile's special effect block
+        source_special_for_bounty = self.source_tower.special if self.source_tower else None
+        damage_result_dict = enemy.take_damage(base_damage, self.damage_type,
+                                             ignore_armor_amount=ignore_armor_amount,
+                                             source_special=source_special_for_bounty) # Pass TOWER's special for bounty check
         
         # Optional: Add visual effect for crit damage
         if self.is_crit:
-            # Need access to Effect class and potentially a way to add effects to a list
-            # Example: Add a small flash effect
             pass 
             
-        return actual_damage, was_killed
+        # Return the entire dictionary received from enemy.take_damage
+        return damage_result_dict
 
     def apply_special_effects(self, enemy, current_time):
         """Applies special effects defined in self.special_effect to the enemy."""

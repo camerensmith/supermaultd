@@ -1340,6 +1340,27 @@ class GameScene:
                             except Exception as e:
                                 print(f"Error creating gold text effect: {e}")
                                 
+                        # --- NEW: Check for and deduct gold penalty --- 
+                        gold_to_deduct = collision_results.get('gold_penalty', 0)
+                        if gold_to_deduct > 0 and self.money > 0:
+                            amount_to_deduct = min(self.money, gold_to_deduct) # Don't deduct more than player has
+                            self.money -= amount_to_deduct
+                            self.tower_selector.update_money(self.money)
+                            print(f"--- BOUNTY PENALTY APPLIED: Player lost {amount_to_deduct} gold. New total: {self.money} ---")
+                            # Optional: Create floating text effect for gold loss
+                            try:
+                                grid_offset_x = config.UI_PANEL_PADDING
+                                grid_offset_y = config.UI_PANEL_PADDING
+                                text_x = proj.x + grid_offset_x 
+                                text_y = proj.y + grid_offset_y 
+                                loss_text = f"-{amount_to_deduct} G"
+                                loss_color = (255, 60, 60) # Reddish color
+                                text_effect = FloatingTextEffect(text_x, text_y, loss_text, color=loss_color, font_size=18)
+                                self.effects.append(text_effect)
+                            except Exception as e:
+                                print(f"Error creating gold loss text effect: {e}")
+                        # --- END Gold Penalty Check ---
+                        
                         # Add any new projectiles (e.g., from bounce)
                         new_projs = collision_results.get('new_projectiles', [])
                         if new_projs:

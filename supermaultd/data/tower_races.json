@@ -1958,7 +1958,12 @@
           "range": 530, "attack_interval": 0.3, "projectile_speed": 525,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
           "critical_chance": 0.20,
-          "critical_multiplier": 2.0
+          "critical_multiplier": 2.0,
+          "special": {
+            "effect": "bounty_on_kill",
+            "gold_penalty": 1,
+            "description": "If this tower gets the killing blow, the player loses 1 gold."
+          }
         },
         "nomad_caravan_depot": {
           "name": "Caravan Depot", "grid_width": 3, "grid_height": 3, "cost": 200,

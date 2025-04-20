@@ -264,9 +264,22 @@ class Enemy:
               f" (Base: {base_damage:.1f}, Type: {damage_type}, TypeMod: {type_modifier:.2f}, {log_armor_part}, ArmorMod: {armor_multiplier:.2f}, BonusMult: {bonus_multiplier:.2f}, MarkMult: {mark_multiplier:.2f})." # Added MarkMult to log
               f" Health: {self.health:.2f}/{self.max_health}")
         
-        # Return both the damage dealt and whether it was killed
         was_killed = self.health <= 0
-        return final_damage, was_killed
+        bounty_triggered = False # Initialize bounty flag
+        gold_penalty = 0 # Initialize penalty
+
+        if was_killed and source_special and source_special.get("effect") == "bounty_on_kill":
+            bounty_triggered = True
+            gold_penalty = source_special.get("gold_penalty", 0) # Get penalty amount
+            print(f"!!! Enemy {self.enemy_id} killed by Bounty Hunter! Triggering {gold_penalty} gold penalty.")
+
+        # Return a dictionary with results
+        return {
+            "damage_dealt": final_damage,
+            "was_killed": was_killed,
+            "bounty_triggered": bounty_triggered,
+            "gold_penalty": gold_penalty # Return penalty amount (0 if not triggered)
+        }
         
     def reduce_armor(self, amount):
         """Reduces the enemy's current armor value by the specified amount."""
