@@ -2,6 +2,7 @@ import pygame
 import pygame_gui
 import os # Need os for listing directory contents
 import random # Import random module
+import glob # <<< ADD IMPORT
 from copy import deepcopy  # Import deepcopy
 import config # Import config module directly
 # print(f"Imported config from: {config.__file__}") # DEBUG: Print path of imported config
@@ -27,6 +28,10 @@ WAVE_STATE_SPAWNING = "SPAWNING"
 WAVE_STATE_COMPLETE = "WAVE_COMPLETE" # Optional: Wait for enemies to clear
 WAVE_STATE_ALL_DONE = "ALL_WAVES_COMPLETE"
 WAVE_STATE_INTERMISSION = "INTERMISSION" # Added new state
+
+# --- Global Constants ---
+MUSIC_END_EVENT = pygame.USEREVENT + 0 # Custom event for music track ending
+# ----------------------
 
 class GameScene:
     def __init__(self, game, selected_race, screen_width, screen_height, click_sound, placement_sound, cancel_sound, sell_sound, invalid_placement_sound):
@@ -303,10 +308,43 @@ class GameScene:
         print(f"UI Panel Area (Pixels): {self.panel_pixel_width}x{self.panel_pixel_height} at ({self.panel_x},{self.panel_y})")
         print(f"Enemy Preview Area: {self.objective_area_rect}")
         
+        # --- Soundtrack Initialization (Added at the very end) --- 
+        self.soundtrack_files = []
+        self.current_track_index = -1
+        try:
+            soundtrack_dir = os.path.join("assets", "sounds")
+            # Use absolute path for glob to be safe
+            abs_soundtrack_dir = os.path.abspath(soundtrack_dir)
+            track_pattern = os.path.join(abs_soundtrack_dir, "track*.mp3")
+            print(f"[Soundtrack Init] Searching for tracks: {track_pattern}")
+            self.soundtrack_files = glob.glob(track_pattern)
+            
+            if not self.soundtrack_files:
+                print(f"[Soundtrack Init] No 'track*.mp3' files found in {abs_soundtrack_dir}")
+            else:
+                print(f"[Soundtrack Init] Found tracks: {[os.path.basename(t) for t in self.soundtrack_files]}")
+                random.shuffle(self.soundtrack_files)
+                self.current_track_index = 0
+                track_to_play = self.soundtrack_files[self.current_track_index]
+                print(f"[Soundtrack Init] Loading and playing first track: {os.path.basename(track_to_play)}")
+                pygame.mixer.music.load(track_to_play)
+                # Get volume from config, default to 0.4 if not found
+                volume = getattr(config, 'SOUNDTRACK_VOLUME', 0.4) 
+                pygame.mixer.music.set_volume(volume)
+                pygame.mixer.music.play(loops=0)
+                print(f"[Soundtrack Init] First track started at volume {volume}.")
+        except Exception as e:
+            print(f"[Soundtrack Init] Error during initialization: {e}")
+            self.current_track_index = -1 # Ensure playback doesn't start if error
+        # --- End Soundtrack Initialization ---
 
-        
     def handle_event(self, event):
         """Handle pygame events"""
+        # --- DEBUG: Print all events --- 
+        # print(f"Event received: {event}") 
+        # Uncomment the above line temporarily if needed to see ALL events
+        # --- END DEBUG --- 
+        
         # Handle UI events first
         self.tower_selector.handle_event(event)
         
@@ -433,7 +471,12 @@ class GameScene:
                 else:
                     print(f"Cannot start wave. Current state: {self.wave_state}, Started: {self.wave_started}")
                 
-        # --- Tower Hover Detection (runs every frame essentially via event loop) ---
+        # --- Handle Music End Event --- 
+        # REMOVED Block: elif event.type == MUSIC_END_EVENT:
+        # ... (all logic inside removed)
+        # --- END Music End Event --- 
+                    
+        # --- Tower Hover Detection --- 
         mouse_x, mouse_y = pygame.mouse.get_pos()
         grid_offset_x = config.UI_PANEL_PADDING
         grid_offset_y = config.UI_PANEL_PADDING
@@ -612,6 +655,26 @@ class GameScene:
             
     def update(self, time_delta):
         """Update game state"""
+        # --- Soundtrack Advancement (Manual Check) --- 
+        if self.soundtrack_files and self.current_track_index != -1: # Check if music should be playing
+            if not pygame.mixer.music.get_busy():
+                print(f"[Soundtrack Update] Mixer not busy, track likely finished.")
+                # Advance index and wrap around
+                self.current_track_index = (self.current_track_index + 1) % len(self.soundtrack_files)
+                next_track_path = self.soundtrack_files[self.current_track_index]
+                print(f"[Soundtrack Update] Attempting to play next track ({self.current_track_index + 1}/{len(self.soundtrack_files)}): {os.path.basename(next_track_path)}")
+                try:
+                    pygame.mixer.music.load(next_track_path)
+                    pygame.mixer.music.play(loops=0) # Play once
+                    print(f"[Soundtrack Update] Successfully started next track.")
+                except pygame.error as e:
+                    print(f"[Soundtrack Update] Error loading/playing track {next_track_path}: {e}")
+                    # Stop trying if error occurs
+                    try: pygame.mixer.music.stop()
+                    except: pass
+                    self.current_track_index = -1
+        # --- END Soundtrack Advancement --- 
+
         current_game_time = pygame.time.get_ticks() / 1000.0 # Get current time once
         
         # --- Wave System Update --- 
