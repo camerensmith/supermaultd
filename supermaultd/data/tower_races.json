@@ -1331,6 +1331,7 @@
           "targets": ["ground", "air"],
           "chain_link_radius": 200,
           "chain_zap_damage_per_tower": 18,
+          "attack_sound": "spark_arc_zap", 
           "description": "Individually fires a weak projectile. Links with nearby Arc Towers to unleash a powerful chain zap from the furthest linked tower, dealing damage based on chain length."
         },
         "spark_zap_coil": {
@@ -1338,7 +1339,7 @@
           "damage_min": 75, "damage_max": 145, "damage_type": "normal",
           "range": 450, "attack_interval": 1.5, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 300, "targets": ["ground", "air"],
-          "special": {"effect": "stun", "duration": 0.75}
+          "special": {"effect": "stun", "duration": 0.2}
         },
         "spark_lightning_rod": {
           "name": "Lightning Rod", "grid_width": 1, "grid_height": 1, "cost": 126,

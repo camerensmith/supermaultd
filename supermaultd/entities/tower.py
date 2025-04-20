@@ -201,7 +201,8 @@ class Tower:
         # --- Load Attack Sound ---
         self.attack_sound = None
         sound_dir = os.path.join("assets", "sounds") # <<< CORRECT
-        sound_basename = self.tower_id
+        # Use 'attack_sound' from JSON if available, otherwise use tower_id
+        sound_basename = self.tower_data.get("attack_sound", self.tower_id) # <<< CHANGE THIS LINE
         # Try MP3 first, then WAV
         possible_paths = [
             os.path.join(sound_dir, f"{sound_basename}.mp3"),

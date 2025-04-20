@@ -2427,7 +2427,21 @@ class GameScene:
                 zap_visual = SuperchargedZapEffect(start_pos, end_pos, duration=0.25, thickness=5) # Adjust duration/thickness
                 self.effects.append(zap_visual)
                 # --- End Supercharged Zap Visual ---
-                
+                initiating_tower_sound_object = initiating_tower.attack_sound # Get the loaded sound object
+                if initiating_tower_sound_object:
+                    try:
+                        initiating_tower_sound_object.play() # Try playing the sound object directly
+                        print(f"Attempting to play chain zap sound for {initiating_tower.tower_id}") # Simpler debug print
+                    except AttributeError as e:
+                        # This error means the object doesn't have a .play() method
+                        print(f"Error: initiating_tower.attack_sound (type: {type(initiating_tower_sound_object)}) has no play() method. Problem loading sound? Error: {e}")
+                    except Exception as e:
+                        # Catch any other sound playing errors
+                        print(f"Error playing sound object for {initiating_tower.tower_id}: {e}")
+                else:
+                    # This means the sound object wasn't loaded correctly in Tower.__init__
+                    print(f"Warning: initiating_tower.attack_sound is None for {initiating_tower.tower_id}. Cannot play sound.")
+                # +++ END: ADD THIS CODE BLOCK +++
                 # Set cooldown for ALL participating towers
                 for tower in longest_chain:
                     tower.last_chain_participation_time = current_time
