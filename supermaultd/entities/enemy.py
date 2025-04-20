@@ -243,8 +243,15 @@ class Enemy:
             
         actual_damage = damage_after_type * armor_multiplier
         
+        # --- NEW: Apply Marked for Death Multiplier --- 
+        mark_multiplier = 1.0
+        if "marked_for_death" in self.status_effects:
+            mark_multiplier = 1.5 # Apply 1.5x damage
+            print(f"... Enemy {self.enemy_id} is marked_for_death, applying x{mark_multiplier} multiplier.")
+        # --- END Marked for Death --- 
+        
         # 3. Apply Bonus Multiplier (e.g., from Shatter)
-        final_damage = actual_damage * bonus_multiplier
+        final_damage = actual_damage * bonus_multiplier * mark_multiplier # Include mark multiplier
         
         self.health -= final_damage # Use final_damage
         # Update log to show effective armor if different
@@ -254,7 +261,7 @@ class Enemy:
             
         # More detailed debug print
         print(f"Enemy {self.enemy_id}: Took {final_damage:.2f} damage." # Use final_damage
-              f" (Base: {base_damage:.1f}, Type: {damage_type}, TypeMod: {type_modifier:.2f}, {log_armor_part}, ArmorMod: {armor_multiplier:.2f}, BonusMult: {bonus_multiplier:.2f})."
+              f" (Base: {base_damage:.1f}, Type: {damage_type}, TypeMod: {type_modifier:.2f}, {log_armor_part}, ArmorMod: {armor_multiplier:.2f}, BonusMult: {bonus_multiplier:.2f}, MarkMult: {mark_multiplier:.2f})." # Added MarkMult to log
               f" Health: {self.health:.2f}/{self.max_health}")
         
         # Return both the damage dealt and whether it was killed
@@ -337,20 +344,17 @@ class Enemy:
                 # Draw overlay centered on the same position as the enemy
                 overlay_rect = overlay_image.get_rect(center=(int(draw_x), int(draw_y)))
                 screen.blit(overlay_image, overlay_rect)
-        # Add checks for other status overlays here if needed
-        # elif 'burning' in self.status_effects:
-        #    overlay_image = enemy_assets.get_status_overlay_image('burning')
-        #    if overlay_image: ...
-        # --- End Status Overlays ---
-
-        # --- Draw DoT Visual Effects --- 
-        # Check if the 'spore_dot' effect is active
-        if "spore_dot" in self.active_dots:
-            dot_visual = enemy_assets.dot_effect_visuals.get("spore_dot")
-            if dot_visual:
-                # Draw the visual centered on the enemy
-                visual_rect = dot_visual.get_rect(center=(int(draw_x), int(draw_y)))
-                screen.blit(dot_visual, visual_rect.topleft)
+        
+        # --- NEW: Draw Marked for Death Overlay --- 
+        if "marked_for_death" in self.status_effects:
+            mark_overlay_image = enemy_assets.get_status_overlay_image('marked_for_death')
+            if mark_overlay_image:
+                mark_rect = mark_overlay_image.get_rect(center=(int(draw_x), int(draw_y)))
+                screen.blit(mark_overlay_image, mark_rect)
+            else:
+                # Optional fallback: Draw a simple red circle if image missing
+                pygame.draw.circle(screen, (255, 0, 0), (int(draw_x), int(draw_y)), 10, 2) 
+        # --- END Marked for Death Overlay --- 
 
         # Draw health bar above the enemy sprite (using draw coordinates)
         health_width = GRID_SIZE * 0.8  

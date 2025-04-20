@@ -694,6 +694,25 @@ class Tower:
                 return results # Shotgun attack handled
             # --- END Shotgun Logic ---
             
+            # --- BEGIN Apply Mark Logic --- REVERTED TO USE PASSED TARGET
+            elif self.special and self.special.get("effect") == "apply_mark":
+                # Relies on GameScene passing the correct target
+                if target:
+                    self.last_attack_time = current_time # Update attack time only if target found
+                    mark_status_effect = self.special.get("mark_status_effect", "marked_for_death")
+                    mark_duration = self.special.get("mark_duration", 0.3) 
+                    print(f"Tower {self.tower_id} applying mark '{mark_status_effect}' to {target.enemy_id} for {mark_duration}s")
+                    target.apply_status_effect(mark_status_effect, mark_duration, 1.0, current_time)
+                    # <<< PLAY SOUND (Mark Apply) >>>
+                    if self.attack_sound:
+                         self.attack_sound.play()
+                    # <<< END PLAY SOUND >>>
+                # else: # Debugging if target is None
+                    # print(f"Tower {self.tower_id} tried to apply mark, but no target was passed.")
+                    
+                return None # No damage/projectiles, just applied the mark
+            # --- END Apply Mark Logic ---
+            
             # --- NEW: Quillspray Logic ---
             elif self.special and self.special.get("effect") == "quillspray":
                 # <<< PLAY SOUND >>>

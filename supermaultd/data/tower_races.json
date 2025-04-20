@@ -1610,7 +1610,7 @@
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
         },
         "tech_air_targeting_computer": {
-          "name": "Air Targeting Computer", "grid_width": 1, "grid_height": 1, "cost": 70,
+          "name": "Air Targeting Computer", "grid_width": 1, "grid_height": 1, "cost": 25,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
           "range": 700, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "aura", "splash_radius": null, "targets": [],
@@ -1623,21 +1623,22 @@
           }
         },
         "tech_ground_targeting_computer": {
-          "name": "Ground Targeting Computer", "grid_width": 1, "grid_height": 1, "cost": 70,
+          "name": "Ground Targeting Computer", "grid_width": 1, "grid_height": 1, "cost": 45,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
-          "range": 700, "attack_interval": 999, "projectile_speed": null,
-          "attack_type": "aura", "splash_radius": null, "targets": [],
+          "range": 700, 
+          "attack_interval": 1.5, 
+          "projectile_speed": null,
+          "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
           "special": {
-            "effect": "air_damage_aura",
-            "targets": ["towers"],
-            "aura_radius": 1200,
-            "air_damage_multiplier": 1.1, 
-            "description": "Nearby projectile towers deal 10% more damage to Air units."
+            "effect": "apply_mark",
+            "mark_status_effect": "marked_for_death", 
+            "mark_duration": 0.3, 
+            "target_selection": "highest_health", 
+            "description": "Periodically marks the highest health enemy in range, causing it to take 50% more damage from all sources."
           }
-          
         },
         "tech_freeze_ray": {
-          "name": "Freeze Ray", "grid_width": 1, "grid_height": 1, "cost": 120,
+          "name": "Freeze Ray", "grid_width": 1, "grid_height": 1, "cost": 80,
           "damage_min": 1, "damage_max": 5, "damage_type": "normal", "target_selection": "random",
           "range": 1000, "attack_interval": 0.1, "projectile_speed": null,
           "attack_type": "beam", "beam_color": "SKY_BLUE",
@@ -1645,9 +1646,9 @@
           "special": {"effect": "slow", "slow_percentage": 75}
         },
         "tech_railgun": {
-          "name": "Railgun", "grid_width": 1, "grid_height": 2, "cost": 180,
+          "name": "Railgun", "grid_width": 1, "grid_height": 2, "cost": 245,
           "damage_min": 875, "damage_max": 1250, "damage_type": "chaos",
-          "range": 1000, "attack_interval": 6.5, "projectile_speed": 1200,
+          "range": 1000, "attack_interval": 5.28, "projectile_speed": 1200,
           "attack_type": "projectile", "splash_radius": 100, "targets": ["ground", "air"]
         },
         "tech_nuclear_silo": {

@@ -1068,8 +1068,12 @@ class GameScene:
                     # ------------------------------------------------------------------------
 
                     # --- Attack Check and Execution for Standard/Special Towers ---
-                    if actual_targets and current_game_time >= tower.last_attack_time + effective_interval:
-                        target_enemy = actual_targets[0] # Assuming single target for most non-beam
+                    # Check if interval is ready AND either targets were found OR it's a specific effect tower that needs to act
+                    interval_ready = current_game_time >= tower.last_attack_time + effective_interval
+                    is_marking_tower = tower.special and tower.special.get("effect") == "apply_mark"
+                    
+                    if interval_ready and (actual_targets or is_marking_tower):
+                        target_enemy = actual_targets[0] if actual_targets else None # Get target if available, else None
 
                         grid_offset_x = config.UI_PANEL_PADDING
                         grid_offset_y = config.UI_PANEL_PADDING
@@ -1081,7 +1085,7 @@ class GameScene:
                             self.attempt_chain_zap(tower, current_game_time, self.enemies, grid_offset_x, grid_offset_y)
                             # We might not need to process results further here if attempt_chain_zap handles effects/sounds
                         else:
-                            # --- Generic Attack Call for other non-beam towers ---
+                            # --- Generic Attack Call for other non-beam/non-chain towers ---
                             # --- Prepare Visual Assets --- 
                             visual_assets = {}
                             # ... (Rest of the visual asset preparation logic remains the same) ...
@@ -1109,15 +1113,16 @@ class GameScene:
                             # --- End Prepare Visual Assets ---
 
                             # Call the tower's generic attack method
+                            # Pass target_enemy (which might be None if it's a marking tower with no targets in range, but attack handles that)
                             attack_results = tower.attack(
-                                target_enemy,
+                                target_enemy, 
                                 current_game_time,
                                 self.enemies,           # Pass all enemies
                                 self.tower_buff_auras,  # Pass buffs
                                 grid_offset_x,
                                 grid_offset_y,
                                 visual_assets=visual_assets, # Pass the visuals
-                                all_towers=self.towers      # <<< ADD THIS ARGUMENT
+                                all_towers=self.towers      # Pass all towers
                             )
 
                             # --- Process Generic Attack Results ---
