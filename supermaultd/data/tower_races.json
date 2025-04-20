@@ -1598,16 +1598,10 @@
           "attack_type": "none", "splash_radius": null, "targets": []
         },
         "tech_laser": {
-          "name": "Laser", "grid_width": 1, "grid_height": 1, "cost": 15,
+          "name": "Laser", "grid_width": 1, "grid_height": 1, "cost": 10,
           "damage_min": 4, "damage_max": 5, "damage_type": "normal",
           "range": 900, "attack_interval": 0.2, "projectile_speed": null,
           "attack_type": "beam", "beam_color": "DEEP_PINK", "splash_radius": null, "targets": ["ground", "air"]
-        },
-        "tech_particle_beam": {
-          "name": "Particle Accelerator", "grid_width": 1, "grid_height": 1, "cost": 40,
-          "damage_min": 10, "damage_max": 12, "damage_type": "piercing",
-          "range": 1100, "attack_interval": 0.7, "projectile_speed": 1500,
-          "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
         },
         "tech_air_targeting_computer": {
           "name": "Air Targeting Computer", "grid_width": 1, "grid_height": 1, "cost": 25,
@@ -1621,6 +1615,12 @@
             "air_damage_multiplier": 1.1, 
             "description": "Nearby projectile towers deal 10% more damage to Air units."
           }
+        },
+        "tech_particle_accelerator": {
+          "name": "Particle Accelerator", "grid_width": 1, "grid_height": 1, "cost": 45,
+          "damage_min": 10, "damage_max": 12, "damage_type": "piercing",
+          "range": 1100, "attack_interval": 0.7, "projectile_speed": 1500,
+          "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
         },
         "tech_ground_targeting_computer": {
           "name": "Ground Targeting Computer", "grid_width": 1, "grid_height": 1, "cost": 45,
@@ -1641,7 +1641,7 @@
           "name": "Freeze Ray", "grid_width": 1, "grid_height": 1, "cost": 80,
           "damage_min": 1, "damage_max": 5, "damage_type": "normal", "target_selection": "random",
           "range": 1000, "attack_interval": 0.1, "projectile_speed": null,
-          "attack_type": "beam", "beam_color": "SKY_BLUE",
+          "attack_type": "beam", "beam_color": "CYAN",
            "splash_radius": null, "targets": ["ground", "air"],
           "special": {"effect": "slow", "slow_percentage": 75}
         },
@@ -1652,7 +1652,7 @@
           "attack_type": "projectile", "splash_radius": 100, "targets": ["ground", "air"]
         },
         "tech_nuclear_silo": {
-          "name": "Nuclear Silo", "grid_width": 3, "grid_height": 3, "cost": 850,
+          "name": "Nuclear Silo", "grid_width": 3, "grid_height": 3, "cost": 1000,
           "damage_min": 30000, "damage_max": 35000,
           "damage_type": "chaos",
           "min_range": 1500,
