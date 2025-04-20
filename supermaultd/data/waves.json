@@ -11,14 +11,14 @@
     "delay_before_wave": 15.0,
     "wave_completion_bonus": 22,
     "enemies": [
-      { "type": "quillpig", "count": 30, "spawn_interval": 0.8, "initial_delay": 0.0 }
+      { "type": "mudrunner", "count": 30, "spawn_interval": 0.8, "initial_delay": 0.0 }
     ]
   },
   {
     "delay_before_wave": 20.0,
     "wave_completion_bonus": 30,
     "enemies": [
-      { "type": "mudrunner", "count": 30, "spawn_interval": 0.8, "initial_delay": 0.0 }
+      { "type": "quillpig", "count": 30, "spawn_interval": 0.8, "initial_delay": 0.0 }
     ]
   },
   {

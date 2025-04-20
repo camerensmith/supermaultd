@@ -98,7 +98,7 @@ ENEMY_DATA = {
     },
     "quillpig": {  
         "health": 308,
-        "speed": 1,
+        "speed": 0.8,
         "value": 1, "armor_value": 7,
         "armor_type": "Light",
         "type": "ground"
@@ -113,10 +113,10 @@ ENEMY_DATA = {
     },
     "red_flyer": { 
         "health": 440,
-        "speed": 1,
+        "speed": 0.3,
         "value": 1, "armor_value": 6,
         "armor_type": "Light",
-        "type": "ground"
+        "type": "air"
     },
     "brawler": {
         "health": 440, 
@@ -128,7 +128,7 @@ ENEMY_DATA = {
     },
     "mongoose": {
         "health": 660,
-        "speed": 1.3,
+        "speed": 1.2,
         "value": 2,
         "armor_type": "Unarmored",
         "armor_value": 11,
@@ -136,7 +136,7 @@ ENEMY_DATA = {
     },
     "manboar": {
         "health": 1000,
-        "speed": 1.2,
+        "speed": 1.1,
         "value": 2,
         "armor_type": "Heavy", 
         "armor_value": 10,
@@ -167,14 +167,14 @@ ENEMY_DATA = {
     },
     "fire_elemental ": {
         "health": 8800,
-        "speed": 0.3,
+        "speed": 0.1,
         "value": 2,
         "armor_type": "Ethereal", 
         "type": "ground"
     },
     "green_dragon": { #gold increase after wave
         "health": 2000,
-        "speed": 1,
+        "speed": 0.4,
         "value": 2,
         "armor_type": "Unarmored", 
         "armor_value": 15,
@@ -228,7 +228,7 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "spectral_dog": {
-        "health": 13000, 
+        "health": 1300, 
         "speed": 0.5, 
         "value": 4,
         "armor_type": "Ethereal",
@@ -244,7 +244,7 @@ ENEMY_DATA = {
     },
     "blue_dragon": { 
         "health": 4600,
-        "speed": 1,
+        "speed": 0.5,
         "value": 4, "armor_value": 30,
         "armor_type": "Unarmored",
         "type": "air" # Flying
@@ -253,7 +253,7 @@ ENEMY_DATA = {
         "health": 13600,
         "speed": 0.4,
         "value": 5,
-        "armor_type": "Magic_Resistant",
+        "armor_type": "Light",
         "armor_value": 35,
         "type": "ground"
     },
@@ -301,7 +301,7 @@ ENEMY_DATA = {
         "health": 37000,
         "speed": 1.5,
         "value": 5, "armor_value": 9,
-        "armor_type": "Ethereal",
+        "armor_type": "Magic_Resistant",
         "armor_value": 13,
         "type": "ground"
     },
@@ -357,7 +357,7 @@ ENEMY_DATA = {
         "health": 200000,
         "speed": 0.9,
         "value": 6,
-        "armor_type": "Ethereal",
+        "armor_type": "Unarmored",
         "armor_value": 0,
         "type": "ground"
     },
@@ -373,7 +373,7 @@ ENEMY_DATA = {
         "health": 255000, # Boss
         "speed": 2,
         "value": 250, # Big reward
-        "armor_type": "Heavy",
+        "armor_type": "Medium",
         "armor_value": 100,
         "type": "ground"
     }

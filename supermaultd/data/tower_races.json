@@ -62,7 +62,7 @@
         },
         "crystal_shooter": {
           "name": "Crystal Shooter",
-          "cost": 9,
+          "cost": 10,
           "damage_min": 11,
           "damage_max": 22,
           "damage_type": "chaos",
@@ -74,7 +74,7 @@
         },
         "diamond_cutter": {
           "name": "Diamond Cutter",
-          "cost": 40,
+          "cost": 35,
           "grid_width": 1,
           "grid_height": 1,
           "damage_min": 25,
@@ -180,7 +180,7 @@
         },
         "pyro_flare_tower": {
           "name": "Flare Tower",
-          "cost": 10,
+          "cost": 9,
           "damage_min": 11,
           "damage_max": 13,
           "damage_type": "normal",
@@ -221,7 +221,7 @@
           "name": "Flame Dancer",
           "description": "A skilled flame dancer that slashes with a fiery blade.",
           "size": "small",
-          "cost": 133,
+          "cost": 130,
           "grid_width": 2,
           "grid_height": 2,
           "damage_min": 220,
@@ -268,7 +268,7 @@
           "name": "Searing Tower",
           "description": "A searing tower that blasts enemies with fireballs. Large splash radius. Can target air units.",
           "size": "small",
-          "cost": 350,
+          "cost": 273,
           "damage_min": 643,
           "damage_max": 795,
           "damage_type": "normal",
@@ -293,7 +293,7 @@
           "description": "A blazing incinerator vent from the burning molten core of the Pyro Empire. Radiates intense heat in a small area that also damages enemies unfortunate enough to be in the area.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 450,
+          "cost": 383,
           "damage_min": 400,
           "damage_max": 450,
           "damage_type": "normal",
@@ -308,7 +308,7 @@
           "special": {
             "effect": "damage_pulse_aura",
             "aura_radius": 700,
-            "pulse_damage": 75,
+            "pulse_damage": 50,
             "interval": 0.2
           }
         }
@@ -369,7 +369,7 @@
           "damage_max": 850,
           "damage_type": "normal",
           "range": 1600,
-          "attack_interval": 2.4,
+          "attack_interval": 1.81,
           "projectile_speed": null,
           "attack_type": "instant",
           "splash_radius": 800,
@@ -390,7 +390,7 @@
           "attack_interval": 4.0,
           "projectile_speed": 225,
           "attack_type": "projectile",
-          "splash_radius": 550,
+          "splash_radius": 450,
           "targets": ["ground"],
           "special": {
             "effect": "blast_zone",
@@ -423,7 +423,7 @@
           "grid_width": 5,
           "grid_height": 5,
           "cost": 1887,
-          "damage_min": 3500,
+          "damage_min": 3000,
           "damage_max": 3675,
           "damage_type": "chaos",
           "range": 1400,
@@ -453,7 +453,7 @@
           "damage_max": 4,
           "damage_type": "normal",
           "range": 400,
-          "attack_interval": 0.3,
+          "attack_interval": 0.35,
           "projectile_speed": 400,
           "attack_type": "projectile",
           "splash_radius": 250,
@@ -624,7 +624,7 @@
           "beam_color": [218, 165, 32],
           "projectile_speed": 400,
           "targets": ["ground", "air"],
-          "beam_max_targets": 3
+          "beam_max_targets": 2
         },
         "gaia_ursa": {
           "name": "Ursa",
@@ -646,7 +646,7 @@
           "grid_width": 2,
           "grid_height": 2,
           "cost": 200,
-          "damage_min": 1,
+          "damage_min": 50,
           "damage_max": 1000,
           "attack_interval": 1, 
           "range": 700,
@@ -665,7 +665,7 @@
           "cost": 350,
           "damage_min": 1800,
           "damage_max": 2300,
-          "attack_interval": 0.6,
+          "attack_interval": 0.8,
           "range": 900,
           "splash_radius": 100,
           "damage_type": "chaos",
@@ -804,7 +804,7 @@
             "strike_damage_min": 800,       
             "strike_damage_max": 900,       
             "strike_damage_type": "normal",  
-            "interval": 5.0,              
+            "interval": 6.0,              
             "description": "Periodically calls down random artillery strikes within a large radius."
           }
         }
@@ -935,13 +935,13 @@
           "duration": 5.0, "dot_damage_type": "arcane"}
         },
         "alchemists_caustic_cannon": {
-          "name": "Caustic Cannon", "grid_width": 2, "grid_height": 2, "cost": 260,
+          "name": "Caustic Cannon", "grid_width": 2, "grid_height": 2, "cost": 213,
           "damage_min": 452, "damage_max": 790, "damage_type": "chaos",
           "range": 650, "attack_interval": 1.5, "projectile_speed": 300,
           "attack_type": "projectile", "splash_radius": 120, "targets": ["ground", "air"]
         },
         "alchemists_chemical_plant": {
-          "name": "Chemical Plant", "grid_width": 3, "grid_height": 3, "cost": 411,
+          "name": "Chemical Plant", "grid_width": 3, "grid_height": 3, "cost": 244,
           "damage_min": 80, "damage_max": 120, "damage_type": "chaos", "target_selection": "random",
           "range": 800, "attack_interval": 0.2, "projectile_speed": 200,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
@@ -949,7 +949,7 @@
           "duration": 5.0, "dot_damage_type": "chaos"}
         },
         "alchemists_plague_reactor": {
-          "name": "Plague Reactor", "grid_width": 2, "grid_height": 2, "cost": 533,
+          "name": "Plague Reactor", "grid_width": 2, "grid_height": 2, "cost": 387,
           "damage_min": 0, "damage_max": 0, "damage_type": "chaos",
           "range": 1000, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "aura", "splash_radius": null, "targets": ["ground", "air"],
@@ -1011,7 +1011,7 @@
           }
         },
         "igloo_icicle_cannon": {
-          "name": "Icicle Cannon", "grid_width": 1, "grid_height": 1, "cost": 180,
+          "name": "Icicle Cannon", "grid_width": 1, "grid_height": 1, "cost": 142,
           "damage_min": 100, "damage_max": 120, "damage_type": "piercing",
           "range": 700, "attack_interval": 1.2, "projectile_speed": 600,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
@@ -1023,13 +1023,19 @@
           }
         },
         "igloo_yeti": {
-          "name": "Yeti", "grid_width": 1, "grid_height": 1, "cost": 210,
+          "name": "Yeti", "grid_width": 1, "grid_height": 1, "cost": 180,
           "damage_min": 388, "damage_max": 505, "damage_type": "normal",
           "range": 350, "attack_interval": 1.3, "projectile_speed": null,
-          "attack_type": "instant", "splash_radius": 300, "targets": ["ground"]
+          "attack_type": "instant", "splash_radius": 300, "targets": ["ground"],
+          "special": {
+            "effect": "shatter",
+            "shatter_target_debuff": "bonechill",
+            "shatter_damage_multiplier": 1.3,
+            "description": "Deals 30% bonus damage to Bonechilled enemies."
+        }
         },
         "igloo_glacial_heart": {
-          "name": "Glacial Heart", "grid_width": 3, "grid_height": 3, "cost": 420,
+          "name": "Glacial Heart", "grid_width": 3, "grid_height": 3, "cost": 200,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
           "range": 700, "attack_interval": 1.5, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": ["ground", "air"],
@@ -1042,7 +1048,7 @@
           }
         },
         "igloo_ice_pillar": {
-          "name": "Ice Pillar", "grid_width": 1, "grid_height": 1, "cost": 345,
+          "name": "Ice Pillar", "grid_width": 1, "grid_height": 1, "cost": 245,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
           "range": 0, "attack_interval": 999, 
           "attack_type": "aura", 
@@ -1122,7 +1128,7 @@
           "name": "Black Hole Generator",
           "grid_width": 3,
           "grid_height": 3,
-          "cost": 1375,
+          "cost": 525,
           "damage_min": 0,
           "damage_max": 0,
           "damage_type": "chaos",
@@ -1156,7 +1162,7 @@
         },
         "goblin_snotlings": {
           "name": "Snotlings", "grid_width": 1, "grid_height": 1, "cost": 7,
-          "damage_min": 2, "damage_max": 14, "damage_type": "normal",
+          "damage_min": 5, "damage_max": 14, "damage_type": "normal",
           "range": 750, "attack_interval": 1, "projectile_speed": 400,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
         },
@@ -1208,8 +1214,8 @@
           "attack_type": "projectile", "splash_radius": 450, "targets": ["ground"],
           "special": {
               "effect": "miss_chance",
-              "chance": 25, 
-              "description": "Has a 25% chance to miss."
+              "chance": 30, 
+              "description": "Has a 30% chance to miss."
           }
         },
         "goblin_shredder": {
@@ -1347,7 +1353,7 @@
           "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"]
         },
         "spark_power_plant": {
-          "name": "Power Plant", "grid_width": 2, "grid_height": 2, "cost": 280,
+          "name": "Power Plant", "grid_width": 2, "grid_height": 2, "cost": 185,
           "damage_min": 0, "damage_max": 0, "damage_type": "chaos",
           "range": 400, "attack_interval": 0, "projectile_speed": null,
           "attack_type": "aura", "splash_radius": null,
@@ -1359,7 +1365,7 @@
           }
         },
         "spark_storm_generator": {
-          "name": "Storm Generator", "grid_width": 1, "grid_height": 1, "cost": 520,
+          "name": "Storm Generator", "grid_width": 1, "grid_height": 1, "cost": 320,
           "damage_min": 50, "damage_max": 60, "damage_type": "arcane", "target_selection": "random",
           "range": 600, "attack_interval": 0.01, "projectile_speed": null,
           "attack_type": "hybrid", "splash_radius": null, "targets": ["ground", "air"],
@@ -1378,7 +1384,7 @@
         },
         "husk_void_leecher": {
           "name": "Void Leecher", "grid_width": 2, "grid_height": 2, "cost": 14,
-          "damage_min": 1, "damage_max": 15, "damage_type": "arcane",
+          "damage_min": 1, "damage_max": 12, "damage_type": "arcane",
           "range": 550, "attack_interval": 0.1, "projectile_speed": 400,
           "attack_type": "beam", "splash_radius": null, "targets": ["ground", "air"]
         },
@@ -1391,7 +1397,7 @@
         "husk_deranged_husk": {
           "name": "Deranged Husk", "grid_width": 2, "grid_height": 2, "cost": 50,
           "damage_min": 88, "damage_max": 260, "damage_type": "normal",
-          "range": 350, "attack_interval": 999, "projectile_speed": null,
+          "range": 350, "attack_interval": 1, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": null, "targets": ["ground"]
         },
         "husk_entropy_trooper": {
@@ -1424,9 +1430,9 @@
           "special": {
             "effect": "rampage_damage_stack",
             "damage_per_stack": 75, 
-            "max_stacks": 10,      
+            "max_stacks": 5,      
             "decay_duration": 5.0, 
-            "description": "Gains +75 damage per consecutive hit (max 10 stacks). Stacks reset after 5 seconds without attacking."
+            "description": "Gains +75 damage per consecutive hit (max 5 stacks). Stacks reset after 5 seconds without attacking."
           }
         }
       }
@@ -1456,7 +1462,13 @@
           "name": "Jaguar Mech", "grid_width": 2, "grid_height": 2, "cost": 150,
           "damage_min": 200, "damage_max": 220, "damage_type": "piercing",
           "range": 900, "attack_interval": 2.0, "projectile_speed": 600,
-          "attack_type": "projectile", "splash_radius": 100, "targets": ["air"]
+          "attack_type": "projectile", "splash_radius": 100, "targets": ["air"],
+          "special": {
+            "effect": "chance_ignore_armor_on_hit",
+            "chance_percent": 25,
+            "ignore_amount": 15,
+            "description": "Has a 25% chance on hit to ignore 15 armor for this attack."
+          }
         },
         "titan_bio_mech": {
           "name": "Bio Mech", "grid_width": 2, "grid_height": 2, "cost": 200,
@@ -1469,19 +1481,37 @@
           "name": "Athena Mech", "grid_width": 3, "grid_height": 3, "cost": 350,
           "damage_min": 600, "damage_max": 650, "damage_type": "siege",
           "range": 1400, "range_min": 300, "attack_interval": 4.0, "projectile_speed": 500,
-          "attack_type": "projectile", "splash_radius": 150, "targets": ["ground"]
+          "attack_type": "projectile", "splash_radius": 150, "targets": ["ground"],
+          "special": {
+            "effect": "chance_ignore_armor_on_hit",
+            "chance_percent": 25,
+            "ignore_amount": 15,
+            "description": "Has a 25% chance on hit to ignore 15 armor for this attack."
+          }
         },
         "titan_apocalypse_mech": {
           "name": "Apocalypse Mech", "grid_width": 3, "grid_height": 3, "cost": 450,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
           "range": 400, "attack_interval": 999, "projectile_speed": null,
-          "attack_type": "aura", "splash_radius": null, "targets": []
+          "attack_type": "aura", "splash_radius": null, "targets": [],
+          "special": {
+            "effect": "chance_ignore_armor_on_hit",
+            "chance_percent": 25,
+            "ignore_amount": 15,
+            "description": "Has a 25% chance on hit to ignore 15 armor for this attack."
+          }
         },
         "titan_obliterator_mech": {
-          "name": "Obliterator Mech", "grid_width": 3, "grid_height": 3, "cost": 800,
+          "name": "Obliterator Mech", "grid_width": 3, "grid_height": 3, "cost": 424,
           "damage_min": 2500, "damage_max": 3000, "damage_type": "siege",
           "range": 1000, "attack_interval": 6.0, "projectile_speed": 300,
-          "attack_type": "projectile", "splash_radius": 400, "targets": ["ground"]
+          "attack_type": "projectile", "splash_radius": 400, "targets": ["ground"],
+          "special": {
+            "effect": "chance_ignore_armor_on_hit",
+            "chance_percent": 25,
+            "ignore_amount": 15,
+            "description": "Has a 25% chance on hit to ignore 15 armor for this attack."
+          }
         }
       }
     },
@@ -1489,15 +1519,15 @@
       "description": "Maintaining order with non-lethal tactics and precision takedowns.",
       "towers": {
         "police_wall": {
-          "name": "Police Barricade", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "name": "Police Blockade", "grid_width": 1, "grid_height": 1, "cost": 1,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": []
         },
         "police_peacekeeper": {
-          "name": "Peacekeeper", "grid_width": 1, "grid_height": 1, "cost": 9,
+          "name": "Peacekeeper", "grid_width": 1, "grid_height": 1, "cost": 11,
           "damage_min": 6, "damage_max": 8, "damage_type": "normal",
-          "range": 550, "attack_interval": 0.5, "projectile_speed": 500,
+          "range": 550, "attack_interval": 0.4, "projectile_speed": 500,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
         },
         "police_tear_gas_launcher": {
@@ -1596,7 +1626,7 @@
           "name": "Particle Beam", "grid_width": 2, "grid_height": 2, "cost": 180,
           "damage_min": 30, "damage_max": 35, "damage_type": "chaos",
           "range": 1000, "attack_interval": 0.5, "projectile_speed": null,
-          "attack_type": "beam", "beacm_color": "STEEL_BLUE", 
+          "attack_type": "beam", "beam_color": "STEEL_BLUE", 
           "splash_radius": 50, "targets": ["ground", "air"]
         },
         "tech_freeze_ray": {
@@ -1643,7 +1673,7 @@
         },
         "seadog_saltwater_soundrel": {
           "name": "Saltwater Scoundrel", "grid_width": 1, "grid_height": 1, "cost": 6,
-          "damage_min": 4, "damage_max": 5, "damage_type": "normal",
+          "damage_min": 6, "damage_max": 7, "damage_type": "normal",
           "range": 500, "attack_interval": 0.6, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": null, "targets": ["ground"],
           "special": {
@@ -1654,7 +1684,7 @@
           }
         },
         "seadog_grog_barrel": {
-          "name": "Grog Barrel", "grid_width": 1, "grid_height": 1, "cost": 15,
+          "name": "Grog Barrel", "grid_width": 1, "grid_height": 1, "cost": 23,
           "damage_min": 40, "damage_max": 50, "damage_type": "siege", 
           "range": 500, "attack_interval": 2.0, "projectile_speed": 300, "bounce": 2,
           "attack_type": "projectile", "splash_radius": 800, "targets": ["ground"], 
@@ -1797,8 +1827,8 @@
           "range": 550, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "aura", "splash_radius": null, "targets": []
         },
-        "solar_ultramirror": {
-          "name": "UltraMirror", "grid_width": 3, "grid_height": 3, "cost": 700,
+        "solar_array": {
+          "name": "Solar Array", "grid_width": 3, "grid_height": 3, "cost": 700,
           "damage_min": 2000, "damage_max": 2200, "damage_type": "chaos", "target_selection": "random",
           "range": 1200, "attack_interval": 4.0, "projectile_speed": null,
           "attack_type": "beam", "beam_color": [255, 100, 0], "splash_radius": 100, "targets": ["ground", "air"],
@@ -1867,7 +1897,7 @@
           }
         },
         "nomad_bounty_hunter": {
-          "name": "Bounty Hunter", "grid_width": 2, "grid_height": 2, "cost": 50,
+          "name": "Bounty Hunter", "grid_width": 2, "grid_height": 2, "cost": 150,
           "damage_min": 890, "damage_max": 1013, "damage_type": "normal",
           "range": 530, "attack_interval": 0.3, "projectile_speed": 525,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
@@ -1875,7 +1905,7 @@
           "critical_multiplier": 2.0
         },
         "nomad_caravan_depot": {
-          "name": "Caravan Depot", "grid_width": 3, "grid_height": 3, "cost": 120,
+          "name": "Caravan Depot", "grid_width": 3, "grid_height": 3, "cost": 200,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",   
           "range": 1800, "attack_interval": 8.5, "projectile_speed": null, 
           "attack_type": "none", "splash_radius": null, "targets": ["ground", "air"], 
@@ -1886,7 +1916,7 @@
             "pass_through_damage_type": "normal",     
             "pass_through_hit_cooldown": 0.1,      
             "explosion_radius_units": 450,         
-            "explosion_damage": 6050,                
+            "explosion_damage": 5000,                
             "explosion_damage_type": "siege",       
             "pass_through_asset_id": "nomad_caravan", 
             "explosion_effect_asset_id": "nomad_caravan",
@@ -1929,7 +1959,9 @@
           "projectile_speed": null,
           "attack_type": "instant",
           "splash_radius": null,
-          "targets": ["ground"]
+          "targets": ["ground"],
+          "critical_chance": 0.20,
+          "critical_multiplier": 3.0
         },
         "ogre_brute": {
           "name": "Ogre Brute",
@@ -1944,7 +1976,9 @@
           "projectile_speed": null,
           "attack_type": "instant",
           "splash_radius": null,
-          "targets": ["ground"]
+          "targets": ["ground"],
+          "critical_chance": 0.20,
+          "critical_multiplier": 3.0
         },
         "ogre_smasher": {
           "name": "Ogre Smasher",
@@ -1978,7 +2012,9 @@
           "projectile_speed": 250,
           "attack_type": "projectile",
           "splash_radius": 50,
-          "targets": ["ground", "air"] 
+          "targets": ["ground", "air"],
+          "critical_chance": 0.20,
+          "critical_multiplier": 4.0
         },
         "ogre_stomping_grounds": {
           "name": "Stomping Grounds",
@@ -2006,7 +2042,7 @@
           "name": "Ogre Chieftain",
           "grid_width": 2,
           "grid_height": 2,
-          "cost": 250,
+          "cost": 291,
           "damage_min": 683,
           "damage_max": 744,
           "attack_speed": 1,
