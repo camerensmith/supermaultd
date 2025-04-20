@@ -1730,7 +1730,7 @@
       }
     },
     "heaven": {
-      "description": "Angelic defenders wielding divine light and celestial power to smite evil and protect allies.",
+      "description": "Angelic defenders whose attacks always ignore a percentage ofenemy armor.",
       "towers": {
         "heaven_wall": {
           "name": "Angelic Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
@@ -1739,25 +1739,40 @@
           "attack_type": "none", "splash_radius": null, "targets": []
         },
         "heaven_guard_tower": {
-          "name": "Heaven Guard Tower", "grid_width": 1, "grid_height": 1, "cost": 8,
+          "name": "Heaven Guard Tower", "grid_width": 1, "grid_height": 1, "cost": 14,
           "damage_min": 11, "damage_max": 17, "damage_type": "piercing",
           "range": 550, "attack_interval": 0.7, "projectile_speed": 450,
-          "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
+          "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
+          "special": {
+            "effect": "ignore_armor_on_hit",
+            "amount": 1,
+            "description": "Attacks ignore 1 enemy armor."
+          }
         },
         "heaven_holy_spike": {
-          "name": "Holy Spike", "grid_width": 1, "grid_height": 1, "cost": 8,
+          "name": "Holy Spike", "grid_width": 1, "grid_height": 1, "cost": 48,
           "damage_min": 28, "damage_max": 47, "damage_type": "piercing",
           "range": 550, "attack_interval": 0.7, "projectile_speed": 450,
-          "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
+          "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
+          "special": {
+            "effect": "ignore_armor_on_hit",
+            "amount": 3,
+            "description": "Attacks ignore 3 enemy armor."
+          }
         },
         "heaven_guardian_angel": {
-          "name": "Guardian Angel", "grid_width": 1, "grid_height": 1, "cost": 80,
+          "name": "Guardian Angel", "grid_width": 1, "grid_height": 1, "cost": 112,
           "damage_min": 50, "damage_max": 60, "damage_type": "arcane",
           "range": 700, "attack_interval": 0.9, "projectile_speed": 500,
-          "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
+          "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
+          "special": {
+            "effect": "ignore_armor_on_hit",
+            "amount": 4,
+            "description": "Attacks ignore 4 enemy armor."
+          }
         },
-        "heaven_divine_shield": {
-          "name": "Divine Shield Spire", "grid_width": 1, "grid_height": 1, "cost": 120,
+        "heaven_radiant_tower": {
+          "name": "Radiant Tower", "grid_width": 1, "grid_height": 1, "cost": 120,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
           "range": 400, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "aura", "splash_radius": null, "targets": []
@@ -1766,13 +1781,23 @@
           "name": "Archangel", "grid_width": 2, "grid_height": 2, "cost": 300,
           "damage_min": 350, "damage_max": 400, "damage_type": "arcane",
           "range": 850, "attack_interval": 1.8, "projectile_speed": null,
-          "attack_type": "instant", "splash_radius": 150, "targets": ["ground", "air"]
+          "attack_type": "instant", "splash_radius": 150, "targets": ["ground", "air"],
+          "special": {
+            "effect": "ignore_armor_on_hit",
+            "amount": 4,
+            "description": "Attacks ignore 4 enemy armor."
+          }
         },
         "heaven_seraphim": {
           "name": "Seraphim", "grid_width": 3, "grid_height": 3, "cost": 650,
           "damage_min": 1500, "damage_max": 1700, "damage_type": "arcane",
           "range": 1000, "attack_interval": 2.5, "projectile_speed": null,
-          "attack_type": "instant", "splash_radius": 300, "targets": ["ground", "air"]
+          "attack_type": "instant", "splash_radius": 300, "targets": ["ground", "air"],
+          "special": {
+            "effect": "ignore_armor_on_hit",
+            "amount": 5,
+            "description": "Attacks ignore 5 enemy armor."
+          }
         }
       }
     },

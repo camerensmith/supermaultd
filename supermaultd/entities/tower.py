@@ -880,12 +880,12 @@ class Tower:
                     if self.attack_sound:
                         self.attack_sound.play()
                     # <<< END PLAY SOUND >>>
-                    # Apply instant damage if needed (some instant types might only apply effects)
-                    # Example: Simple instant damage (adjust if specific instant towers have no base damage)
-                    if initial_damage > 0: 
-                       target.take_damage(initial_damage, self.damage_type) 
-                       results['damage_dealt'] = initial_damage # Track damage for results if needed
-                    # Apply INSTANT special effects (like stun from instant attacks) - if not handled by collision
+                    # Apply instant damage if needed
+                    if initial_damage > 0:
+                       # Pass the tower's special dict to take_damage for instant attacks
+                       target.take_damage(initial_damage, self.damage_type, source_special=self.special)
+                       results['damage_dealt'] = initial_damage # Track damage
+                    # Apply INSTANT special effects
                     self.apply_instant_special_effects(target, current_time) 
                     
                     # --- Create Instant Attack Visual Effect --- 
@@ -924,7 +924,8 @@ class Tower:
                             dist_sq = (enemy.x - primary_target_pos[0])**2 + (enemy.y - primary_target_pos[1])**2
                             if dist_sq <= splash_radius_sq:
                                 print(f"    ... splashing {enemy.enemy_id} for {splash_damage:.2f}")
-                                enemy.take_damage(splash_damage, self.damage_type)
+                                # Pass the tower's special dict to take_damage for instant splash attacks
+                                enemy.take_damage(splash_damage, self.damage_type, source_special=self.special)
                                 # Also apply instant special effects (like stun) to splashed targets?
                                 self.apply_instant_special_effects(enemy, current_time) 
                                 enemies_splashed += 1
@@ -967,7 +968,8 @@ class Tower:
                                 # Apply falloff
                                 current_chain_damage *= (1.0 - damage_falloff)
                                 print(f"    ... chaining to {next_target.enemy_id} for {current_chain_damage:.2f} damage")
-                                next_target.take_damage(current_chain_damage, self.damage_type)
+                                # Pass the tower's special dict to take_damage for chain lightning attacks
+                                next_target.take_damage(current_chain_damage, self.damage_type, source_special=self.special)
                                 targets_hit.add(next_target)
                                 chain_path_visual.append((next_target.x, next_target.y)) # Add position for visual
                                 current_chain_target = next_target # Move to the next link

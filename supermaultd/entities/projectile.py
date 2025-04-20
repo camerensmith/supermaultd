@@ -608,10 +608,10 @@ class Projectile:
         # --- End Calculate ignore_armor_amount ---
         
         # Pass the calculated ignore_armor_amount to enemy.take_damage
-        # Assuming enemy.take_damage signature is: (base_damage, damage_type, bonus_multiplier, ignore_armor_amount)
-        # We are not passing bonus_multiplier from here, so it uses default 1.0 in take_damage
-        actual_damage, was_killed = enemy.take_damage(base_damage, self.damage_type, 
-                                                    ignore_armor_amount=ignore_armor_amount)
+        # Also pass the projectile's special_effect data
+        actual_damage, was_killed = enemy.take_damage(base_damage, self.damage_type,
+                                                    ignore_armor_amount=ignore_armor_amount,
+                                                    source_special=self.special_effect) # Pass special effect dict
         
         # Optional: Add visual effect for crit damage
         if self.is_crit:

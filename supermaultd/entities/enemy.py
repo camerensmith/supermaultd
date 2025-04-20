@@ -201,15 +201,30 @@ class Enemy:
         self.rect.center = (int(self.x), int(self.y)) # Keep rect centered on enemy
         # ------------------------------------
         
-    def take_damage(self, base_damage, damage_type="normal", bonus_multiplier=1.0, ignore_armor_amount=0):
-        """Apply damage to the enemy, considering armor type, armor value, bonus multipliers, and armor ignore."""
+    def take_damage(self, base_damage, damage_type="normal", bonus_multiplier=1.0, ignore_armor_amount=0, source_special=None):
+        """Apply damage to the enemy, considering armor type, armor value, bonus multipliers, and armor ignore.
+
+        Args:
+            base_damage: The raw damage value.
+            damage_type: The type of damage (e.g., 'normal', 'piercing').
+            bonus_multiplier: Additional multiplier (e.g., from Shatter).
+            ignore_armor_amount: Base amount of armor to ignore (e.g., from target debuffs).
+            source_special: The 'special' dictionary from the attacking tower/projectile (optional).
+        """
         # 1. Apply Armor Type vs Damage Type multiplier
-        type_modifier = self.damage_modifiers.get(damage_type, 1.0) 
+        type_modifier = self.damage_modifiers.get(damage_type, 1.0)
         damage_after_type = base_damage * type_modifier
-        
+
+        # --- NEW: Check source_special for 'ignore_armor_on_hit' --- 
+        if source_special and source_special.get("effect") == "ignore_armor_on_hit":
+            ignore_amount_from_source = source_special.get("amount", 0)
+            ignore_armor_amount += ignore_amount_from_source # Add to existing ignore amount
+            print(f"... Applying ignore_armor_on_hit ({ignore_amount_from_source}) from source. Total ignore: {ignore_armor_amount}")
+        # --- END NEW CHECK ---
+
         # 2. Apply Armor Value reduction/amplification
-        # Calculate effective armor using the passed ignore_amount
-        effective_armor = self.current_armor_value - ignore_armor_amount # Use parameter
+        # Calculate effective armor using the potentially increased ignore_amount
+        effective_armor = self.current_armor_value - ignore_armor_amount
         armor_multiplier = 1.0
         if effective_armor >= 0:
             armor_multiplier = 1.0 / (1.0 + ARMOR_CONSTANT * effective_armor) # Use effective_armor
