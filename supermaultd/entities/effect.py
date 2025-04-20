@@ -170,6 +170,71 @@ class ChainLightningVisual(Effect):
         except Exception as e:
              print(f"Error drawing chain lightning ({self.line_type}): {e}")
 
+class WhipVisual(Effect):
+    """Visual effect for whip attacks, drawing lines between points."""
+    def __init__(self, path_coords, duration=0.3, color=None, thickness=3, line_type='whip'):
+        """
+        Initialize the whip visual.
+        
+        :param path_coords: List of (x, y) tuples representing the whip path (absolute screen coords).
+        :param duration: How long the visual effect lasts in seconds.
+        :param color: The color of the whip lines. If None, uses default based on type.
+        :param thickness: The thickness of the whip lines.
+        :param line_type: Used to determine default color/thickness if not provided.
+        """
+        self.path_coords = path_coords
+        self.duration = max(0.01, duration)
+        self.timer = 0.0
+        self.finished = False
+        self.line_type = line_type
+
+        # Determine default color/thickness based on type if not provided
+        if color is None:
+            if self.line_type == 'whip':
+                self.color = SADDLE_BROWN 
+                self.thickness = 1 
+            else: # Fallback 
+                self.color = (255, 255, 255) 
+                self.thickness = 1
+        else:
+            self.color = color # Use provided color
+            self.thickness = thickness # Use provided thickness
+        
+        # Base Effect attributes needed for loop compatibility
+        self.image = None 
+        self.rect = None 
+        
+        print(f"WhipVisual created. Path has {len(path_coords)} points.")
+
+    def update(self, time_delta):
+        """Update the effect timer. Returns True if finished."""
+        if self.finished:
+            return True
+            
+        self.timer += time_delta
+        if self.timer >= self.duration:
+            self.finished = True
+            
+        return self.finished
+
+    def draw(self, screen):
+        """Draw the whip segments."""
+        if self.finished or len(self.path_coords) < 2:
+            return
+            
+        alpha_multiplier = max(0, 1.0 - (self.timer / self.duration))
+        current_alpha = int(255 * alpha_multiplier)
+        current_color = (*self.color[:3], current_alpha) # Use self.color
+
+        try:
+            for i in range(len(self.path_coords) - 1):
+                start_pos = self.path_coords[i]
+                end_pos = self.path_coords[i+1]
+                # Use standard line for whip for now, can customize later
+                pygame.draw.aaline(screen, current_color, start_pos, end_pos, self.thickness) # Use self.thickness 
+        except Exception as e:
+             print(f"Error drawing whip visual: {e}")
+
 class FloatingTextEffect(Effect):
     """Displays text that floats upwards and fades out."""
     def __init__(self, x, y, text, duration=1.5, color=(255, 215, 0), font_size=20, rise_speed=20):

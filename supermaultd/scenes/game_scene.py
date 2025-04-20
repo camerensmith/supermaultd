@@ -15,7 +15,7 @@ from entities.enemy import Enemy # Import Enemy class
 from entities.projectile import Projectile # Import Projectile class
 from entities.offset_boomerang_projectile import OffsetBoomerangProjectile # <<< ADDED IMPORT
 # Import all necessary effect classes at the top level
-from entities.effect import Effect, FloatingTextEffect, ChainLightningVisual, RisingFadeEffect, GroundEffectZone, FlamethrowerParticleEffect, SuperchargedZapEffect, AcidSpewParticleEffect, PulseImageEffect, ExpandingCircleEffect, DrainParticleEffect # Added AcidSpewParticleEffect, PulseImageEffect, and ExpandingCircleEffect, DrainParticleEffect
+from entities.effect import Effect, FloatingTextEffect, ChainLightningVisual, RisingFadeEffect, GroundEffectZone, FlamethrowerParticleEffect, SuperchargedZapEffect, AcidSpewParticleEffect, PulseImageEffect, ExpandingCircleEffect, DrainParticleEffect, WhipVisual # Added AcidSpewParticleEffect, PulseImageEffect, ExpandingCircleEffect, DrainParticleEffect, WhipVisual
 from entities.orbiting_damager import OrbitingDamager # NEW IMPORT
 from entities.pass_through_exploder import PassThroughExploder # NEW IMPORT
 import json # Import json for loading armor data
@@ -1134,8 +1134,11 @@ class GameScene:
                     # Check if interval is ready AND either targets were found OR it's a specific effect tower that needs to act
                     interval_ready = current_game_time >= tower.last_attack_time + effective_interval
                     is_marking_tower = tower.special and tower.special.get("effect") == "apply_mark"
-                    
-                    if interval_ready and (actual_targets or is_marking_tower):
+                    # <<< ADDED: Check for whip attack type >>>
+                    is_whip_tower = tower.attack_type == 'whip'
+
+                    # <<< MODIFIED: Added OR is_whip_tower to the condition >>>
+                    if interval_ready and (actual_targets or is_marking_tower or is_whip_tower):
                         target_enemy = actual_targets[0] if actual_targets else None # Get target if available, else None
 
                         grid_offset_x = config.UI_PANEL_PADDING
@@ -2311,9 +2314,22 @@ class GameScene:
             if attack_results.get("type") == "chain_visual":
                 chain_path = attack_results.get("path", [])
                 if len(chain_path) >= 2:
-                    adjusted_path = [(int(x + grid_offset_x), int(y + grid_offset_y)) for x, y in chain_path]
-                    chain_effect = ChainLightningVisual(adjusted_path, duration=0.3)
+                    # Original chain visual assumed path was relative, needed offset
+                    # adjusted_path = [(int(x + grid_offset_x), int(y + grid_offset_y)) for x, y in chain_path]
+                    # For whip, the path is already screen-adjusted from Tower.attack
+                    chain_effect = ChainLightningVisual(chain_path, duration=0.3)
                     self.effects.append(chain_effect)
+            # --- NEW: Handle Whip Visual --- 
+            elif attack_results.get("type") == "whip_visual":
+                visual_path = attack_results.get("visual_path", [])
+                duration = attack_results.get("duration", 0.2)
+                if len(visual_path) >= 2: # Need at least tower pos and one target
+                    # Use the NEW WhipVisual class
+                    # Path coordinates are already screen-adjusted in Tower.attack
+                    whip_effect = WhipVisual(visual_path, duration=duration) # No need to specify line_type, defaults to 'whip'
+                    self.effects.append(whip_effect)
+            # --- END Whip Visual Handling ---
+
         elif isinstance(attack_results, list):
              # Handle legacy list return 
              if attack_results: 

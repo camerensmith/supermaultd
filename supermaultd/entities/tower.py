@@ -535,6 +535,8 @@ class Tower:
         effective_splash_radius_pixels = buffed_stats['splash_radius_pixels'] 
         
         # --- Interval Check (Moved to be universal for non-beam) ---
+        # <<< ADDED DEBUG PRINT >>>
+        print(f"DEBUG Interval Check: Tower={self.tower_id}, Time={current_time:.2f}, LastAttack={self.last_attack_time:.2f}, Interval={effective_interval:.2f}, SalvoRem={self.salvo_shots_remaining}")
         # Allow attack if interval ready OR if a salvo is currently active (but attack shouldn't proceed if active)
         is_salvo_tower = self.special and self.special.get("effect") == "salvo_attack"
         if current_time - self.last_attack_time < effective_interval and self.salvo_shots_remaining <= 0:
@@ -601,8 +603,9 @@ class Tower:
 
         # --- Standard Attack Logic (Requires Target) --- 
         if self.attack_type != 'beam': # Exclude beam, broadside already handled
-            if not target: # If broadside wasn't triggered, we MUST have a target now
-                 print(f"ERROR: Tower {self.tower_id} attack called without target (and not broadside).")
+            # <<< MODIFIED: Added check to allow whip attack type without target >>>
+            if not target and self.attack_type != 'whip': 
+                 print(f"ERROR: Tower {self.tower_id} attack called without target (and not broadside/whip).") # Updated print
                  return None # Should not happen if called correctly from GameScene
 
             # --- Check for Salvo Attack Initiation --- 
@@ -754,6 +757,71 @@ class Tower:
 
                 return results # Quillspray attack handled
             # --- END Quillspray Logic ---
+
+            # <<< --- ADDED WHIP ATTACK LOGIC --- >>>
+            elif self.attack_type == 'whip':
+                print(f"DEBUG: Entered whip attack block for {self.tower_id} at time {current_time:.2f}")
+                # Whip logic needs to find its own targets within range
+                whip_targets_in_range = []
+                for enemy in all_enemies:
+                    if enemy.health > 0 and enemy.type in self.targets and self.is_in_range(enemy.x, enemy.y):
+                        whip_targets_in_range.append(enemy)
+
+                if not whip_targets_in_range:
+                    print(f"  DEBUG: Whip attack - No targets found in range.")
+                    self.last_attack_time = current_time # Still update cooldown even if no target found?
+                    return results # No targets, nothing to do
+
+                # --- Play Sound ---
+                if self.attack_sound:
+                    self.attack_sound.play()
+                # --- End Play Sound ---
+
+                self.last_attack_time = current_time # Update attack time
+
+                # Sort targets by distance (closest first)
+                whip_targets_in_range.sort(key=lambda e: (e.x - self.x)**2 + (e.y - self.y)**2)
+
+                # Get whip parameters from special
+                max_whip_targets = self.special.get("whip_targets", 1)
+                damage_multiplier_first = self.special.get("whip_damage_multiplier", 0.5)
+                visual_duration = self.special.get("whip_visual_duration", 0.2)
+
+                # Select actual targets up to the max count
+                actual_whip_targets = whip_targets_in_range[:max_whip_targets]
+                target_ids = [t.enemy_id for t in actual_whip_targets]
+                print(f"  DEBUG: Whip attacking targets: {target_ids}")
+
+                # Create visual path (adjusting for screen offset)
+                visual_path = [(self.x + grid_offset_x, self.y + grid_offset_y)] # Start at tower center (screen coords)
+                
+                # Apply damage
+                for i, whip_target in enumerate(actual_whip_targets):
+                    # Calculate base damage (needs buffed stats)
+                    # Assume calculate_damage is safe to call even if target was initially None
+                    base_whip_damage, is_crit = self.calculate_damage(whip_target, buffed_stats, current_time, damage_multiplier=damage_multiplier)
+                    
+                    # Apply multiplier (last target gets full damage, others get reduced)
+                    final_damage = base_whip_damage
+                    if i < len(actual_whip_targets) - 1: # If not the last target
+                        final_damage *= damage_multiplier_first
+                    
+                    print(f"    DEBUG: Whipping {whip_target.enemy_id} for {final_damage:.2f} damage (Multiplier: {damage_multiplier_first if i < len(actual_whip_targets) - 1 else 1.0})")
+                    # Pass tower special for potential on-hit effects
+                    whip_target.take_damage(final_damage, self.damage_type, source_special=self.special)
+                    
+                    # Add target position to visual path (screen coords)
+                    visual_path.append((whip_target.x + grid_offset_x, whip_target.y + grid_offset_y))
+
+                # Create whip visual effect
+                if len(visual_path) > 1:
+                    results["type"] = "whip_visual" # Signal to GameScene
+                    results["visual_path"] = visual_path
+                    results["duration"] = visual_duration
+                    print(f"  DEBUG: Created whip visual effect with {len(visual_path)} points.")
+
+                return results # Whip attack handled
+            # <<< --- END WHIP ATTACK LOGIC --- >>>
 
             # --- Gattling Level Up & Visual Effect Logic --- 
             is_gattling = self.special and self.special.get("effect") == "gattling_spin_up"

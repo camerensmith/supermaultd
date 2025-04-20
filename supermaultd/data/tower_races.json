@@ -1309,13 +1309,19 @@
         },
         "spark_static_post": {
           "name": "Static Post", "grid_width": 1, "grid_height": 1, "cost": 8,
-          "damage_min": 7, "damage_max": 9, "damage_type": "normal", "bounce": 1,
-          "range": 500, "attack_interval": 0.4, "projectile_speed": 600,
+          "damage_min": 7, "damage_max": 8, "damage_type": "normal", "bounce": 1,
+          "range": 580, "attack_interval": 0.4, "projectile_speed": 600,
+          "attack_type": "instant", "splash_radius": 225, "targets": ["ground", "air"]
+        },
+        "spark_shock_node": {
+          "name": "Shock Node", "grid_width": 1, "grid_height": 1, "cost": 15,
+          "damage_min": 30, "damage_max": 32, "damage_type": "normal",
+          "range": 215, "attack_interval": 0.8, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"]
         },
         "spark_arc_tower": {
           "name": "Arc Tower", "grid_width": 1, "grid_height": 1, "cost": 35,
-          "damage_min": 20, "damage_max": 22,
+          "damage_min": 41, "damage_max": 43,
           "damage_type": "normal", 
           "range": 600, 
           "attack_interval": 0.9, 
@@ -1324,36 +1330,30 @@
           "splash_radius": null, 
           "targets": ["ground", "air"],
           "chain_link_radius": 200,
-          "chain_zap_damage_per_tower": 15,
+          "chain_zap_damage_per_tower": 18,
           "description": "Individually fires a weak projectile. Links with nearby Arc Towers to unleash a powerful chain zap from the furthest linked tower, dealing damage based on chain length."
         },
         "spark_zap_coil": {
-          "name": "Zap Coil", "grid_width": 1, "grid_height": 1, "cost": 80,
-          "damage_min": 55, "damage_max": 145, "damage_type": "normal",
+          "name": "Zap Coil", "grid_width": 1, "grid_height": 1, "cost": 61,
+          "damage_min": 75, "damage_max": 145, "damage_type": "normal",
           "range": 450, "attack_interval": 1.5, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 300, "targets": ["ground", "air"],
           "special": {"effect": "stun", "duration": 0.75}
         },
         "spark_lightning_rod": {
-          "name": "Lightning Rod", "grid_width": 1, "grid_height": 1, "cost": 140,
+          "name": "Lightning Rod", "grid_width": 1, "grid_height": 1, "cost": 126,
           "damage_min": 180, "damage_max": 200, "damage_type": "piercing",
-          "range": 800, "attack_interval": 1.2, "projectile_speed": null,
+          "range": 800, "attack_interval": 1.5, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
           "special": {
             "effect": "chain_lightning",
-            "chain_targets": 3,
+            "chain_targets": 4,
             "chain_radius": 250,
             "chain_damage_falloff": 0.3
           }
         },
-        "spark_shock_node": {
-          "name": "Shock Node", "grid_width": 1, "grid_height": 1, "cost": 155,
-          "damage_min": 180, "damage_max": 200, "damage_type": "piercing",
-          "range": 250, "attack_interval": 1, "projectile_speed": null,
-          "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"]
-        },
         "spark_power_plant": {
-          "name": "Power Plant", "grid_width": 2, "grid_height": 2, "cost": 185,
+          "name": "Power Plant", "grid_width": 2, "grid_height": 2, "cost": 165,
           "damage_min": 0, "damage_max": 0, "damage_type": "chaos",
           "range": 400, "attack_interval": 0, "projectile_speed": null,
           "attack_type": "aura", "splash_radius": null,
@@ -1365,11 +1365,12 @@
           }
         },
         "spark_storm_generator": {
-          "name": "Storm Generator", "grid_width": 1, "grid_height": 1, "cost": 320,
-          "damage_min": 50, "damage_max": 60, "damage_type": "arcane", "target_selection": "random",
-          "range": 600, "attack_interval": 0.01, "projectile_speed": null,
-          "attack_type": "hybrid", "splash_radius": null, "targets": ["ground", "air"],
-          "special": {"effect": "storm_aura", "dot_damage": 30, "dot_interval": 0.6, "slow_percentage": 10, "aura_radius": 600}
+          "name": "Storm Generator", "grid_width": 1, "grid_height": 1, "cost": 224,
+          "damage_min": 400, "damage_max": 800, "damage_type": "arcane", "target_selection": "random",
+          "range": 600, "attack_interval": 1, "projectile_speed": null,
+          "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
+          "stats_air": {
+          }
         }
       }
     },
@@ -1705,27 +1706,35 @@
           "projectile_asset_id": "grog_barrel_projectile", 
           "special": {"effect": "slow", "slow_percentage": 25, "duration": 1.0, "description": "Splashed enemies are slowed."}
         },
-        "seadog_slaver": {
-          "name": "Slaver", "grid_width": 1, "grid_height": 1, "cost": 45,
-          "damage_min": 38, "damage_max": 45, "damage_type": "piercing",
-          "range": 650, "attack_interval": 0.1, "projectile_speed": 800,
-          "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
-        },
-        "seadog_chain_gunner": {
-          "name": "Seadog Chain Gunner", "grid_width": 1, "grid_height": 1, "cost": 45,
-          "damage_min": 8, "damage_max": 10, "damage_type": "piercing",
-          "range": 650, "attack_interval": 0.1, "projectile_speed": 800,
-          "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
-        },
         "seadog_chain_shot_cannon": {
-          "name": "Chain Shot Cannon", "grid_width": 1, "grid_height": 1, "cost": 80,
+          "name": "Chain Shot Cannon", "grid_width": 1, "grid_height": 1, "cost": 55,
           "damage_min": 15, "damage_max": 20, "damage_type": "siege",
           "range": 900, "attack_interval": 1.2, "projectile_speed": 350, "bounce": 5, 
-          "attack_type": "projectile", "splash_radius": null, "targets": ["ground"],
+          "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
           "special": {"effect": "slow", "slow_percentage": 40, "duration": 1.5}
         },
+        "seadog_cannoneer": {
+          "name": "Cannoneer", "grid_width": 2, "grid_height": 2, "cost": 167,
+          "damage_min": 8, "damage_max": 10, "damage_type": "piercing",
+          "range": 650, "attack_interval": 2, "projectile_speed": 600,
+          "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
+        },
+        "seadog_slaver": {
+          "name": "Slaver", "grid_width": 1, "grid_height": 1, "cost": 167,
+          "damage_min": 38, "damage_max": 45, "damage_type": "piercing",
+          "range": 650, "attack_interval": 1, 
+          "attack_type": "whip", 
+          "targets": ["ground", "air"],
+          "special": {
+            "effect": "whip_attack",
+            "whip_targets": 2,
+            "whip_damage_multiplier": 0.5, 
+            "whip_visual_duration": 0.09,
+            "description": "Whips up to 2 enemies in range, dealing 50% damage to the first targets and 100% damage to the last target hit."
+          }
+        },
         "seadog_broadside_battery": {
-          "name": "Broadside Battery", "grid_width": 3, "grid_height": 3, "cost": 145,
+          "name": "Broadside Battery", "grid_width": 3, "grid_height": 3, "cost": 180,
           "damage_min": 180, "damage_max": 200, "damage_type": "siege",
           "range": 750, "attack_interval": 1.5, "projectile_speed": 400,
           "attack_type": "projectile", "splash_radius": 200, "targets": ["ground"],
@@ -1738,8 +1747,8 @@
         "seadog_kraken_caller": {
           "name": "Kraken Caller", "grid_width": 3, "grid_height": 3, "cost": 335,
           "damage_min": 700, "damage_max": 800, "damage_type": "chaos",
-          "range": 1000, "attack_interval": 3.5, "projectile_speed": null,
-          "attack_type": "instant", "splash_radius": 950, "targets": ["ground", "air"]
+          "range": 1000, "attack_interval": 3.0, "projectile_speed": null,
+          "attack_type": "instant", "splash_radius": 1100, "targets": ["ground", "air"]
         }
       }
     },
