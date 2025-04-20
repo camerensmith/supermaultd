@@ -1253,8 +1253,8 @@
           "attack_type": "aura", "splash_radius": null, "targets": ["ground"],
           "special": {"effect": "slow_aura", "slow_percentage": 25, "duration": 2.0, "aura_radius": 500}
         },
-        "deepseer_serpent_coil": {
-          "name": "Serpent Coil", "grid_width": 1, "grid_height": 1, "cost": 70,
+        "deepseer_serpent_coiler": {
+          "name": "Serpent Coiler", "grid_width": 1, "grid_height": 1, "cost": 70,
           "damage_min": 40, "damage_max": 45, "damage_type": "arcane",
           "range": 650, "attack_interval": 0.7, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"]
