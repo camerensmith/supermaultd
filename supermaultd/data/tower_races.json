@@ -1603,14 +1603,14 @@
           "range": 900, "attack_interval": 0.2, "projectile_speed": null,
           "attack_type": "beam", "beam_color": "DEEP_PINK", "splash_radius": null, "targets": ["ground", "air"]
         },
-        "tech_particle_accelerator": {
+        "tech_particle_beam": {
           "name": "Particle Accelerator", "grid_width": 1, "grid_height": 1, "cost": 40,
           "damage_min": 10, "damage_max": 12, "damage_type": "piercing",
-          "range": 1100, "attack_interval": 0.7, "projectile_speed": 800,
+          "range": 1100, "attack_interval": 0.7, "projectile_speed": 1500,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
         },
-        "tech_targeting_computer": {
-          "name": "Targeting Computer", "grid_width": 1, "grid_height": 1, "cost": 70,
+        "tech_air_targeting_computer": {
+          "name": "Air Targeting Computer", "grid_width": 1, "grid_height": 1, "cost": 70,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
           "range": 700, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "aura", "splash_radius": null, "targets": [],
@@ -1622,12 +1622,19 @@
             "description": "Nearby projectile towers deal 10% more damage to Air units."
           }
         },
-        "tech_particle_beam": {
-          "name": "Particle Beam", "grid_width": 2, "grid_height": 2, "cost": 180,
-          "damage_min": 30, "damage_max": 35, "damage_type": "chaos",
-          "range": 1000, "attack_interval": 0.5, "projectile_speed": null,
-          "attack_type": "beam", "beam_color": "STEEL_BLUE", 
-          "splash_radius": 50, "targets": ["ground", "air"]
+        "tech_ground_targeting_computer": {
+          "name": "Ground Targeting Computer", "grid_width": 1, "grid_height": 1, "cost": 70,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 700, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "aura", "splash_radius": null, "targets": [],
+          "special": {
+            "effect": "air_damage_aura",
+            "targets": ["towers"],
+            "aura_radius": 1200,
+            "air_damage_multiplier": 1.1, 
+            "description": "Nearby projectile towers deal 10% more damage to Air units."
+          }
+          
         },
         "tech_freeze_ray": {
           "name": "Freeze Ray", "grid_width": 1, "grid_height": 1, "cost": 120,
@@ -1637,8 +1644,14 @@
            "splash_radius": null, "targets": ["ground", "air"],
           "special": {"effect": "slow", "slow_percentage": 75}
         },
+        "tech_railgun": {
+          "name": "Railgun", "grid_width": 1, "grid_height": 2, "cost": 180,
+          "damage_min": 875, "damage_max": 1250, "damage_type": "chaos",
+          "range": 1000, "attack_interval": 6.5, "projectile_speed": 1200,
+          "attack_type": "projectile", "splash_radius": 100, "targets": ["ground", "air"]
+        },
         "tech_nuclear_silo": {
-          "name": "Nuclear Silo", "grid_width": 3, "grid_height": 3, "cost": 2500,
+          "name": "Nuclear Silo", "grid_width": 3, "grid_height": 3, "cost": 850,
           "damage_min": 30000, "damage_max": 35000,
           "damage_type": "chaos",
           "min_range": 1500,
@@ -1711,7 +1724,7 @@
           "special": {"effect": "slow", "slow_percentage": 40, "duration": 1.5}
         },
         "seadog_broadside_battery": {
-          "name": "Broadside Battery", "grid_width": 3, "grid_height": 3, "cost": 220,
+          "name": "Broadside Battery", "grid_width": 3, "grid_height": 3, "cost": 145,
           "damage_min": 180, "damage_max": 200, "damage_type": "siege",
           "range": 750, "attack_interval": 1.5, "projectile_speed": 400,
           "attack_type": "projectile", "splash_radius": 200, "targets": ["ground"],
@@ -1722,7 +1735,7 @@
           }
         },
         "seadog_kraken_caller": {
-          "name": "Kraken Caller", "grid_width": 3, "grid_height": 3, "cost": 550,
+          "name": "Kraken Caller", "grid_width": 3, "grid_height": 3, "cost": 335,
           "damage_min": 700, "damage_max": 800, "damage_type": "chaos",
           "range": 1000, "attack_interval": 3.5, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 950, "targets": ["ground", "air"]
@@ -1809,7 +1822,7 @@
       }
     },
     "solar": {
-      "description": "Harnessing the power of stars, these towers incinerate foes with focused beams and radiant heat.",
+      "description": "This faction incinerates foes with focused beams and radiant heat.",
       "towers": {
         "solar_wall": {
           "name": "Solar Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
@@ -1997,6 +2010,23 @@
         },
         "ogre_brute": {
           "name": "Ogre Brute",
+          "grid_width": 1,
+          "grid_height": 1,
+          "cost": 50,
+          "damage_min": 45,
+          "damage_max": 60,
+          "damage_type": "normal",
+          "range": 300,
+          "attack_interval": 1.8,
+          "projectile_speed": null,
+          "attack_type": "instant",
+          "splash_radius": null,
+          "targets": ["ground"],
+          "critical_chance": 0.20,
+          "critical_multiplier": 3.0
+        },
+        "ogre_war_drums": {
+          "name": "War Drums",
           "grid_width": 1,
           "grid_height": 1,
           "cost": 50,
