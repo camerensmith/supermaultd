@@ -1917,7 +1917,18 @@
             "damage_min": 56, "damage_max": 83, "damage_type": "piercing",
             "range": 785, "attack_interval": 1.0, "projectile_speed": 550,
           "attack_type": "beam", "beam_color": [165, 42, 42], "splash_radius": null, "targets": ["ground", "air"]
-        }, 
+        },
+        "nomad_bazaar": {
+          "name": "Bazaar", "grid_width": 2, "grid_height": 2, "cost": 75,
+          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "range": 0, "attack_interval": 999, "projectile_speed": null,
+          "attack_type": "none", "splash_radius": null, "targets": [],
+          "special": {
+            "effect": "gold_generation",
+            "amount": 5,
+            "interval": 10.0
+          }
+        },
         "nomad_spirit_ward": {
           "name": "Spirit Ward", "grid_width": 1, "grid_height": 1, "cost": 72,
           "damage_min": 999, "damage_max": 999, "damage_type": "arcane",
@@ -1984,17 +1995,6 @@
             "travel_speed": 50, 
             "description": "Launches a fixed-distance caravan that damages enemies it passes through and explodes at its destination."
           }
-        },
-        "nomad_bazaar": {
-          "name": "Bazaar", "grid_width": 2, "grid_height": 2, "cost": 75,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
-          "range": 0, "attack_interval": 999, "projectile_speed": null,
-          "attack_type": "none", "splash_radius": null, "targets": [],
-          "special": {
-            "effect": "gold_generation",
-            "amount": 5,
-            "interval": 10.0
-          }
         }
       }
     },
@@ -2011,12 +2011,12 @@
           "name": "Ogrekin",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 8,
+          "cost": 16,
           "damage_min": 8,
           "damage_max": 13,
           "damage_type": "normal",
           "range": 300,
-          "attack_interval": 1.8,
+          "attack_interval": 1.3,
           "projectile_speed": null,
           "attack_type": "instant",
           "splash_radius": null,
@@ -2024,39 +2024,63 @@
           "critical_chance": 0.20,
           "critical_multiplier": 3.0
         },
+        "ogre_mage": {
+          "name": "Ogre Mage",
+          "grid_width": 1,
+          "grid_height": 1,
+          "cost": 40,
+          "damage_min": 32,
+          "damage_max": 55,
+          "damage_type": "arcane",
+          "range": 400,
+          "attack_interval": 1.5,
+          "projectile_speed": 250,
+          "attack_type": "projectile",
+          "splash_radius": 50,
+          "targets": ["ground", "air"],
+          "critical_chance": 0.20,
+          "critical_multiplier": 4.0
+        },
         "ogre_brute": {
           "name": "Ogre Brute",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 50,
+          "cost": 55,
           "damage_min": 45,
           "damage_max": 60,
           "damage_type": "normal",
           "range": 300,
-          "attack_interval": 1.8,
+          "attack_interval": 1.5,
           "projectile_speed": null,
           "attack_type": "instant",
           "splash_radius": null,
           "targets": ["ground"],
           "critical_chance": 0.20,
-          "critical_multiplier": 3.0
+          "critical_multiplier": 4.0
         },
         "ogre_war_drums": {
           "name": "War Drums",
           "grid_width": 1,
           "grid_height": 1,
           "cost": 50,
-          "damage_min": 45,
-          "damage_max": 60,
+          "damage_min": 0,
+          "damage_max": 0,
           "damage_type": "normal",
-          "range": 300,
-          "attack_interval": 1.8,
+          "range": 400,
+          "attack_interval": 999,
           "projectile_speed": null,
-          "attack_type": "instant",
+          "attack_type": "aura",
           "splash_radius": null,
           "targets": ["ground"],
-          "critical_chance": 0.20,
-          "critical_multiplier": 3.0
+          "special": {
+            "effect": "crit_damage_pulse_aura",
+            "targets": ["towers"], 
+            "aura_radius": 450,         
+            "interval": 2.5,             
+            "duration": 1.0,             
+            "crit_multiplier_bonus": 0.5, 
+            "description": "Periodically pulses, granting nearby friendly towers +0.5 critical damage multiplier for 1 second."
+          }
         },
         "ogre_smasher": {
           "name": "Ogre Smasher",
@@ -2076,23 +2100,6 @@
             "effect": "stun",
             "duration": 0.5
           }
-        },
-        "ogre_mage": {
-          "name": "Ogre Mage",
-          "grid_width": 1,
-          "grid_height": 1,
-          "cost": 180,
-          "damage_min": 120,
-          "damage_max": 150,
-          "damage_type": "arcane",
-          "range": 400,
-          "attack_interval": 2.5,
-          "projectile_speed": 250,
-          "attack_type": "projectile",
-          "splash_radius": 50,
-          "targets": ["ground", "air"],
-          "critical_chance": 0.20,
-          "critical_multiplier": 4.0
         },
         "ogre_stomping_grounds": {
           "name": "Stomping Grounds",

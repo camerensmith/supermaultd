@@ -845,6 +845,42 @@ class GameScene:
                         print(f"DEBUG: Included {tower.tower_id} (Type: {tower.attack_type}, Effect: {effect_type}) in enemy_aura_towers.")
 
         
+        # --- NEW: Process Tower-Targeting PULSE Auras --- 
+        pulse_aura_towers = [
+            t for t in self.towers 
+            if t.special and 
+            t.special.get("effect") == "crit_damage_pulse_aura" and # Or other pulse effects targeting towers
+            "towers" in t.special.get("targets", [])
+        ]
+        
+        for pulse_tower in pulse_aura_towers:
+            special = pulse_tower.special
+            interval = special.get("interval", 1.0)
+            duration = special.get("duration", 1.0)
+            crit_bonus = special.get("crit_multiplier_bonus", 0.0)
+            aura_radius_sq = pulse_tower.aura_radius_pixels ** 2
+            
+            # Check if it's time to pulse
+            if current_game_time >= pulse_tower.last_pulse_time + interval:
+                pulse_tower.last_pulse_time = current_game_time # Update last pulse time
+                print(f"--- Tower {pulse_tower.tower_id} pulsing crit damage buff! ---")
+                
+                # Find target towers within range
+                targets_found = 0
+                for target_tower in self.towers:
+                    if target_tower == pulse_tower: continue # Don't buff self
+                    
+                    dist_sq = (target_tower.x - pulse_tower.x)**2 + (target_tower.y - pulse_tower.y)**2
+                    if dist_sq <= aura_radius_sq:
+                        # Apply the temporary buff
+                        target_tower.apply_pulsed_buff('crit_damage', crit_bonus, duration, current_game_time)
+                        targets_found += 1
+                        print(f"    -> Applied pulsed crit buff (+{crit_bonus}) to {target_tower.tower_id}")
+                
+                if targets_found > 0:
+                    print(f"--- Pulse buff applied to {targets_found} towers. ---")
+        # --- END Tower Pulse Aura Processing ---
+        
         # --- Update Towers --- 
         for tower in self.towers:
             # --- Call Tower's Internal Update (for self-managed abilities) --- 

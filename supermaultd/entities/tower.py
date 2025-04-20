@@ -190,6 +190,10 @@ class Tower:
         self.salvo_target = None
         # --- END Salvo State ---
 
+        # --- NEW: Pulsed Buff State ---
+        self.pulsed_buffs = {} # Stores temporary buffs like { 'crit_damage': {'value': 0.5, 'end_time': 123.4} }
+        # --- END Pulsed Buff State ---
+
         # Calculate derived stats
         self.calculate_derived_stats()
         
@@ -321,7 +325,7 @@ class Tower:
         return damage_min, damage_max, attack_speed
 
     def get_buffed_stats(self, current_time, tower_buff_auras, all_towers):
-        """Calculates effective stats based on active tower buff auras."""
+        """Calculates effective stats based on active tower buff auras and pulsed buffs."""
         total_speed_bonus_percent = 0.0
         total_damage_bonus_percent = 0.0
         total_crit_chance_bonus = 0.0
@@ -395,6 +399,22 @@ class Tower:
                     print(f"DEBUG: {self.tower_id} ({self.center_grid_x},{self.center_grid_y}) found {nearby_swarmer_count} nearby swarmers. Applying +{swarm_bonus_percent}% speed bonus.") # Debug
                     total_speed_bonus_percent += swarm_bonus_percent
         # --- End Swarm Power Check ---
+
+        # Check for expired pulsed buffs and remove them
+        expired_pulsed_keys = [k for k, v in self.pulsed_buffs.items() if current_time >= v['end_time']]
+        for key in expired_pulsed_keys:
+            del self.pulsed_buffs[key]
+            # Optional: print(f"DEBUG Tower {self.tower_id}: Pulsed buff '{key}' expired.")
+
+        # Apply active pulsed buffs
+        if 'crit_damage' in self.pulsed_buffs:
+            pulsed_crit_bonus = self.pulsed_buffs['crit_damage']['value']
+            total_crit_multiplier_bonus += pulsed_crit_bonus
+            # Optional: print(f"DEBUG Tower {self.tower_id}: Applying pulsed crit damage bonus: +{pulsed_crit_bonus}")
+        # Add checks for other pulsed buff types here if needed (e.g., 'attack_speed')
+        # if 'attack_speed' in self.pulsed_buffs:
+        #    pulsed_speed_bonus = self.pulsed_buffs['attack_speed']['value'] # Assuming value is % bonus
+        #    total_speed_bonus_percent += pulsed_speed_bonus
 
         # Calculate final multipliers and effective stats
         speed_multiplier = 1.0 + (total_speed_bonus_percent / 100.0)
@@ -1645,3 +1665,13 @@ class Tower:
         # --- END Gattling Spin-Down ---
                                     
         # --- Add other tower-specific update logic here if needed --- 
+
+    # --- NEW: Method to apply temporary pulsed buffs ---
+    def apply_pulsed_buff(self, buff_type, value, duration, current_time):
+        """Applies a temporary buff received from a pulse aura."""
+        if duration <= 0:
+            return
+        end_time = current_time + duration
+        self.pulsed_buffs[buff_type] = {'value': value, 'end_time': end_time}
+        # Optional: print(f"DEBUG Tower {self.tower_id}: Received pulsed buff '{buff_type}' (value: {value}) until {end_time:.2f}")
+    # --- END apply_pulsed_buff ---
