@@ -1024,6 +1024,7 @@
           "attack_type": "aura", 
           "special": {
               "effect": "slow_pulse_aura",
+              "visual_effect": "frost_pulse", 
               "targets": "enemies",
               "aura_radius": 300,
               "slow_percentage": 25,
@@ -1182,7 +1183,7 @@
           "special": {"effect": "slow_aura", "slow_percentage": 60, "aura_radius": 250}
         },
         "goblin_junk_thrower": {
-          "name": "Junk Thrower", "grid_width": 1, "grid_height": 1, "cost": 25,
+          "name": "Junk Thrower", "grid_width": 2, "grid_height": 2, "cost": 25,
           "damage_min": 15, "damage_max": 20, "damage_type": "normal",
           "range": 950, "attack_interval": 1.3, "projectile_speed": 150,
           "attack_type": "projectile", "splash_radius": 60, "targets": ["ground"],
@@ -1192,7 +1193,7 @@
           }
         },
         "goblin_ripper_mekk": {
-          "name": "Ripper Mekk", "grid_width": 1, "grid_height": 1, "cost": 140,
+          "name": "Ripper Mekk", "grid_width": 2, "grid_height": 2, "cost": 140,
           "damage_min": 44, "damage_max": 312, "damage_type": "normal",
           "range": 350, "attack_interval": 0.7, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": null, "targets": ["ground"],
@@ -1203,8 +1204,8 @@
             "description": "Has a 15% chance on hit to permanently shred 1 armor from the target."
           }
         },
-        "goblin_scrap_launcher": {
-          "name": "Scrap Launcher", "grid_width": 2, "grid_height": 2, "cost": 110,
+        "goblin_scrapper": {
+          "name": "Goblin Scrapper", "grid_width": 2, "grid_height": 2, "cost": 110,
           "damage_min": 10, "damage_max": 100, "damage_type": "siege",
           "range": 700, "attack_interval": 1.6, "projectile_speed": 300,
           "attack_type": "projectile", "splash_radius": 150, "targets": ["ground"],
@@ -1565,16 +1566,6 @@
             "spread_angle": 20
           }
         },
-        "police_sniper_tower": {
-          "name": "Sniper Tower", "grid_width": 1, "grid_height": 1, "cost": 240,
-          "damage_min": 500, "damage_max": 550, "damage_type": "piercing",
-          "range_min": 800, "range": 2200, "attack_interval": 3.0, "projectile_speed": null,
-          "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
-          "special": {
-              "effect": "mini_stun",
-              "stun_duration": 0.2
-          }
-        },
         "police_hq": {
           "name": "Police HQ", "grid_width": 5, "grid_height": 5, "cost": 300,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
@@ -1589,12 +1580,15 @@
             "description": "Boosts the damage of immediately adjacent towers."
           }
         },
-        "police_swat_truck": {
-          "name": "SWAT Truck", "grid_width": 1, "grid_height": 1, "cost": 180,
-          "damage_min": 40, "damage_max": 50, "damage_type": "piercing", 
-          "range": 750, "attack_interval": 0.6, 
-          "attack_type": "instant", 
-          "splash_radius": null, "targets": ["ground", "air"] 
+        "police_sniper_tower": {
+          "name": "Sniper Tower", "grid_width": 1, "grid_height": 1, "cost": 240,
+          "damage_min": 500, "damage_max": 550, "damage_type": "piercing",
+          "range_min": 800, "range": 2200, "attack_interval": 3.0, "projectile_speed": null,
+          "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
+          "special": {
+              "effect": "mini_stun",
+              "stun_duration": 0.2
+          }
         }
       }
     },
@@ -2023,7 +2017,7 @@
           "damage_min": 8,
           "damage_max": 13,
           "damage_type": "normal",
-          "range": 300,
+          "range": 235,
           "attack_interval": 1.3,
           "projectile_speed": null,
           "attack_type": "instant",
@@ -2057,7 +2051,7 @@
           "damage_min": 45,
           "damage_max": 60,
           "damage_type": "normal",
-          "range": 300,
+          "range": 235,
           "attack_interval": 1.5,
           "projectile_speed": null,
           "attack_type": "instant",
@@ -2084,36 +2078,17 @@
             "effect": "crit_damage_pulse_aura",
             "targets": ["towers"], 
             "aura_radius": 450,         
-            "interval": 2.5,             
-            "duration": 1.0,             
+            "interval": 5,             
+            "duration": 5,             
             "crit_multiplier_bonus": 0.5, 
             "description": "Periodically pulses, granting nearby friendly towers +0.5 critical damage multiplier for 1 second."
-          }
-        },
-        "ogre_smasher": {
-          "name": "Ogre Smasher",
-          "grid_width": 2,
-          "grid_height": 2,
-          "cost": 180,
-          "damage_min": 120,
-          "damage_max": 150,
-          "damage_type": "siege",
-          "range": 75,
-          "attack_interval": 2.5,
-          "projectile_speed": null,
-          "attack_type": "instant",
-          "splash_radius": 50,
-          "targets": ["ground"],
-          "special": {
-            "effect": "stun",
-            "duration": 0.5
           }
         },
         "ogre_stomping_grounds": {
           "name": "Stomping Grounds",
           "grid_width": 3,
           "grid_height": 3,
-          "cost": 250,
+          "cost": 100,
           "damage_min": 0,
           "damage_max": 0,
           "damage_type": "normal",
@@ -2131,27 +2106,49 @@
             "aura_radius": 500
           }
         },
+        "ogre_smasher": {
+          "name": "Ogre Smasher",
+          "grid_width": 2,
+          "grid_height": 2,
+          "cost": 180,
+          "damage_min": 120,
+          "damage_max": 150,
+          "damage_type": "siege",
+          "range": 400,
+          "attack_interval": 2.5,
+          "projectile_speed": null,
+          "attack_type": "instant",
+          "splash_radius": 50,
+          "critical_chance": 0.20,
+          "critical_multiplier": 3.0,
+          "targets": ["ground"],
+          "special": {
+            "effect": "stun",
+            "duration": 0.5
+          }
+        },
         "ogre_chieftain": {
           "name": "Ogre Chieftain",
           "grid_width": 2,
           "grid_height": 2,
-          "cost": 291,
-          "damage_min": 683,
-          "damage_max": 744,
+          "cost": 261,
+          "damage_min": 483,
+          "damage_max": 544,
           "attack_speed": 1,
-          "range": 300,
+          "range": 400,
           "attack_type": "instant",
           "damage_type": "normal",
           "targets": ["ground"],
           "splash_radius": 0,
+          "critical_chance": 0.20,
+          "critical_multiplier": 4.0,
           "special": {
             "effect": "berserk_trigger",
             "chance": 0.20,
             "duration": 4.0,
             "damage_bonus_percentage": 15.0,
             "description": "20% chance on attack to increase own damage by 15% for 4 seconds."
-          },
-          "upgrades": []
+          }
         }
       }
     },

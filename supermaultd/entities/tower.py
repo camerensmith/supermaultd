@@ -213,27 +213,35 @@ class Tower:
             os.path.join(sound_dir, f"{sound_basename}.wav")
         ]
         
-        found_path = None
         for path in possible_paths:
-            # --- Added Debug Print ---
-            print(f"  Checking for sound file at: {os.path.abspath(path)}") # <<< Let's add this
-            # ------------------------
-            if os.path.isfile(path): # <<< Potential Issue 2
-                found_path = path
-                break
+            if os.path.exists(path):
+                try:
+                    self.attack_sound = pygame.mixer.Sound(path)
+                    print(f"Loaded attack sound for {self.tower_id} from {path}")
+                    break # Sound found, stop searching
+                except pygame.error as e:
+                    print(f"Error loading sound {path}: {e}")
+        if not self.attack_sound:
+            print(f"Warning: No attack sound file found for {self.tower_id} (checked: {sound_basename}.mp3/wav)")
 
-        if found_path: # <<< This block is likely not being entered
-            try:
-                self.attack_sound = pygame.mixer.Sound(found_path)
-                print(f"DEBUG Tower INIT: Loaded attack sound '{os.path.basename(found_path)}' for {self.tower_id}")
-            except pygame.error as e:
-                print(f"Warning: Failed to load sound file '{os.path.basename(found_path)}' for tower {self.tower_id}: {e}")
-        else:
-             # --- Added Else Print ---
-             print(f"  DEBUG: NO sound file found for {self.tower_id} after checking paths.") # <<< Let's add this
-             # -----------------------
-             pass
-        # --- End Load Attack Sound ---
+        # --- NEW: Looping sound for Ogre War Drums ---
+        self.looping_sound_channel = None # Initialize attribute
+        if self.tower_id == 'ogre_war_drums':
+            drums_sound_path = os.path.join(sound_dir, "ogre_war_drums.mp3") # Assuming mp3
+            if os.path.exists(drums_sound_path):
+                try:
+                    drum_sound = pygame.mixer.Sound(drums_sound_path)
+                    self.looping_sound_channel = pygame.mixer.find_channel() # Find an available channel
+                    if self.looping_sound_channel:
+                        self.looping_sound_channel.play(drum_sound, loops=-1) # Play looping
+                        print(f"Started looping sound {drums_sound_path} on channel {self.looping_sound_channel}")
+                    else:
+                        print("Warning: No available sound channels for ogre_war_drums loop.")
+                except pygame.error as e:
+                    print(f"Error loading or playing ogre_war_drums sound {drums_sound_path}: {e}")
+            else:
+                print(f"Warning: Looping sound file not found: {drums_sound_path}")
+        # --- END Looping Sound ---
 
         # --- Beam Sound State ---
         self.is_beam_sound_playing = False

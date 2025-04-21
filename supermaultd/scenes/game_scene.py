@@ -864,7 +864,31 @@ class GameScene:
             if current_game_time >= pulse_tower.last_pulse_time + interval:
                 pulse_tower.last_pulse_time = current_game_time # Update last pulse time
                 print(f"--- Tower {pulse_tower.tower_id} pulsing crit damage buff! ---")
-                
+
+                # <<< ADDED: Create Visual Pulse Effect for Tower Buff Auras >>>
+                try:
+                    # Import math if not already imported at the top
+                    import math 
+                    # Use the pre-calculated aura_radius_pixels if available
+                    if hasattr(pulse_tower, 'aura_radius_pixels'):
+                        pulse_radius_pixels = pulse_tower.aura_radius_pixels
+                    else: # Fallback: Calculate from special data if needed
+                        aura_radius_units = special.get('aura_radius', 0)
+                        pulse_radius_pixels = aura_radius_units * (config.GRID_SIZE / 200.0) 
+                        
+                    pulse_color = (255, 0, 0, 100) # Faint RED (RGBA)
+                    pulse_duration = 0.5 # seconds
+                    pulse_effect = ExpandingCircleEffect(pulse_tower.x, pulse_tower.y, 
+                                                         pulse_radius_pixels, 
+                                                         pulse_duration, 
+                                                         pulse_color, thickness=2)
+                    self.effects.append(pulse_effect)
+                except NameError: # Catch if ExpandingCircleEffect wasn't imported
+                    print("ERROR: ExpandingCircleEffect class not found. Please ensure it's defined and imported.")
+                except Exception as e:
+                    print(f"Error creating {pulse_tower.tower_id} pulse effect: {e}")
+                # <<< END Added Visual Effect >>>
+
                 # Find target towers within range
                 targets_found = 0
                 for target_tower in self.towers:
@@ -1249,13 +1273,14 @@ class GameScene:
                     allowed_targets = special.get('targets', [])
                    
                     # --- Create Visual Pulse Effect --- 
-                    if tower.tower_id == 'alchemists_miasma_pillar': # <<< CORRECTED TYPO HERE
+                    if tower.tower_id == 'alchemists_miasma_pillar' or tower.tower_id == 'igloo_frost_pulser': 
                        
                         try:
                             # Import math if not already imported at the top
                             import math 
                             pulse_radius_pixels = math.sqrt(radius_sq)
-                            pulse_color = (0, 255, 0, 100) # Faint green (RGBA)
+                            # <<< MODIFIED: Changed color to blue >>>
+                            pulse_color = (0, 100, 255, 100) # Faint blue (RGBA)
                             pulse_duration = 0.5 # seconds
                             pulse_effect = ExpandingCircleEffect(tower.x, tower.y, 
                                                                  pulse_radius_pixels, 
@@ -2232,6 +2257,14 @@ class GameScene:
                 tower_to_sell.attack_sound.stop()
                 print(f"DEBUG: Stopped beam sound for sold tower {tower_to_sell.tower_id}")
             # --- End Stop Beam Sound ---
+
+            # --- NEW: Stop Looping Sound (Ogre War Drums) --- 
+            if tower_to_sell.tower_id == 'ogre_war_drums':
+                if hasattr(tower_to_sell, 'looping_sound_channel') and tower_to_sell.looping_sound_channel:
+                    print(f"Stopping looping sound for sold {tower_to_sell.tower_id} on channel {tower_to_sell.looping_sound_channel}")
+                    tower_to_sell.looping_sound_channel.stop()
+                    tower_to_sell.looping_sound_channel = None # Clear reference
+            # --- END Stop Looping Sound ---
 
             # Update UI display
             self.tower_selector.update_money(self.money)
