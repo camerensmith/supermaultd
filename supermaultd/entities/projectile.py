@@ -476,15 +476,28 @@ class Projectile:
         # --- Standard Splash Damage (Percentage Based) --- 
         if self.splash_radius > 0:
             splash_damage_amount = self.damage * 0.25 # Changed from 0.5 to 0.25
-            # Use pre-calculated splash_radius_sq
-            # splash_radius_sq = self.splash_radius ** 2 # Removed
-            print(f"... applying splash damage (Radius: {self.splash_radius}, Base Damage: {splash_damage_amount:.2f})")
+            
+            # --- NEW: Check for Crit Splash Increase --- 
+            effective_splash_radius_sq = self.splash_radius_sq # Start with base squared radius
+            crit_splash_multiplier = 1.0 # Default multiplier
+            if self.is_crit and self.source_tower and self.source_tower.special and self.source_tower.special.get("effect") == "crit_splash_increase":
+                crit_splash_multiplier = self.source_tower.special.get("crit_splash_multiplier", 1.0)
+                if crit_splash_multiplier != 1.0:
+                    # Calculate new radius and square it
+                    crit_radius = self.splash_radius * crit_splash_multiplier
+                    effective_splash_radius_sq = crit_radius ** 2
+                    print(f"    CRITICAL LANDSLIDE! Splash Radius increased to {crit_radius:.1f} (Multiplier: x{crit_splash_multiplier})")
+            # --- END Crit Splash Check --- 
+            
+            # Use pre-calculated splash_radius_sq (now potentially modified by crit)
+            print(f"... applying splash damage (Radius: {math.sqrt(effective_splash_radius_sq):.1f}, Base Damage: {splash_damage_amount:.2f})")
             
             enemies_splashed = 0
             for enemy in enemies:
                 if enemy != collided_enemy and enemy.health > 0: 
                     dist_sq = (enemy.x - impact_pos[0])**2 + (enemy.y - impact_pos[1])**2
-                    if dist_sq <= self.splash_radius_sq: # Use the stored squared value
+                    # Use the EFFECTIVE splash radius squared for check
+                    if dist_sq <= effective_splash_radius_sq: 
                         print(f"...... splashing {enemy.enemy_id} for {splash_damage_amount:.2f}")
                         self.apply_damage(enemy, damage_override=splash_damage_amount) # Override damage for splash
                         enemies_splashed += 1
