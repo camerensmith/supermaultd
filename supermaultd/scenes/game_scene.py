@@ -3,6 +3,7 @@ import pygame_gui
 import os # Need os for listing directory contents
 import random # Import random module
 import glob # <<< ADD IMPORT
+import math
 from copy import deepcopy  # Import deepcopy
 import config # Import config module directly
 # print(f"Imported config from: {config.__file__}") # DEBUG: Print path of imported config
@@ -867,8 +868,6 @@ class GameScene:
 
                 # <<< ADDED: Create Visual Pulse Effect for Tower Buff Auras >>>
                 try:
-                    # Import math if not already imported at the top
-                    import math 
                     # Use the pre-calculated aura_radius_pixels if available
                     if hasattr(pulse_tower, 'aura_radius_pixels'):
                         pulse_radius_pixels = pulse_tower.aura_radius_pixels
@@ -1288,7 +1287,6 @@ class GameScene:
                        
                         try:
                             # Import math if not already imported at the top
-                            import math 
                             pulse_radius_pixels = math.sqrt(radius_sq)
                             # <<< MODIFIED: Changed color to blue >>>
                             pulse_color = (0, 100, 255, 100) # Faint blue (RGBA)
@@ -1597,6 +1595,45 @@ class GameScene:
                                 if slow_percentage > 0:
                                     multiplier = 1.0 - (slow_percentage / 100.0)
                                     enemy.apply_status_effect('slow', time_delta * 1.5, multiplier, current_game_time)
+                                    
+                            # --- NEW: Vortex Damage Aura --- 
+                            elif effect_type == 'vortex_damage_aura':
+                                tick_interval = special.get('tick_interval', 0.1) 
+                                # Check interval using the tower's last_aura_tick_time
+                                if current_game_time >= tower.last_aura_tick_time + tick_interval:
+                                    # Update tick time ONCE per tower, after interval check
+                                    tower.last_aura_tick_time = current_game_time 
+                                    # Get damage parameters
+                                    min_dmg = special.get('min_damage_at_edge', 0)
+                                    max_dmg = special.get('max_damage_at_center', 0)
+                                    damage_type = special.get('damage_type', 'arcane')
+                                    aura_radius = special.get('aura_radius', 0) # Radius in abstract units
+                                    
+                                    # Calculate radius squared in pixels
+                                    radius_scale_factor = config.GRID_SIZE / 200.0
+                                    aura_radius_pixels = aura_radius * radius_scale_factor
+                                    aura_radius_pixels_sq = aura_radius_pixels ** 2
+
+                                    # Calculate distance squared (already have dist_sq from outer loop)
+                                    # dist_sq = (enemy.x - tower.x)**2 + (enemy.y - tower.y)**2
+                                    
+                                    if aura_radius_pixels > 0: # Avoid division by zero if radius is 0
+                                        # Calculate normalized distance (0 at center, 1 at edge)
+                                        normalized_distance = math.sqrt(dist_sq) / aura_radius_pixels
+                                        normalized_distance = max(0.0, min(1.0, normalized_distance)) # Clamp between 0 and 1
+                                        
+                                        # Calculate damage scale factor (1 at center, 0 at edge)
+                                        damage_scale_factor = 1.0 - normalized_distance
+                                        
+                                        # Calculate damage for this tick
+                                        damage_range = max_dmg - min_dmg
+                                        damage_this_tick = min_dmg + (damage_range * damage_scale_factor)
+                                        
+                                        if damage_this_tick > 0:
+                                            # print(f"DEBUG Vortex: Dist={math.sqrt(dist_sq):.1f}/{aura_radius_pixels:.1f}, NormDist={normalized_distance:.2f}, Scale={damage_scale_factor:.2f}, Dmg={damage_this_tick:.2f}") # Debug
+                                            enemy.take_damage(damage_this_tick, damage_type)
+                                            # Note: Need to update tower.last_aura_tick_time outside this inner enemy loop << FIXED
+                            # --- END Vortex Damage Aura --- 
 
             # --- Move Enemy --- 
             # Enemy.move() handles status updates internally

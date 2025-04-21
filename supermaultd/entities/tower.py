@@ -247,6 +247,10 @@ class Tower:
         self.is_beam_sound_playing = False
         # --- End Beam Sound State ---
 
+        # --- NEW: Continuous Aura Tick Timer ---
+        self.last_aura_tick_time = 0.0
+        # --- END Continuous Aura Tick Timer ---
+
     def calculate_derived_stats(self):
         """Calculates pixel dimensions and ranges based on grid size and tower data."""
         # Pixel dimensions based on grid size
