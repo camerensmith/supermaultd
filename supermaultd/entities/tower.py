@@ -629,6 +629,18 @@ class Tower:
                  print(f"ERROR: Tower {self.tower_id} attack called without target (and not broadside/whip).") # Updated print
                  return None # Should not happen if called correctly from GameScene
 
+            # --- NEW: Miss Chance Check --- 
+            if self.special and self.special.get("effect") == "miss_chance":
+                miss_chance_percent = self.special.get("chance", 0)
+                if random.random() * 100 < miss_chance_percent:
+                    # Make the MISS! message larger/more prominent
+                    print(f"\n***          MISS!          ***")
+                    print(f"*** Tower {self.tower_id} attack missed (Chance: {miss_chance_percent}%) ***\n")
+                    self.last_attack_time = current_time # Consume the attack cooldown
+                    # Optional: Play a miss sound?
+                    return None # Attack misses, do nothing further
+            # --- END Miss Chance Check ---
+
             # --- Check for Salvo Attack Initiation --- 
             if is_salvo_tower:
                 # <<< PLAY SOUND (First Shot) >>>

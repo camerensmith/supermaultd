@@ -825,19 +825,6 @@
           "range": 550, "attack_interval": 0.5, "projectile_speed": 400,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
         },
-        "stone_grounding_totem": {
-          "name": "Grounding Totem", "grid_width": 1, "grid_height": 1, "cost": 220,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
-          "range": 400, "attack_interval": 999, "projectile_speed": null,
-          "attack_type": "aura", "splash_radius": null, "targets": [],
-          "special": { 
-              "effect": "stun_pulse_aura",
-              "targets": ["air"],
-              "duration": 1.5,
-              "interval": 6.0,
-              "aura_radius": 400
-          }
-        },
         "stone_golem": {
           "name": "Golem", "grid_width": 2, "grid_height": 2, "cost": 75,
           "damage_min": 80, "damage_max": 90, "damage_type": "normal",
@@ -1176,11 +1163,11 @@
         "goblin_junk_thrower": {
           "name": "Junk Thrower", "grid_width": 1, "grid_height": 1, "cost": 25,
           "damage_min": 15, "damage_max": 20, "damage_type": "normal",
-          "range": 950, "attack_interval": 0.8, "projectile_speed": 150,
+          "range": 950, "attack_interval": 1.3, "projectile_speed": 150,
           "attack_type": "projectile", "splash_radius": 60, "targets": ["ground"],
           "special": {
             "effect": "quillspray",
-            "quill_count": 8
+            "quill_count": 10
           }
         },
         "goblin_ripper_mekk": {
@@ -1208,7 +1195,7 @@
           }
         },
         "goblin_catapult_brigade": {
-          "name": "Goblin Catapult Brigade", "grid_width": 3, "grid_height": 3, "cost": 250,
+          "name": "Goblin Catapult Brigade", "grid_width": 2, "grid_height": 2, "cost": 250,
           "damage_min": 800, "damage_max": 3000, "damage_type": "chaos",
           "range_min": 2500, "range": 3000, "attack_interval": 2.5, "projectile_speed": 350,
           "attack_type": "projectile", "splash_radius": 450, "targets": ["ground"],
