@@ -1082,27 +1082,27 @@
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": []
         },
-        "alien_alien_drone": {
+        "alien_drone": {
           "name": "Alien Drone", "grid_width": 1, "grid_height": 1, "cost": 14,
           "damage_min": 9, "damage_max": 11, "damage_type": "arcane",
-          "range": 600, "attack_interval": 0.6, "projectile_speed": 500,
+          "range": 600, "attack_interval": 0.6, "projectile_speed": 300,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
         },
         "alien_warper": {
           "name": "Warper", "grid_width": 1, "grid_height": 1, "cost": 30,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
-          "range": 300, "attack_interval": 999, "projectile_speed": null,
-          "attack_type": "instant", "splash_radius": null, "targets": []
+          "damage_min": 56, "damage_max": 56, "damage_type": "arcane",
+          "range": 300, "attack_interval": 1.3, "projectile_speed": 5000,
+          "attack_type": "projectile", "splash_radius": 375, "targets": ["ground", "air"]
         },
         "alien_ufo": {
           "name": "UFO", "grid_width": 2, "grid_height": 2, "cost": 100,
-          "damage_min": 50, "damage_max": 60, "damage_type": "arcane",
-          "range": 800, "attack_interval": 1.8, "projectile_speed": 350,
-          "attack_type": "projectile", "splash_radius": 130, "targets": ["ground", "air"]
+          "damage_min": 205, "damage_max": 211, "damage_type": "normal",
+          "range": 800, "attack_interval": 1.8, "projectile_speed": 280,
+          "attack_type": "projectile", "splash_radius": 330, "targets": ["ground", "air"]
         },
         "alien_void_ray": {
           "name": "Void Ray", "grid_width": 1, "grid_height": 1, "cost": 170,
-          "damage_min": 65, "damage_max": 65, "damage_type": "chaos",
+          "damage_min": 89, "damage_max": 105, "damage_type": "chaos",
           "range": 700, "attack_interval": 0.3, "projectile_speed": null,
           "attack_type": "beam", "splash_radius": null, "targets": ["ground", "air"]
         },

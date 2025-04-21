@@ -132,7 +132,7 @@ class OrbitingDamager:
              # Fallback if draw_projectile doesn't exist or fails
              print(f"Warning: Could not find draw method for orb asset '{self.asset_id}' in provided asset manager.")
              # Draw a simple circle as a fallback
-             pygame.draw.circle(screen, (255, 0, 255), (int(draw_x), int(draw_y)), self.collision_radius)
+             pygame.draw.circle(screen, (0, 0, 255), (int(draw_x), int(draw_y)), self.collision_radius)
         except Exception as e:
             print(f"Error drawing orb {self.asset_id}: {e}")
-            pygame.draw.circle(screen, (255, 0, 0), (int(draw_x), int(draw_y)), self.collision_radius) # Draw red circle on error
+            pygame.draw.circle(screen, (0, 0, 255), (int(draw_x), int(draw_y)), self.collision_radius) # Draw red circle on error
