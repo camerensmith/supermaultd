@@ -82,6 +82,7 @@ class TowerAssets:
             "alien_black_hole_generator": "black_hole.png", # Update Tower ID
             "pyro_flame_dancer": "flame_ring.png", # Added flame dancer mapping
             "goblin_shredder": "buzzsaw.png", # Added shredder mapping
+            "brine_vortex_monument": "brine_vortex_monument.png",
             # Add other towers/overlay visuals here
         }
 

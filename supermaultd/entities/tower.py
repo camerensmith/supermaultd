@@ -250,6 +250,26 @@ class Tower:
         # --- NEW: Continuous Aura Tick Timer ---
         self.last_aura_tick_time = 0.0
         # --- END Continuous Aura Tick Timer ---
+        
+        # --- Vortex Visual Rotation Timing --- <<< ADDED
+        self.vortex_visual_last_update_time = 0.0
+        self.vortex_visual_update_interval = 0.02 # Update ~20 times/sec
+        self.vortex_current_angle = 0.0
+        self.vortex_overlay_image = None # Initialize overlay storage
+        # --- END Vortex Visual Timing --- <<< ADDED
+
+        # --- Load Vortex Overlay Image (Specific Load) --- <<< ADDED
+        if self.tower_id == 'brine_vortex_monument':
+            vortex_image_path = os.path.join("assets", "effects", "brine_vortex_monument.png")
+            if os.path.exists(vortex_image_path):
+                try:
+                    self.vortex_overlay_image = pygame.image.load(vortex_image_path).convert_alpha()
+                    print(f"Loaded vortex overlay for {self.tower_id}")
+                except pygame.error as e:
+                    print(f"Error loading vortex overlay image {vortex_image_path}: {e}")
+            else:
+                print(f"Warning: Vortex overlay image not found: {vortex_image_path}")
+        # --- END Vortex Overlay Load --- <<< ADDED
 
     def calculate_derived_stats(self):
         """Calculates pixel dimensions and ranges based on grid size and tower data."""
@@ -1346,58 +1366,87 @@ class Tower:
         pygame.draw.rect(screen, BLACK, border_rect, 2) # 2 pixel thick black border
 
         # --- Draw Overlay Visual (if applicable) --- 
-        overlay_visual_img = tower_assets.get_overlay_visual(self.tower_id)
-        if overlay_visual_img: 
+        # REMOVED: overlay_visual_img = tower_assets.get_overlay_visual(self.tower_id)
+        # Check for the specifically loaded vortex image first
+        if self.tower_id == "brine_vortex_monument" and self.vortex_overlay_image:
+            # --- RE-ADDED ROTATION --- 
             current_time_ms = pygame.time.get_ticks()
-            rotation_speed_degrees = 0
-            target_scale_factor = 1.0 # Scale relative to tower size (1.0 = same size)
-            target_size = (self.width_pixels, self.height_pixels) # Default to tower footprint size
-            center_on_tower = True # Default to centering on tower footprint
+            current_time_sec = current_time_ms / 1000.0
+            rotation_speed_degrees = -45 # Clockwise 45 deg/sec
             
-            # Specific logic for different overlays
-            if self.tower_id == "alien_black_hole_generator": 
-                rotation_speed_degrees = 10 # Clockwise rotation for black hole
-                if self.aura_radius_pixels > 0: # Scale to aura if defined
-                    target_diameter = int(self.aura_radius_pixels * 2)
-                    target_size = (target_diameter, target_diameter)
-            elif self.tower_id == "pyro_flame_dancer":
-                rotation_speed_degrees = 360 # Fast clockwise rotation for flame ring
-                # Keep default target_size (tower footprint) and center_on_tower
-            elif self.tower_id == "goblin_shredder":
-                 rotation_speed_degrees = 720 # Very fast clockwise rotation for buzzsaw
-                # Keep default target_size (tower footprint) and center_on_tower
-            
-            # Apply rotation if needed
-            if rotation_speed_degrees != 0:
-                rotation_angle = (current_time_ms / 1000.0 * rotation_speed_degrees) % 360
-                rotated_overlay = pygame.transform.rotate(overlay_visual_img, rotation_angle)
-            else:
-                rotated_overlay = overlay_visual_img # No rotation needed
+            # Update Angle Periodically
+            if current_time_sec - self.vortex_visual_last_update_time >= self.vortex_visual_update_interval:
+                time_since_last_update = current_time_sec - self.vortex_visual_last_update_time
+                self.vortex_current_angle = (self.vortex_current_angle + rotation_speed_degrees * time_since_last_update) % 360
+                self.vortex_visual_last_update_time = current_time_sec
                 
-            # Apply scaling
-            try:
-                # Check if target size is different from the rotated image size
-                if target_size[0] != rotated_overlay.get_width() or target_size[1] != rotated_overlay.get_height():
-                    scaled_rotated_overlay = pygame.transform.smoothscale(rotated_overlay, target_size)
+            # Rotate the original overlay image using the current angle
+            overlay_image_to_draw = pygame.transform.rotate(self.vortex_overlay_image, self.vortex_current_angle)
+            # --- END RE-ADDED ROTATION --- 
+            
+            # No scaling calculation needed
+            
+            # Determine center point for blitting (center on tower's logical center)
+            center_x = int(self.x + offset_x)
+            center_y = int(self.y + offset_y)
+            
+            # Get rect centered correctly and blit the ROTATED image
+            overlay_rect = overlay_image_to_draw.get_rect(center=(center_x, center_y))
+            screen.blit(overlay_image_to_draw, overlay_rect.topleft)
+
+        # --- Fallback for other overlays (unchanged) --- 
+        else:
+            overlay_visual_img = tower_assets.get_overlay_visual(self.tower_id)
+            if overlay_visual_img: 
+                current_time_ms = pygame.time.get_ticks()
+                rotation_speed_degrees = 0
+                target_scale_factor = 1.0 # Scale relative to tower size (1.0 = same size)
+                target_size = (self.width_pixels, self.height_pixels) # Default to tower footprint size
+                center_on_tower = True # Default to centering on tower footprint
+                
+                # Specific logic for different overlays
+                if self.tower_id == "alien_black_hole_generator": 
+                    rotation_speed_degrees = 10 # Clockwise rotation for black hole
+                    if self.aura_radius_pixels > 0: # Scale to aura if defined
+                        target_diameter = int(self.aura_radius_pixels * 2)
+                        target_size = (target_diameter, target_diameter)
+                elif self.tower_id == "pyro_flame_dancer":
+                    rotation_speed_degrees = 360 # Fast clockwise rotation for flame ring
+                    # Keep default target_size (tower footprint) and center_on_tower
+                elif self.tower_id == "goblin_shredder":
+                     rotation_speed_degrees = 720 # Very fast clockwise rotation for buzzsaw
+                    # Keep default target_size (tower footprint) and center_on_tower
+                
+                # Apply rotation if needed
+                if rotation_speed_degrees != 0:
+                    rotation_angle = (current_time_ms / 1000.0 * rotation_speed_degrees) % 360
+                    rotated_overlay = pygame.transform.rotate(overlay_visual_img, rotation_angle)
                 else:
-                    scaled_rotated_overlay = rotated_overlay # No scaling needed
-                
-                # Determine center point for blitting
-                if center_on_tower:
-                     center_x = draw_pixel_x + self.width_pixels // 2
-                     center_y = draw_pixel_y + self.height_pixels // 2
-                else: # Use tower's logical center (self.x, self.y) + offset
-                    center_x = int(self.x + offset_x)
-                    center_y = int(self.y + offset_y)
-                
-                # Get rect centered correctly and blit
-                overlay_rect = scaled_rotated_overlay.get_rect(center=(center_x, center_y))
-                screen.blit(scaled_rotated_overlay, overlay_rect.topleft)
-                
-            except ValueError: # Catch potential zero dimensions during scaling
-                 pass 
-            except Exception as e:
-                print(f"Error drawing overlay visual for {self.tower_id}: {e}")
+                    rotated_overlay = overlay_visual_img # No rotation needed
+                    
+                # Apply scaling
+                try:
+                    # Check if target size is different from the rotated image size
+                    if target_size[0] != rotated_overlay.get_width() or target_size[1] != rotated_overlay.get_height():
+                        scaled_rotated_overlay = pygame.transform.smoothscale(rotated_overlay, target_size)
+                    else:
+                        scaled_rotated_overlay = rotated_overlay # No scaling needed
+                    
+                    # Determine center point for blitting
+                    if center_on_tower:
+                         center_x = draw_pixel_x + self.width_pixels // 2
+                         center_y = draw_pixel_y + self.height_pixels // 2
+                    else: # Use tower's logical center (self.x, self.y) + offset
+                        center_x = int(self.x + offset_x)
+                        center_y = int(self.y + offset_y)
+                    
+                    # Get rect centered correctly and blit
+                    overlay_rect = scaled_rotated_overlay.get_rect(center=(center_x, center_y))
+                    screen.blit(scaled_rotated_overlay, overlay_rect.topleft)
+                except ValueError: # Catch potential zero dimensions during scaling
+                     pass 
+                except Exception as e:
+                    print(f"Error drawing overlay visual for {self.tower_id}: {e}")
         # --- End Overlay Visual --- 
 
         # REMOVE Range indicator drawing from here
