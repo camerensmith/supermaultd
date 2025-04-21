@@ -924,11 +924,20 @@ class GameScene:
             buffed_stats = tower.get_buffed_stats(current_game_time, self.tower_buff_auras, self.towers) # Buffs influence interval/damage
             effective_interval = buffed_stats['attack_interval'] # Use the buffed interval
             
-            # --- Gold Generation Check --- 
-            if tower.special and tower.special.get("effect") == "gold_generation":
+            # --- Gold Generation Check (Modified for Random) --- 
+            if tower.special:
+                effect_type = tower.special.get("effect")
+                amount = 0 # Initialize amount
                 interval = tower.special.get("interval", 10.0) 
+                
                 if current_game_time - tower.last_pulse_time >= interval:
-                    amount = tower.special.get("amount", 0)
+                    if effect_type == "random_gold_generation":
+                        min_gold = tower.special.get("min_gold", 1)
+                        max_gold = tower.special.get("max_gold", 1)
+                        amount = random.randint(min_gold, max_gold) # Generate random amount
+                    elif effect_type == "gold_generation":
+                        amount = tower.special.get("amount", 0) # Get fixed amount
+                    
                     if amount > 0:
                         self.money += amount
                         self.tower_selector.update_money(self.money)
@@ -950,7 +959,9 @@ class GameScene:
                         except Exception as e:
                             print(f"Error creating gold text effect: {e}")
                             
+                    # Update pulse time ONLY if the interval check passed
                     tower.last_pulse_time = current_game_time 
+            # --- End Gold Generation --- 
             
             # --- Specific Broadside Firing Logic --- 
             is_broadside = tower.special and tower.special.get("effect") == "broadside"

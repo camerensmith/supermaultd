@@ -1141,6 +1141,16 @@ class Tower:
             target.apply_status_effect('stun', stun_duration, True, current_time)
             print(f"Tower {self.tower_id} applied instant STUN to {target.enemy_id} for {stun_duration}s")
 
+        # --- NEW: Bash Chance Logic ---
+        elif effect_type == "bash_chance":
+            chance = self.special.get("chance_percent", 0)
+            if random.random() * 100 < chance:
+                stun_duration = self.special.get("stun_duration", 0.1) # Get mini-stun duration
+                if stun_duration > 0:
+                    target.apply_status_effect('stun', stun_duration, True, current_time)
+                    print(f"Tower {self.tower_id} BASHED {target.enemy_id} for {stun_duration}s (Chance: {chance}%)")
+        # --- END Bash Chance Logic ---
+
         # Add other instant-applicable effects here (e.g., direct DoT application?)
         # Careful not to duplicate effects handled by projectiles
         

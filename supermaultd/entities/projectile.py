@@ -359,8 +359,8 @@ class Projectile:
             # --- End Killing Blow Check ---
             # Capture the full result dictionary from apply_damage
             damage_result = self.apply_damage(collided_enemy)
+            was_killed = damage_result.get('was_killed', False)
             primary_damage_dealt = damage_result.get('damage_dealt', 0)
-            was_killed_by_this_hit = damage_result.get('was_killed', False)
             bounty_triggered = damage_result.get('bounty_triggered', False)
             gold_penalty = damage_result.get('gold_penalty', 0)
             # --- End capture result ---
@@ -381,7 +381,7 @@ class Projectile:
             # --- End On-Hit Tower Special Effects ---
 
             # --- Trigger Gold On Kill (After damage applied) ---
-            if was_killed_by_this_hit and self.special_on_kill_data:
+            if was_killed and self.special_on_kill_data:
                 chance = self.special_on_kill_data.get("chance_percent", 0)
                 amount = self.special_on_kill_data.get("gold_amount", 0)
                 if amount > 0 and random.random() * 100 < chance:
@@ -426,6 +426,45 @@ class Projectile:
                     print(f"... projectile applied {dot_name} DoT ({amplified_dot_damage:.1f}/{dot_interval}s for {dot_duration}s) to {collided_enemy.enemy_id}")
                     # Record that this effect was applied in results (optional)
                     results['special_effects_applied'].append(f'{dot_name}_dot')
+
+            if was_killed:
+                results['enemies_killed'].append(collided_enemy)
+                # Check for gold on kill (only primary target for projectile)
+                if self.special_on_kill_data:
+                    chance = self.special_on_kill_data.get("chance_percent", 0)
+                    amount = self.special_on_kill_data.get("gold_amount", 0)
+                    if amount > 0 and random.random() * 100 < chance:
+                        results['gold_added'] = results.get('gold_added', 0) + amount
+                # Check for bounty penalty
+                if bounty_triggered:
+                    results['gold_penalty'] = results.get('gold_penalty', 0) + gold_penalty
+
+            # --- Apply standard on-hit effects AFTER primary damage --- 
+            if collided_enemy and collided_enemy.health > 0: # Only apply effects if target survived
+                # Apply special effects from projectile/tower
+                if self.special_effect:
+                    effect_result = self.apply_special_effects(collided_enemy, current_time)
+                    if effect_result:
+                        results['special_effects_applied'].append((collided_enemy, effect_result))
+                
+                # --- NEW: Apply Bash Chance from Source Tower --- 
+                if self.source_tower and self.source_tower.special:
+                    effect_type = self.source_tower.special.get("effect")
+                    if effect_type == "bash_chance":
+                        chance = self.source_tower.special.get("chance_percent", 0)
+                        if random.random() * 100 < chance:
+                            stun_duration = self.source_tower.special.get("stun_duration", 0.1)
+                            if stun_duration > 0:
+                                collided_enemy.apply_status_effect('stun', stun_duration, True, current_time)
+                                print(f"Projectile from {self.source_tower.tower_id} BASHED {collided_enemy.enemy_id} for {stun_duration}s (Chance: {chance}%)")
+                # --- END Bash Chance --- 
+                
+                # --- Apply Armor Reduction on Hit (from source tower's special) --- 
+                if self.source_tower and self.source_tower.special and self.source_tower.special.get("effect") == "armor_reduction_on_hit":
+                    amount = self.source_tower.special.get("armor_reduction_amount", 1)
+                    if hasattr(collided_enemy, 'reduce_armor'):
+                        collided_enemy.reduce_armor(amount)
+                        print(f"... applied armor reduction ({amount}) to {collided_enemy.enemy_id}")
 
         else:
             print(f"Projectile reached max distance or target location ({int(impact_pos[0])}, {int(impact_pos[1])}) without hitting valid enemy.")
