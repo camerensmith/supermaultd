@@ -194,6 +194,13 @@ class Tower:
         self.pulsed_buffs = {} # Stores temporary buffs like { 'crit_damage': {'value': 0.5, 'end_time': 123.4} }
         # --- END Pulsed Buff State ---
 
+        # --- NEW: Pulse Animation State ---
+        self.pulse_start_time = 0
+        self.pulse_radius = 0
+        self.pulse_alpha = 255
+        self.pulse_duration = 2.5  # Match the interval from tower_races.json
+        # --- END Pulse Animation State ---
+
         # Calculate derived stats
         self.calculate_derived_stats()
         
@@ -306,13 +313,6 @@ class Tower:
         self.miasma_pulse_radius = 0
         self.miasma_pulse_alpha = 255
         # --- End Miasma Pulse State ---
-
-        # --- Pulse Animation State ---
-        self.pulse_start_time = 0.0
-        self.pulse_duration = 1.0  # 1 second for full pulse cycle
-        self.pulse_radius = 0
-        self.pulse_alpha = 255
-        # --- End Pulse State ---
 
     def calculate_derived_stats(self):
         """Calculates pixel dimensions and ranges based on grid size and tower data."""
@@ -1600,208 +1600,54 @@ class Tower:
             game_scene_add_projectile_callback: Callback to add projectiles.
             asset_loader: Function to load assets.
         """
-        self.asset_loader = asset_loader 
+        self.asset_loader = asset_loader
 
-        # --- Salvo Firing Logic (Runs every frame if active) ---
-        if self.salvo_shots_remaining > 0 and current_time >= self.salvo_next_shot_time:
-            if self.salvo_target and self.salvo_target.health > 0:
-                # Target still valid, fire next shot
-                print(f"... Salvo Firing shot {self.special.get('salvo_count', 1) - self.salvo_shots_remaining + 1} for {self.tower_id}")
-                # Calculate damage (can reuse calculate_damage or simplify)
-                # Simplifying here - assuming no buffs needed for subsequent salvo shots
-                base_dmg = random.uniform(self.base_damage_min, self.base_damage_max)
-                is_crit = False # Salvo shots don't crit by default?
+        # --- Frost Pulse Aura Effect ---
+        if self.special and self.special.get("effect") == "slow_pulse_aura":
+            # Check if it's time for a new pulse
+            if current_time - self.last_pulse_time >= self.special.get("interval", 2.5):
+                self.last_pulse_time = current_time
+                pulse_duration = self.special.get("duration", 1.0)
+                slow_percentage = self.special.get("slow_percentage", 80)
+                slow_multiplier = 1.0 - (slow_percentage / 100.0)
+                targets = self.special.get("targets", ["ground", "air"])
                 
-                # Use buffed stats for splash radius
-                # Note: This requires buffed_stats to be calculated or passed differently if needed here
-                # Using base splash for simplicity in update loop
-                splash_rad_pixels = self.splash_radius_pixels 
-                
-                projectile = Projectile(self.x, self.y, base_dmg, self.projectile_speed, 
-                                      self.tower_data.get('projectile_asset_id', self.tower_id),
-                                      target_enemy=self.salvo_target, 
-                                      splash_radius=splash_rad_pixels,
-                                      source_tower=self, is_crit=is_crit, 
-                                      special_effect=self.special,
-                                      damage_type=self.damage_type,
-                                      bounces_remaining=self.bounce,
-                                      bounce_range_pixels=self.bounce_range_pixels,
-                                      bounce_damage_falloff=self.bounce_damage_falloff,
-                                      pierce_adjacent=self.pierce_adjacent,
-                                      asset_loader=self.asset_loader)
-                game_scene_add_projectile_callback(projectile)
-
-                # Decrement and schedule next shot
-                self.salvo_shots_remaining -= 1
-                if self.salvo_shots_remaining > 0:
-                    salvo_interval = self.special.get("salvo_interval", 0.1)
-                    self.salvo_next_shot_time = current_time + salvo_interval
-                else:
-                    # Salvo finished
-                    print(f"... Salvo complete for {self.tower_id}")
-                    self.salvo_target = None # Clear target
-            else:
-                # Target lost or died during salvo
-                print(f"... Salvo target lost for {self.tower_id}, stopping salvo.")
-                self.salvo_shots_remaining = 0
-                self.salvo_target = None
-        # --- END Salvo Firing Logic ---
-
-        # --- Fixed Distance Pass Through Exploder Logic --- 
-        if self.special and self.special.get("effect") == "fixed_distance_pass_through_explode":
-            # Check cooldown based on tower's attack_interval
-            if current_time - self.last_attack_time >= self.attack_interval:
-                # Find target simply to determine initial direction
-                target = None
-                potential_targets = []
+                # Find enemies in range
                 for enemy in all_enemies:
-                    if enemy.health > 0 and enemy.type in self.targets and self.is_in_range(enemy.x, enemy.y):
-                        potential_targets.append(enemy)
+                    if enemy.health > 0 and enemy.type in targets:
+                        # Calculate distance to enemy
+                        dx = enemy.x - self.x
+                        dy = enemy.y - self.y
+                        dist_sq = dx*dx + dy*dy
+                        if dist_sq <= self.aura_radius_pixels * self.aura_radius_pixels:
+                            # Apply slow effect
+                            enemy.apply_status_effect('slow', pulse_duration, slow_multiplier, current_time)
+                            print(f"Frost Pulse from {self.tower_id} slowed {enemy.enemy_id} by {slow_percentage}% for {pulse_duration}s")
+        # --- End Frost Pulse Aura Effect ---
+
+        # --- Miasma Pillar DOT Pulse Effect ---
+        if self.special and self.special.get("effect") == "dot_pulse_aura":
+            # Check if it's time for a new pulse
+            if current_time - self.last_pulse_time >= self.special.get("interval", 0.5):
+                self.last_pulse_time = current_time
+                dot_damage = self.special.get("dot_damage", 18)
+                dot_interval = self.special.get("dot_interval", 0.5)
+                dot_duration = self.special.get("dot_duration", 5.0)
+                dot_damage_type = self.special.get("dot_damage_type", "arcane")
+                targets = self.special.get("targets", ["ground", "air"])
                 
-                if potential_targets:
-                    # Simple targeting: closest or first (doesn't really matter as it only sets direction)
-                    potential_targets.sort(key=lambda e: (e.x - self.x)**2 + (e.y - self.y)**2)
-                    target = potential_targets[0]
-                    
-                    print(f"Tower {self.tower_id} launching PassThroughExploder towards {target.enemy_id}")
-                    # Create the new entity, passing the asset_loader
-                    exploder = PassThroughExploder(self, target, self.special, asset_loader) 
-                    # Use the CORRECT callback for exploders
-                    game_scene_add_exploder_callback(exploder)
-                    
-                    # Update tower's cooldown timer
-                    self.last_attack_time = current_time
-                # else: # No target in range, do nothing this frame
-                    # print(f"Tower {self.tower_id} PassThroughExploder ready, but no target in range.")
-                    
-        # --- NEW: Random Bombardment Logic ---
-        if self.special and self.special.get("effect") == "random_bombardment":
-            interval = self.special.get("interval", 5.0) # Get interval from special
-            if current_time - self.last_attack_time >= interval:
-                bombard_radius_units = self.special.get("bombardment_radius", 0)
-                # --- Apply the same scaling as standard range ---
-                range_scale_factor = GRID_SIZE / 200.0 
-                bombard_radius = bombard_radius_units * range_scale_factor # Convert to pixels/game units
-                # --- End Scaling ---
-                strike_aoe_radius = self.special.get("strike_aoe_radius", 0)
-                strike_aoe_radius_sq = strike_aoe_radius ** 2
-
-                if bombard_radius > 0 and strike_aoe_radius > 0:
-                    # Pick a random angle and distance within the bombardment radius
-                    rand_angle = random.uniform(0, 2 * math.pi)
-                    # Use sqrt(random) for uniform area distribution
-                    rand_dist = bombard_radius * math.sqrt(random.random()) # Use the scaled radius
-                    
-                    # Calculate strike point coordinates relative to tower center
-                    strike_x = self.x + math.cos(rand_angle) * rand_dist
-                    strike_y = self.y + math.sin(rand_angle) * rand_dist
-                    
-                    print(f"Tower {self.tower_id} triggering random bombardment at ({strike_x:.1f}, {strike_y:.1f})")
-
-                    # Calculate damage for this strike
-                    strike_dmg_min = self.special.get("strike_damage_min", 0)
-                    strike_dmg_max = self.special.get("strike_damage_max", 0)
-                    strike_dmg_type = self.special.get("strike_damage_type", "normal")
-                    strike_damage = random.uniform(strike_dmg_min, strike_dmg_max)
-
-                    # Find enemies within the strike AOE
-                    enemies_hit_count = 0
-                    for enemy in all_enemies:
-                        if enemy.health > 0:
-                            dist_sq = (enemy.x - strike_x)**2 + (enemy.y - strike_y)**2
-                            if dist_sq <= strike_aoe_radius_sq:
-                                print(f"... hitting {enemy.enemy_id} for {strike_damage:.2f}")
-                                enemy.take_damage(strike_damage, strike_dmg_type)
-                                enemies_hit_count += 1
-                    
-                    # Create visual explosion effect at strike point
-                    try:
-                        # Use game scene callback to add the effect
-                        # We need grid offsets passed into update or calculated here
-                        # Correctly access imported config constants
-                        grid_offset_x = UI_PANEL_PADDING
-                        grid_offset_y = UI_PANEL_PADDING
-                        # Calculate screen coords for the effect
-                        effect_screen_x = strike_x + grid_offset_x
-                        effect_screen_y = strike_y + grid_offset_y
-                        
-                        # Create a simple effect (like RisingFadeEffect or a new ExplosionEffect)
-                        # Load the specific bombardment image
-                        if self.asset_loader:
-                            explosion_img = self.asset_loader("assets/effects/bomb_barrage_beacon.png") # Use the correct image path
-                            if explosion_img:
-                                # Using RisingFadeEffect - scales and fades. Adjust class/params if needed.
-                                explosion_effect = RisingFadeEffect(effect_screen_x, effect_screen_y, explosion_img, duration=0.6, start_scale=0.1, end_scale=1.5)
-                                # Use the CORRECT callback for visual effects
-                                game_scene_add_effect_callback(explosion_effect)
-                            else: 
-                                print("Warning: Could not load bomb_barrage_beacon.png for bombardment effect.")
-                        else:
-                             print("Warning: Asset loader not available in Tower.update for bombardment effect.")
-                             
-                    except Exception as e:
-                        print(f"Error creating bombardment visual effect: {e}")
-
-                    # Update tower's cooldown timer
-                    self.last_attack_time = current_time 
-        # --- END Random Bombardment Logic ---
-
-        # --- NEW: Bribe Kill Logic ---
-        if self.special and self.special.get("effect") == "bribe_kill":
-            interval = self.special.get("interval", 3.0) 
-            if current_time - self.last_pulse_time >= interval:
-                bribe_chance = self.special.get("bribe_chance_percent", 0)
-                # Roll the dice
-                if random.random() * 100 < bribe_chance:
-                    bribe_radius = self.special.get("bribe_radius", 0)
-                    bribe_radius_sq = bribe_radius ** 2
-                    bribe_cost = self.special.get("bribe_cost", 0)
-                    excluded_ids = self.special.get("excluded_enemy_ids", [])
-
-                    if bribe_radius > 0 and bribe_cost > 0:
-                        # Find closest valid target
-                        closest_target = None
-                        min_dist_sq = float('inf')
-
-                        for enemy in all_enemies:
-                            if (enemy.health > 0 and 
-                                enemy.enemy_id not in excluded_ids):
-                                dist_sq = (enemy.x - self.x)**2 + (enemy.y - self.y)**2
-                                if dist_sq <= bribe_radius_sq and dist_sq < min_dist_sq:
-                                    min_dist_sq = dist_sq
-                                    closest_target = enemy
-                        
-                        # Attempt bribe if target found
-                        if closest_target:
-                            print(f"Tower {self.tower_id} attempting bribe on {closest_target.enemy_id} (Cost: {bribe_cost}). Chance: {bribe_chance}%")
-                            # Check affordability using callback
-                            if game_scene_can_afford_callback(bribe_cost):
-                                # Deduct money using callback
-                                if game_scene_deduct_money_callback(bribe_cost):
-                                    print(f"$$$ BRIBE SUCCESSFUL on {closest_target.enemy_id}! Deducted {bribe_cost}.")
-                                    # Instantly kill the enemy
-                                    closest_target.take_damage(999999, "bribe") # Use high damage and unique type
-                                    # Create visual effect (e.g., floating money sign)
-                                    try:
-                                        # Assuming config access is fixed
-                                        grid_offset_x = UI_PANEL_PADDING
-                                        grid_offset_y = UI_PANEL_PADDING
-                                        text_x = closest_target.x + grid_offset_x
-                                        text_y = closest_target.y + grid_offset_y - (GRID_SIZE * 0.5) # Above enemy
-                                        bribe_text = "$ BRIBE $"
-                                        bribe_color = (0, 200, 0) # Green
-                                        text_effect = FloatingTextEffect(text_x, text_y, bribe_text, color=bribe_color, font_size=20, duration=1.5)
-                                        game_scene_add_effect_callback(text_effect)
-                                    except Exception as e:
-                                        print(f"Error creating bribe text effect: {e}")
-                                else:
-                                     print(f"... Bribe failed (Deduction callback returned False?)") # Should not happen if can_afford passed
-                            else:
-                                print(f"... Bribe failed (Cannot afford {bribe_cost})")
-                        # else: print(f"... No valid target found for bribe attempt.") # Optional
-                # Update tower's cooldown timer regardless of success/target found AFTER chance roll passes
-                self.last_pulse_time = current_time 
-        # --- END Bribe Kill Logic ---
+                # Find enemies in range
+                for enemy in all_enemies:
+                    if enemy.health > 0 and enemy.type in targets:
+                        # Calculate distance to enemy
+                        dx = enemy.x - self.x
+                        dy = enemy.y - self.y
+                        dist_sq = dx*dx + dy*dy
+                        if dist_sq <= self.aura_radius_pixels * self.aura_radius_pixels:
+                            # Apply DOT effect
+                            enemy.apply_dot_effect("miasma", dot_damage, dot_interval, dot_duration, dot_damage_type, current_time)
+                            print(f"Miasma Pillar from {self.tower_id} applied DOT to {enemy.enemy_id} ({dot_damage} {dot_damage_type} every {dot_interval}s for {dot_duration}s)")
+        # --- End Miasma Pillar DOT Pulse Effect ---
 
         # --- Rampage Stack Decay Logic ---
         if self.rampage_stacks > 0 and self.special and self.special.get("effect") == "rampage_damage_stack":

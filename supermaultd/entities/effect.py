@@ -1174,3 +1174,46 @@ class FloatingTextEffect:
              screen.blit(self.text_surf, self.rect)
         except Exception as e:
             print(f"Error rendering/drawing FloatingTextEffect: {e}") 
+
+class FrostPulseEffect:
+    """Visual effect for the Frost Pulse tower's slow aura."""
+    def __init__(self, x, y, radius, duration):
+        self.x = x
+        self.y = y
+        self.radius = radius
+        self.duration = duration
+        self.life_remaining = duration
+        self.finished = False
+        
+    def update(self, time_delta):
+        """Update the effect's lifetime."""
+        self.life_remaining -= time_delta
+        if self.life_remaining <= 0:
+            self.finished = True
+            return True
+        return False
+        
+    def draw(self, screen, offset_x=0, offset_y=0):
+        """Draw the expanding frost pulse effect."""
+        if self.finished:
+            return
+            
+        # Calculate current radius based on lifetime
+        progress = 1.0 - (self.life_remaining / self.duration)
+        current_radius = self.radius * progress
+        
+        # Calculate alpha based on lifetime
+        alpha = int(255 * (1.0 - progress))
+        
+        # Create a surface for the pulse
+        pulse_surface = pygame.Surface((int(current_radius * 2), int(current_radius * 2)), pygame.SRCALPHA)
+        
+        # Draw the pulse circle
+        pygame.draw.circle(pulse_surface, (0, 200, 255, alpha), 
+                         (int(current_radius), int(current_radius)), 
+                         int(current_radius), 2)
+        
+        # Blit the pulse surface to the screen
+        screen.blit(pulse_surface, 
+                   (self.x - current_radius + offset_x, 
+                    self.y - current_radius + offset_y)) 

@@ -1312,6 +1312,19 @@ class GameScene:
                             self.effects.append(pulse_effect)
                             print(f"ULTRA-VISIBLE: Created FILLED miasma_pillar effect")
                         elif tower.tower_id == 'igloo_frost_pulse':
+                            pulse_color = (0, 200, 255, 120)  # Light blue with transparency
+                            pulse_thickness = 0  # Use filled circle
+                            pulse_duration = 0.8  # Longer duration to be more visible
+                            pulse_effect = ExpandingCircleEffect(
+                                tower.x, 
+                                tower.y, 
+                                pulse_radius_pixels, 
+                                pulse_duration, 
+                                pulse_color, 
+                                thickness=pulse_thickness,
+                                filled=True  # Use filled circle instead of outline
+                            )
+                            self.effects.append(pulse_effect)
                             print(f"PULSE-DEBUG: Created {pulse_color} pulse effect for {tower.tower_id} with radius {pulse_radius_pixels:.1f}px")
                         else:
                             pulse_color = (255, 0, 0, 100)  # Default faint red (RGBA)
@@ -1334,10 +1347,8 @@ class GameScene:
                     # Now find and affect ALL valid enemies in range
                     for enemy in self.enemies: # Iterate through all current enemies
                         # --- DEBUG: Target Type & Range Pre-check ---
-                        if tower.tower_id == 'igloo_glacial_heart' and enemy.enemy_id == 'doomlord': # Log only for relevant combo
-                            print(f"??? Pulse Check for {tower.tower_id} on {enemy.enemy_id}: \
-                                  Enemy Type='{enemy.type}', Allowed Types={allowed_targets}, In Type? {enemy.type in allowed_targets}, \
-                                  DistSq={ (enemy.x - tower.x)**2 + (enemy.y - tower.y)**2 :.1f}, RadiusSq={radius_sq:.1f}")
+                        if tower.tower_id == 'igloo_frost_pulse': # Log for frost pulse
+                            print(f"FROST PULSE DEBUG: Checking {enemy.enemy_id} at distance {math.sqrt((enemy.x - tower.x)**2 + (enemy.y - tower.y)**2):.1f}px")
                         # --- END DEBUG ---
                         
                         # Handle both array format ["ground", "air"] and string format "enemies"
@@ -1352,16 +1363,12 @@ class GameScene:
                             if dist_sq <= radius_sq:
                                 # Apply the specific pulse effect
                                 if effect_type == 'slow_pulse_aura':
+                                    if tower.tower_id == 'igloo_frost_pulse':
+                                        print(f"FROST PULSE DEBUG: Applying slow effect to {enemy.enemy_id}")
                                     slow_percentage = special.get('slow_percentage', 0)
                                     duration = special.get('duration', 1.0)
                                     multiplier = 1.0 - (slow_percentage / 100.0)
                                     enemy.apply_status_effect('slow', duration, multiplier, current_game_time)
-                                    # Optional damage
-                                    pulse_damage = special.get('pulse_damage')
-                                    if pulse_damage is not None and pulse_damage > 0:
-                                        damage_type = special.get('pulse_damage_type', 'normal')
-                                        enemy.take_damage(pulse_damage, damage_type)
-                                    
                                 elif effect_type == 'damage_pulse_aura':
                                     pulse_damage = special.get('pulse_damage', 0)
                                     damage_type = special.get('pulse_damage_type', 'normal')

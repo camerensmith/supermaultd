@@ -1007,7 +1007,7 @@
               "visual_effect": "frost_pulse", 
               "targets": ["ground", "air"],
               "aura_radius": 300,
-              "slow_percentage": 25,
+              "slow_percentage": 80,
               "interval": 2.5,
               "duration": 1.0
           }
