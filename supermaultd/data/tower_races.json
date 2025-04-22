@@ -914,14 +914,16 @@
           "splash_radius": null,
           "special": {
             "effect": "dot_pulse_aura",
-            "interval": 2.0,
+            "interval": 0.5,
             "aura_radius": 650,
             "targets": ["ground", "air"],
             "dot_effect_name": "miasma",
             "dot_damage": 18,
             "dot_interval": 0.5,
             "dot_duration": 5.0,
-            "dot_damage_type": "arcane"
+            "dot_damage_type": "arcane",
+            "slow_percentage": 30,
+            "duration": 1.5
           }
         },
         "alchemists_toxin_lab": {
@@ -964,13 +966,13 @@
       "description": "Harnessing the biting cold, these structures slow and shatter foes with ice and frost.",
       "towers": {
         "igloo_wall": {
-          "name": "Ice Brick", "grid_width": 1, "grid_height": 1, "cost": 1,
+          "name": "Ice Block", "grid_width": 1, "grid_height": 1, "cost": 1,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": []
         },
         "igloo_snowball_tosser": {
-          "name": "Snowball Tosser", "grid_width": 1, "grid_height": 1, "cost": 9,
+          "name": "Snowball Tosser", "grid_width": 1, "grid_height": 1, "cost": 8,
           "damage_min": 6, "damage_max": 7, "damage_type": "piercing",
           "range": 500, "attack_interval": 0.7, "projectile_speed": 400,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
@@ -994,20 +996,8 @@
           "targets": ["ground", "air"]
         }
         },
-        "igloo_snowman": {
-          "name": "Snowman", "grid_width": 1, "grid_height": 1, "cost": 24,
-          "damage_min": 15, "damage_max": 18, "damage_type": "piercing",
-          "range": 600, "attack_interval": 0.6, "projectile_speed": 500,
-          "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
-          "special": {
-            "effect": "shatter",
-            "shatter_target_debuff": "bonechill",
-            "shatter_damage_multiplier": 1.25,
-            "description": "Deals 25% bonus damage to Bonechilled enemies."
-        }
-        },
-        "igloo_frost_pulser": {
-          "name": "Frost Pulser", "grid_width": 1, "grid_height": 1, "cost": 60,
+        "igloo_frost_pulse": {
+          "name": "Frost Pulse", "grid_width": 1, "grid_height": 1, "cost": 60,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
           "range": 0, 
           "attack_interval": 999, 
@@ -1015,15 +1005,15 @@
           "special": {
               "effect": "slow_pulse_aura",
               "visual_effect": "frost_pulse", 
-              "targets": "enemies",
+              "targets": ["ground", "air"],
               "aura_radius": 300,
               "slow_percentage": 25,
               "interval": 2.5,
               "duration": 1.0
           }
         },
-        "igloo_icicle_cannon": {
-          "name": "Icicle Cannon", "grid_width": 1, "grid_height": 1, "cost": 142,
+        "igloo_icicle_launcher": {
+          "name": "Icicle Launcher", "grid_width": 1, "grid_height": 1, "cost": 142,
           "damage_min": 100, "damage_max": 120, "damage_type": "piercing",
           "range": 700, "attack_interval": 1.2, "projectile_speed": 600,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
@@ -1046,28 +1036,16 @@
             "description": "Deals 30% bonus damage to Bonechilled enemies."
         }
         },
-        "igloo_ice_pillar": {
-          "name": "Ice Pillar", "grid_width": 1, "grid_height": 1, "cost": 245,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
-          "range": 0, "attack_interval": 999, 
-          "attack_type": "aura", 
-          "special": {
-              "effect": "slow_aura", 
-              "targets": "enemies", 
-              "aura_radius": 300,
-              "slow_percentage": 20
-          }
-        },
-        "igloo_glacier_launcher": {
-          "name": "Glacier Launcher", "grid_width": 1, "grid_height": 1, "cost": 400,
-          "damage_min": 825, "damage_max": 980, "damage_type": "normal",
-          "range": 500, "attack_interval": 2, "projectile_speed": null,
+        "igloo_glacier_cannon": {
+          "name": "Glacier Cannon", "grid_width": 1, "grid_height": 1, "cost": 355,
+          "damage_min": 400, "damage_max": 400, "damage_type": "normal",
+          "range": 500, "attack_interval": 2, "projectile_speed": 400,
           "attack_type": "projectile", "splash_radius": 200, "targets": ["ground", "air"],
           "special": {
             "effect": "shatter",
             "shatter_target_debuff": "bonechill",
-            "shatter_damage_multiplier": 1.5,
-            "description": "Deals 50% bonus damage to Bonechilled enemies."
+            "shatter_damage_multiplier": 1.9,
+            "description": "Deals 90% bonus damage to Bonechilled enemies."
         }
         }
       }

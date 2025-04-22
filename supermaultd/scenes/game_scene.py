@@ -1271,37 +1271,65 @@ class GameScene:
             tower = aura_data['tower']
             special = aura_data['special']
             effect_type = special.get('effect')
+            
+            # Special debug for miasma pillar
+            if tower.tower_id == 'alchemists_miasma_pillar':
+                print(f"DEBUG: Found miasma_pillar in aura towers loop with effect_type={effect_type}")
 
             # Check if this aura is a pulsed type
             if effect_type and effect_type.endswith('_pulse_aura'):
                 interval = special.get('interval', 1.0)
                 # Check pulse timing ONCE per tower
+                print(f"PULSE-DEBUG: Tower {tower.tower_id} checking pulse timing | Current time: {current_game_time:.2f} | Last pulse: {tower.last_pulse_time:.2f} | Interval: {interval}")
                 if current_game_time - tower.last_pulse_time >= interval:
-                  
+                    print(f"PULSE-DEBUG: Tower {tower.tower_id} TRIGGERING PULSE NOW!")
                     tower.last_pulse_time = current_game_time # Update time immediately
+
                     radius_sq = aura_data['radius_sq']
                     allowed_targets = special.get('targets', [])
                    
                     # --- Create Visual Pulse Effect --- 
-                    if tower.tower_id == 'alchemists_miasma_pillar' or tower.tower_id == 'igloo_frost_pulser': 
-                       
-                        try:
-                            # Import math if not already imported at the top
-                            pulse_radius_pixels = math.sqrt(radius_sq)
-                            # <<< MODIFIED: Changed color to blue >>>
-                            pulse_color = (0, 100, 255, 100) # Faint blue (RGBA)
-                            pulse_duration = 0.5 # seconds
-                            pulse_effect = ExpandingCircleEffect(tower.x, tower.y, 
-                                                                 pulse_radius_pixels, 
-                                                                 pulse_duration, 
-                                                                 pulse_color, thickness=2)
+                    try:
+                        # Import math if not already imported at the top
+                        pulse_radius_pixels = math.sqrt(radius_sq)
+                        
+                        # Set color based on tower type
+                        if tower.tower_id == 'alchemists_miasma_pillar':
+                            # Super bright visible green with maximum opacity
+                            pulse_color = (0, 255, 0, 120)  # Fully bright green with some transparency 
+                            pulse_thickness = 0  # Not used for filled circle
+                            
+                            pulse_duration = 0.8  # Longer duration to be more visible
+                            pulse_effect = ExpandingCircleEffect(
+                                tower.x, 
+                                tower.y, 
+                                pulse_radius_pixels, 
+                                pulse_duration, 
+                                pulse_color, 
+                                thickness=pulse_thickness,
+                                filled=True  # Use filled circle instead of outline
+                            )
                             self.effects.append(pulse_effect)
-                    
-                        except NameError: # Catch if ExpandingCircleEffect wasn't imported
-                            print("ERROR: ExpandingCircleEffect class not found. Please ensure it's defined and imported.")
-                        except Exception as e:
-                            print(f"Error creating Miasma Pillar pulse effect: {e}")
-                    # --- Other Pulse Visuals (e.g., Glacial Heart) ---
+                            print(f"ULTRA-VISIBLE: Created FILLED miasma_pillar effect")
+                        elif tower.tower_id == 'igloo_frost_pulse':
+                            print(f"PULSE-DEBUG: Created {pulse_color} pulse effect for {tower.tower_id} with radius {pulse_radius_pixels:.1f}px")
+                        else:
+                            pulse_color = (255, 0, 0, 100)  # Default faint red (RGBA)
+                            pulse_thickness = 2  # Default thickness
+                            
+                            pulse_duration = 0.5  # seconds
+                            pulse_effect = ExpandingCircleEffect(tower.x, tower.y, 
+                                                                pulse_radius_pixels, 
+                                                                pulse_duration, 
+                                                                pulse_color, thickness=pulse_thickness)
+                            self.effects.append(pulse_effect)
+                            print(f"PULSE-DEBUG: Created {pulse_color} pulse effect for {tower.tower_id} with radius {pulse_radius_pixels:.1f}px")
+                
+                    except NameError: # Catch if ExpandingCircleEffect wasn't imported
+                        print(f"ERROR: ExpandingCircleEffect class not found for {tower.tower_id}. Please ensure it's defined and imported.")
+                    except Exception as e:
+                        print(f"Error creating pulse effect for {tower.tower_id}: {e}")
+                    # --- End Visual Pulse Effect ---
 
                     # Now find and affect ALL valid enemies in range
                     for enemy in self.enemies: # Iterate through all current enemies
@@ -1311,7 +1339,15 @@ class GameScene:
                                   Enemy Type='{enemy.type}', Allowed Types={allowed_targets}, In Type? {enemy.type in allowed_targets}, \
                                   DistSq={ (enemy.x - tower.x)**2 + (enemy.y - tower.y)**2 :.1f}, RadiusSq={radius_sq:.1f}")
                         # --- END DEBUG ---
-                        if enemy.health > 0 and enemy.type in allowed_targets:
+                        
+                        # Handle both array format ["ground", "air"] and string format "enemies"
+                        is_valid_target = False
+                        if isinstance(allowed_targets, list):
+                            is_valid_target = enemy.type in allowed_targets
+                        elif allowed_targets == "enemies":
+                            is_valid_target = True  # "enemies" means all enemy types
+                        
+                        if enemy.health > 0 and is_valid_target:
                             dist_sq = (enemy.x - tower.x)**2 + (enemy.y - tower.y)**2
                             if dist_sq <= radius_sq:
                                 # Apply the specific pulse effect
@@ -1326,7 +1362,6 @@ class GameScene:
                                         damage_type = special.get('pulse_damage_type', 'normal')
                                         enemy.take_damage(pulse_damage, damage_type)
                                     
-
                                 elif effect_type == 'damage_pulse_aura':
                                     pulse_damage = special.get('pulse_damage', 0)
                                     damage_type = special.get('pulse_damage_type', 'normal')
@@ -1362,7 +1397,15 @@ class GameScene:
                                     
                                     # Apply the DoT to the enemy
                                     enemy.apply_dot_effect(dot_name, amplified_dot_damage, dot_interval, dot_duration, dot_damage_type, current_game_time)
-
+                                    
+                                    # --- CHECK FOR SLOW EFFECT IN DOT PULSE ---
+                                    slow_percentage = special.get('slow_percentage', 0)
+                                    if slow_percentage > 0:
+                                        slow_duration = special.get('duration', 1.0)
+                                        slow_multiplier = 1.0 - (slow_percentage / 100.0)
+                                        enemy.apply_status_effect('slow', slow_duration, slow_multiplier, current_game_time)
+                                        print(f"[DOT-SLOW] {tower.tower_id}: Applied {slow_percentage}% slow for {slow_duration}s to {enemy.enemy_id}")
+                                    # --- END SLOW EFFECT CHECK ---
                                    
                                 # --- End DoT Pulse Aura ---
 
@@ -1458,6 +1501,27 @@ class GameScene:
             self.effects.extend(newly_created_effects)
             # print(f"Added {len(newly_created_effects)} new effects to main list.")
 
+        # --- Update Visual Effects ---
+        for effect in self.effects[:]:  # Use a slice copy for safe removal
+            try:
+                # Call update() and check if effect is finished
+                if hasattr(effect, 'update') and callable(effect.update):
+                    if isinstance(effect, GroundEffectZone):
+                        if effect.update(time_delta, self.enemies):
+                            self.effects.remove(effect)
+                    else:
+                        if effect.update(time_delta):
+                            self.effects.remove(effect)
+                elif hasattr(effect, 'finished') and effect.finished:
+                    self.effects.remove(effect)
+            except Exception as e:
+                print(f"Error updating effect: {e}")
+                try:
+                    self.effects.remove(effect)  # Remove problematic effect
+                except ValueError:
+                    pass  # Already removed
+        # --- End Update Visual Effects ---
+
         # --- Update Orbiting Damagers --- 
         # Need to get current time again or pass it down
         current_time_seconds = pygame.time.get_ticks() / 1000.0
@@ -1492,12 +1556,7 @@ class GameScene:
         # --- End Pass-Through Exploder Update ---
 
         # --- Update GROUND Effects (Like Fallout Zone) --- 
-        for ground_effect in [ef for ef in self.effects if isinstance(ef, GroundEffectZone)][:]:
-             if ground_effect.update(time_delta, self.enemies):
-                 try:
-                     self.effects.remove(ground_effect)
-                 except ValueError:
-                     pass # Already removed?
+        # This section can be removed since we now handle GroundEffectZone in the main loop
         # --- End Ground Effects ---
 
         # --- Update Standard Effects --- 

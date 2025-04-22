@@ -300,6 +300,20 @@ class Tower:
                     print(f"Warning: No special ability sound file found for {self.tower_id} (checked: {ability_sound_id}.mp3/wav)")
         # --- END Execute Ability State ---
 
+        # --- Miasma Pulse Animation State ---
+        self.miasma_pulse_start_time = 0.0
+        self.miasma_pulse_duration = 1.0  # 1 second for full pulse cycle
+        self.miasma_pulse_radius = 0
+        self.miasma_pulse_alpha = 255
+        # --- End Miasma Pulse State ---
+
+        # --- Pulse Animation State ---
+        self.pulse_start_time = 0.0
+        self.pulse_duration = 1.0  # 1 second for full pulse cycle
+        self.pulse_radius = 0
+        self.pulse_alpha = 255
+        # --- End Pulse State ---
+
     def calculate_derived_stats(self):
         """Calculates pixel dimensions and ranges based on grid size and tower data."""
         # Pixel dimensions based on grid size
@@ -1212,33 +1226,66 @@ class Tower:
         draw_pixel_x = (self.top_left_grid_x * GRID_SIZE) + offset_x
         draw_pixel_y = (self.top_left_grid_y * GRID_SIZE) + offset_y
 
-        # --- Draw Pulsing Heat Effect (Incinerator) --- 
-        if self.tower_id == "pyro_incinerator":
-            current_time_ms = pygame.time.get_ticks()
-            pulse_duration_ms = 1500 # How long one pulse cycle takes (1.5 seconds)
-            max_alpha = 120 # Max transparency (0-255)
+        # --- SPECIAL CASE: Pulse Animation for miasma_pillar and frost_pulse ---
+        if self.tower_id in ['alchemists_miasma_pillar', 'igloo_frost_pulse']:
+            current_time = pygame.time.get_ticks() / 1000.0  # Convert to seconds
             
-            # Calculate pulse progress (0.0 to 1.0)
-            pulse_progress = (current_time_ms % pulse_duration_ms) / pulse_duration_ms
-            # Use sine wave for smooth pulsing alpha (abs ensures positive)
-            current_alpha = int(max_alpha * abs(math.sin(pulse_progress * math.pi * 2))) # Full sine wave (0->1->0->-1->0)
+            # Initialize pulse if not started
+            if self.pulse_start_time == 0:
+                self.pulse_start_time = current_time
             
-            center_x = int(self.x + offset_x)
-            center_y = int(self.y + offset_y)
-            radius = int(self.range) # Use tower's range
-            pulse_color = (255, 50, 50, current_alpha) # Reddish color with pulsing alpha
+            # Calculate pulse progress (0 to 1)
+            pulse_progress = (current_time - self.pulse_start_time) / self.pulse_duration
             
-            if radius > 0 and current_alpha > 10: # Draw only if radius/alpha are meaningful
+            # Reset pulse if complete
+            if pulse_progress >= 1.0:
+                self.pulse_start_time = current_time
+                pulse_progress = 0.0
+            
+            # Calculate expanding radius (0 to aura_radius)
+            self.pulse_radius = int(self.aura_radius_pixels * pulse_progress)
+            
+            # Calculate fading alpha (255 to 0)
+            self.pulse_alpha = int(255 * (1.0 - pulse_progress))
+            
+            # Draw the pulsing circle
+            if self.pulse_radius > 0 and self.pulse_alpha > 0:
                 try:
-                    # Create a temporary surface for alpha blending
-                    temp_surface = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
-                    # Draw the circle onto the center of the temporary surface
-                    pygame.draw.circle(temp_surface, pulse_color, (radius, radius), radius)
-                    # Blit the temporary surface onto the main screen, centered correctly
-                    screen.blit(temp_surface, (center_x - radius, center_y - radius))
+                    center_x = int(self.x + offset_x)
+                    center_y = int(self.y + offset_y)
+                    
+                    # Create a surface for alpha blending
+                    temp_surface = pygame.Surface((self.pulse_radius * 2, self.pulse_radius * 2), pygame.SRCALPHA)
+                    
+                    # Set color based on tower type
+                    if self.tower_id == 'alchemists_miasma_pillar':
+                        circle_color = (0, 255, 0, self.pulse_alpha)  # Green for miasma
+                    else:  # igloo_frost_pulse
+                        circle_color = (0, 200, 255, self.pulse_alpha)  # Light blue for frost
+                    
+                    pygame.draw.circle(temp_surface, circle_color, (self.pulse_radius, self.pulse_radius), self.pulse_radius, 6)
+                    # Blit the temporary surface to the screen
+                    screen.blit(temp_surface, (center_x - self.pulse_radius, center_y - self.pulse_radius))
                 except Exception as e:
-                    print(f"Error drawing incinerator pulse effect: {e}")
-        # --- End Pulsing Heat Effect ---
+                    print(f"Error drawing pulse effect for {self.tower_id}: {e}")
+
+            # --- Draw Ground Effect Zone for Nuclear Silo ---
+            if self.tower_id == 'tech_nuclear_silo' and self.aura_radius_pixels > 0:
+                try:
+                    center_x = int(self.x + offset_x)
+                    center_y = int(self.y + offset_y)
+                    radius = int(self.aura_radius_pixels)
+                    
+                    # Create a surface for the ground effect zone
+                    zone_surface = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
+                    # Draw a semi-transparent orange circle for the zone
+                    zone_color = (255, 165, 0, 50)  # Orange with low opacity
+                    pygame.draw.circle(zone_surface, zone_color, (radius, radius), radius)
+                    # Blit the zone surface to the screen
+                    screen.blit(zone_surface, (center_x - radius, center_y - radius))
+                except Exception as e:
+                    print(f"Error drawing nuclear silo ground effect zone: {e}")
+        # --- End Pulse Animation and Ground Effect ---
 
         # --- Draw Creep Colony Glow --- 
         elif self.tower_id == "zork_creep_colony" and self.aura_radius_pixels > 0:

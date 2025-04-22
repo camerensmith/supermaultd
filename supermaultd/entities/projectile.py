@@ -312,6 +312,32 @@ class Projectile:
             print(f"[Projectile Collision] Created impact effect for {self.projectile_id} at ({int(impact_pos[0])}, {int(impact_pos[1])}) size {int(effect_diameter)}")
         # --- End Impact Visual --- 
 
+        # --- Create Fallout Zone if Applicable ---
+        if self.special_effect and self.special_effect.get("effect") == "fallout":
+            radius_units = self.special_effect.get("radius", 900)
+            duration = self.special_effect.get("duration", 15.0)
+            dot_damage = self.special_effect.get("dot_damage", 150)
+            dot_interval = self.special_effect.get("dot_interval", 0.5)
+            dot_damage_type = self.special_effect.get("dot_damage_type", "chaos")
+            valid_targets = self.special_effect.get("fallout_targets", ["ground"])
+            
+            print(f"[DEBUG] Creating fallout zone with: radius={radius_units}, duration={duration}, damage={dot_damage}/{dot_interval}s, type={dot_damage_type}")
+            
+            # Create the fallout zone
+            fallout_zone = GroundEffectZone(
+                x=impact_pos[0],
+                y=impact_pos[1],
+                radius_units=radius_units,
+                duration=duration,
+                dot_damage=dot_damage,
+                dot_interval=dot_interval,
+                damage_type=dot_damage_type,
+                valid_targets=valid_targets
+            )
+            results['new_effects'].append(fallout_zone)
+            print(f"[Projectile Collision] Created fallout zone at ({int(impact_pos[0])}, {int(impact_pos[1])}) with radius {radius_units}")
+        # --- End Fallout Zone Creation ---
+
         # --- Get Initial Target (if exists) --- 
         initial_target = self.target if self.target else None 
         # --- Determine Collision Point Enemy (if applicable) --- 
@@ -474,23 +500,8 @@ class Projectile:
         if self.special_effect:
             effect_type = self.special_effect.get("effect")
             
-            # --- Fallout Zone --- 
-            if effect_type == "fallout":
-                radius_units = self.special_effect.get("radius", 100)
-                duration = self.special_effect.get("duration", 5.0)
-                dot_damage = self.special_effect.get("dot_damage", 10)
-                dot_interval = self.special_effect.get("dot_interval", 0.5)
-                damage_type = self.special_effect.get("dot_damage_type", "chaos")
-                valid_targets = self.special_effect.get("fallout_targets", ["ground"])
-                
-                print(f"... creating fallout zone (Radius: {radius_units}, Duration: {duration}, Damage: {dot_damage}/{dot_interval}s {damage_type})")
-                fallout_zone = GroundEffectZone(impact_pos[0], impact_pos[1], radius_units, 
-                                                duration, dot_damage, dot_interval, 
-                                                damage_type, valid_targets)
-                results['new_effects'].append(fallout_zone)
-            
             # --- Blast Zone (Full Damage AoE) --- 
-            elif effect_type == "blast_zone" and primary_damage_dealt > 0: 
+            if effect_type == "blast_zone" and primary_damage_dealt > 0: 
                 radius_units = self.special_effect.get("radius", 50)
                 blast_targets = self.special_effect.get("targets", ["ground"])
                 blast_radius_pixels = radius_units * (GRID_SIZE / 200.0)

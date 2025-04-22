@@ -609,12 +609,19 @@ class GroundEffectZone:
         
         self.life_remaining = duration
         self.time_since_last_dot = 0.0
-        self.effect_color = (*config.ORANGE, 80) # Use config.ORANGE explicitly
+        self.effect_color = (255, 165, 0, 120) # Orange with alpha for fallout
+
+        print(f"[DEBUG] GroundEffectZone created at ({x}, {y}) with:")
+        print(f"  - radius: {radius_units} units = {self.radius_pixels} pixels")
+        print(f"  - duration: {duration}s")
+        print(f"  - damage: {dot_damage} {damage_type} every {dot_interval}s")
+        print(f"  - valid targets: {valid_targets}")
 
     def update(self, time_delta, enemies):
         """Update zone duration and apply DoT to enemies inside."""
         self.life_remaining -= time_delta
         if self.life_remaining <= 0:
+            print("[DEBUG] GroundEffectZone expired")
             return True # Effect is finished
 
         self.time_since_last_dot += time_delta
@@ -636,7 +643,11 @@ class GroundEffectZone:
                     if dist_sq <= self.radius_pixels_sq:
                         enemy.take_damage(damage_to_apply, self.damage_type)
                         enemies_hit += 1
-            # if enemies_hit > 0: print(f"Fallout zone hit {enemies_hit} enemies.")
+                        print(f"[DEBUG] Fallout zone hit enemy at ({enemy.x}, {enemy.y}) - distance: {math.sqrt(dist_sq):.1f}px, radius: {self.radius_pixels:.1f}px")
+            if enemies_hit > 0:
+                print(f"[DEBUG] Fallout zone hit {enemies_hit} enemies for {damage_to_apply} {self.damage_type} damage")
+            else:
+                print(f"[DEBUG] Fallout zone found no valid targets in range")
             
         return False # Effect is still active
 
@@ -651,10 +662,23 @@ class GroundEffectZone:
         radius = int(self.radius_pixels)
         
         if radius > 0:
-            # Create a temporary surface for transparency
-            temp_surface = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
-            pygame.draw.circle(temp_surface, self.effect_color, (radius, radius), radius)
-            screen.blit(temp_surface, (draw_x - radius, draw_y - radius)) 
+            try:
+                # Create a temporary surface for transparency
+                temp_surface = pygame.Surface((radius * 2 + 4, radius * 2 + 4), pygame.SRCALPHA)
+                # Draw a filled circle
+                pygame.draw.circle(temp_surface, self.effect_color, (radius + 2, radius + 2), radius)
+                # Draw an outline
+                pygame.draw.circle(temp_surface, (255, 165, 0, 255), (radius + 2, radius + 2), radius, 3)
+                # Blit the temporary surface to the screen
+                screen.blit(temp_surface, (draw_x - radius - 2, draw_y - radius - 2))
+                
+                if self.life_remaining % 1.0 < 0.1:  # Print debug once per second
+                    print(f"[DEBUG] Drawing fallout zone at ({draw_x}, {draw_y}) with radius {radius}px, life: {self.life_remaining:.1f}s")
+            except Exception as e:
+                print(f"Error drawing fallout zone: {e}")
+                print(f"  - draw_x: {draw_x}, draw_y: {draw_y}")
+                print(f"  - radius: {radius}")
+                print(f"  - grid_offset: ({grid_offset_x}, {grid_offset_y})")
 
 class FlamethrowerParticleEffect:
     """Continuous stream of particles from a source tower to a target enemy."""
@@ -1051,13 +1075,14 @@ class PulseImageEffect:
 
 # --- NEW: Expanding Circle Effect --- 
 class ExpandingCircleEffect:
-    def __init__(self, x, y, max_radius, duration, color, thickness=2):
+    def __init__(self, x, y, max_radius, duration, color, thickness=2, filled=False):
         self.x = x
         self.y = y
         self.max_radius = max_radius
         self.duration = max(0.01, duration) # Avoid division by zero
         self.color = color # Should be RGBA tuple like (R, G, B, Alpha)
         self.thickness = thickness
+        self.filled = filled  # Whether to draw a filled circle
         self.start_time = pygame.time.get_ticks() / 1000.0
         self.current_radius = 0
         self.finished = False
@@ -1081,8 +1106,10 @@ class ExpandingCircleEffect:
         if not self.finished and self.current_radius > 0:
             draw_x = int(self.x + offset_x)
             draw_y = int(self.y + offset_y)
-            # Draw the circle - pygame handles alpha in the color tuple if surface supports it
-            pygame.draw.circle(screen, self.color, (draw_x, draw_y), int(self.current_radius), self.thickness)
+            
+            # Draw filled or outlined circle based on the filled parameter
+            thickness = 0 if self.filled else self.thickness  # pygame uses 0 for filled circles
+            pygame.draw.circle(screen, self.color, (draw_x, draw_y), int(self.current_radius), thickness)
 # --- End Expanding Circle Effect ---
 
 class FloatingTextEffect:
