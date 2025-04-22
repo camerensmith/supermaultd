@@ -271,6 +271,35 @@ class Tower:
                 print(f"Warning: Vortex overlay image not found: {vortex_image_path}")
         # --- END Vortex Overlay Load --- <<< ADDED
 
+        # --- NEW: Execute Ability State --- 
+        self.execute_cooldown = 0.0
+        self.execute_last_time = 0.0
+        self.execute_health_threshold = 0.0
+        self.special_ability_sound = None # Sound for execute/other specials
+        
+        if self.special and self.special.get("effect") == "execute":
+            self.execute_cooldown = self.special.get("execute_cooldown", 5.0)
+            self.execute_health_threshold = self.special.get("execute_health_threshold", 0.10)
+            # Load the special sound
+            ability_sound_id = self.special.get("ability_sound_id")
+            if ability_sound_id:
+                # Assuming sound_dir is already defined earlier in __init__
+                possible_paths = [
+                    os.path.join(sound_dir, f"{ability_sound_id}.mp3"),
+                    os.path.join(sound_dir, f"{ability_sound_id}.wav")
+                ]
+                for path in possible_paths:
+                    if os.path.exists(path):
+                        try:
+                            self.special_ability_sound = pygame.mixer.Sound(path)
+                            print(f"Loaded special ability sound for {self.tower_id} ({ability_sound_id}) from {path}")
+                            break
+                        except pygame.error as e:
+                            print(f"Error loading special ability sound {path}: {e}")
+                if not self.special_ability_sound:
+                    print(f"Warning: No special ability sound file found for {self.tower_id} (checked: {ability_sound_id}.mp3/wav)")
+        # --- END Execute Ability State ---
+
     def calculate_derived_stats(self):
         """Calculates pixel dimensions and ranges based on grid size and tower data."""
         # Pixel dimensions based on grid size
@@ -1747,6 +1776,42 @@ class Tower:
                 self.gattling_continuous_fire_start_time = 0.0 # Reset tracking
         # --- END Gattling Spin-Down ---
                                     
+        # --- Execute Ability Logic --- 
+        if self.special and self.special.get("effect") == "execute" and self.execute_cooldown > 0:
+            # Check cooldown
+            if current_time - self.execute_last_time >= self.execute_cooldown:
+                valid_targets = []
+                # Scan enemies in range
+                for enemy in all_enemies:
+                    # Check if enemy is alive, in range, and meets health threshold
+                    if (enemy.health > 0 and 
+                        self.is_in_range(enemy.x, enemy.y) and
+                        enemy.max_health > 0 and 
+                        (enemy.health / enemy.max_health) <= self.execute_health_threshold):
+                        valid_targets.append(enemy)
+                
+                if valid_targets:
+                    # Choose a target (e.g., the first one found)
+                    target_to_execute = valid_targets[0]
+                    print(f"!!! {self.tower_id} EXECUTE triggered on {target_to_execute.enemy_id} (HP: {target_to_execute.health}/{target_to_execute.max_health}) !!!")
+                    
+                    # Instantly kill the target
+                    # Using high damage triggers standard death processing (gold, effects, removal)
+                    target_to_execute.take_damage(999999, "execute") 
+                    
+                    # Play the special sound if loaded
+                    if self.special_ability_sound:
+                        self.special_ability_sound.play()
+                    
+                    # TODO: Trigger a visual effect? (Use game_scene_add_effect_callback)
+                    # Example: effect = FloatingTextEffect(target_to_execute.x + grid_offset_x, ...) 
+                    # if game_scene_add_effect_callback: game_scene_add_effect_callback(effect)
+                    
+                    # Reset cooldown
+                    self.execute_last_time = current_time
+                    # Note: Don't return here, let the rest of the update run
+        # --- END Execute Ability Logic ---
+
         # --- Add other tower-specific update logic here if needed --- 
 
     # --- NEW: Method to apply temporary pulsed buffs ---

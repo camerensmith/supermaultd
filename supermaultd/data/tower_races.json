@@ -675,36 +675,42 @@
           "range": 350, "attack_interval": 1, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 200, "targets": ["ground"]
         },
-        "knights_arrow_tower": {
-          "name": "Arrow Tower", "grid_width": 2, "grid_height": 2, "cost": 26,
-          "damage_min": 25, "damage_max": 30, "damage_type": "piercing", "pierce_adjacent": 1,
-          "range": 750, "attack_interval": 0.8, "projectile_speed": 450,
+        "knights_watchtower": {
+          "name": "Watchtower", "grid_width": 2, "grid_height": 2, "cost": 26,
+          "damage_min": 20, "damage_max": 30, "damage_type": "piercing", "pierce_adjacent": 1,
+          "range": 750, "attack_interval": 0.8, "projectile_speed": 650,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
         },
         "knights_arcane_tower": {
-          "name": "Arcane Tower", "grid_width": 2, "grid_height": 2, "cost": 75,
+          "name": "Arcane Tower", "grid_width": 2, "grid_height": 2, "cost": 65,
           "damage_min": 70, "damage_max": 80, "damage_type": "arcane",
-          "range": 700, "attack_interval": 1.2, "projectile_speed": 330,
-          "attack_type": "projectile", "splash_radius": 50, "targets": ["ground", "air"]
+          "range": 700, "attack_interval": 1, "projectile_speed": 330,
+          "attack_type": "projectile", "splash_radius": 280, "targets": ["ground", "air"]
         },
-        "knights_marksman_tower": {
-            "name": "Marksman Tower", "grid_width": 1, "grid_height": 1, "cost": 175,
-            "damage_min": 221, "damage_max": 410, "damage_type": "piercing",
-            "range_min": 1000, "range": 2000, "attack_interval": 1.6, "projectile_speed": null,
-            "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
-            "critical_chance": 0.1, "critical_multiplier": 15
+        "knights_arrow_tower": {
+            "name": "Arrow Tower", "grid_width": 2, "grid_height": 2, "cost": 109,
+            "damage_min": 35, "damage_max": 65, "damage_type": "piercing", "pierce_adjacent": 1,
+            "range": 750, "attack_interval": 0.3, "projectile_speed": 650, "target_selection": "random",
+            "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
         },
         "knights_ballista": {
-          "name": "Ballista", "grid_width": 3, "grid_height": 2, "cost": 250,
-          "damage_min": 450, "damage_max": 500, "damage_type": "siege", "pierce_adjacent": 5,
+          "name": "Ballista", "grid_width": 3, "grid_height": 2, "cost": 155,
+          "damage_min": 290, "damage_max": 380, "damage_type": "siege", "pierce_adjacent": 7,
           "range": 1000, "attack_interval": 3.5, "projectile_speed": 700, "bounce": 2,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground"]
         },
         "knights_knight": {
-          "name": "Knight", "grid_width": 1, "grid_height": 1, "cost": 325,
-          "damage_min": 476, "damage_max": 501, "damage_type": "normal",
+          "name": "Knight", "grid_width": 1, "grid_height": 1, "cost": 315,
+          "damage_min": 436, "damage_max": 501, "damage_type": "normal",
           "range": 350, "attack_interval": 0.8, "projectile_speed": null,
-          "attack_type": "instant", "splash_radius": 150, "targets": ["ground"]
+          "attack_type": "instant", "splash_radius": 150, "targets": ["ground"],
+          "special": {
+            "effect": "execute",
+            "execute_cooldown": 5.0,
+            "execute_health_threshold": 0.15,
+            "ability_sound_id": "knight_execute",
+            "description": "Periodically attempts to instantly kill a nearby low-health enemy (below 15% HP)."
+          }
         }
       }
     },
@@ -1602,7 +1608,8 @@
           "name": "Sniper Tower", "grid_width": 1, "grid_height": 1, "cost": 240,
           "damage_min": 500, "damage_max": 550, "damage_type": "piercing",
           "range_min": 800, "range": 2200, "attack_interval": 3.0, "projectile_speed": null,
-          "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"]
+          "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
+          "critical_chance": 0.1, "critical_multiplier": 15
         }
       }
     },

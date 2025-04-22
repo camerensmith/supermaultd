@@ -184,7 +184,9 @@ class TowerSelector:
             if bounce > 0:
                 bounce_range = tower_data.get('bounce_range', 'N/A')
                 bounce_falloff = tower_data.get('bounce_damage_falloff', 'N/A')
-                tooltip_lines.append(f"- Bounces: {bounce} times (Range: {bounce_range}, Falloff: {bounce_falloff*100:.0f}%) ")
+                # Conditionally format falloff
+                falloff_str = f"{bounce_falloff*100:.0f}%" if isinstance(bounce_falloff, (int, float)) else str(bounce_falloff)
+                tooltip_lines.append(f"- Bounces: {bounce} times (Range: {bounce_range}, Falloff: {falloff_str})")
 
             # Pierce
             pierce = tower_data.get('pierce_adjacent', 0)
