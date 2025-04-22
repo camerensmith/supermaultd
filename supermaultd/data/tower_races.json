@@ -52,7 +52,7 @@
   },
   "races": {
     "crystal_castle": {
-      "description": "A crystalline faction using refractive energies to deal Chaos damage and chain effects.",
+      "description": "Pure Chaos damage snipers and chain beams—armor bypass, very high single target DPS when built out.",
       "towers": {
         "crystal_wall": {
           "name": "Crystal Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
@@ -74,7 +74,7 @@
         },
         "diamond_cutter": {
           "name": "Diamond Cutter",
-          "cost": 35,
+          "cost": 31,
           "grid_width": 1,
           "grid_height": 1,
           "damage_min": 25,
@@ -89,7 +89,7 @@
         },
         "crystal_cannon": {
           "name": "Crystal Cannon",
-          "cost": 70,
+          "cost": 60,
           "damage_min": 60,
           "damage_max": 110,
           "damage_type": "chaos",
@@ -104,7 +104,7 @@
         },
         "crystal_fury": {
           "name": "Crystal Fury",
-          "cost": 135,
+          "cost": 122,
           "grid_width": 2,
           "grid_height": 2,
           "damage_min": 120,
@@ -123,7 +123,7 @@
         "crystal_castle_facet_focuser": {
           "name": "Facet Focuser",
           "grid_width": 1, "grid_height": 1,
-          "cost": 285,
+          "cost": 186,
           "damage_min": 800,
           "damage_max": 800,
           "damage_type": "chaos",
@@ -138,7 +138,7 @@
         },
         "crystal_blaster": {
           "name": "Crystal Blaster",
-          "cost": 475,
+          "cost": 245,
           "grid_width": 2,
           "grid_height": 2,
           "damage_min": 412,
@@ -153,14 +153,14 @@
         },
         "crystal_dissolver": {
           "name": "Crystal Dissolver",
-          "cost": 850,
+          "cost": 450,
           "range": 800,
           "grid_width": 3,
           "grid_height": 3,
-          "damage_min": 2500,
-          "damage_max": 2500,
+          "damage_min": 2000,
+          "damage_max": 2000,
           "damage_type": "chaos",
-          "attack_interval": 0.66,
+          "attack_interval": 0.88,
           "projectile_speed": null,
           "attack_type": "beam",
           "splash_radius": null,
@@ -170,7 +170,7 @@
       }
     },
     "pyro": {
-      "description": "A fiery faction specializing in burning damage over time and wide-area splash attacks.",
+      "description": "Heavy splash + burn over time auras and traps. Excels at crowd control.",
       "towers": {
         "pyro_wall": {
           "name": "Fire Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
@@ -200,7 +200,7 @@
         "pyro_fire_trap": {
           "name": "Fire Trap", 
           "description": "A fire trap that burns enemies that walk over it.",
-          "grid_width": 1, "grid_height": 1, "cost": 30,
+          "grid_width": 1, "grid_height": 1, "cost": 25,
           "damage_min": 0, "damage_max": 0,
           "damage_type": "normal", 
           "traversable": true,
@@ -221,7 +221,7 @@
           "name": "Flame Dancer",
           "description": "A skilled flame dancer that slashes with a fiery blade.",
           "size": "small",
-          "cost": 130,
+          "cost": 110,
           "grid_width": 2,
           "grid_height": 2,
           "damage_min": 220,
@@ -268,7 +268,7 @@
           "name": "Searing Tower",
           "description": "A searing tower that blasts enemies with fireballs. Large splash radius. Can target air units.",
           "size": "small",
-          "cost": 273,
+          "cost": 243,
           "damage_min": 643,
           "damage_max": 795,
           "damage_type": "normal",
@@ -315,7 +315,7 @@
       }
     },
     "cauldron_tank_command": {
-      "description": "Masters of armored warfare, fielding incredibly expensive but large and slow firing devastatingly powerful tanks with slow-firing cannons.",
+      "description": "Slow, heavy siege; excels at killing Fortified units",
       "towers": {
         "tank_wall": {
           "name": "Tank Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
@@ -348,7 +348,7 @@
           "name": "MK I",
           "grid_width": 3,
           "grid_height": 3,
-          "cost": 65,
+          "cost": 55,
           "damage_min": 200,
           "damage_max": 300,
           "damage_type": "siege",
@@ -359,29 +359,12 @@
           "splash_radius": 100,
           "targets": ["ground"]
         },
-        "tank_aegis_flak_cannon": {
-          "name": "Aegis Flak Tank",
-          "description": "A flak cannon that devasta",
-          "grid_width": 3,
-          "grid_height": 3,
-          "cost": 109,
-          "damage_min": 700,
-          "damage_max": 850,
-          "damage_type": "normal",
-          "range": 1600,
-          "attack_interval": 1.81,
-          "projectile_speed": null,
-          "attack_type": "instant",
-          "splash_radius": 800,
-          "targets": ["air"],
-          "attack_visual_effect": "tank_aegis_flak_cannon"
-        },
         "tank_blasto_mortar": {
           "name": "Blasto Mortar Tank", 
           "description": "Powerful artillery that can deals massive AOE damage.",
           "grid_width": 3,
           "grid_height": 3,
-          "cost": 220,
+          "cost": 200,
           "damage_min": 500,
           "damage_max": 1000,
           "damage_type": "siege",
@@ -404,9 +387,9 @@
           "description": "A massive tank with a powerful javeling launcher that can deal massive damage to enemies.",
           "grid_width": 4,
           "grid_height": 4,
-          "cost": 390,
-          "damage_min": 900,
-          "damage_max": 1000,
+          "cost": 300,
+          "damage_min": 500,
+          "damage_max": 600,
           "damage_type": "normal",
           "range_min": 500,
           "range": 800,
@@ -422,7 +405,7 @@
           "description": "A powerful tank that fires a massive corrosive shell to shred armor of even the toughest enemies.",
           "grid_width": 5,
           "grid_height": 5,
-          "cost": 1887,
+          "cost": 500,
           "damage_min": 3000,
           "damage_max": 3675,
           "damage_type": "chaos",
@@ -461,6 +444,7 @@
         },
         "zork_slime_spewer": {
           "name": "Slime Spewer",
+          "description": "Large AOE damage.",
           "grid_width": 1,
           "grid_height": 1,
           "cost": 15,
@@ -663,8 +647,8 @@
           "grid_width": 4,
           "grid_height": 4,
           "cost": 350,
-          "damage_min": 1800,
-          "damage_max": 2300,
+          "damage_min": 800,
+          "damage_max": 1000,
           "attack_interval": 0.8,
           "range": 900,
           "splash_radius": 100,
@@ -943,13 +927,13 @@
           "duration": 5.0, "dot_damage_type": "arcane"}
         },
         "alchemists_caustic_cannon": {
-          "name": "Caustic Cannon", "grid_width": 2, "grid_height": 2, "cost": 213,
+          "name": "Caustic Cannon", "grid_width": 2, "grid_height": 2, "cost": 112,
           "damage_min": 452, "damage_max": 790, "damage_type": "chaos",
           "range": 650, "attack_interval": 1.5, "projectile_speed": 300,
           "attack_type": "projectile", "splash_radius": 120, "targets": ["ground", "air"]
         },
         "alchemists_chemical_plant": {
-          "name": "Chemical Plant", "grid_width": 3, "grid_height": 3, "cost": 244,
+          "name": "Chemical Plant", "grid_width": 3, "grid_height": 3, "cost": 177,
           "damage_min": 80, "damage_max": 120, "damage_type": "chaos", "target_selection": "random",
           "range": 800, "attack_interval": 0.2, "projectile_speed": 200,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
@@ -957,7 +941,7 @@
           "duration": 5.0, "dot_damage_type": "chaos"}
         },
         "alchemists_plague_reactor": {
-          "name": "Plague Reactor", "grid_width": 2, "grid_height": 2, "cost": 387,
+          "name": "Plague Reactor", "grid_width": 2, "grid_height": 2, "cost": 256,
           "damage_min": 0, "damage_max": 0, "damage_type": "chaos",
           "range": 1000, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "aura", "splash_radius": null, "targets": ["ground", "air"],
@@ -1116,7 +1100,7 @@
           "attack_type": "beam", "splash_radius": null, "targets": ["ground", "air"]
         },
         "alien_orbiter": {
-          "name": "Orbiter", "grid_width": 3, "grid_height": 3, "cost": 475,
+          "name": "Orbiter", "grid_width": 3, "grid_height": 3, "cost": 275,
           "damage_min": 0, "damage_max": 0, "damage_type": "piercing",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": [],
@@ -1137,7 +1121,7 @@
           "name": "Black Hole Generator",
           "grid_width": 3,
           "grid_height": 3,
-          "cost": 525,
+          "cost": 445,
           "damage_min": 0,
           "damage_max": 0,
           "damage_type": "chaos",
@@ -1218,13 +1202,13 @@
         },
         "goblin_catapult_brigade": {
           "name": "Goblin Catapult Brigade", "grid_width": 2, "grid_height": 2, "cost": 250,
-          "damage_min": 800, "damage_max": 3000, "damage_type": "chaos",
+          "damage_min": 800, "damage_max": 3000, "damage_type": "normal",
           "range_min": 2500, "range": 3000, "attack_interval": 2.5, "projectile_speed": 350,
           "attack_type": "projectile", "splash_radius": 450, "targets": ["ground"],
           "special": {
               "effect": "miss_chance",
               "chance": 70, 
-              "description": "Has a 70% chance to miss."
+              "description": "Has a 70% chance to misfire."
           }
         },
         "goblin_shredder": {
@@ -1248,9 +1232,9 @@
           "attack_type": "none", "splash_radius": null, "targets": []
         },
         "brine_coral_trident": {
-          "name": "Coral Trident", "grid_width": 1, "grid_height": 1, "cost": 12,
+          "name": "Coral Trident", "grid_width": 1, "grid_height": 1, "cost": 10,
           "damage_min": 10, "damage_max": 13, "damage_type": "normal",
-          "range": 300, "attack_interval": 0.2, "projectile_speed": null,
+          "range": 250, "attack_interval": 0.5, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 333, "targets": ["ground", "air"],
           "pierce_adjacent": 1, 
           "pierce_adjacent_damage_multiplier": 0.5,
@@ -1262,9 +1246,9 @@
           }
         },
         "brine_serpent_coiler": {
-          "name": "Serpent Coiler", "grid_width": 1, "grid_height": 1, "cost": 70,
+          "name": "Serpent Coiler", "grid_width": 1, "grid_height": 1, "cost": 51,
           "damage_min": 40, "damage_max": 45, "damage_type": "arcane",
-          "range": 650, "attack_interval": 0.7, "projectile_speed": 800,
+          "range": 650, "attack_interval": 0.7, "projectile_speed": 600,
           "attack_type": "projectile", "splash_radius": 450, "targets": ["ground", "air"],
           "special": {
             "effect": "bash_chance",
@@ -1272,9 +1256,28 @@
             "stun_duration": 0.1,
             "description": "Has a chance on hit to briefly stun the target."
         }
+      },
+      "brine_cascade_monument": {
+        "name": "Cascade Monument", "grid_width": 2, "grid_height": 2, "cost": 90,
+        "damage_min": 0,            
+        "damage_max": 0,            
+        "damage_type": "normal",      
+        "range": 0,                 
+        "attack_interval": 999,       
+        "projectile_speed": null,
+        "attack_type": "aura",        
+        "splash_radius": null,      
+        "targets": [],              
+        "special": {
+          "effect": "splash_radius_buff_aura",
+          "aura_radius": 500,          
+          "splash_radius_increase": 175, 
+          "targets": ["towers"],         
+          "description": "Increases the splash radius of nearby towers by 75."
+        }
         },
         "brine_naga_depth_guard": {
-          "name": "Naga Depth Guard", "grid_width": 2, "grid_height": 2, "cost": 150,
+          "name": "Naga Depth Guard", "grid_width": 2, "grid_height": 2, "cost": 90,
           "damage_min": 150, "damage_max": 170, "damage_type": "normal",
           "range": 500, "attack_interval": 0.6, "projectile_speed": 400,
           "attack_type": "instant", "splash_radius": 325, "targets": ["ground"],
@@ -1285,30 +1288,11 @@
             "description": "Has a chance on hit to briefly stun the target."
         }
         },
-        "brine_cascade_monument": {
-          "name": "Cascade Monument", "grid_width": 3, "grid_height": 3, "cost": 300,
-          "damage_min": 0,            
-          "damage_max": 0,            
-          "damage_type": "normal",      
-          "range": 0,                 
-          "attack_interval": 999,       
-          "projectile_speed": null,
-          "attack_type": "aura",        
-          "splash_radius": null,      
-          "targets": [],              
-          "special": {
-            "effect": "splash_radius_buff_aura",
-            "aura_radius": 500,          
-            "splash_radius_increase": 175, 
-            "targets": ["towers"],         
-            "description": "Increases the splash radius of nearby towers by 75."
-          }
-        },
         "brine_tidal_guardian": {
           "name": "Tidal Guardian", "grid_width": 2, "grid_height": 2, "cost": 150,
           "damage_min": 100, "damage_max": 120, "damage_type": "normal",
-          "range": 700, "attack_interval": 1.0, "projectile_speed": 300,
-          "attack_type": "projectile", "splash_radius": 375, "targets": ["ground", "air"],
+          "range": 700, "attack_interval": 1.0, "projectile_speed": null,
+          "attack_type": "instant", "splash_radius": 375, "targets": ["ground", "air"],
           "special": {
             "effect": "bash_chance",
             "chance_percent": 25,
@@ -1320,7 +1304,7 @@
           "name": "Vortex Monument", 
           "grid_width": 3, 
           "grid_height": 3, 
-          "cost": 480,
+          "cost": 259,
           "damage_min": 0,
           "damage_max": 0,
           "damage_type": "arcane",
@@ -1335,7 +1319,7 @@
             "aura_radius": 2000,
             "tick_interval": 0.1,
             "min_damage_at_edge": 1.0,
-            "max_damage_at_center": 30.0,
+            "max_damage_at_center": 25.0,
             "damage_type": "arcane",
             "targets": ["ground", "air"],
             "description": "Continuously damages nearby enemies. Damage increases closer to the monument."
@@ -1686,7 +1670,7 @@
           "attack_type": "projectile", "splash_radius": 100, "targets": ["ground", "air"]
         },
         "tech_nuclear_silo": {
-          "name": "Nuclear Silo", "grid_width": 3, "grid_height": 3, "cost": 1000,
+          "name": "Nuclear Silo", "grid_width": 3, "grid_height": 3, "cost": 600,
           "damage_min": 30000, "damage_max": 35000,
           "damage_type": "chaos",
           "min_range": 1500,
@@ -1997,7 +1981,7 @@
         },
         "nomad_bounty_hunter": {
           "name": "Bounty Hunter", "grid_width": 2, "grid_height": 2, "cost": 150,
-          "damage_min": 890, "damage_max": 1013, "damage_type": "normal",
+          "damage_min": 677, "damage_max": 690, "damage_type": "normal",
           "range": 530, "attack_interval": 0.3, "projectile_speed": 525,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
           "critical_chance": 0.20,

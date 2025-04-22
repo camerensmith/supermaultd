@@ -107,43 +107,127 @@ class TowerSelector:
             # Button covers the whole entry area, relative to panel
             #button_rect = pygame.Rect(entry_x, current_y, content_width, button_height)
 
-            # --- Generate Tooltip Text ---
+            # --- Generate Comprehensive Tooltip Text ---
+            tooltip_lines = []
+
+            # Basic Info
             name = tower_data.get('name', 'N/A')
             cost = tower_data.get('cost', 0)
-            # Fetch damage min/max
-            damage_min = tower_data.get('damage_min', 0)
-            damage_max = tower_data.get('damage_max', damage_min) # Default max to min if missing
-            damage_str = f"{damage_min}-{damage_max}" if damage_min != damage_max else f"{damage_min}"
-            
-            # Fetch numerical range
-            range_val = tower_data.get('range', 0)
-            
-            # Fetch attack interval and calculate speed
-            attack_interval = tower_data.get('attack_interval', 0.0)
-            attack_speed_str = f"{(1.0 / attack_interval):.2f} shots/sec" if attack_interval > 0 else "N/A"
+            tooltip_lines.append(f"<b>{name}</b>")
+            tooltip_lines.append(f"Cost: ${cost}")
+            grid_w = tower_data.get('grid_width', 1)
+            grid_h = tower_data.get('grid_height', 1)
+            if grid_w > 1 or grid_h > 1:
+                tooltip_lines.append(f"Size: {grid_w}x{grid_h}")
 
-            damage_type = tower_data.get('damage_type', 'N/A')
-            # Get damage type description from loaded data
+            tooltip_lines.append("") # Spacer
+            tooltip_lines.append("<b>Stats:</b>")
+
+            # Damage
+            damage_min = tower_data.get('damage_min', 0)
+            damage_max = tower_data.get('damage_max', damage_min)
+            damage_str = f"{damage_min}-{damage_max}" if damage_min != damage_max else f"{damage_min}"
+            tooltip_lines.append(f"- Damage: {damage_str}")
+
+            # Damage Type
+            damage_type = tower_data.get('damage_type', 'normal')
             damage_type_info = self.damage_type_data.get(damage_type, {})
-            damage_desc = damage_type_info.get("description", "Damage type info not found.")
-            
-            # Construct tooltip with correct data
-            tooltip_text = (
-                f"<b>{name}</b><br>"
-                f"Cost: ${cost}<br>"
-                f"Damage: {damage_str} ({damage_type})<br>"
-                f"Range: {range_val}<br>"
-                f"Attack Speed: {attack_speed_str}<br>"
-                f"<br>"
-                f"<i>{damage_desc}</i>"
-            )
-            # --- End Tooltip Text ---
+            damage_desc = damage_type_info.get("description", "")
+            tooltip_lines.append(f"- Type: {damage_type.capitalize()} ({damage_desc})")
+
+            # Attack Speed
+            attack_interval = tower_data.get('attack_interval')
+            attack_speed_stat = tower_data.get('attack_speed') # Check for explicit speed first
+            if attack_speed_stat:
+                tooltip_lines.append(f"- Attack Speed: {attack_speed_stat:.2f}/sec")
+            elif attack_interval and attack_interval > 0 and attack_interval < 999:
+                tooltip_lines.append(f"- Attack Speed: {(1.0 / attack_interval):.2f}/sec (Interval: {attack_interval:.2f}s)")
+
+            # Range
+            range_val = tower_data.get('range', 0)
+            range_min = tower_data.get('range_min', 0)
+            range_str = f"{range_val}"
+            if range_min > 0:
+                range_str += f" (Min: {range_min})"
+            tooltip_lines.append(f"- Range: {range_str}")
+
+            # Targets
+            targets = tower_data.get('targets', [])
+            if targets:
+                tooltip_lines.append(f"- Targets: {', '.join(t.capitalize() for t in targets)}")
+
+            # Critical Strike
+            crit_chance = tower_data.get('critical_chance', 0.0)
+            crit_multi = tower_data.get('critical_multiplier', 1.0)
+            if crit_chance > 0:
+                tooltip_lines.append(f"- Crit: {crit_chance*100:.0f}% chance for x{crit_multi:.1f} damage")
+
+            tooltip_lines.append("") # Spacer
+            tooltip_lines.append("<b>Attack Modifiers:</b>")
+
+            # Attack Type
+            attack_type = tower_data.get('attack_type', 'none')
+            tooltip_lines.append(f"- Attack Type: {attack_type.capitalize()}")
+
+            # Projectile Speed
+            proj_speed = tower_data.get('projectile_speed')
+            if proj_speed is not None:
+                tooltip_lines.append(f"- Projectile Speed: {proj_speed}")
+
+            # Splash
+            splash = tower_data.get('splash_radius')
+            if splash is not None and splash > 0:
+                tooltip_lines.append(f"- Splash Radius: {splash}")
+
+            # Bounce
+            bounce = tower_data.get('bounce', 0)
+            if bounce > 0:
+                bounce_range = tower_data.get('bounce_range', 'N/A')
+                bounce_falloff = tower_data.get('bounce_damage_falloff', 'N/A')
+                tooltip_lines.append(f"- Bounces: {bounce} times (Range: {bounce_range}, Falloff: {bounce_falloff*100:.0f}%) ")
+
+            # Pierce
+            pierce = tower_data.get('pierce_adjacent', 0)
+            if pierce > 0:
+                tooltip_lines.append(f"- Pierces: {pierce} adjacent targets")
+
+            # Special Block
+            special_data = tower_data.get('special')
+            if special_data and isinstance(special_data, dict):
+                tooltip_lines.append("") # Spacer
+                tooltip_lines.append("<b>Special Ability:</b>")
+                special_desc = special_data.get('description')
+                if special_desc:
+                    tooltip_lines.append(f"<i>{special_desc}</i>")
+                else:
+                    # Try to display effect name if no description
+                    effect_name = special_data.get('effect')
+                    if effect_name:
+                        tooltip_lines.append(f"Effect: {effect_name}")
+                
+                # Add known parameters (add more as needed)
+                known_params = {
+                    "duration": "Duration", "interval": "Interval", "slow_percentage": "Slow",
+                    "aura_radius": "Aura Radius", "pulse_damage": "Pulse Damage", "dot_damage": "DoT Damage",
+                    "stun_duration": "Stun Duration", "chance_percent": "Chance", "pellets": "Pellets", 
+                    "crit_splash_multiplier": "Crit Splash Mult", "chain_targets": "Chain Targets",
+                    "gold_amount": "Gold Amount", "reduction_amount": "Reduction", "max_stacks": "Max Stacks"
+                }
+                for key, label in known_params.items():
+                    if key in special_data:
+                        value = special_data[key]
+                        unit = "%" if "percent" in key or "slow" in key else ("s" if "duration" in key or "interval" in key else "")
+                        tooltip_lines.append(f"- {label}: {value}{unit}")
+
+            # Join lines with HTML line breaks
+            tooltip_text = "<br>".join(tooltip_lines)
+            # --- End Comprehensive Tooltip --- 
 
             # Position button relative to the scroll container
             button_rect = pygame.Rect(0, current_y, content_width, button_height) # X=0 for scroll container
             button = pygame_gui.elements.UIButton(
                 relative_rect=button_rect,
-                text="", 
+                text=name,
                 manager=self.manager,
                 container=self.button_scroll_container.get_container(), # Get the actual container surface
                 tool_tip_text=tooltip_text,
@@ -151,7 +235,6 @@ class TowerSelector:
             )
             self.tower_buttons[tower_id] = button
 
-            # --- Elements positioned relative to the Panel --- 
             # Image
             preview_image = self.tower_assets.get_tower_preview(tower_id)
             if preview_image:
@@ -170,20 +253,6 @@ class TowerSelector:
                     manager=self.manager, 
                     container=self.button_scroll_container.get_container() # Add to scroll container
                 )
-
-            # Name Label
-            name_rel_x = text_x_rel
-            # Center name label vertically within the button height
-            name_rel_y = (button_height - line_height) // 2
-            # Label position is relative to the scroll container
-            name_label_rect = pygame.Rect(name_rel_x, button_rect.top + name_rel_y, text_width, line_height)
-            pygame_gui.elements.UILabel(
-                relative_rect=name_label_rect, 
-                text=name, 
-                manager=self.manager, 
-                container=self.button_scroll_container.get_container(), # Add to scroll container 
-                object_id="@tower_button_label_name"
-            )
 
             # Update Y for next button (relative to scroll container)
             current_y += button_height + padding

@@ -170,8 +170,7 @@ class RaceSelector:
                 text=race_id.replace('_', ' ').title(),
                 manager=self.manager,
                 container=self.button_scroll_container.get_container(), 
-                object_id=f"#race_button_{race_id}",
-                tool_tip_text=self.race_descriptions.get(race_id, "") # Use loaded description
+                object_id=f"#race_button_{race_id}"
             )
             self.race_buttons.append((race_id, button))
             current_scroll_y += button_height + h_padding 

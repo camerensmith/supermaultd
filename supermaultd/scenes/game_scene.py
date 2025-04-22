@@ -2090,19 +2090,8 @@ class GameScene:
         # --- Draw UI elements --- 
         self.ui_manager.draw_ui(screen)
 
-        # --- Draw Lives Display (AFTER UI) --- 
-        try:
-            lives_font = pygame.font.Font(None, 24) # Create smaller, local font
-            if lives_font: 
-
-                lives_text = f"Lives: {self.lives}"
-                lives_surface = lives_font.render(lives_text, True, config.WHITE) # Use white color
-                lives_rect = lives_surface.get_rect(topleft=(10, 10)) # Position with padding
-                screen.blit(lives_surface, lives_rect)
-            else:
-                print("DEBUG: Failed to create local lives_font.")
-        except Exception as e:
-             print(f"ERROR drawing lives: {e}")
+        # --- Draw Lives Display (Using the dedicated method) ---
+        self.draw_ui(screen)
         # --- End Lives Display ---
 
         # --- Draw Hovered Tower Range Indicator ---
@@ -2149,9 +2138,20 @@ class GameScene:
         # Draw money and lives
         font = pygame.font.Font(None, 36)
         # money_text = font.render(f"Money: ${self.money}", True, (255, 255, 255)) # Commented out money rendering
-        lives_text = font.render(f"Lives: {self.lives}", True, (255, 255, 255))
+        lives_text_surface = font.render(f"Lives: {self.lives}", True, (255, 255, 255))
         # screen.blit(money_text, (10, 10)) # Commented out money drawing
-        screen.blit(lives_text, (10, 50))
+        lives_text_rect = lives_text_surface.get_rect()
+        
+        # Center horizontally
+        lives_text_rect.centerx = self.screen_width // 2
+        
+        # Position vertically near the bottom (using bottom padding as reference)
+        lives_text_rect.bottom = self.screen_height - config.UI_PANEL_PADDING
+        
+        # NEW: Center the text rect within the objective area rect
+        lives_text_rect.center = self.objective_area_rect.center
+        
+        screen.blit(lives_text_surface, lives_text_rect)
         
         # Draw tower selection UI
         # TODO: Implement tower selection UI

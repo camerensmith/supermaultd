@@ -617,7 +617,12 @@ class Projectile:
                     if pierced_count >= self.pierce_adjacent:
                         break
                     if enemy_to_pierce.health > 0:
-                        damage_dealt, was_killed = self.apply_damage(enemy_to_pierce)
+                        # Apply damage and get the result dictionary
+                        damage_result = self.apply_damage(enemy_to_pierce)
+                        # Extract needed values safely
+                        damage_dealt = damage_result.get("damage_dealt", 0)
+                        was_killed = damage_result.get("was_killed", False)
+
                         self.hit_enemies_in_sequence.add(enemy_to_pierce) # Track pierce hits for bounce logic
                         if damage_dealt > 0:
                             results['damage_dealt'].append((enemy_to_pierce, damage_dealt, self.damage_type))

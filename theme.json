@@ -1,0 +1,48 @@
+{
+    "defaults":
+    {
+        "colours":
+        {
+            "normal_bg": "#4c5052",
+            "hovered_bg": "#63686b",
+            "disabled_bg": "#25292e",
+            "selected_bg": "#365880",
+            "active_bg": "#365880",
+            "dark_bg": "#21282d",
+            "disabled_dark_bg": "#181818",
+            "normal_text": "#bbbbbb",
+            "hovered_text": "#bbbbbb",
+            "disabled_text": "#808080",
+            "selected_text": "#bbbbbb",
+            "active_text": "#bbbbbb",
+            "normal_text_shadow": "#10101070",
+            "hovered_text_shadow": "#10101070",
+            "disabled_text_shadow": "#10101070",
+            "selected_text_shadow": "#10101070",
+            "active_text_shadow": "#10101070",
+            "normal_border": "#5c6062",
+            "hovered_border": "#73787b",
+            "disabled_border": "#35393e",
+            "selected_border": "#466890",
+            "active_border": "#466890",
+            "link_text": "#6897bb",
+            "link_hover": "#84bfed",
+            "link_selected": "#84bfed",
+            "text_shadow": "#777777",
+            "filled_bar": "#f4251b",
+            "unfilled_bar": "#CCCCCC",
+            "text_cursor": "#FFFFFFFF"
+        }
+    },
+
+    "tool_tip":
+    {
+        "misc": {
+            "rect_width": "250"
+        },
+        "colours": {
+            "dark_bg": "@dark_bg",
+            "normal_text": "@normal_text"
+        }
+    }
+} 
