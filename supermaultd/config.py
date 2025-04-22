@@ -98,7 +98,7 @@ ENEMY_DATA = {
     },
     "quillpig": {  
         "health": 308,
-        "speed": 0.8,
+        "speed": 0.7,
         "value": 1, "armor_value": 7,
         "armor_type": "Light",
         "type": "ground"

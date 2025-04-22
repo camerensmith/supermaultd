@@ -663,17 +663,17 @@
     "knights_keep": {
       "description": "A disciplined order relying on sturdy defenses, sharp steel, and powerful siege engines.",
       "towers": {
-        "knights_castle_wall": {
+        "knights_wall": {
           "name": "Castle Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": []
         },
         "knights_militia": {
-          "name": "Militia", "grid_width": 1, "grid_height": 1, "cost": 9,
+          "name": "Militia", "grid_width": 1, "grid_height": 1, "cost": 8,
           "damage_min": 8, "damage_max": 10, "damage_type": "piercing",
           "range": 350, "attack_interval": 1, "projectile_speed": null,
-          "attack_type": "instant", "splash_radius": 200, "targets": ["ground"]
+          "attack_type": "instant", "splash_radius": 225, "targets": ["ground"]
         },
         "knights_watchtower": {
           "name": "Watchtower", "grid_width": 2, "grid_height": 2, "cost": 26,
