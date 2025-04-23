@@ -59,8 +59,7 @@ class TowerAssets:
         effects_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'effects')
         aura_map = {
             "alchemist_miasma_pillar": "miasma.png", # Tower ID maps to effect image
-            "spark_storm_generator": "storm_effect.png", # Add mapping for storm generator
-            # Add other towers/aura visuals here
+            # Remove storm_effect from here
         }
 
         for tower_id, filename in aura_map.items():
@@ -83,6 +82,7 @@ class TowerAssets:
             "pyro_flame_dancer": "flame_ring.png", # Added flame dancer mapping
             "goblin_shredder": "buzzsaw.png", # Added shredder mapping
             "brine_vortex_monument": "brine_vortex_monument.png",
+            "spark_storm_generator": "storm_effect.png", # Add storm effect here
             # Add other towers/overlay visuals here
         }
 

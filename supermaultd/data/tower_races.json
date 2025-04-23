@@ -1156,10 +1156,10 @@
           }
         },
         "goblin_ripper_mekk": {
-          "name": "Ripper Mekk", "grid_width": 2, "grid_height": 2, "cost": 140,
+          "name": "Ripper Mekk", "grid_width": 2, "grid_height": 2, "cost": 101,
           "damage_min": 44, "damage_max": 312, "damage_type": "normal",
-          "range": 350, "attack_interval": 0.7, "projectile_speed": null,
-          "attack_type": "instant", "splash_radius": null, "targets": ["ground"],
+          "range": 400, "attack_interval": 1, "projectile_speed": null,
+          "attack_type": "instant", "splash_radius": 300, "targets": ["ground"],
           "special": {
             "effect": "armor_reduction_on_hit",
             "chance_percent": 15, 
@@ -1175,23 +1175,23 @@
           "special": { 
             "effect": "shotgun",
             "pellets": 15,
-            "spread_angle": 75,
+            "spread_angle": 125,
             "description": "Fires a spray of 15 pellets."
           }
         },
         "goblin_catapult_brigade": {
-          "name": "Goblin Catapult Brigade", "grid_width": 2, "grid_height": 2, "cost": 250,
+          "name": "Goblin Catapult Brigade", "grid_width": 2, "grid_height": 2, "cost": 150,
           "damage_min": 800, "damage_max": 3000, "damage_type": "normal",
-          "range_min": 2500, "range": 3000, "attack_interval": 2.5, "projectile_speed": 350,
+          "range_min": 2500, "range": 3000, "attack_interval": 4.3, "projectile_speed": 350,
           "attack_type": "projectile", "splash_radius": 450, "targets": ["ground"],
           "special": {
               "effect": "miss_chance",
-              "chance": 70, 
-              "description": "Has a 70% chance to misfire."
+              "chance": 50, 
+              "description": "Has a 50% chance to misfire."
           }
         },
         "goblin_shredder": {
-          "name": "Goblin Shredder", "grid_width": 3, "grid_height": 3, "cost": 450,
+          "name": "Goblin Shredder", "grid_width": 3, "grid_height": 3, "cost": 204,
           "description": "Goblin savagery at its finest. A brutal cage contraption that rips enemies apart. Causes heavy hemmorhage damage over time.",
           "damage_min": 20, "damage_max": 85, "damage_type": "chaos", 
           "range": 350, "attack_interval": 0.1,
@@ -1316,7 +1316,7 @@
           "attack_type": "none", "splash_radius": null, "targets": []
         },
         "spark_static_post": {
-          "name": "Static Post", "grid_width": 1, "grid_height": 1, "cost": 8,
+          "name": "Static Post", "grid_width": 1, "grid_height": 2, "cost": 8,
           "damage_min": 7, "damage_max": 8, "damage_type": "normal", "bounce": 1,
           "range": 580, "attack_interval": 0.4, "projectile_speed": 600,
           "attack_type": "instant", "splash_radius": 225, "targets": ["ground", "air"]
@@ -1343,14 +1343,14 @@
           "description": "Individually fires a weak projectile. Links with nearby Arc Towers to unleash a powerful chain zap from the furthest linked tower, dealing damage based on chain length."
         },
         "spark_zap_coil": {
-          "name": "Zap Coil", "grid_width": 1, "grid_height": 1, "cost": 61,
+          "name": "Zap Coil", "grid_width": 1, "grid_height": 2, "cost": 61,
           "damage_min": 75, "damage_max": 145, "damage_type": "normal",
           "range": 450, "attack_interval": 1.5, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 300, "targets": ["ground", "air"],
           "special": {"effect": "stun", "duration": 0.2}
         },
         "spark_lightning_rod": {
-          "name": "Lightning Rod", "grid_width": 1, "grid_height": 1, "cost": 126,
+          "name": "Lightning Rod", "grid_width": 1, "grid_height": 2, "cost": 126,
           "damage_min": 180, "damage_max": 200, "damage_type": "piercing",
           "range": 800, "attack_interval": 1.5, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
@@ -1374,10 +1374,10 @@
           }
         },
         "spark_storm_generator": {
-          "name": "Storm Generator", "grid_width": 1, "grid_height": 1, "cost": 224,
+          "name": "Storm Generator", "grid_width": 2, "grid_height": 2, "cost": 224,
           "damage_min": 400, "damage_max": 800, "damage_type": "arcane", "target_selection": "random",
-          "range": 600, "attack_interval": 1, "projectile_speed": null,
-          "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
+          "range": 3000, "attack_interval": 2, "projectile_speed": null, "traversable": true,
+          "attack_type": "instant", "instant_hold": 0.5, "splash_radius": 500, "targets": ["ground", "air"],
           "stats_air": {
           }
         }
@@ -1554,13 +1554,13 @@
         },
         "police_breacher": {
           "name": "Breacher", "grid_width": 1, "grid_height": 1, "cost": 90,
-          "damage_min": 40, "damage_max": 45, "damage_type": "piercing",
-          "range": 850, "attack_interval": 1.0, "projectile_speed": 550,
+          "damage_min": 85, "damage_max": 100, "damage_type": "piercing",
+          "range": 850, "attack_interval": 2.2, "projectile_speed": 550,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground"],
           "special": {
               "effect": "shotgun",
               "pellets": 5,
-            "spread_angle": 20
+            "spread_angle": 35
           }
         },
         "police_hq": {

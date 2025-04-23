@@ -12,7 +12,7 @@ from entities.offset_boomerang_projectile import OffsetBoomerangProjectile # <<<
 from entities.orbiting_damager import OrbitingDamager
 # from entities.orbiting_orbs_effect import OrbitingOrbsEffect # Removed import
 from entities.effect import Effect, FloatingTextEffect, ChainLightningVisual, RisingFadeEffect, GroundEffectZone # Added GroundEffectZone
-from entities.harpoon_projectile import HarpoonProjectile # Added HarpoonProjectile import
+from entities.harpoon_projectile import HarpoonProjectile
 
 class Tower:
     def __init__(self, x, y, tower_id, tower_data):
@@ -252,6 +252,55 @@ class Tower:
             else:
                 print(f"Warning: Looping sound file not found: {drums_sound_path}")
         # --- END Looping Sound ---
+
+        # --- NEW: Looping sound for Spark Storm Generator ---
+        if self.tower_id == 'spark_storm_generator':
+            storm_sound_path = os.path.join(sound_dir, "spark_thunderstorm.mp3")
+            if os.path.exists(storm_sound_path):
+                try:
+                    storm_sound = pygame.mixer.Sound(storm_sound_path)
+                    self.looping_sound_channel = pygame.mixer.find_channel()
+                    if self.looping_sound_channel:
+                        self.looping_sound_channel.play(storm_sound, loops=-1)
+                        print(f"Started looping sound {storm_sound_path} on channel {self.looping_sound_channel}")
+                    else:
+                        print("Warning: No available sound channels for spark_storm_generator loop.")
+                except pygame.error as e:
+                    print(f"Error loading or playing spark_storm_generator sound {storm_sound_path}: {e}")
+            else:
+                print(f"Warning: Looping sound file not found: {storm_sound_path}")
+        # --- END Spark Storm Generator Sound ---
+
+        # --- NEW: Looping sound for Goblin Shredder ---
+        if self.tower_id == 'goblin_shredder':
+            shredder_sound_path = os.path.join(sound_dir, "goblin_shredder_on.mp3")
+            if os.path.exists(shredder_sound_path):
+                try:
+                    shredder_sound = pygame.mixer.Sound(shredder_sound_path)
+                    self.looping_sound_channel = pygame.mixer.find_channel()
+                    if self.looping_sound_channel:
+                        self.looping_sound_channel.play(shredder_sound, loops=-1)
+                        print(f"Started looping sound {shredder_sound_path} on channel {self.looping_sound_channel}")
+                    else:
+                        print("Warning: No available sound channels for goblin_shredder loop.")
+                except pygame.error as e:
+                    print(f"Error loading or playing goblin_shredder sound {shredder_sound_path}: {e}")
+            else:
+                print(f"Warning: Looping sound file not found: {shredder_sound_path}")
+        # --- END Goblin Shredder Sound ---
+
+        # --- NEW: Load Miss Sound for Goblin Catapult Brigade ---
+        if self.tower_id == 'goblin_catapult_brigade':
+            miss_sound_path = os.path.join(sound_dir, "goblin_catapult_misfire.mp3")
+            if os.path.exists(miss_sound_path):
+                try:
+                    self.miss_sound = pygame.mixer.Sound(miss_sound_path)
+                    print(f"Loaded miss sound for {self.tower_id} from {miss_sound_path}")
+                except pygame.error as e:
+                    print(f"Error loading miss sound {miss_sound_path}: {e}")
+            else:
+                print(f"Warning: Miss sound file not found: {miss_sound_path}")
+        # --- END Miss Sound Loading ---
 
         # --- Beam Sound State ---
         self.is_beam_sound_playing = False
@@ -716,14 +765,32 @@ class Tower:
 
             # --- NEW: Miss Chance Check --- 
             if self.special and self.special.get("effect") == "miss_chance":
-                miss_chance_percent = self.special.get("chance", 0)
-                if random.random() * 100 < miss_chance_percent:
-                    # Make the MISS! message larger/more prominent
-                    print(f"\n***          MISS!          ***")
-                    print(f"*** Tower {self.tower_id} attack missed (Chance: {miss_chance_percent}%) ***\n")
+                miss_chance = self.special.get("chance", 0)
+                if random.random() * 100 < miss_chance:
+                    print(f"Tower {self.tower_id} MISSED due to {miss_chance}% miss chance!")
+                    # Play miss sound if available
+                    if hasattr(self, 'miss_sound') and self.miss_sound:
+                        self.miss_sound.play()
+                    
+                    # Create floating text effect for MISS!
+                    try:
+                        # Calculate position (above tower center)
+                        text_x = self.x
+                        text_y = self.y - (self.height_pixels / 2) # Start above tower center
+                        
+                        miss_text = "MISSFIRE!"
+                        miss_color = (255, 0, 0) # Red color
+                        text_effect = FloatingTextEffect(text_x, text_y, miss_text, 
+                                                       duration=1.5, 
+                                                       color=miss_color, 
+                                                       font_size=40, 
+                                                       rise_speed=30)
+                        self.game_scene_add_effect_callback(text_effect)
+                    except Exception as e:
+                        print(f"Error creating miss text effect: {e}")
+                    
                     self.last_attack_time = current_time # Consume the attack cooldown
-                    # Optional: Play a miss sound?
-                    return None # Attack misses, do nothing further
+                    return None # Return None to prevent any attack effects
             # --- END Miss Chance Check ---
 
             # --- Check for Salvo Attack Initiation --- 
@@ -1136,7 +1203,33 @@ class Tower:
                     # Apply INSTANT special effects
                     self.apply_instant_special_effects(target, current_time) 
                     
-                    # --- Create Instant Attack Visual Effect --- 
+                    # --- Try to Create Projectile-Style Visual First ---
+                    try:
+                        # Try to get projectile image using tower_id like projectiles do
+                        projectile_img = self.asset_loader.get_projectile_image(self.tower_id)
+                        if projectile_img:
+                            # Calculate angle from tower to target
+                            dx = target.x - self.x
+                            dy = target.y - self.y
+                            angle = math.degrees(math.atan2(-dy, dx))
+                            
+                            # Create projectile-style effect
+                            projectile_effect = Effect(
+                                target.x + grid_offset_x,
+                                target.y + grid_offset_y,
+                                projectile_img,
+                                duration=0.1,  # Short duration
+                                target_size=(GRID_SIZE * 2, GRID_SIZE * 2),  # Scale up for storm generator
+                                hold_duration=0.1,  # Hold for 0.1s
+                                rotation=angle  # Rotate to point from tower to target
+                            )
+                            results['effects'].append(projectile_effect)
+                            print(f"Created projectile-style visual for {self.tower_id} instant attack")
+                    except Exception as e:
+                        print(f"Note: Could not create projectile-style visual for {self.tower_id}: {e}")
+                        # Fall through to normal instant attack visual handling
+                    
+                    # --- Fallback to Normal Instant Attack Visual Effect --- 
                     visual_effect_name = self.tower_data.get("attack_visual_effect")
                     if visual_effect_name and visual_assets: # Check if name and assets exist
                         visual_img = visual_assets.get(visual_effect_name)
@@ -1145,16 +1238,62 @@ class Tower:
                             # Calculate screen coordinates
                             effect_x = target.x + grid_offset_x
                             effect_y = target.y + grid_offset_y
-                            # Create a standard fading effect (adjust duration/size as needed)
+                            
+                            # Get hold duration from tower data, default to 0.1 if not specified
+                            hold_duration = self.tower_data.get("instant_hold", 0.1)
+                            
+                            # Create a standard fading effect
                             vis_effect = Effect(effect_x, effect_y, visual_img, 
                                                 duration=0.5, # Example duration
                                                 target_size=(GRID_SIZE, GRID_SIZE), # Example size
-                                                hold_duration=0.1)
+                                                hold_duration=hold_duration)
                             results['effects'].append(vis_effect)
                         else:
                             print(f"Warning: Could not load visual asset '{visual_effect_name}' for tower {self.tower_id}")
                     # --- End Instant Visual Effect ---
-                    
+
+                    # --- Special Case: Storm Generator Lightning Bolt ---
+                    if self.tower_id == "spark_storm_generator" and visual_assets:
+                        try:
+                            # Try to get the lightning bolt image from the projectiles directory
+                            projectile_path = os.path.join("assets", "images", "projectiles", "spark_storm_generator.png")
+                            lightning_img = self.asset_loader(projectile_path)
+                            if lightning_img:
+                                # Calculate angle from tower to target
+                                dx = target.x - self.x
+                                dy = target.y - self.y
+                                angle = math.degrees(math.atan2(-dy, dx))
+                                
+                                # Get hold duration from tower data, default to 0.1 if not specified
+                                hold_duration = self.tower_data.get("instant_hold", 0.1)
+                                
+                                # Create lightning effect
+                                lightning_effect = Effect(
+                                    target.x + grid_offset_x,
+                                    target.y + grid_offset_y,
+                                    lightning_img,
+                                    duration=0.1,  # Very short duration
+                                    target_size=(GRID_SIZE * 2, GRID_SIZE * 2),  # Scale up the lightning
+                                    hold_duration=hold_duration  # Use the hold duration from tower data
+                                )
+                                # Store the rotation angle as a custom attribute
+                                lightning_effect.rotation_angle = angle
+                                # Override the draw method to handle rotation
+                                original_draw = lightning_effect.draw
+                                def rotated_draw(screen):
+                                    if not lightning_effect.finished and lightning_effect.image:
+                                        # Create a rotated copy of the image
+                                        rotated_img = pygame.transform.rotate(lightning_effect.image, lightning_effect.rotation_angle)
+                                        # Get the rect of the rotated image
+                                        rotated_rect = rotated_img.get_rect(center=lightning_effect.rect.center)
+                                        # Draw the rotated image
+                                        screen.blit(rotated_img, rotated_rect)
+                                lightning_effect.draw = rotated_draw
+                                results['effects'].append(lightning_effect)
+                        except Exception as e:
+                            print(f"Note: Could not create lightning bolt visual for spark_storm_generator: {e}")
+                    # --- End Storm Generator Lightning Bolt ---
+
                     # --- Instant Splash Damage Logic --- 
                     effective_splash_radius_pixels = buffed_stats.get('splash_radius_pixels', 0)
                     if effective_splash_radius_pixels > 0 and initial_damage > 0: # Only splash if radius > 0 and damage > 0
@@ -1243,26 +1382,29 @@ class Tower:
             return
 
         effect_type = self.special.get("effect")
-
-        # Example: Apply stun if it's an instant attack
-        if effect_type == "stun" and "duration" in self.special:
-            stun_duration = self.special["duration"]
-            target.apply_status_effect('stun', stun_duration, True, current_time)
-            print(f"Tower {self.tower_id} applied instant STUN to {target.enemy_id} for {stun_duration}s")
-
-        # --- NEW: Bash Chance Logic ---
-        elif effect_type == "bash_chance":
-            chance = self.special.get("chance_percent", 0)
-            if random.random() * 100 < chance:
-                stun_duration = self.special.get("stun_duration", 0.1) # Get mini-stun duration
-                if stun_duration > 0:
-                    target.apply_status_effect('stun', stun_duration, True, current_time)
-                    print(f"Tower {self.tower_id} BASHED {target.enemy_id} for {stun_duration}s (Chance: {chance}%)")
-        # --- END Bash Chance Logic ---
-
-        # Add other instant-applicable effects here (e.g., direct DoT application?)
-        # Careful not to duplicate effects handled by projectiles
         
+        # --- Handle DoT Effects ---
+        if (effect_type and # First check if effect exists
+            "dot_damage" in self.special and 
+            "dot_interval" in self.special and 
+            "duration" in self.special): # Use "duration" from JSON for direct DoTs
+
+            # Extract DoT parameters
+            dot_name = effect_type # Use effect_type as the DoT name
+            base_dot_damage = self.special.get("dot_damage", 0)
+            dot_interval = self.special.get("dot_interval", 1.0)
+            dot_duration = self.special.get("duration", 1.0) # Use "duration" from JSON
+            dot_damage_type = self.special.get("dot_damage_type", "normal")
+
+            # Apply the DoT to the enemy
+            if base_dot_damage > 0: # Only apply if damage is positive
+                target.apply_dot_effect(
+                    dot_name, base_dot_damage, dot_interval, 
+                    dot_duration, dot_damage_type, current_time
+                )
+                print(f"... instant attack applied {dot_name} DoT ({base_dot_damage}/{dot_interval}s for {dot_duration}s) to {target.enemy_id}")
+        # --- End DoT Effects ---
+
     def draw(self, screen, tower_assets, offset_x=0, offset_y=0):
         """Draw the tower using its associated image, scaled to its grid footprint, with a border and offset."""
         draw_pixel_x = (self.top_left_grid_x * GRID_SIZE) + offset_x
@@ -1528,6 +1670,11 @@ class Tower:
                     if self.aura_radius_pixels > 0: # Scale to aura if defined
                         target_diameter = int(self.aura_radius_pixels * 2)
                         target_size = (target_diameter, target_diameter)
+                elif self.tower_id == "spark_storm_generator":
+                    rotation_speed_degrees = 0 # No rotation for storm
+                    # Scale to tower's range instead of aura radius
+                    target_diameter = int(self.range * 2) # Double the range for full diameter
+                    target_size = (target_diameter, target_diameter)
                 elif self.tower_id == "pyro_flame_dancer":
                     rotation_speed_degrees = 360 # Fast clockwise rotation for flame ring
                     # Keep default target_size (tower footprint) and center_on_tower
@@ -1582,7 +1729,7 @@ class Tower:
         # Define this tower's bounding box in grid coordinates
         self_start_x = self.top_left_grid_x
         self_end_x = self_start_x + self.grid_width - 1
-        self_start_y = self.top_left_grid_y
+        self_start_y = self_start_y
         self_end_y = self_start_y + self.grid_height - 1
         
         # Define the adjacency check area (this tower's box expanded by 1 cell)
