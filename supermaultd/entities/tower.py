@@ -12,6 +12,7 @@ from entities.offset_boomerang_projectile import OffsetBoomerangProjectile # <<<
 from entities.orbiting_damager import OrbitingDamager
 # from entities.orbiting_orbs_effect import OrbitingOrbsEffect # Removed import
 from entities.effect import Effect, FloatingTextEffect, ChainLightningVisual, RisingFadeEffect, GroundEffectZone # Added GroundEffectZone
+from entities.harpoon_projectile import HarpoonProjectile # Added HarpoonProjectile import
 
 class Tower:
     def __init__(self, x, y, tower_id, tower_data):
@@ -940,6 +941,22 @@ class Tower:
                 return results # Whip attack handled
             # <<< --- END WHIP ATTACK LOGIC --- >>>
 
+            # --- Harpoon Attack Logic ---
+            elif self.attack_type == 'harpoon':
+                # <<< PLAY SOUND >>>
+                if self.attack_sound:
+                    self.attack_sound.play()
+                # <<< END PLAY SOUND >>>
+                self.last_attack_time = current_time # Update attack time
+                
+                # Create the harpoon projectile
+                harpoon = HarpoonProjectile(
+                    self.x, self.y, target, self, self.special
+                )
+                results['projectiles'].append(harpoon)
+                return results
+            # --- END Harpoon Attack Logic ---
+
             # --- Gattling Level Up & Visual Effect Logic --- 
             is_gattling = self.special and self.special.get("effect") == "gattling_spin_up"
             if is_gattling:
@@ -1213,18 +1230,7 @@ class Tower:
                             adjusted_path = [(int(x + grid_offset_x), int(y + grid_offset_y)) for x, y in chain_path_visual]
                             chain_effect = ChainLightningVisual(adjusted_path, duration=0.3) # Use existing visual
                             results['effects'].append(chain_effect)
-                    # --- End Chain Lightning Logic ---
-
-                # --- Apply effects common to both standard projectile/instant that are triggered ON ATTACK (not collision) --- 
-                # Example: Rampage Stacks - This should happen *when* the tower attacks, regardless of projectile hit
-                if self.special and self.special.get("effect") == "rampage_damage_stack":
-                    self.rampage_stacks = min(self.special.get('max_stacks', 10), self.rampage_stacks + 1)
-                    self.rampage_last_hit_time = current_time
-                    print(f"Tower {self.tower_id} gained rampage stack. Stacks: {self.rampage_stacks}")
-                # NOTE: Armor shred, pierce adjacent usually happen on COLLISION (handled in Projectile/Enemy)
-                #       Or need specific logic here if INSTANT attacks should trigger them.
-                #       Let's assume they are handled on collision for now unless specified otherwise.
-                # <<< FIX INDENTATION END >>>
+                    # --- END Chain Lightning Logic ---
 
         # --- Beam Logic --- 
         # ... (existing beam logic - sound doesn't make sense here) ...

@@ -1741,11 +1741,25 @@
               "description": "Fires 3 cannons from each side."
           }
         },
-        "seadog_kraken_caller": {
-          "name": "Kraken Caller", "grid_width": 3, "grid_height": 3, "cost": 335,
-          "damage_min": 700, "damage_max": 800, "damage_type": "chaos",
-          "range": 1000, "attack_interval": 3.0, "projectile_speed": null,
-          "attack_type": "instant", "splash_radius": 1100, "targets": ["ground", "air"]
+        "seadog_harpoon_tower": {
+          "name": "Harpoon Tower",
+          "grid_width": 1,
+          "grid_height": 1,
+          "cost": 200,
+          "damage_min": 100,
+          "damage_max": 100,
+          "damage_type": "normal",
+          "range": 900,
+          "attack_interval": 9.0,
+          "projectile_speed": 400,
+          "attack_type": "harpoon",
+          "targets": ["ground", "air"],
+          "special": {
+            "effect": "harpoon",
+            "pull_distance": 900,
+            "pull_duration": 2,
+            "shear_multiplier": 1.2
+          }
         }
       }
     },
