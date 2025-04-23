@@ -1525,7 +1525,7 @@
       }
     },
     "police_station": {
-      "description": "Maintaining order with non-lethal tactics and precision takedowns.",
+      "description": "The Police.",
       "towers": {
         "police_wall": {
           "name": "Police Blockade", "grid_width": 1, "grid_height": 1, "cost": 1,
@@ -1539,12 +1539,18 @@
           "range": 550, "attack_interval": 0.4, "projectile_speed": 500,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
         },
-        "police_tear_gas_launcher": {
-          "name": "Tear Gas Launcher", "grid_width": 1, "grid_height": 1, "cost": 22,
-          "damage_min": 1, "damage_max": 1, "damage_type": "normal",
-          "range": 500, "attack_interval": 2.0, "projectile_speed": 300,
-          "attack_type": "projectile", "splash_radius": 100, "targets": ["ground", "air"],
-          "special": {"effect": "slow", "slow_percentage": 30, "duration": 2.5}
+        "police_grenade_launcher": {
+          "name": "Grenade Launcher", "grid_width": 1, "grid_height": 1, "cost": 22,
+          "damage_min": 20, "damage_max": 30, "damage_type": "normal",
+          "range": 500, "attack_interval": 2.0, "projectile_speed": 175,
+          "attack_type": "projectile", "splash_radius": 200, "targets": ["ground", "air"],
+          "special": {
+            "effect": "grenade_launcher",
+            "detonation_time": 2.0,
+            "max_bounces": 1,
+            "bounce_speed_loss": 0.2,
+            "explosion_radius": 100
+          }
         },
         "police_taser_turret": {
           "name": "Taser Turret", "grid_width": 1, "grid_height": 1, "cost": 50,

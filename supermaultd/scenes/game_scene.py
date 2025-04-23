@@ -15,12 +15,13 @@ from utils.pathfinding import find_path # Import pathfinding function
 from entities.enemy import Enemy # Import Enemy class
 from entities.projectile import Projectile # Import Projectile class
 from entities.offset_boomerang_projectile import OffsetBoomerangProjectile # <<< ADDED IMPORT
+from entities.grenade_projectile import GrenadeProjectile # <<< ADDED IMPORT
 # Import all necessary effect classes at the top level
 from entities.effect import Effect, FloatingTextEffect, ChainLightningVisual, RisingFadeEffect, GroundEffectZone, FlamethrowerParticleEffect, SuperchargedZapEffect, AcidSpewParticleEffect, PulseImageEffect, ExpandingCircleEffect, DrainParticleEffect, WhipVisual # Added AcidSpewParticleEffect, PulseImageEffect, ExpandingCircleEffect, DrainParticleEffect, WhipVisual
 from entities.orbiting_damager import OrbitingDamager # NEW IMPORT
 from entities.pass_through_exploder import PassThroughExploder # NEW IMPORT
 import json # Import json for loading armor data
-
+import pymunk
 
 # Define wave states
 WAVE_STATE_IDLE = "IDLE"
@@ -1434,6 +1435,7 @@ class GameScene:
         for proj in self.projectiles[:]:
             # --- CHECK IF BOOMERANG ---
             is_boomerang = type(proj).__name__ == 'OffsetBoomerangProjectile' # Dynamic check
+            is_grenade = type(proj).__name__ == 'GrenadeProjectile' # Check for grenade
 
             if is_boomerang:
                 # --- Update Boomerang (which manages its own 'finished' state) ---
@@ -1444,73 +1446,32 @@ class GameScene:
                         # print("Boomerang finished, removed.") # Optional DEBUG
                     except ValueError:
                         print("Warning: Tried to remove finished boomerang that was already removed?")
+            elif is_grenade:
+                # --- Update Grenade (which handles its own collisions and detonation) ---
+                proj.move(time_delta, self.enemies, self.towers)
+                if proj.has_detonated:
+                    # Get explosion result
+                    explosion_result = proj.detonate(self.enemies)
+                    # Add any new effects
+                    if explosion_result.get('new_effects'):
+                        newly_created_effects.extend(explosion_result['new_effects'])
+                    # Remove the grenade
+                    self.projectiles.remove(proj)
             else:
-                # --- Existing Logic for Standard Projectiles ---
-                proj.move(time_delta, self.enemies) 
+                # --- Standard Projectile Update ---
+                proj.move(time_delta, self.enemies)
                 if proj.collided:
-                    # on_collision now returns a dictionary with new projectiles/effects/gold
-                    collision_results = proj.on_collision(self.enemies, current_time, self.tower_buff_auras)
-                    
-                    if collision_results:
-                        # Check for and add gold
-                        gold_to_add = collision_results.get('gold_added', 0)
-                        if gold_to_add > 0:
-                            self.money += gold_to_add
-                            self.tower_selector.update_money(self.money)
-                            # Optional: Create floating text effect for gold gain
-                            try:
-                                grid_offset_x = config.UI_PANEL_PADDING
-                                grid_offset_y = config.UI_PANEL_PADDING
-                                # Use projectile position BEFORE removal
-                                text_x = proj.x + grid_offset_x 
-                                text_y = proj.y + grid_offset_y 
-                                gold_text = f"+{gold_to_add} G"
-                                gold_color = (255, 215, 0) # Gold color
-                                text_effect = FloatingTextEffect(text_x, text_y, gold_text, color=gold_color, font_size=18)
-                                self.effects.append(text_effect)
-                            except Exception as e:
-                                print(f"Error creating gold text effect: {e}")
-                                
-                        # --- NEW: Check for and deduct gold penalty --- 
-                        gold_to_deduct = collision_results.get('gold_penalty', 0)
-                        if gold_to_deduct > 0 and self.money > 0:
-                            amount_to_deduct = min(self.money, gold_to_deduct) # Don't deduct more than player has
-                            self.money -= amount_to_deduct
-                            self.tower_selector.update_money(self.money)
-                            print(f"--- BOUNTY PENALTY APPLIED: Player lost {amount_to_deduct} gold. New total: {self.money} ---")
-                            # Optional: Create floating text effect for gold loss
-                            try:
-                                grid_offset_x = config.UI_PANEL_PADDING
-                                grid_offset_y = config.UI_PANEL_PADDING
-                                text_x = proj.x + grid_offset_x 
-                                text_y = proj.y + grid_offset_y 
-                                loss_text = f"-{amount_to_deduct} G"
-                                loss_color = (255, 60, 60) # Reddish color
-                                text_effect = FloatingTextEffect(text_x, text_y, loss_text, color=loss_color, font_size=18)
-                                self.effects.append(text_effect)
-                            except Exception as e:
-                                print(f"Error creating gold loss text effect: {e}")
-                        # --- END Gold Penalty Check ---
-                        
-                        # Add any new projectiles (e.g., from bounce)
-                        new_projs = collision_results.get('new_projectiles', [])
-                        if new_projs:
-                            newly_created_projectiles.extend(new_projs)
-                        
-                        
-                        # Add any new effects (e.g., fallout zone)
-                        new_effects = collision_results.get('new_effects', [])
-                        if new_effects:
-                            newly_created_effects.extend(new_effects)
-                        
-                    
-                    # Always remove the original projectile after collision is processed
-                    try:
-                        self.projectiles.remove(proj)
-                    except ValueError:
-                        # Keep this block aligned with try
-                        print(f"Warning: Tried to remove projectile that was already removed?") 
-                        
+                    # Get collision results
+                    collision_result = proj.on_collision(self.enemies, current_time, self.tower_buff_auras)
+                    # Add any new projectiles
+                    if collision_result.get('new_projectiles'):
+                        newly_created_projectiles.extend(collision_result['new_projectiles'])
+                    # Add any new effects
+                    if collision_result.get('new_effects'):
+                        newly_created_effects.extend(collision_result['new_effects'])
+                    # Remove the projectile
+                    self.projectiles.remove(proj)
+
         # Add any newly created items to the main lists AFTER iterating
         if newly_created_projectiles:
             self.projectiles.extend(newly_created_projectiles)

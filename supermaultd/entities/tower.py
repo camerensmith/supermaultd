@@ -1,5 +1,6 @@
 import pygame
 import math
+import pymunk
 import random
 import os # <<< ADDED IMPORT
 from config import *
@@ -13,6 +14,7 @@ from entities.orbiting_damager import OrbitingDamager
 # from entities.orbiting_orbs_effect import OrbitingOrbsEffect # Removed import
 from entities.effect import Effect, FloatingTextEffect, ChainLightningVisual, RisingFadeEffect, GroundEffectZone # Added GroundEffectZone
 from entities.harpoon_projectile import HarpoonProjectile
+from entities.grenade_projectile import GrenadeProjectile
 
 class Tower:
     def __init__(self, x, y, tower_id, tower_data):
@@ -1146,10 +1148,10 @@ class Tower:
                         results['projectiles'].append(boomerang)
                     # --- Check for Pass-Through Exploder ---
                     elif self.special and self.special.get("effect") == "fixed_distance_pass_through_explode":
-                        # <<< PLAY SOUND >>>
+                        # <<< PLAY SOUND >>> 
                         if self.attack_sound:
                             self.attack_sound.play()
-                        # <<< END PLAY SOUND >>>
+                        # <<< END PLAY SOUND >>> 
                         self.last_attack_time = current_time # Update attack time
                         
                         # Create the exploder
@@ -1168,6 +1170,43 @@ class Tower:
                         
                         # Add to game scene's exploders list
                         self.game_scene_add_exploder_callback(exploder)
+                    # --- Check for Grenade Launcher ---
+                    elif self.special and self.special.get("effect") == "grenade_launcher":
+                        # Play attack sound if available
+                        if hasattr(self, 'attack_sound') and self.attack_sound:
+                            self.attack_sound.play()
+                        
+                        # Calculate base direction to target
+                        dx = target.x - self.x
+                        dy = target.y - self.y
+                        base_angle = math.atan2(dy, dx)
+                        
+                        # Add random spread (30 degrees in either direction)
+                        spread_angle = random.uniform(-30, 30) * (math.pi / 180)  # Convert to radians
+                        direction_angle = base_angle + spread_angle
+                        
+                        # Create grenade projectile
+                        grenade = GrenadeProjectile(
+                            start_x=self.x,
+                            start_y=self.y,
+                            damage=initial_damage,
+                            speed=self.projectile_speed,
+                            projectile_id="police_grenade_launcher",
+                            direction_angle=direction_angle,
+                            max_distance=self.range,
+                            splash_radius=self.splash_radius,
+                            source_tower=self,
+                            is_crit=is_crit,
+                            special_effect=self.special,
+                            damage_type=self.damage_type,
+                            asset_loader=self.asset_loader,  # Use tower's asset loader
+                            detonation_time=self.special.get("detonation_time", 2.0),
+                            max_bounces=self.special.get("max_bounces", 3),
+                            bounce_speed_loss=self.special.get("bounce_speed_loss", 0.2),
+                            explosion_radius=self.special.get("explosion_radius", 100)
+                        )
+                        
+                        results['projectiles'].append(grenade)
                     else:
                         # --- Normal Projectile Creation ---
                         # <<< PLAY SOUND >>>
