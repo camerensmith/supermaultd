@@ -157,7 +157,7 @@
           "range": 800,
           "grid_width": 3,
           "grid_height": 3,
-          "damage_min": 2000,
+          "damage_min": 1800,
           "damage_max": 2000,
           "damage_type": "chaos",
           "attack_interval": 0.88,
@@ -1630,7 +1630,7 @@
           "special": {
             "effect": "apply_mark",
             "mark_status_effect": "marked_for_death", 
-            "mark_duration": 0.3, 
+            "mark_duration": 1.0, 
             "target_selection": "highest_health", 
             "description": "Periodically marks the highest health enemy in range, causing it to take 50% more damage from all sources."
           }
@@ -1882,7 +1882,7 @@
         "solar_array": {
           "name": "Solar Array", "grid_width": 3, "grid_height": 3, "cost": 700,
           "damage_min": 2000, "damage_max": 2200, "damage_type": "chaos", "target_selection": "random",
-          "range": 1200, "attack_interval": 4.0, "projectile_speed": null,
+          "range": 1200, "attack_interval": 0.7, "projectile_speed": null,
           "attack_type": "beam", "beam_color": [255, 100, 0], "splash_radius": 100, "targets": ["ground", "air"],
           "special": {
             "effect": "requires_solar_adjacency",
@@ -1975,8 +1975,8 @@
         "nomad_caravan_depot": {
           "name": "Caravan Depot", "grid_width": 3, "grid_height": 3, "cost": 200,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",   
-          "range": 1800, "attack_interval": 8.5, "projectile_speed": null, 
-          "attack_type": "none", "splash_radius": null, "targets": ["ground", "air"], 
+          "range": 1800, "attack_interval": 8.5, "projectile_speed": 50, 
+          "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"], 
           "special": {
             "effect": "fixed_distance_pass_through_explode",
             "fixed_travel_distance_units": 1800,       

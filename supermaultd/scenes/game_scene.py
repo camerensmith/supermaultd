@@ -1553,21 +1553,7 @@ class GameScene:
 
         # --- Update Pass-Through Exploders --- 
         for exploder in self.pass_through_exploders[:]: # Use slice copy for safe removal
-            should_remove, new_effect = exploder.update(time_delta, self.enemies, current_time_seconds)
-            if new_effect:
-                # Need to adjust position by offset before adding to scene effects
-                grid_offset_x = config.UI_PANEL_PADDING
-                grid_offset_y = config.UI_PANEL_PADDING
-                # Assuming the effect stores its world coords (x,y) and needs offset for drawing
-                # If the Effect class handles offsets itself, this might not be needed
-                # For now, let's assume we add it as is, and Effect's draw handles offset
-                # OR, we adjust the Effect's position here. Let's try adding as is.
-                if hasattr(new_effect, 'x') and hasattr(new_effect, 'y'): # Check if effect has position
-                     # We might need to adjust the coordinates if Effect expects screen coords
-                     # new_effect.x += grid_offset_x 
-                     # new_effect.y += grid_offset_y
-                     pass # Add effect as is for now
-                self.effects.append(new_effect) # Add the visual effect to the main list
+            should_remove = exploder.update(time_delta, self.enemies, current_time_seconds)
             if should_remove:
                 # update returns True when max distance is reached and explosion is done
                 self.pass_through_exploders.remove(exploder)
@@ -2520,7 +2506,12 @@ class GameScene:
             # Add any projectiles created
             new_projectiles = attack_results.get('projectiles', [])
             if new_projectiles:
-                self.projectiles.extend(new_projectiles)
+                for proj in new_projectiles:
+                    if isinstance(proj, PassThroughExploder):
+                        # PassThroughExploders are handled by the callback, don't add them here
+                        pass
+                    else:
+                        self.projectiles.append(proj)
             # Add any visual effects created
             new_effects = attack_results.get('effects', [])
             if new_effects:

@@ -25,6 +25,7 @@ class PassThroughExploder:
         self.parent_tower = parent_tower
         self.special_data = special_data
         self.asset_loader = asset_loader # Store the loader function
+        self.game_scene_add_effect_callback = parent_tower.game_scene_add_effect_callback # Store the effect callback
         self.start_x = parent_tower.x
         self.start_y = parent_tower.y
         self.x = self.start_x
@@ -154,9 +155,12 @@ class PassThroughExploder:
             print(f"{self.asset_id} reached max distance.")
             self.is_active = False # Stop moving/damaging
             explosion_effect = self.trigger_explosion(all_enemies) # Handle explosion effect
-            return True, explosion_effect # Signal removal AND return the effect instance
+            if explosion_effect:
+                # Add the effect to the scene via the parent tower's callback
+                self.game_scene_add_effect_callback(explosion_effect)
+            return True # Signal removal
 
-        return False, None # Still active, no effect created this frame
+        return False # Still active
 
     # Note: check_segment_collision was integrated directly into update loop
     # def check_segment_collision(self, x1, y1, x2, y2, enemy):

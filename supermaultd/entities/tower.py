@@ -1057,6 +1057,30 @@ class Tower:
                             asset_loader=self.asset_loader # Pass the loader function
                         )
                         results['projectiles'].append(boomerang)
+                    # --- Check for Pass-Through Exploder ---
+                    elif self.special and self.special.get("effect") == "fixed_distance_pass_through_explode":
+                        # <<< PLAY SOUND >>>
+                        if self.attack_sound:
+                            self.attack_sound.play()
+                        # <<< END PLAY SOUND >>>
+                        self.last_attack_time = current_time # Update attack time
+                        
+                        # Create the exploder
+                        exploder = PassThroughExploder(
+                            parent_tower=self,
+                            target_enemy=target,
+                            special_data=self.special,
+                            asset_loader=self.asset_loader
+                        )
+                        
+                        # Set up the effect callback
+                        exploder.game_scene_add_effect_callback = self.game_scene_add_effect_callback
+                        
+                        # Add to results
+                        results['projectiles'].append(exploder)
+                        
+                        # Add to game scene's exploders list
+                        self.game_scene_add_exploder_callback(exploder)
                     else:
                         # --- Normal Projectile Creation ---
                         # <<< PLAY SOUND >>>
@@ -1549,7 +1573,7 @@ class Tower:
         # Define this tower's bounding box in grid coordinates
         self_start_x = self.top_left_grid_x
         self_end_x = self_start_x + self.grid_width - 1
-        self_start_y = self_start_y
+        self_start_y = self.top_left_grid_y
         self_end_y = self_start_y + self.grid_height - 1
         
         # Define the adjacency check area (this tower's box expanded by 1 cell)
@@ -1605,13 +1629,18 @@ class Tower:
             all_enemies: List of all active enemies (for targeting).
             game_scene_add_exploder_callback: Callback for PassThroughExploder.
             game_scene_add_effect_callback: Callback for standard visual effects.
-            game_scene_can_afford_callback: Callback to check player money.
+            game_scene_can_afford_callback: Callback to check if player can afford something.
             game_scene_deduct_money_callback: Callback to deduct player money.
             game_scene_add_projectile_callback: Callback to add projectiles.
             asset_loader: Function to load assets.
             all_towers: List of all placed towers (for aura effects).
         """
         self.asset_loader = asset_loader 
+        self.game_scene_add_exploder_callback = game_scene_add_exploder_callback
+        self.game_scene_add_effect_callback = game_scene_add_effect_callback
+        self.game_scene_can_afford_callback = game_scene_can_afford_callback
+        self.game_scene_deduct_money_callback = game_scene_deduct_money_callback
+        self.game_scene_add_projectile_callback = game_scene_add_projectile_callback
 
         # --- Frost Pulse Aura Effect ---
         if self.special and self.special.get("effect") == "slow_pulse_aura":
