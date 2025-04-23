@@ -961,6 +961,9 @@ class Tower:
                         print(f"Gattling {self.tower_id} reached Level {self.gattling_level}!")
                 # --- END Gattling Level Up --- 
                 
+                # Calculate damage for the gattling attack
+                initial_damage, is_crit = self.calculate_damage(target, buffed_stats, current_time, damage_multiplier=damage_multiplier)
+                
                 # --- Gattling Dual Projectile Visual --- 
                 if self.attack_type == 'projectile':
                     visual_offset_x = 10 # Pixels offset from center for visual streams
@@ -2064,6 +2067,47 @@ class Tower:
                         else:
                             print(f"DEBUG: Enemy {enemy.enemy_id} is too far away ({dist:.1f} > {self.aura_radius_pixels})")
         # --- End DoT Amplification Aura Effect ---
+
+        # --- Salvo Attack Logic ---
+        if self.special and self.special.get("effect") == "salvo_attack" and self.salvo_shots_remaining > 0:
+            if current_time >= self.salvo_next_shot_time:
+                # Fire next salvo shot
+                salvo_interval = self.special.get("salvo_interval", 0.1)
+                self.salvo_next_shot_time = current_time + salvo_interval
+                self.salvo_shots_remaining -= 1
+                
+                # Calculate damage for this shot
+                buffed_stats = self.get_buffed_stats(current_time, [], all_towers)
+                damage_multiplier = buffed_stats['damage_multiplier']
+                effective_splash_radius_pixels = buffed_stats['splash_radius_pixels']
+                
+                initial_damage, is_crit = self.calculate_damage(self.salvo_target, buffed_stats, current_time, damage_multiplier=damage_multiplier)
+                
+                # Create and fire the projectile
+                projectile = Projectile(
+                    self.x, self.y, initial_damage, self.projectile_speed,
+                    self.tower_data.get('projectile_asset_id', self.tower_id),
+                    target_enemy=self.salvo_target,
+                    splash_radius=effective_splash_radius_pixels,
+                    source_tower=self,
+                    is_crit=is_crit,
+                    special_effect=self.special,
+                    damage_type=self.damage_type,
+                    bounces_remaining=self.bounce,
+                    bounce_range_pixels=self.bounce_range_pixels,
+                    bounce_damage_falloff=self.bounce_damage_falloff,
+                    pierce_adjacent=self.pierce_adjacent,
+                    asset_loader=self.asset_loader
+                )
+                
+                # Add projectile to game scene
+                if self.game_scene_add_projectile_callback:
+                    self.game_scene_add_projectile_callback(projectile)
+                
+                # Play sound for each shot
+                if self.attack_sound:
+                    self.attack_sound.play()
+        # --- END Salvo Attack Logic ---
 
     # --- NEW: Method to apply temporary pulsed buffs ---
     def apply_pulsed_buff(self, buff_type, value, duration, current_time):

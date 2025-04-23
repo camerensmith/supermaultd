@@ -2146,16 +2146,16 @@
         }
       }
     },
-    "industrialists": {
+    "industry": {
       "description": "Industrialists are a race of people who are skilled in the art of building and manufacturing. They are known for their ability to create powerful machines and structures.",
       "towers": {
-        "industrialists_wall": {
+        "industry_wall": {
           "name": "Factory Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": []
         },
-        "industrialists_factory_worker": {
+        "industry_factory_worker": {
           "name": "Factory Worker",
           "grid_width": 1,
           "grid_height": 1,
@@ -2170,7 +2170,7 @@
           "splash_radius": null,
           "targets": ["ground"]
         },
-        "industrialists_machinist": {
+        "industry_machinist": {
           "name": "Machinist",
           "grid_width": 1,
           "grid_height": 1,
@@ -2185,7 +2185,7 @@
           "splash_radius": null,
           "targets": ["ground"]
         },
-        "industrialists_factory": {
+        "industry_factory": {
           "name": "Factory",
           "grid_width": 2,
           "grid_height": 2,
@@ -2200,8 +2200,8 @@
           "splash_radius": null,
           "targets": ["ground"]
         },
-        "industrialists_missile_battery": {
-          "name": "Missile Battery",
+        "industry_missile_battery": {
+          "name": "Missile Battery Platform",
           "grid_width": 2,
           "grid_height": 2,
           "cost": 180,
@@ -2209,7 +2209,7 @@
           "damage_max": 150,
           "damage_type": "siege",
           "range": 750,             
-          "attack_interval": 3.0,     
+          "attack_interval": 4.0,     
           "projectile_speed": 600,    
           "attack_type": "projectile",  
           "splash_radius": 50,      
@@ -2221,7 +2221,7 @@
             "description": "Fires a rapid salvo of 6 missiles, then reloads."
           }
         },
-        "industrialists_oil_rig": {
+        "industry_oil_rig": {
           "name": "Oil Rig",
           "grid_width": 3,
           "grid_height": 3,
@@ -2241,7 +2241,7 @@
             "description": "Periodically generates between 1 and 10 gold."
           }
         },
-        "industrialists_gattling_gun": {
+        "industry_gattling_gun": {
           "name": "Gattling Gun",
           "grid_x": 1,
           "grid_y": 1,
@@ -2251,19 +2251,19 @@
           "damage_max": 8,
           "damage_type": "pierce",
           "range": 600,
-          "attack_interval": 0.5,
-          "projectile_speed": 1500,
+          "attack_interval": 1,
+          "projectile_speed": 800,
           "splash_radius": null,
           "targets": ["ground", "air"],
           "special": {
               "effect": "gattling_spin_up",
-              "levels": 3,                    
+              "levels": 5,                    
               "time_per_level_sec": 1.5,      
               "speed_multiplier_per_level": 0.70, 
               "decay_time_sec": 2.0           
           }
         },
-        "industrialists_magnate": {
+        "industry_magnate": {
           "name": "Magnate", 
           "grid_width": 1, "grid_height": 1, "cost": 400,
           "damage_min": 0,
@@ -2285,7 +2285,7 @@
             "description": "Periodically attempts (25% chance every 2.5s) to bribe a nearby enemy for $100, instantly killing it. Cannot bribe Lord Supermaul."
           }
         },
-        "industrialsts_champion_of_industry": {
+        "industry_champion_of_industry": {
           "name": "Champion of Industry",
           "grid_width": 2,
           "grid_height": 2,
@@ -2304,8 +2304,7 @@
             "duration": 4.0,
             "damage_bonus_percentage": 15.0,
             "description": "20% chance on attack to increase own damage by 15% for 4 seconds."
-          },
-          "upgrades": []
+          }
         }
       }
     }
