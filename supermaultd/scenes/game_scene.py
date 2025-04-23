@@ -696,11 +696,19 @@ class GameScene:
         # --- Pre-calculate Tower Buff Auras (Affecting Towers) --- 
         # Store as instance variable for use in draw method
         self.tower_buff_auras = [] 
+        processed_tower_ids = set() # Track which tower IDs we've already processed
+        
         for tower in self.towers:
-            # Check if the tower has a special block and targets towers
-            if tower.special and "towers" in tower.special.get('targets', []):
+            # Skip if we've already processed this tower
+            if tower.tower_id in processed_tower_ids:
+                continue
+            processed_tower_ids.add(tower.tower_id)
+            
+            # Check if the tower has a special block
+            if tower.special:
+                effect_type = tower.special.get('effect')
                 is_standard_aura = (tower.attack_type == 'aura' or tower.attack_type == 'hybrid')
-                is_dot_amp_aura = tower.special.get('effect') == 'dot_amplification_aura'
+                is_dot_amp_aura = effect_type == 'dot_amplification_aura'
                 
                 # Process if it's a standard buff aura OR the new DoT amp aura
                 if is_standard_aura or is_dot_amp_aura:
@@ -714,7 +722,7 @@ class GameScene:
                             'special': tower.special
                         })
                         if is_dot_amp_aura:
-                            print(f"DEBUG: Added {tower.tower_id} (dot_amp_aura) to tower_buff_auras.") # Optional debug
+                            print(f"DEBUG: Added {tower.tower_id} (dot_amp_aura) to tower_buff_auras with radius {aura_radius_pixels:.1f}px")
 
         # --- BEGIN Adjacency Buff Calculation --- 
         hq_towers = [t for t in self.towers if t.tower_id == 'police_police_hq']
@@ -819,6 +827,10 @@ class GameScene:
             # Check if the tower has a special block and an aura radius
             if tower.special and tower.special.get('aura_radius', 0) > 0:
                 effect_type = tower.special.get('effect')
+                # Skip dot_amplification_aura as it affects towers, not enemies
+                if effect_type == 'dot_amplification_aura':
+                    continue
+                    
                 is_pulse_aura = effect_type and effect_type.endswith('_pulse_aura')
                 is_continuous_aura = tower.attack_type in ['aura', 'hybrid']
                 

@@ -148,10 +148,11 @@ class Tower:
         
         # Calculate and store aura radius in pixels if applicable
         self.aura_radius_pixels = 0
+        aura_units = 0
         if self.special and 'aura_radius' in self.special:
-             aura_units = self.special.get('aura_radius', 0)
-             self.aura_radius_pixels = aura_units * (GRID_SIZE / 200.0)
-             print(f"DEBUG: {self.tower_id} aura radius set to {self.aura_radius_pixels} pixels (from {aura_units} units)")
+            aura_units = self.special.get('aura_radius', 0)
+        self.aura_radius_pixels = aura_units * (GRID_SIZE / 200.0)
+        print(f"DEBUG: {self.tower_id} aura radius set to {self.aura_radius_pixels} pixels")
         
         # Initialize unique ability if tower has one
         self.unique_ability = None
@@ -338,17 +339,7 @@ class Tower:
         # Convert splash radius (usually in design units) to pixels
         self.splash_radius_pixels = self.splash_radius * range_scale_factor if self.splash_radius is not None else 0
 
-        # Calculate aura radius in pixels if applicable
-        self.aura_radius_pixels = 0
-        if self.special and 'aura_radius' in self.special:
-            aura_units = self.special.get('aura_radius', 0)
-            self.aura_radius_pixels = aura_units * range_scale_factor
-            print(f"DEBUG: {self.tower_id} aura radius set to {self.aura_radius_pixels} pixels (from {aura_units} units)")
-
-        # Calculate bounce range pixels (already handled in __init__ if bounce > 0)
-        # If bounce range wasn't calculated in __init__, add it here:
-        # json_bounce_range = self.tower_data.get("bounce_range")
-        # self.bounce_range_pixels = json_bounce_range * range_scale_factor if json_bounce_range is not None else 0
+        # Aura radius is now handled in __init__ with direct 1:1 conversion
         
     def can_attack(self, current_time):
         """Check if the tower can attack based on its attack interval"""
@@ -368,22 +359,32 @@ class Tower:
         return within_max_range and outside_min_range
         
     def get_dot_amplification_multiplier(self, tower_buff_auras):
-        """Check buff auras for nearby DoT amplification and return the highest multiplier."""
-        highest_multiplier = 1.0 # Default: no amplification
-        for aura_data in tower_buff_auras:
-            # Check if the aura is the correct type
-            if aura_data['special'].get('effect') == 'dot_amplification_aura':
-                buff_tower = aura_data['tower']
-                aura_radius_sq = aura_data['radius_sq']
+        """Get the highest dot amplification multiplier from nearby Plague Reactors"""
+        if not tower_buff_auras:
+            return 1.0
+            
+        highest_multiplier = 1.0
+        processed_towers = set()  # Track which towers we've already processed
+        
+        for aura in tower_buff_auras:
+            buff_tower = aura['tower']
+            if buff_tower.tower_id in processed_towers:
+                continue
+            processed_towers.add(buff_tower.tower_id)
+            
+            # Check if this is a dot amplification aura
+            if buff_tower.special and buff_tower.special.get('effect') == 'dot_amplification_aura':
+                # Calculate distance to buff tower
+                dx = self.x - buff_tower.x
+                dy = self.y - buff_tower.y
+                distance_sq = dx * dx + dy * dy
                 
-                # Check if this tower (self) is within the buff tower's aura range
-                dist_sq = (self.x - buff_tower.x)**2 + (self.y - buff_tower.y)**2
-                if dist_sq <= aura_radius_sq:
-                    # Get the multiplier from this specific aura
-                    multiplier = aura_data['special'].get('dot_damage_multiplier', 1.0)
-                    # Keep the highest multiplier found
-                    highest_multiplier = max(highest_multiplier, multiplier)
-                    # print(f"DEBUG: Tower {self.tower_id} affected by {buff_tower.tower_id} DoT amp aura. Multiplier: {multiplier}") # Optional debug
+                # Check if within aura range
+                if distance_sq <= aura['radius_sq']:
+                    multiplier = buff_tower.special.get('multiplier', 1.0)
+                    if multiplier > highest_multiplier:
+                        highest_multiplier = multiplier
+                        print(f"DEBUG: Tower {self.tower_id} affected by {buff_tower.tower_id}'s dot_amp_aura: {multiplier}x")
         
         return highest_multiplier
 
@@ -1590,11 +1591,11 @@ class Tower:
     def update(self, current_time, all_enemies, 
                game_scene_add_exploder_callback, 
                game_scene_add_effect_callback,   
-               game_scene_can_afford_callback,   # New money callback 1
-               game_scene_deduct_money_callback, # New money callback 2
-               game_scene_add_projectile_callback, # New projectile callback
+               game_scene_can_afford_callback,   
+               game_scene_deduct_money_callback, 
+               game_scene_add_projectile_callback,
                asset_loader,
-               all_towers):  # Added all_towers parameter
+               all_towers):
         """
         Handles tower-specific updates, including salvo firing.
         Called by GameScene each frame.
@@ -1765,21 +1766,20 @@ class Tower:
         # --- Rampage Stack Decay Logic ---
         if self.rampage_stacks > 0 and self.special and self.special.get("effect") == "rampage_damage_stack":
             decay_duration = self.special.get("decay_duration", 3.0)
-            time_since_last_hit = current_time - self.rampage_last_hit_time # Use current_time passed into update
+            time_since_last_hit = current_time - self.rampage_last_hit_time
 
             if time_since_last_hit > decay_duration:
                 print(f"### RAMPAGE RESET: Tower {self.tower_id} stacks expired after {time_since_last_hit:.2f}s. Resetting {self.rampage_stacks} stacks.")
                 self.rampage_stacks = 0
-                # self.rampage_last_hit_time = 0.0 # Optional: reset time too
         # --- END Rampage Decay ---
 
         # --- Gattling Spin-Down Logic --- 
         if self.gattling_level > 0 and self.special and self.special.get("effect") == "gattling_spin_up":
             decay_time = self.special.get("decay_time_sec", 2.0)
             if current_time - self.gattling_last_attack_time > decay_time:
-                print(f"Gattling {self.tower_id} spun down from Level {self.gattling_level}.") # Debug
+                print(f"Gattling {self.tower_id} spun down from Level {self.gattling_level}.")
                 self.gattling_level = 0
-                self.gattling_continuous_fire_start_time = 0.0 # Reset tracking
+                self.gattling_continuous_fire_start_time = 0.0
         # --- END Gattling Spin-Down ---
                                     
         # --- Execute Ability Logic --- 
@@ -1802,22 +1802,14 @@ class Tower:
                     print(f"!!! {self.tower_id} EXECUTE triggered on {target_to_execute.enemy_id} (HP: {target_to_execute.health}/{target_to_execute.max_health}) !!!")
                     
                     # Instantly kill the target
-                    # Using high damage triggers standard death processing (gold, effects, removal)
                     target_to_execute.take_damage(999999, "execute") 
                     
                     # Play the special sound if loaded
                     if self.special_ability_sound:
                         self.special_ability_sound.play()
                     
-                    # TODO: Trigger a visual effect? (Use game_scene_add_effect_callback)
-                    # Example: effect = FloatingTextEffect(target_to_execute.x + grid_offset_x, ...) 
-                    # if game_scene_add_effect_callback: game_scene_add_effect_callback(effect)
-                    
                     # Reset cooldown
                     self.execute_last_time = current_time
-                    # Note: Don't return here, let the rest of the update run
-
-        # --- Add other tower-specific update logic here if needed --- 
 
         # --- Attack Speed Aura Effect ---
         if self.special and self.special.get("effect") == "attack_speed_aura":
@@ -1853,6 +1845,197 @@ class Tower:
                             print(f"DEBUG: Tower {tower.tower_id} is not the required race ({tower_race} != {required_race})")
         # --- End Attack Speed Aura Effect ---
 
+        # --- Splash Radius Buff Aura Effect ---
+        if self.special and self.special.get("effect") == "splash_radius_buff_aura":
+            # Check if it's time for a new tick
+            if current_time - self.last_aura_tick_time >= 1.0:  # Check every 1.0 seconds
+                self.last_aura_tick_time = current_time
+                splash_radius_increase = self.special.get("splash_radius_increase", 175)
+                targets = self.special.get("targets", ["towers"])
+                
+                print(f"DEBUG: {self.tower_id} checking splash radius buff aura (radius: {self.aura_radius_pixels})")
+                
+                # Find towers in range
+                for tower in all_towers:
+                    if tower != self:  # Don't affect self
+                        # Calculate distance to tower
+                        dx = tower.x - self.x
+                        dy = tower.y - self.y
+                        dist_sq = dx*dx + dy*dy
+                        dist = math.sqrt(dist_sq)
+                        
+                        if dist_sq <= self.aura_radius_pixels * self.aura_radius_pixels:
+                            # Apply splash radius buff with longer duration
+                            tower.apply_pulsed_buff('splash_radius_buff', splash_radius_increase, 1.5, current_time)
+                            print(f"DEBUG: Splash Radius Aura from {self.tower_id} buffed {tower.tower_id} with +{splash_radius_increase} splash radius")
+                        else:
+                            print(f"DEBUG: Tower {tower.tower_id} is too far away ({dist:.1f} > {self.aura_radius_pixels})")
+        # --- End Splash Radius Buff Aura Effect ---
+
+        # --- Adjacency Attack Speed Buff Effect ---
+        if self.special and self.special.get("effect") == "adjacency_attack_speed_buff":
+            # Check if it's time for a new tick
+            if current_time - self.last_aura_tick_time >= 0.1:  # Check every 0.1 seconds
+                self.last_aura_tick_time = current_time
+                speed_bonus_percent = self.special.get("attack_speed_bonus_percentage", 20)
+                speed_multiplier = 1.0 + (speed_bonus_percent / 100.0)
+                targets = self.special.get("targets", ["towers"])
+                
+                print(f"DEBUG: {self.tower_id} checking adjacency attack speed buff")
+                
+                # Find adjacent towers
+                for tower in all_towers:
+                    if tower != self:  # Don't affect self
+                        # Check if towers are adjacent (1 grid cell away)
+                        dx = abs(tower.center_grid_x - self.center_grid_x)
+                        dy = abs(tower.center_grid_y - self.center_grid_y)
+                        
+                        if (dx <= 1 and dy <= 1) and (dx == 1 or dy == 1):  # Only adjacent, not diagonal
+                            # Apply attack speed buff
+                            tower.apply_pulsed_buff('attack_speed_buff', speed_multiplier, 0.2, current_time)
+                            print(f"DEBUG: Adjacency Attack Speed Buff from {self.tower_id} buffed {tower.tower_id} with +{speed_bonus_percent}% attack speed")
+        # --- End Adjacency Attack Speed Buff Effect ---
+
+        # --- Adjacency Damage Buff Effect ---
+        if self.special and self.special.get("effect") == "adjacency_damage_buff":
+            # Check if it's time for a new tick
+            if current_time - self.last_aura_tick_time >= 1.0:  # Check every 1.0 seconds
+                self.last_aura_tick_time = current_time
+                damage_bonus_percent = self.special.get("damage_bonus_percentage", 15)
+                damage_multiplier = 1.0 + (damage_bonus_percent / 100.0)
+                targets = self.special.get("targets", ["towers"])
+                
+                print(f"DEBUG: {self.tower_id} checking adjacency damage buff")
+                
+                # Find adjacent towers
+                for tower in all_towers:
+                    if tower != self:  # Don't affect self
+                        # Check if towers are adjacent (1 grid cell away)
+                        dx = abs(tower.center_grid_x - self.center_grid_x)
+                        dy = abs(tower.center_grid_y - self.center_grid_y)
+                        
+                        if (dx <= 1 and dy <= 1) and (dx == 1 or dy == 1):  # Only adjacent, not diagonal
+                            # Apply damage buff
+                            tower.apply_pulsed_buff('damage_buff', damage_multiplier, 1.5, current_time)
+                            print(f"DEBUG: Adjacency Damage Buff from {self.tower_id} buffed {tower.tower_id} with +{damage_bonus_percent}% damage")
+        # --- End Adjacency Damage Buff Effect ---
+
+        # --- Air Damage Aura Effect ---
+        if self.special and self.special.get("effect") == "air_damage_aura":
+            # Check if it's time for a new tick
+            if current_time - self.last_aura_tick_time >= 1.0:  # Check every 1.0 seconds
+                self.last_aura_tick_time = current_time
+                air_damage_multiplier = self.special.get("air_damage_multiplier", 1.1)
+                targets = self.special.get("targets", ["towers"])
+                
+                print(f"DEBUG: {self.tower_id} checking air damage aura (radius: {self.aura_radius_pixels})")
+                
+                # Find towers in range
+                for tower in all_towers:
+                    if tower != self:  # Don't affect self
+                        # Only affect projectile towers
+                        if tower.attack_type == 'projectile':
+                            # Calculate distance to tower
+                            dx = tower.x - self.x
+                            dy = tower.y - self.y
+                            dist_sq = dx*dx + dy*dy
+                            dist = math.sqrt(dist_sq)
+                            
+                            if dist_sq <= self.aura_radius_pixels * self.aura_radius_pixels:
+                                # Apply air damage buff
+                                tower.apply_pulsed_buff('air_damage_buff', air_damage_multiplier, 1.5, current_time)
+                                print(f"DEBUG: Air Damage Aura from {self.tower_id} buffed {tower.tower_id} with x{air_damage_multiplier} air damage")
+                            else:
+                                print(f"DEBUG: Tower {tower.tower_id} is too far away ({dist:.1f} > {self.aura_radius_pixels})")
+                        else:
+                            print(f"DEBUG: Tower {tower.tower_id} is not a projectile tower, skipping air damage buff")
+        # --- End Air Damage Aura Effect ---
+
+        # --- Damage Aura Effect ---
+        if self.special and self.special.get("effect") == "damage_aura":
+            # Check if it's time for a new tick
+            if current_time - self.last_aura_tick_time >= 1.0:  # Check every 1.0 seconds
+                self.last_aura_tick_time = current_time
+                damage_bonus_percent = self.special.get("damage_bonus_percentage", 10)
+                damage_multiplier = 1.0 + (damage_bonus_percent / 100.0)
+                targets = self.special.get("targets", ["towers"])
+                
+                print(f"DEBUG: {self.tower_id} checking damage aura (radius: {self.aura_radius_pixels})")
+                
+                # Find towers in range
+                for tower in all_towers:
+                    if tower != self:  # Don't affect self
+                        # Calculate distance to tower
+                        dx = tower.x - self.x
+                        dy = tower.y - self.y
+                        dist_sq = dx*dx + dy*dy
+                        dist = math.sqrt(dist_sq)
+                        
+                        if dist_sq <= self.aura_radius_pixels * self.aura_radius_pixels:
+                            # Apply damage buff
+                            tower.apply_pulsed_buff('damage_buff', damage_multiplier, 1.5, current_time)
+                            print(f"DEBUG: Damage Aura from {self.tower_id} buffed {tower.tower_id} with +{damage_bonus_percent}% damage")
+                        else:
+                            print(f"DEBUG: Tower {tower.tower_id} is too far away ({dist:.1f} > {self.aura_radius_pixels})")
+        # --- End Damage Aura Effect ---
+
+        # --- Crit Aura Effect ---
+        if self.special and self.special.get("effect") == "crit_aura":
+            # Check if it's time for a new tick
+            if current_time - self.last_aura_tick_time >= 1.0:  # Check every 1.0 seconds
+                self.last_aura_tick_time = current_time
+                crit_chance_bonus = self.special.get("crit_chance_bonus", 0.50)
+                crit_multiplier_bonus = self.special.get("crit_multiplier_bonus", 0.5)
+                targets = self.special.get("targets", ["towers"])
+                
+                print(f"DEBUG: {self.tower_id} checking crit aura (radius: {self.aura_radius_pixels})")
+                
+                # Find towers in range
+                for tower in all_towers:
+                    if tower != self:  # Don't affect self
+                        # Calculate distance to tower
+                        dx = tower.x - self.x
+                        dy = tower.y - self.y
+                        dist_sq = dx*dx + dy*dy
+                        dist = math.sqrt(dist_sq)
+                        
+                        if dist_sq <= self.aura_radius_pixels * self.aura_radius_pixels:
+                            # Apply crit chance buff
+                            tower.apply_pulsed_buff('crit_chance_buff', crit_chance_bonus, 1.5, current_time)
+                            # Apply crit multiplier buff
+                            tower.apply_pulsed_buff('crit_multiplier_buff', crit_multiplier_bonus, 1.5, current_time)
+                            print(f"DEBUG: Crit Aura from {self.tower_id} buffed {tower.tower_id} with +{crit_chance_bonus*100}% crit chance and +{crit_multiplier_bonus} crit multiplier")
+                        else:
+                            print(f"DEBUG: Tower {tower.tower_id} is too far away ({dist:.1f} > {self.aura_radius_pixels})")
+        # --- End Crit Aura Effect ---
+
+        # --- DoT Amplification Aura Effect ---
+        if self.special and self.special.get("effect") == "dot_amplification_aura":
+            # Check if it's time for a new tick
+            if current_time - self.last_aura_tick_time >= 1.0:  # Check every 1.0 seconds
+                self.last_aura_tick_time = current_time
+                dot_damage_multiplier = self.special.get("dot_damage_multiplier", 2.5)
+                targets = self.special.get("targets", ["ground", "air"])
+                
+                print(f"DEBUG: {self.tower_id} checking DoT amplification aura (radius: {self.aura_radius_pixels})")
+                
+                # Find enemies in range
+                for enemy in all_enemies:
+                    if enemy.health > 0 and enemy.type in targets:
+                        # Calculate distance to enemy
+                        dx = enemy.x - self.x
+                        dy = enemy.y - self.y
+                        dist_sq = dx*dx + dy*dy
+                        dist = math.sqrt(dist_sq)
+                        
+                        if dist_sq <= self.aura_radius_pixels * self.aura_radius_pixels:
+                            # Apply DoT damage multiplier to the enemy with a longer duration that matches the check interval
+                            enemy.apply_status_effect('dot_amplification', 2.0, dot_damage_multiplier, current_time)
+                            print(f"DEBUG: DoT Amplification Aura from {self.tower_id} amplified DoTs on {enemy.enemy_id} by x{dot_damage_multiplier}")
+                        else:
+                            print(f"DEBUG: Enemy {enemy.enemy_id} is too far away ({dist:.1f} > {self.aura_radius_pixels})")
+        # --- End DoT Amplification Aura Effect ---
+
     # --- NEW: Method to apply temporary pulsed buffs ---
     def apply_pulsed_buff(self, buff_type, value, duration, current_time):
         """Applies a temporary buff received from a pulse aura."""
@@ -1860,5 +2043,4 @@ class Tower:
             return
         end_time = current_time + duration
         self.pulsed_buffs[buff_type] = {'value': value, 'end_time': end_time}
-        # Optional: print(f"DEBUG Tower {self.tower_id}: Received pulsed buff '{buff_type}' (value: {value}) until {end_time:.2f}")
     # --- END apply_pulsed_buff ---

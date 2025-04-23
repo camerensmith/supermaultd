@@ -2,6 +2,7 @@ import pygame
 import math
 import random
 from config import *
+import time
 
 # Pre-calculate the armor constant for efficiency
 ARMOR_CONSTANT = 0.06
@@ -79,7 +80,10 @@ class Enemy:
         end_time = current_time + duration
         
         # Store effect data - value is used for slow multiplier, ignored for stun
-        self.status_effects[effect_type] = { 'end_time': end_time, 'value': value }
+        if effect_type == 'dot_amplification':
+            self.status_effects[effect_type] = { 'end_time': end_time, 'multiplier': value }
+        else:
+            self.status_effects[effect_type] = { 'end_time': end_time, 'value': value }
         
         print(f"Enemy {self.enemy_id}: Applied {effect_type} until {end_time:.2f}")
         # Recalculate speed immediately after applying any status effect
@@ -114,19 +118,26 @@ class Enemy:
             print(f"Enemy {self.enemy_id}: Refreshing DoT '{effect_name}'.")
             pass # Overwrite below
 
+        # Store base damage and let update_dots handle amplification
         self.active_dots[effect_name] = {
-            'damage': damage,
+            'base_damage': damage,
             'interval': interval,
             'next_tick': next_tick_time,
             'end_time': end_time,
             'damage_type': damage_type
         }
-        print(f"Enemy {self.enemy_id}: Applied DoT '{effect_name}' ({damage}/{interval}s for {duration}s, type: {damage_type}). Ends at {end_time:.2f}.")
+        print(f"Enemy {self.enemy_id}: Applied DoT '{effect_name}' (Base: {damage}/{interval}s for {duration}s, type: {damage_type}). Ends at {end_time:.2f}.")
 
     def update_dots(self, current_time):
         """Processes active DoT effects, applying damage and removing expired ones."""
         if not self.active_dots:
             return
+
+        # Get dot amplification multiplier from status effects
+        dot_amp_multiplier = 1.0
+        if 'dot_amplification' in self.status_effects:
+            dot_amp_multiplier = self.status_effects['dot_amplification']['multiplier']
+            print(f"Enemy {self.enemy_id}: DoT amplification active (x{dot_amp_multiplier})")
 
         # Use list keys for safe iteration if removing items
         for effect_name in list(self.active_dots.keys()):
@@ -140,13 +151,15 @@ class Enemy:
 
             # Check for tick time
             if current_time >= dot_data['next_tick']:
-                print(f"Enemy {self.enemy_id}: DoT '{effect_name}' ticking for {dot_data['damage']} damage ({dot_data['damage_type']}).")
-                self.take_damage(dot_data['damage'], dot_data['damage_type'])
+                # Apply dot amplification multiplier to base damage
+                amplified_damage = dot_data['base_damage'] * dot_amp_multiplier
+                print(f"Enemy {self.enemy_id}: DoT '{effect_name}' ticking for {amplified_damage} damage (base: {dot_data['base_damage']}, amp: x{dot_amp_multiplier}, type: {dot_data['damage_type']}).")
+                self.take_damage(amplified_damage, dot_data['damage_type'])
                 # Schedule next tick
                 dot_data['next_tick'] += dot_data['interval']
                 # Ensure next_tick doesn't fall behind current_time excessively due to lag
                 if dot_data['next_tick'] < current_time:
-                     dot_data['next_tick'] = current_time + dot_data['interval']
+                    dot_data['next_tick'] = current_time + dot_data['interval']
 
     def move(self, current_time):
         """Move the enemy towards the next waypoint with wandering behavior."""
@@ -206,18 +219,13 @@ class Enemy:
         # ------------------------------------
         
     def take_damage(self, base_damage, damage_type="normal", bonus_multiplier=1.0, ignore_armor_amount=0, source_special=None):
-        """Apply damage to the enemy, considering armor type, armor value, bonus multipliers, and armor ignore.
-
-        Args:
-            base_damage: The raw damage value.
-            damage_type: The type of damage (e.g., 'normal', 'piercing').
-            bonus_multiplier: Additional multiplier (e.g., from Shatter).
-            ignore_armor_amount: Base amount of armor to ignore (e.g., from target debuffs).
-            source_special: The 'special' dictionary from the attacking tower/projectile (optional).
-        """
+        """Apply damage to the enemy, taking into account resistances, status effects, and armor."""
         # 1. Apply Armor Type vs Damage Type multiplier
         type_modifier = self.damage_modifiers.get(damage_type, 1.0)
         damage_after_type = base_damage * type_modifier
+
+        # Note: We don't apply dot_amplification here anymore since it's already applied when creating the DoT
+        # The amplification is handled in apply_dot_effect and other places where DoTs are created
 
         # --- NEW: Check source_special for 'ignore_armor_on_hit' --- 
         if source_special and source_special.get("effect") == "ignore_armor_on_hit":

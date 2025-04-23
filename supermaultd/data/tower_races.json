@@ -946,15 +946,15 @@
           "duration": 5.0, "dot_damage_type": "chaos"}
         },
         "alchemists_plague_reactor": {
-          "name": "Plague Reactor", "grid_width": 2, "grid_height": 2, "cost": 256,
+          "name": "Plague Reactor", "grid_width": 4, "grid_height": 4, "cost": 256,
           "damage_min": 0, "damage_max": 0, "damage_type": "chaos",
-          "range": 1000, "attack_interval": 999, "projectile_speed": null,
+          "range": 3000, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "aura", "splash_radius": null, "targets": ["ground", "air"],
           "special": {
             "effect": "dot_amplification_aura",
-            "aura_radius": 1000,
+            "aura_radius": 3000,
             "dot_damage_multiplier": 2.5,
-            "targets": ["towers"]
+            "targets": ["ground", "air"]
           }
         }
       }
@@ -1143,7 +1143,7 @@
           "damage_min": 0, "damage_max": 0, "damage_type": "normal", "traversable": true,
           "range": 250, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "aura", "splash_radius": null, "targets": [],
-          "special": {"effect": "slow_aura", "slow_percentage": 60, "aura_radius": 250}
+          "special": {"effect": "slow_aura", "slow_percentage": 30, "aura_radius": 250}
         },
         "goblin_junk_thrower": {
           "name": "Junk Thrower", "grid_width": 2, "grid_height": 2, "cost": 25,
@@ -1424,8 +1424,8 @@
         "husk_rift_walker": {
           "name": "Rift Walker", "grid_width": 2, "grid_height": 2, "cost": 220,
           "damage_min": 120, "damage_max": 180, "damage_type": "magic",
-          "range": 700, "attack_interval": 1.5, "projectile_speed": 500,
-          "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
+          "range": 700, "attack_interval": 1.5, "projectile_speed": null,
+          "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
           "special": {
             "effect": "max_hp_reduction_on_hit",
             "reduction_percentage": 2, 
@@ -1435,7 +1435,7 @@
         "husk_void_horror": {
           "name": "Void Horror", "grid_width": 2, "grid_height": 2, "cost": 600,
           "damage_min": 280, "damage_max": 350, "damage_type": "chaos",
-          "range": 350, "attack_interval": 0.5, "projectile_speed": null,
+          "range": 500, "attack_interval": 0.5, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 200, "targets": ["ground", "air"],
           "special": {
             "effect": "rampage_damage_stack",
