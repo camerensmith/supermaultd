@@ -294,8 +294,8 @@
           "grid_width": 1,
           "grid_height": 1,
           "cost": 383,
-          "damage_min": 400,
-          "damage_max": 450,
+          "damage_min": 0,
+          "damage_max": 0,
           "damage_type": "normal",
           "range": 700,
           "attack_interval": 0.5,
@@ -917,13 +917,10 @@
             "interval": 0.5,
             "aura_radius": 650,
             "targets": ["ground", "air"],
-            "dot_effect_name": "miasma",
             "dot_damage": 18,
             "dot_interval": 0.5,
             "dot_duration": 5.0,
-            "dot_damage_type": "arcane",
-            "slow_percentage": 30,
-            "duration": 1.5
+            "dot_damage_type": "arcane"
           }
         },
         "alchemists_toxin_lab": {
@@ -1116,12 +1113,10 @@
           "splash_radius": null,
           "targets": [],
           "special": {
-            "effect": "slow_pulse_aura",
+            "effect": "damage_pulse_aura",
             "targets": ["ground", "air"],
             "aura_radius": 1000,
             "interval": 7.0,
-            "slow_percentage": 75,
-            "duration": 2.5,
             "pulse_damage": 4000,
             "pulse_damage_type": "chaos"
           }

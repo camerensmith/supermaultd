@@ -151,6 +151,7 @@ class Tower:
         if self.special and 'aura_radius' in self.special:
              aura_units = self.special.get('aura_radius', 0)
              self.aura_radius_pixels = aura_units * (GRID_SIZE / 200.0)
+             print(f"DEBUG: {self.tower_id} aura radius set to {self.aura_radius_pixels} pixels (from {aura_units} units)")
         
         # Initialize unique ability if tower has one
         self.unique_ability = None
@@ -336,6 +337,13 @@ class Tower:
         
         # Convert splash radius (usually in design units) to pixels
         self.splash_radius_pixels = self.splash_radius * range_scale_factor if self.splash_radius is not None else 0
+
+        # Calculate aura radius in pixels if applicable
+        self.aura_radius_pixels = 0
+        if self.special and 'aura_radius' in self.special:
+            aura_units = self.special.get('aura_radius', 0)
+            self.aura_radius_pixels = aura_units * range_scale_factor
+            print(f"DEBUG: {self.tower_id} aura radius set to {self.aura_radius_pixels} pixels (from {aura_units} units)")
 
         # Calculate bounce range pixels (already handled in __init__ if bounce > 0)
         # If bounce range wasn't calculated in __init__, add it here:
@@ -1585,7 +1593,8 @@ class Tower:
                game_scene_can_afford_callback,   # New money callback 1
                game_scene_deduct_money_callback, # New money callback 2
                game_scene_add_projectile_callback, # New projectile callback
-               asset_loader):
+               asset_loader,
+               all_towers):  # Added all_towers parameter
         """
         Handles tower-specific updates, including salvo firing.
         Called by GameScene each frame.
@@ -1599,8 +1608,9 @@ class Tower:
             game_scene_deduct_money_callback: Callback to deduct player money.
             game_scene_add_projectile_callback: Callback to add projectiles.
             asset_loader: Function to load assets.
+            all_towers: List of all placed towers (for aura effects).
         """
-        self.asset_loader = asset_loader
+        self.asset_loader = asset_loader 
 
         # --- Frost Pulse Aura Effect ---
         if self.special and self.special.get("effect") == "slow_pulse_aura":
@@ -1628,12 +1638,13 @@ class Tower:
         # --- Miasma Pillar DOT Pulse Effect ---
         if self.special and self.special.get("effect") == "dot_pulse_aura":
             # Check if it's time for a new pulse
-            if current_time - self.last_pulse_time >= self.special.get("interval", 0.5):
+            if current_time - self.last_pulse_time >= self.special.get("pulse_interval", 0.5):
                 self.last_pulse_time = current_time
-                dot_damage = self.special.get("dot_damage", 18)
-                dot_interval = self.special.get("dot_interval", 0.5)
-                dot_duration = self.special.get("dot_duration", 5.0)
-                dot_damage_type = self.special.get("dot_damage_type", "arcane")
+                pulse_duration = self.special.get("pulse_duration", 5.0)
+                slow_percentage = self.special.get("slow_percentage", 0.3)
+                slow_multiplier = 1.0 - slow_percentage
+                damage = self.special.get("damage", 18.0)
+                damage_type = self.special.get("damage_type", "arcane")
                 targets = self.special.get("targets", ["ground", "air"])
                 
                 # Find enemies in range
@@ -1645,9 +1656,111 @@ class Tower:
                         dist_sq = dx*dx + dy*dy
                         if dist_sq <= self.aura_radius_pixels * self.aura_radius_pixels:
                             # Apply DOT effect
-                            enemy.apply_dot_effect("miasma", dot_damage, dot_interval, dot_duration, dot_damage_type, current_time)
-                            print(f"Miasma Pillar from {self.tower_id} applied DOT to {enemy.enemy_id} ({dot_damage} {dot_damage_type} every {dot_interval}s for {dot_duration}s)")
+                            enemy.apply_dot_effect(
+                                "miasma_pillar",
+                                damage,
+                                self.special.get("pulse_interval", 0.5),
+                                pulse_duration,
+                                damage_type,
+                                current_time
+                            )
+                            # Apply slow effect
+                            enemy.apply_status_effect('slow', pulse_duration, slow_multiplier, current_time)
+                            print(f"Miasma Pillar from {self.tower_id} applied DOT and slow to {enemy.enemy_id}")
         # --- End Miasma Pillar DOT Pulse Effect ---
+
+        # --- Vortex Damage Aura Effect ---
+        if self.special and self.special.get("effect") == "vortex_damage_aura":
+            # Check if it's time for a new tick
+            if current_time - self.last_aura_tick_time >= self.special.get("tick_interval", 0.1):
+                self.last_aura_tick_time = current_time
+                min_damage = self.special.get("min_damage_at_edge", 1.0)
+                max_damage = self.special.get("max_damage_at_center", 25.0)
+                damage_type = self.special.get("damage_type", "arcane")
+                targets = self.special.get("targets", ["ground", "air"])
+                
+                # Find enemies in range
+                for enemy in all_enemies:
+                    if enemy.health > 0 and enemy.type in targets:
+                        # Calculate distance to enemy
+                        dx = enemy.x - self.x
+                        dy = enemy.y - self.y
+                        dist_sq = dx*dx + dy*dy
+                        if dist_sq <= self.aura_radius_pixels * self.aura_radius_pixels:
+                            # Calculate damage based on distance (more damage closer to center)
+                            distance = math.sqrt(dist_sq)
+                            distance_ratio = 1.0 - (distance / self.aura_radius_pixels)
+                            damage = min_damage + (max_damage - min_damage) * distance_ratio
+                            
+                            # Apply damage
+                            enemy.take_damage(damage, damage_type)
+                            print(f"Vortex from {self.tower_id} dealt {damage:.1f} {damage_type} damage to {enemy.enemy_id}")
+        # --- End Vortex Damage Aura Effect ---
+
+        # --- Glacial Heart Bonechill Pulse Effect ---
+        if self.special and self.special.get("effect") == "bonechill_pulse_aura":
+            # Check if it's time for a new pulse
+            if current_time - self.last_pulse_time >= self.special.get("interval", 0.5):
+                self.last_pulse_time = current_time
+                bonechill_duration = self.special.get("bonechill_duration", 4.0)
+                targets = self.special.get("targets", ["ground", "air"])
+                
+                # Find enemies in range
+                for enemy in all_enemies:
+                    if enemy.health > 0 and enemy.type in targets:
+                        # Calculate distance to enemy
+                        dx = enemy.x - self.x
+                        dy = enemy.y - self.y
+                        dist_sq = dx*dx + dy*dy
+                        if dist_sq <= self.aura_radius_pixels * self.aura_radius_pixels:
+                            # Apply bonechill effect
+                            enemy.apply_status_effect('bonechill', bonechill_duration, 1.0, current_time)
+                            print(f"Glacial Heart from {self.tower_id} applied bonechill to {enemy.enemy_id} for {bonechill_duration}s")
+        # --- End Glacial Heart Bonechill Pulse Effect ---
+
+        # --- Black Hole Generator Damage Pulse Effect ---
+        if self.special and self.special.get("effect") == "damage_pulse_aura":
+            # Check if it's time for a new pulse
+            if current_time - self.last_pulse_time >= self.special.get("interval", 7.0):
+                self.last_pulse_time = current_time
+                pulse_damage = self.special.get("pulse_damage", 4000)
+                pulse_damage_type = self.special.get("pulse_damage_type", "chaos")
+                targets = self.special.get("targets", ["ground", "air"])
+                
+                # Find enemies in range
+                for enemy in all_enemies:
+                    if enemy.health > 0 and enemy.type in targets:
+                        # Calculate distance to enemy
+                        dx = enemy.x - self.x
+                        dy = enemy.y - self.y
+                        dist_sq = dx*dx + dy*dy
+                        if dist_sq <= self.aura_radius_pixels * self.aura_radius_pixels:
+                            # Apply damage
+                            enemy.take_damage(pulse_damage, pulse_damage_type)
+                            print(f"Black Hole Generator from {self.tower_id} dealt {pulse_damage} {pulse_damage_type} damage to {enemy.enemy_id}")
+        # --- End Black Hole Generator Damage Pulse Effect ---
+
+        # --- Crit Damage Pulse Aura Effect ---
+        if self.special and self.special.get("effect") == "crit_damage_pulse_aura":
+            # Check if it's time for a new pulse
+            if current_time - self.last_pulse_time >= self.special.get("interval", 5.0):
+                self.last_pulse_time = current_time 
+                pulse_duration = self.special.get("duration", 5.0)
+                crit_multiplier_bonus = self.special.get("crit_multiplier_bonus", 0.5)
+                targets = self.special.get("targets", ["towers"])
+                
+                # Find towers in range
+                for tower in all_towers:
+                    if tower != self:  # Don't affect self
+                        # Calculate distance to tower
+                        dx = tower.x - self.x
+                        dy = tower.y - self.y
+                        dist_sq = dx*dx + dy*dy
+                        if dist_sq <= self.aura_radius_pixels * self.aura_radius_pixels:
+                            # Apply crit damage buff
+                            tower.apply_status_effect('crit_damage_buff', pulse_duration, crit_multiplier_bonus, current_time)
+                            print(f"War Drums from {self.tower_id} buffed {tower.tower_id} with +{crit_multiplier_bonus} crit damage for {pulse_duration}s")
+        # --- End Crit Damage Pulse Aura Effect ---
 
         # --- Rampage Stack Decay Logic ---
         if self.rampage_stacks > 0 and self.special and self.special.get("effect") == "rampage_damage_stack":
@@ -1703,9 +1816,42 @@ class Tower:
                     # Reset cooldown
                     self.execute_last_time = current_time
                     # Note: Don't return here, let the rest of the update run
-        # --- END Execute Ability Logic ---
 
         # --- Add other tower-specific update logic here if needed --- 
+
+        # --- Attack Speed Aura Effect ---
+        if self.special and self.special.get("effect") == "attack_speed_aura":
+            # Check if it's time for a new tick
+            if current_time - self.last_aura_tick_time >= 0.1:  # Check every 0.1 seconds
+                self.last_aura_tick_time = current_time
+                speed_multiplier = self.special.get("attack_speed_multiplier", 1.3)
+                required_race = self.special.get("required_race", "zork")
+                
+                print(f"DEBUG: {self.tower_id} checking attack speed aura (radius: {self.aura_radius_pixels})")
+                
+                # Find towers in range
+                for tower in all_towers:
+                    if tower != self:  # Don't affect self
+                        # Calculate distance to tower
+                        dx = tower.x - self.x
+                        dy = tower.y - self.y
+                        dist_sq = dx*dx + dy*dy
+                        dist = math.sqrt(dist_sq)
+                        
+                        # Check if tower belongs to the required race
+                        tower_race = tower.tower_id.split('_')[0]  # Extract race from tower_id
+                        print(f"DEBUG: Checking tower {tower.tower_id} (race: {tower_race}, distance: {dist:.1f})")
+                        
+                        if tower_race == required_race:
+                            if dist_sq <= self.aura_radius_pixels * self.aura_radius_pixels:
+                                # Apply attack speed buff
+                                tower.apply_status_effect('attack_speed_buff', 0.2, speed_multiplier, current_time)
+                                print(f"DEBUG: Attack Speed Aura from {self.tower_id} buffed {tower.tower_id} with x{speed_multiplier} attack speed")
+                            else:
+                                print(f"DEBUG: Tower {tower.tower_id} is too far away ({dist:.1f} > {self.aura_radius_pixels})")
+                        else:
+                            print(f"DEBUG: Tower {tower.tower_id} is not the required race ({tower_race} != {required_race})")
+        # --- End Attack Speed Aura Effect ---
 
     # --- NEW: Method to apply temporary pulsed buffs ---
     def apply_pulsed_buff(self, buff_type, value, duration, current_time):

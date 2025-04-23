@@ -676,18 +676,18 @@ class GameScene:
                     self.current_track_index = -1
         # --- END Soundtrack Advancement --- 
 
-        current_game_time = pygame.time.get_ticks() / 1000.0 # Get current time once
+        current_time = pygame.time.get_ticks() / 1000.0 # Get current time once
         
         # --- Wave System Update --- 
-        self.update_wave_system(current_game_time, time_delta)
+        self.update_wave_system(current_time, time_delta)
         # ------------------------
         
         # --- Update Tower Links (Periodically) --- REMOVED
-        # time_since_last_link_update = current_game_time - self.last_link_update_time
+        # time_since_last_link_update = current_time - self.last_link_update_time
         # print(f"DEBUG Link Update Check: Time since last={time_since_last_link_update:.2f}s, Interval={self.link_update_interval}s") # Debug print
         # if time_since_last_link_update >= self.link_update_interval:
         #     self.update_tower_links()
-        #     self.last_link_update_time = current_game_time
+        #     self.last_link_update_time = current_time
         # --- End Link Update ---
         
         # Update UI
@@ -828,12 +828,10 @@ class GameScene:
                     # Check if the targets list contains enemy types or the old "enemies" string
                     # Ensure the aura isn't targeting towers (handled above in tower_buff_auras)
                     targets_enemies = any(t in ["ground", "air", "enemies"] for t in aura_targets) or aura_targets == "enemies"
-                    targets_towers = tower.special.get('targets') == 'towers' # Check specifically
+                    targets_towers = "towers" in aura_targets or aura_targets == "towers" # Check specifically
                     
                     # Include if it targets enemies and NOT exclusively towers
-                    # Also include if it's a pulse aura, assuming pulses target enemies unless specified otherwise?
-                    # Let's refine: Include if (targets enemies AND not targets towers) OR (is pulse aura)
-                    if (targets_enemies and not targets_towers) or is_pulse_aura:
+                    if targets_enemies and not targets_towers:
                         aura_radius_units = tower.special.get('aura_radius', 0)
                         aura_radius_pixels = aura_radius_units * (config.GRID_SIZE / 200.0)
                         aura_radius_sq = aura_radius_pixels ** 2
@@ -862,8 +860,8 @@ class GameScene:
             aura_radius_sq = pulse_tower.aura_radius_pixels ** 2
             
             # Check if it's time to pulse
-            if current_game_time >= pulse_tower.last_pulse_time + interval:
-                pulse_tower.last_pulse_time = current_game_time # Update last pulse time
+            if current_time >= pulse_tower.last_pulse_time + interval:
+                pulse_tower.last_pulse_time = current_time # Update last pulse time
                 print(f"--- Tower {pulse_tower.tower_id} pulsing crit damage buff! ---")
 
                 # <<< ADDED: Create Visual Pulse Effect for Tower Buff Auras >>>
@@ -896,7 +894,7 @@ class GameScene:
                     dist_sq = (target_tower.x - pulse_tower.x)**2 + (target_tower.y - pulse_tower.y)**2
                     if dist_sq <= aura_radius_sq:
                         # Apply the temporary buff
-                        target_tower.apply_pulsed_buff('crit_damage', crit_bonus, duration, current_game_time)
+                        target_tower.apply_pulsed_buff('crit_damage', crit_bonus, duration, current_time)
                         targets_found += 1
                         print(f"    -> Applied pulsed crit buff (+{crit_bonus}) to {target_tower.tower_id}")
                 
@@ -908,19 +906,20 @@ class GameScene:
         for tower in self.towers:
             # --- Call Tower's Internal Update (for self-managed abilities) --- 
             # Pass current time, enemies, ALL callbacks, and the image loader
-            tower.update(current_game_time, self.enemies, 
+            tower.update(current_time, self.enemies, 
                          self.add_pass_through_exploder, # Callback 1
                          self.add_visual_effect,          # Callback 2
                          self.can_afford,                 # Callback 3 
                          self.deduct_money,               # Callback 4 
                          self.add_projectile,             # Callback 5 (NEW)
-                         self.load_single_image)          # Asset Loader
+                         self.load_single_image,          # Asset Loader
+                         self.towers)                     # All towers list
             # ------------------------------------------------------------------
             
             # Calculate buffed stats once per tower update
             # Note: get_buffed_stats itself needs the list of auras
-            # Pass current_game_time and self.towers along with auras
-            buffed_stats = tower.get_buffed_stats(current_game_time, self.tower_buff_auras, self.towers) # Buffs influence interval/damage
+            # Pass current_time and self.towers along with auras
+            buffed_stats = tower.get_buffed_stats(current_time, self.tower_buff_auras, self.towers) # Buffs influence interval/damage
             effective_interval = buffed_stats['attack_interval'] # Use the buffed interval
             
             # --- Gold Generation Check (Modified for Random) --- 
@@ -929,7 +928,7 @@ class GameScene:
                 amount = 0 # Initialize amount
                 interval = tower.special.get("interval", 10.0) 
                 
-                if current_game_time - tower.last_pulse_time >= interval:
+                if current_time - tower.last_pulse_time >= interval:
                     if effect_type == "random_gold_generation":
                         min_gold = tower.special.get("min_gold", 1)
                         max_gold = tower.special.get("max_gold", 1)
@@ -959,19 +958,19 @@ class GameScene:
                             print(f"Error creating gold text effect: {e}")
                             
                     # Update pulse time ONLY if the interval check passed
-                    tower.last_pulse_time = current_game_time 
+                    tower.last_pulse_time = current_time 
             # --- End Gold Generation --- 
             
             # --- Specific Broadside Firing Logic --- 
             is_broadside = tower.special and tower.special.get("effect") == "broadside"
             if is_broadside:
-                if current_game_time - tower.last_attack_time >= effective_interval:
+                if current_time - tower.last_attack_time >= effective_interval:
                     print(f"DEBUG: Broadside tower {tower.tower_id} firing based on interval.")
                     grid_offset_x = config.UI_PANEL_PADDING
                     grid_offset_y = config.UI_PANEL_PADDING
                     # Capture and process results for broadside
                     # Pass self.towers for potential adjacency checks within attack
-                    attack_results = tower.attack(None, current_game_time, self.enemies, self.tower_buff_auras, grid_offset_x, grid_offset_y, all_towers=self.towers) 
+                    attack_results = tower.attack(None, current_time, self.enemies, self.tower_buff_auras, grid_offset_x, grid_offset_y, all_towers=self.towers) 
                     if isinstance(attack_results, dict):
                         new_projectiles = attack_results.get('projectiles', [])
                         if new_projectiles:
@@ -1027,7 +1026,7 @@ class GameScene:
                             # Target changed or lost
                             if current_primary_target: # Indentation Level 4 (24 spaces)
                                 print(f"Laser Painter {tower.tower_id} started painting {current_primary_target.enemy_id}")
-                                tower.paint_start_time = current_game_time # Reset timer for new target
+                                tower.paint_start_time = current_time # Reset timer for new target
                             else:
                                 # print(f"Laser Painter {tower.tower_id} lost target.") # Optional debug
                                 tower.paint_start_time = 0.0 # No target, reset time
@@ -1133,7 +1132,7 @@ class GameScene:
                             
                     if proceed_with_beam_effects:
                         # Apply effects if interval allows (mimics the damage logic interval)
-                        if current_game_time >= tower.last_attack_time + effective_interval:
+                        if current_time >= tower.last_attack_time + effective_interval:
                             effects_applied_this_tick = False # Flag to update attack time once
                             for target_enemy in tower.beam_targets:
                                 if target_enemy.health > 0:
@@ -1142,7 +1141,7 @@ class GameScene:
                                     apply_damage_now = False
                                     if is_painter:
                                         if target_enemy == tower.painting_target and tower.paint_start_time > 0 and \
-                                           (current_game_time - tower.paint_start_time >= tower.special.get('charge_duration', 2.0)):
+                                           (current_time - tower.paint_start_time >= tower.special.get('charge_duration', 2.0)):
                                             apply_damage_now = True
                                             tower.paint_start_time = 0.0 # Reset charge
                                     else:
@@ -1165,7 +1164,7 @@ class GameScene:
                                             slow_multiplier = 1.0 - (slow_percentage / 100.0)
                                             # <<< FIX: Use a small fixed duration instead of time_delta >>>
                                             fixed_slow_duration = 0.2 # Apply slow for 0.2 seconds each frame beam hits
-                                            target_enemy.apply_status_effect('slow', fixed_slow_duration, slow_multiplier, current_game_time)
+                                            target_enemy.apply_status_effect('slow', fixed_slow_duration, slow_multiplier, current_time)
                                             # print(f"DEBUG: Freeze ray applying slow {slow_percentage}% to {target_enemy.enemy_id}") # Optional Debug
                                             effects_applied_this_tick = True
                                     # --- End Apply Slow --- 
@@ -1174,7 +1173,7 @@ class GameScene:
                             
                             # Update last attack time ONCE if any effect/damage was applied this tick
                             if effects_applied_this_tick:
-                                tower.last_attack_time = current_game_time
+                                tower.last_attack_time = current_time
 
                 elif potential_targets: # Indentation Level 2 (16 spaces) - Aligned with 'if tower.attack_type == beam:'
                     if target_selection_mode == "random":
@@ -1202,7 +1201,7 @@ class GameScene:
 
                     # --- Attack Check and Execution for Standard/Special Towers ---
                     # Check if interval is ready AND either targets were found OR it's a specific effect tower that needs to act
-                    interval_ready = current_game_time >= tower.last_attack_time + effective_interval
+                    interval_ready = current_time >= tower.last_attack_time + effective_interval
                     is_marking_tower = tower.special and tower.special.get("effect") == "apply_mark"
                     # <<< ADDED: Check for whip attack type >>>
                     is_whip_tower = tower.attack_type == 'whip'
@@ -1218,7 +1217,7 @@ class GameScene:
                         if tower.tower_id == 'spark_arc_tower':
                             # Call the specific chain zap attempt logic
                             # This function handles its own cooldowns and results
-                            self.attempt_chain_zap(tower, current_game_time, self.enemies, grid_offset_x, grid_offset_y)
+                            self.attempt_chain_zap(tower, current_time, self.enemies, grid_offset_x, grid_offset_y)
                             # We might not need to process results further here if attempt_chain_zap handles effects/sounds
                         else:
                             # --- Generic Attack Call for other non-beam/non-chain towers ---
@@ -1252,7 +1251,7 @@ class GameScene:
                             # Pass target_enemy (which might be None if it's a marking tower with no targets in range, but attack handles that)
                             attack_results = tower.attack(
                                 target_enemy, 
-                                current_game_time,
+                                current_time,
                                 self.enemies,           # Pass all enemies
                                 self.tower_buff_auras,  # Pass buffs
                                 grid_offset_x,
@@ -1280,10 +1279,10 @@ class GameScene:
             if effect_type and effect_type.endswith('_pulse_aura'):
                 interval = special.get('interval', 1.0)
                 # Check pulse timing ONCE per tower
-                print(f"PULSE-DEBUG: Tower {tower.tower_id} checking pulse timing | Current time: {current_game_time:.2f} | Last pulse: {tower.last_pulse_time:.2f} | Interval: {interval}")
-                if current_game_time - tower.last_pulse_time >= interval:
+                print(f"PULSE-DEBUG: Tower {tower.tower_id} checking pulse timing | Current time: {current_time:.2f} | Last pulse: {tower.last_pulse_time:.2f} | Interval: {interval}")
+                if current_time - tower.last_pulse_time >= interval:
                     print(f"PULSE-DEBUG: Tower {tower.tower_id} TRIGGERING PULSE NOW!")
-                    tower.last_pulse_time = current_game_time # Update time immediately
+                    tower.last_pulse_time = current_time # Update time immediately
 
                     radius_sq = aura_data['radius_sq']
                     allowed_targets = special.get('targets', [])
@@ -1368,7 +1367,7 @@ class GameScene:
                                     slow_percentage = special.get('slow_percentage', 0)
                                     duration = special.get('duration', 1.0)
                                     multiplier = 1.0 - (slow_percentage / 100.0)
-                                    enemy.apply_status_effect('slow', duration, multiplier, current_game_time)
+                                    enemy.apply_status_effect('slow', duration, multiplier, current_time)
                                 elif effect_type == 'damage_pulse_aura':
                                     pulse_damage = special.get('pulse_damage', 0)
                                     damage_type = special.get('pulse_damage_type', 'normal')
@@ -1377,15 +1376,15 @@ class GameScene:
 
                                 elif effect_type == 'stun_pulse_aura':
                                     duration = special.get('duration', 0.5)
-                                    enemy.apply_status_effect('stun', duration, None, current_game_time)
+                                    enemy.apply_status_effect('stun', duration, None, current_time)
     
                                 
                                 # --- NEW: Bonechill Pulse --- 
                                 elif effect_type == 'bonechill_pulse_aura':
                                     duration = special.get('bonechill_duration', 3.0) # Get duration from JSON, default 3s
-                                    enemy.apply_status_effect('bonechill', duration, None, current_game_time)
+                                    enemy.apply_status_effect('bonechill', duration, None, current_time)
                                     # --- ADDED BONECHILL APPLICATION LOG ---
-                                    print(f"$$$ BONECHILL APPLIED by {tower.tower_id} to {enemy.enemy_id} for {duration}s at {current_game_time:.2f}s")
+                                    print(f"$$$ BONECHILL APPLIED by {tower.tower_id} to {enemy.enemy_id} for {duration}s at {current_time:.2f}s")
                                     # --- END LOG ---
 
                                 # --- End Bonechill Pulse --- 
@@ -1403,14 +1402,14 @@ class GameScene:
                                     amplified_dot_damage = base_dot_damage * amp_multiplier
                                     
                                     # Apply the DoT to the enemy
-                                    enemy.apply_dot_effect(dot_name, amplified_dot_damage, dot_interval, dot_duration, dot_damage_type, current_game_time)
+                                    enemy.apply_dot_effect(dot_name, amplified_dot_damage, dot_interval, dot_duration, dot_damage_type, current_time)
                                     
                                     # --- CHECK FOR SLOW EFFECT IN DOT PULSE ---
                                     slow_percentage = special.get('slow_percentage', 0)
                                     if slow_percentage > 0:
                                         slow_duration = special.get('duration', 1.0)
                                         slow_multiplier = 1.0 - (slow_percentage / 100.0)
-                                        enemy.apply_status_effect('slow', slow_duration, slow_multiplier, current_game_time)
+                                        enemy.apply_status_effect('slow', slow_duration, slow_multiplier, current_time)
                                         print(f"[DOT-SLOW] {tower.tower_id}: Applied {slow_percentage}% slow for {slow_duration}s to {enemy.enemy_id}")
                                     # --- END SLOW EFFECT CHECK ---
                                    
@@ -1438,7 +1437,7 @@ class GameScene:
                 proj.move(time_delta, self.enemies) 
                 if proj.collided:
                     # on_collision now returns a dictionary with new projectiles/effects/gold
-                    collision_results = proj.on_collision(self.enemies, current_game_time, self.tower_buff_auras)
+                    collision_results = proj.on_collision(self.enemies, current_time, self.tower_buff_auras)
                     
                     if collision_results:
                         # Check for and add gold
@@ -1645,7 +1644,7 @@ class GameScene:
                             elif effect_type == 'slow_aura':
                                 slow_percentage = special.get('slow_percentage', 0)
                                 multiplier = 1.0 - (slow_percentage / 100.0)
-                                enemy.apply_status_effect('slow', time_delta * 1.5, multiplier, current_game_time)
+                                enemy.apply_status_effect('slow', time_delta * 1.5, multiplier, current_time)
                                 
                             elif effect_type == 'storm_aura': # Added check for storm_aura
                                 # Apply Damage Component
@@ -1660,15 +1659,15 @@ class GameScene:
                                 slow_percentage = special.get('slow_percentage', 0)
                                 if slow_percentage > 0:
                                     multiplier = 1.0 - (slow_percentage / 100.0)
-                                    enemy.apply_status_effect('slow', time_delta * 1.5, multiplier, current_game_time)
+                                    enemy.apply_status_effect('slow', time_delta * 1.5, multiplier, current_time)
                                     
                             # --- NEW: Vortex Damage Aura --- 
                             elif effect_type == 'vortex_damage_aura':
                                 tick_interval = special.get('tick_interval', 0.1) 
                                 # Check interval using the tower's last_aura_tick_time
-                                if current_game_time >= tower.last_aura_tick_time + tick_interval:
+                                if current_time >= tower.last_aura_tick_time + tick_interval:
                                     # Update tick time ONCE per tower, after interval check
-                                    tower.last_aura_tick_time = current_game_time 
+                                    tower.last_aura_tick_time = current_time 
                                     # Get damage parameters
                                     min_dmg = special.get('min_damage_at_edge', 0)
                                     max_dmg = special.get('max_damage_at_center', 0)
@@ -1703,7 +1702,7 @@ class GameScene:
 
             # --- Move Enemy --- 
             # Enemy.move() handles status updates internally
-            enemy.move(current_game_time)
+            enemy.move(current_time)
             
             # --- Check for Walkover Tower Trigger --- 
             if enemy.health > 0:
@@ -1731,7 +1730,7 @@ class GameScene:
                                     amp_multiplier = tower.get_dot_amplification_multiplier(self.tower_buff_auras)
                                     amplified_dot_damage = base_dot_damage * amp_multiplier
                                     # Apply the burn DoT
-                                    enemy.apply_dot_effect(effect_type, amplified_dot_damage, dot_interval, dot_duration, dot_damage_type, current_game_time)
+                                    enemy.apply_dot_effect(effect_type, amplified_dot_damage, dot_interval, dot_duration, dot_damage_type, current_time)
                                     print(f"Enemy {enemy.enemy_id} walked over Fire Pit {tower.tower_id}, applied burn.")
                                 # --- Add check for Earth Spine --- 
                                 elif effect_type == "ground_spike_dot":
@@ -1743,7 +1742,7 @@ class GameScene:
                                     amp_multiplier = tower.get_dot_amplification_multiplier(self.tower_buff_auras)
                                     amplified_dot_damage = base_dot_damage * amp_multiplier
                                     # Apply the spike DoT
-                                    enemy.apply_dot_effect(effect_type, amplified_dot_damage, dot_interval, dot_duration, dot_damage_type, current_game_time)
+                                    enemy.apply_dot_effect(effect_type, amplified_dot_damage, dot_interval, dot_duration, dot_damage_type, current_time)
                                     print(f"Enemy {enemy.enemy_id} walked over Earth Spine {tower.tower_id}, applied {effect_type}.")
                                 # Add other walkover effects here if needed (e.g., instant damage)
                                 # elif effect_type == "walkover_damage": ... 
@@ -1803,7 +1802,7 @@ class GameScene:
                 print(f"Enemy {enemy.enemy_id} defeated. Gained ${enemy.value}. Current Money: ${self.money}")
                 print(f"  Enemies left this wave NOW: {self.enemies_alive_this_wave}") # DEBUG
             
-    def draw(self, screen, time_delta, current_game_time):
+    def draw(self, screen, time_delta, current_time):
         """Draw the game scene with new layout"""
         # Fill background - Cover the whole screen first
         screen.fill((0, 0, 0)) # Black background
@@ -2023,7 +2022,7 @@ class GameScene:
                                 if is_painter:
                                     # Check if this target is THE painted target AND charge time is met
                                     if target_enemy == tower.painting_target and tower.paint_start_time > 0 and \
-                                       (current_game_time - tower.paint_start_time >= charge_duration):
+                                       (current_time - tower.paint_start_time >= charge_duration):
                                         print(f"Laser Painter {tower.tower_id} FIRE! Target: {target_enemy.enemy_id}")
                                         apply_effects_now = True
                                         # Reset paint time after firing to require re-charge
@@ -2033,11 +2032,11 @@ class GameScene:
                                     apply_effects_now = True
                                     
                                 # Calculate buffed damage (only needed when applying effects)
-                                buffed_stats = tower.get_buffed_stats(current_game_time, self.tower_buff_auras, self.towers) 
+                                buffed_stats = tower.get_buffed_stats(current_time, self.tower_buff_auras, self.towers) 
                                 damage_multiplier = buffed_stats.get('damage_multiplier', 1.0)
                                 
                                 # Only apply damage if enough time has passed since last attack
-                                if current_game_time - tower.last_attack_time >= tower.attack_interval:
+                                if current_time - tower.last_attack_time >= tower.attack_interval:
                                     # Calculate and apply beam damage
                                     damage_min = tower.base_damage_min
                                     damage_max = tower.base_damage_max
@@ -2048,7 +2047,7 @@ class GameScene:
                                     print(f"Beam tower {tower.tower_id} dealt {damage} {tower.damage_type} damage to {target_enemy.enemy_id}")
                                     
                                     # Update last attack time
-                                    tower.last_attack_time = current_game_time
+                                    tower.last_attack_time = current_time
                                 
                 else:
                     # For non-painter towers (normal beams), effects apply every frame
@@ -2057,7 +2056,7 @@ class GameScene:
                     # Ensure this block is aligned correctly too
                     if apply_effects_now:
                         # Calculate buffed damage (only needed when applying effects)
-                        buffed_stats = tower.get_buffed_stats(current_game_time, self.tower_buff_auras, self.towers) 
+                        buffed_stats = tower.get_buffed_stats(current_time, self.tower_buff_auras, self.towers) 
                         damage_multiplier = buffed_stats.get('damage_multiplier', 1.0)
                             
                 # --- End Apply Damage & Effects --- 
