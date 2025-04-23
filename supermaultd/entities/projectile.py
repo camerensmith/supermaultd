@@ -691,11 +691,22 @@ class Projectile:
                  print(f"DEBUG: Warning - Tried to ignore armor, but enemy {enemy.enemy_id} lacks 'current_armor_value' attribute.")
         # --- End Calculate ignore_armor_amount ---
         
+        # --- Check for Shatter Effect ---
+        bonus_multiplier = 1.0
+        if self.shatter_data:
+            target_debuff = self.shatter_data.get("shatter_target_debuff", "")
+            if target_debuff in enemy.status_effects:
+                shatter_multiplier = self.shatter_data.get("shatter_damage_multiplier", 1.0)
+                bonus_multiplier = shatter_multiplier
+                print(f"DEBUG: Shatter effect triggered! Applying {shatter_multiplier}x damage to {enemy.enemy_id} with {target_debuff} debuff")
+        # --- End Shatter Check ---
+        
         # Call enemy.take_damage and store the returned dictionary
         # Pass self.source_tower.special, NOT self.special_effect for bounty check
         # Because the bounty effect is defined on the TOWER, not the projectile's special effect block
         source_special_for_bounty = self.source_tower.special if self.source_tower else None
         damage_result_dict = enemy.take_damage(base_damage, self.damage_type,
+                                             bonus_multiplier=bonus_multiplier,
                                              ignore_armor_amount=ignore_armor_amount,
                                              source_special=source_special_for_bounty) # Pass TOWER's special for bounty check
         
