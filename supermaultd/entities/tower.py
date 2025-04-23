@@ -2260,6 +2260,55 @@ class Tower:
                             print(f"DEBUG: Enemy {enemy.enemy_id} is too far away ({dist:.1f} > {self.aura_radius_pixels})")
         # --- End DoT Amplification Aura Effect ---
 
+        # --- Random Bombardment Effect ---
+        if self.special and self.special.get("effect") == "random_bombardment":
+            # Check if it's time for a new strike
+            if current_time - self.last_attack_time >= self.special.get("interval", 6.0):
+                self.last_attack_time = current_time
+                
+                # Get bombardment parameters
+                bombardment_radius = self.special.get("bombardment_radius", 2750)
+                strike_aoe_radius = self.special.get("strike_aoe_radius", 250)
+                strike_damage_min = self.special.get("strike_damage_min", 800)
+                strike_damage_max = self.special.get("strike_damage_max", 900)
+                strike_damage_type = self.special.get("strike_damage_type", "normal")
+                
+                # Calculate random strike position within bombardment radius
+                angle = random.uniform(0, 2 * math.pi)
+                distance = random.uniform(0, bombardment_radius)
+                strike_x = self.x + math.cos(angle) * distance
+                strike_y = self.y + math.sin(angle) * distance
+                
+                # Create explosion effect
+                explosion = Effect(
+                    strike_x,
+                    strike_y,
+                    self.asset_loader("assets/effects/fire_burst.png"),
+                    duration=0.5,
+                    target_size=(strike_aoe_radius * 2, strike_aoe_radius * 2)
+                )
+                
+                # Deal damage to enemies in radius
+                strike_radius_sq = strike_aoe_radius ** 2
+                for enemy in all_enemies:
+                    if enemy.health > 0:
+                        dx = enemy.x - strike_x
+                        dy = enemy.y - strike_y
+                        dist_sq = dx**2 + dy**2
+                        if dist_sq <= strike_radius_sq:
+                            # Calculate damage falloff based on distance
+                            distance = math.sqrt(dist_sq)
+                            falloff = 1.0 - (distance / strike_aoe_radius)
+                            damage = random.uniform(strike_damage_min, strike_damage_max) * falloff
+                            enemy.take_damage(damage, strike_damage_type)
+                
+                # Add explosion to game scene
+                if self.game_scene_add_effect_callback:
+                    self.game_scene_add_effect_callback(explosion)
+                
+                print(f"Random bombardment strike at ({int(strike_x)}, {int(strike_y)})")
+        # --- End Random Bombardment Effect ---
+
         # --- Salvo Attack Logic ---
         if self.special and self.special.get("effect") == "salvo_attack" and self.salvo_shots_remaining > 0:
             if current_time >= self.salvo_next_shot_time:

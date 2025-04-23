@@ -715,7 +715,7 @@
       }
     },
     "bomb_brigade": {
-      "description": "Masters of demolition and area denial, wielding unstable explosives with devastating effect.",
+      "description": "Huge AOE, splash damage and big range, however they only deal siege damage.",
       "towers": {
         "bomb_wall": {
           "name": "Barricade", "grid_width": 1, "grid_height": 1, "cost": 1,
@@ -731,22 +731,14 @@
         },
         "bomb_mine_field": {
           "name": "Mine Field", "grid_width": 1, "grid_height": 1, "cost": 150,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
-          "range": 150, "attack_interval": 999, "projectile_speed": null,
-          "attack_type": "aura", "splash_radius": null, "targets": [],
-          "traversable": true,
-          "special": {
-            "effect": "damage_pulse_aura",
-            "targets": ["ground"],
-            "aura_radius": 200, 
-            "pulse_damage": 20, 
-            "interval": 0.2,
-            "pulse_damage_type": "siege"
-          }
+          "damage_min": 35, "damage_max": 35, "damage_type": "siege",
+          "range": 150, "attack_interval": 0.1, "projectile_speed": null,
+          "attack_type": "instant", "splash_radius": 200, "targets": ["ground"],
+          "traversable": true
         },
         "bomb_cluster_launcher": {
           "name": "Cluster Launcher", "grid_width": 2, "grid_height": 2, "cost": 90,
-          "damage_min": 40, "damage_max": 50, "damage_type": "piercing", "target_selection": "random",
+          "damage_min": 40, "damage_max": 50, "damage_type": "siege", "target_selection": "random",
           "range": 650, "attack_interval": 2.0, "projectile_speed": 350,
           "attack_type": "projectile", "splash_radius": 600, "targets": ["ground"]
         },
@@ -779,8 +771,8 @@
           "grid_width": 1, "grid_height": 1, "cost": 500,
           "damage_min": 0,       
           "damage_max": 0,       
-          "damage_type": "normal", 
-          "range": 2750,            
+          "damage_type": "siege", 
+          "range": 5000,            
           "attack_interval": 999,  
           "projectile_speed": null,
           "traversable": true,
@@ -789,12 +781,12 @@
           "targets": [],           
           "special": {
             "effect": "random_bombardment",
-            "bombardment_radius": 2750,      
-            "strike_aoe_radius": 250,       
+            "bombardment_radius": 5000,      
+            "strike_aoe_radius": 1000,       
             "strike_damage_min": 800,       
             "strike_damage_max": 900,       
-            "strike_damage_type": "normal",  
-            "interval": 6.0,              
+            "strike_damage_type": "siege",  
+            "interval": 1.0,              
             "description": "Periodically calls down random artillery strikes within a large radius."
           }
         }
