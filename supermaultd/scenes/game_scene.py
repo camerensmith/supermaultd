@@ -2346,6 +2346,14 @@ class GameScene:
                     tower_to_sell.looping_sound_channel = None # Clear reference
             # --- END Stop Looping Sound ---
 
+            # --- NEW: Stop Looping Sound (Bomb Barrage Beacon) --- 
+            if tower_to_sell.tower_id == 'bomb_barrage_beacon':
+                if hasattr(tower_to_sell, 'looping_sound_channel') and tower_to_sell.looping_sound_channel:
+                    print(f"Stopping looping sound for sold {tower_to_sell.tower_id} on channel {tower_to_sell.looping_sound_channel}")
+                    tower_to_sell.looping_sound_channel.stop()
+                    tower_to_sell.looping_sound_channel = None # Clear reference
+            # --- END Stop Looping Sound ---
+
             # Update UI display
             self.tower_selector.update_money(self.money)
             

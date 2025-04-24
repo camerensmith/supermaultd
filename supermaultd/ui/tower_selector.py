@@ -114,6 +114,13 @@ class TowerSelector:
             name = tower_data.get('name', 'N/A')
             cost = tower_data.get('cost', 0)
             tooltip_lines.append(f"<b>{name}</b>")
+            
+            # Add description if it exists
+            description = tower_data.get('description')
+            if description:
+                tooltip_lines.append(f"<i>{description}</i>")
+                tooltip_lines.append("") # Add a spacer after description
+                
             tooltip_lines.append(f"Cost: ${cost}")
             grid_w = tower_data.get('grid_width', 1)
             grid_h = tower_data.get('grid_height', 1)

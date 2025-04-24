@@ -368,6 +368,30 @@ class Tower:
         self.miasma_pulse_alpha = 255
         # --- End Miasma Pulse State ---
 
+        # --- NEW: Looping sound for Bomb Barrage Beacon ---
+        if self.tower_id == 'bomb_barrage_beacon':
+            beacon_sound_path = os.path.join(sound_dir, "bomb_barrage_beacon.mp3")
+            if os.path.exists(beacon_sound_path):
+                try:
+                    beacon_sound = pygame.mixer.Sound(beacon_sound_path)
+                    self.looping_sound_channel = pygame.mixer.find_channel()
+                    if self.looping_sound_channel:
+                        self.looping_sound_channel.play(beacon_sound, loops=-1)
+                        print(f"Started looping sound {beacon_sound_path} on channel {self.looping_sound_channel}")
+                    else:
+                        print("Warning: No available sound channels for bomb_barrage_beacon loop.")
+                except pygame.error as e:
+                    print(f"Error loading or playing bomb_barrage_beacon sound {beacon_sound_path}: {e}")
+            else:
+                print(f"Warning: Looping sound file not found: {beacon_sound_path}")
+        # --- END Bomb Barrage Beacon Sound ---
+
+        # Set last_attack_time to trigger first strike immediately for bombardment
+        if tower_data.get("special", {}).get("effect") == "random_bombardment":
+            self.last_attack_time = -tower_data["special"]["interval"]  # Set to negative interval to trigger immediately
+        else:
+            self.last_attack_time = 0
+
     def calculate_derived_stats(self):
         """Calculates pixel dimensions and ranges based on grid size and tower data."""
         # Pixel dimensions based on grid size
@@ -1332,7 +1356,7 @@ class Tower:
                         except Exception as e:
                             print(f"Note: Could not create lightning bolt visual for spark_storm_generator: {e}")
                     # --- End Storm Generator Lightning Bolt ---
-
+                    
                     # --- Instant Splash Damage Logic --- 
                     effective_splash_radius_pixels = buffed_stats.get('splash_radius_pixels', 0)
                     if effective_splash_radius_pixels > 0 and initial_damage > 0: # Only splash if radius > 0 and damage > 0
@@ -1421,7 +1445,7 @@ class Tower:
             return
 
         effect_type = self.special.get("effect")
-        
+
         # --- Handle DoT Effects ---
         if (effect_type and # First check if effect exists
             "dot_damage" in self.special and 
@@ -1443,7 +1467,7 @@ class Tower:
                 )
                 print(f"... instant attack applied {dot_name} DoT ({base_dot_damage}/{dot_interval}s for {dot_duration}s) to {target.enemy_id}")
         # --- End DoT Effects ---
-
+        
     def draw(self, screen, tower_assets, offset_x=0, offset_y=0):
         """Draw the tower using its associated image, scaled to its grid footprint, with a border and offset."""
         draw_pixel_x = (self.top_left_grid_x * GRID_SIZE) + offset_x
@@ -2263,7 +2287,7 @@ class Tower:
         # --- Random Bombardment Effect ---
         if self.special and self.special.get("effect") == "random_bombardment":
             # Check if it's time for a new strike
-            if current_time - self.last_attack_time >= self.special.get("interval", 6.0):
+            if current_time - self.last_attack_time >= self.special["interval"]:  # Use exact interval from tower data
                 self.last_attack_time = current_time
                 
                 # Get bombardment parameters
@@ -2279,13 +2303,24 @@ class Tower:
                 strike_x = self.x + math.cos(angle) * distance
                 strike_y = self.y + math.sin(angle) * distance
                 
+                # Convert grid coordinates to pixel coordinates and ensure strike stays within bounds
+                # Grid coordinates: (26,1), (1,24), (1,1), (24,1)
+                # Convert to pixel coordinates (assuming 50 pixels per grid)
+                min_x = 1 * 50  # Left boundary
+                max_x = 26 * 50  # Right boundary
+                min_y = 1 * 50  # Top boundary
+                max_y = 24 * 50  # Bottom boundary
+                
+                strike_x = max(min_x, min(strike_x, max_x))
+                strike_y = max(min_y, min(strike_y, max_y))
+                
                 # Create explosion effect
                 explosion = Effect(
                     strike_x,
                     strike_y,
                     self.asset_loader("assets/effects/fire_burst.png"),
                     duration=0.5,
-                    target_size=(strike_aoe_radius * 2, strike_aoe_radius * 2)
+                    target_size=(strike_aoe_radius, strike_aoe_radius)  # Make visual effect match actual radius
                 )
                 
                 # Deal damage to enemies in radius
@@ -2358,3 +2393,15 @@ class Tower:
         end_time = current_time + duration
         self.pulsed_buffs[buff_type] = {'value': value, 'end_time': end_time}
     # --- END apply_pulsed_buff ---
+
+    def sell(self):
+        """Sell the tower and return its sell value"""
+        # Stop any looping sounds
+        if hasattr(self, 'looping_sound_channel') and self.looping_sound_channel:
+            self.looping_sound_channel.stop()
+            self.looping_sound_channel = None
+            print(f"Stopped looping sound for {self.tower_id}")
+            
+        # Calculate sell value (50% of cost)
+        sell_value = self.cost // 2
+        return sell_value

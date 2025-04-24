@@ -727,7 +727,7 @@
           "name": "Bomb Lobber", "grid_width": 1, "grid_height": 1, "cost": 15,
           "damage_min": 10, "damage_max": 12, "damage_type": "siege",
           "range": 500, "attack_interval": 0.5, "projectile_speed": 95,
-          "attack_type": "projectile", "splash_radius": 80, "targets": ["ground"]
+          "attack_type": "projectile", "splash_radius": 600, "targets": ["ground"]
         },
         "bomb_mine_field": {
           "name": "Mine Field", "grid_width": 1, "grid_height": 1, "cost": 150,
@@ -742,37 +742,34 @@
           "range": 650, "attack_interval": 2.0, "projectile_speed": 350,
           "attack_type": "projectile", "splash_radius": 600, "targets": ["ground"]
         },
-        "bomb_shrapnel_cannon": {
-          "name": "Shrapnel Cannon", "grid_width": 2, "grid_height": 2, "cost": 150,
-          "damage_min": 100, "damage_max": 120, "damage_type": "siege",
-          "range": 600, "attack_interval": 2.5, "projectile_speed": 400,
-          "attack_type": "projectile", "splash_radius": 250, "targets": ["ground"],
-          "special": {
-            "effect": "shotgun",
-            "pellets": 7,
-            "spread_angle": 33
-          }
-        },
         "bomb_sticky__bomb_launcher": {
-          "name": "Sticky Bomb Launcher", "grid_width": 1, "grid_height": 1, "cost": 280,
-          "damage_min": 200, "damage_max": 220, "damage_type": "piercing",
-          "range": 700, "attack_interval": 2.2, "projectile_speed": 500,
-          "attack_type": "projectile", "splash_radius": 100, "targets": ["ground", "air"],
-          "special": {"effect": "slow", "slow_percentage": 30, "duration": 2.5}
+          "name": "Sticky Bomb Launcher", "grid_width": 2, "grid_height": 2, "cost": 280,
+          "damage_min": 40, "damage_max": 50, "damage_type": "siege", "target_selection": "random",
+          "range": 650, "attack_interval": 2.0, "projectile_speed": 350,
+          "attack_type": "projectile", "splash_radius": 600, "targets": ["ground"],
+          "special": {
+            "effect": "sticky_bomb",
+            "detonation_delay": 2.0,
+            "base_explosion_damage": 200,
+            "explosion_radius": 150,
+            "multiple_bomb_explosion_multiplier": 1.5,
+            "max_stacks": 5
+          }
         },
         "bomb_bombadier": {
           "name": "Bombadier", "grid_width": 1, "grid_height": 1, "cost": 280,
           "damage_min": 200, "damage_max": 220, "damage_type": "piercing",
           "range": 700, "attack_interval": 2.2, "projectile_speed": 500,
-          "attack_type": "projectile", "splash_radius": 100, "targets": ["ground", "air"]
+          "attack_type": "projectile", "splash_radius": 600, "targets": ["ground", "air"]
         },
         "bomb_barrage_beacon": {
           "name": "Bombardment Barrage Beacon", 
+          "description": "Periodically calls down random artillery strikes within a large radius.",
           "grid_width": 1, "grid_height": 1, "cost": 500,
           "damage_min": 0,       
           "damage_max": 0,       
           "damage_type": "siege", 
-          "range": 5000,            
+          "range": 1000,            
           "attack_interval": 999,  
           "projectile_speed": null,
           "traversable": true,
@@ -781,12 +778,12 @@
           "targets": [],           
           "special": {
             "effect": "random_bombardment",
-            "bombardment_radius": 5000,      
-            "strike_aoe_radius": 1000,       
+            "bombardment_radius": 1000,      
+            "strike_aoe_radius": 500,       
             "strike_damage_min": 800,       
             "strike_damage_max": 900,       
             "strike_damage_type": "siege",  
-            "interval": 1.0,              
+            "interval": 6.0,              
             "description": "Periodically calls down random artillery strikes within a large radius."
           }
         }
@@ -1673,7 +1670,7 @@
       }
     },
     "seadogs": {
-      "description": "Swashbuckling pirates wielding crude cannons, cutlasses, and a thirst for gold.",
+      "description": "Featuring cannons and harpoons, may plunder extra gold from slain enemies.",
       "towers": {
         "seadog_wall": {
           "name": "Ship Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
@@ -1698,15 +1695,20 @@
           "damage_min": 40, "damage_max": 50, "damage_type": "siege", 
           "range": 500, "attack_interval": 2.0, "projectile_speed": 300, "bounce": 2,
           "attack_type": "projectile", "splash_radius": 800, "targets": ["ground"], 
-          "projectile_asset_id": "grog_barrel_projectile", 
-          "special": {"effect": "slow", "slow_percentage": 25, "duration": 1.0, "description": "Splashed enemies are slowed."}
+          "projectile_asset_id": "grog_barrel_projectile",
+          "special": {
+            "effect": "gold_on_kill",
+            "chance_percent": 15, 
+            "gold_amount": 1,
+            "description": "Has a 15% chance to grant 1 gold on a killing blow."
+        }
         },
         "seadog_chain_shot_cannon": {
           "name": "Chain Shot Cannon", "grid_width": 1, "grid_height": 1, "cost": 55,
           "damage_min": 15, "damage_max": 20, "damage_type": "siege",
           "range": 900, "attack_interval": 1.2, "projectile_speed": 350, "bounce": 5, 
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
-          "special": {"effect": "slow", "slow_percentage": 40, "duration": 1.5}
+          "special": {"effect": "slow", "slow_percentage": 30, "duration": 1.5}
         },
         "seadog_cannoneer": {
           "name": "Cannoneer", "grid_width": 2, "grid_height": 2, "cost": 167,
