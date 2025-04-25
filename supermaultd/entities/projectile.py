@@ -655,6 +655,54 @@ class Projectile:
                         pierced_count += 1
         # --- End Pierce Adjacent --- 
         
+        # Play impact sound for bomb lobber
+        if self.source_tower and self.source_tower.tower_id == "bomb_lobber":
+            try:
+                impact_sound = pygame.mixer.Sound("assets/sounds/bomb_lobber_hit.mp3")
+                impact_sound.play()
+            except:
+                print("Could not play bomb lobber impact sound")
+                
+        # Play impact sound for bomb bombardier
+        if self.source_tower and self.source_tower.tower_id == "bomb_bombardier":
+            try:
+                impact_sound = pygame.mixer.Sound("assets/sounds/bomb_bombardier_hit.mp3")
+                impact_sound.play()
+            except:
+                print("Could not play bomb bombardier impact sound")
+                
+        # Play impact sound for tech nuclear silo
+        if self.source_tower and self.source_tower.tower_id == "tech_nuclear_silo":
+            try:
+                impact_sound = pygame.mixer.Sound("assets/sounds/nuke.mp3")
+                impact_sound.play()
+            except:
+                print("Could not play nuke impact sound")
+                
+        # Play impact sound for igloo snowball tosser
+        if self.source_tower and self.source_tower.tower_id == "igloo_snowball_tosser":
+            try:
+                impact_sound = pygame.mixer.Sound("assets/sounds/snowball_hit.mp3")
+                impact_sound.play()
+            except:
+                print("Could not play snowball impact sound")
+                
+        # Play impact sound for igloo icicle launcher
+        if self.source_tower and self.source_tower.tower_id == "igloo_icicle_launcher":
+            try:
+                impact_sound = pygame.mixer.Sound("assets/sounds/icicle_shatter.mp3")
+                impact_sound.play()
+            except:
+                print("Could not play icicle shatter sound")
+                
+        # Play impact sound for igloo glacier cannon
+        if self.source_tower and self.source_tower.tower_id == "igloo_glacier_cannon":
+            try:
+                impact_sound = pygame.mixer.Sound("assets/sounds/glacier_impact.mp3")
+                impact_sound.play()
+            except:
+                print("Could not play glacier impact sound")
+
         # self.collided = True # Already set at the start
         return results
 

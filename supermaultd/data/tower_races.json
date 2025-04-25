@@ -511,11 +511,11 @@
           "projectile_speed": 300,
           "attack_type": "projectile",
           "splash_radius": 775,
-          "targets": ["air"],
+          "targets": ["ground","air"],
           "special": {
             "effect": "swarm_power",
             "check_radius": 400,
-            "attack_speed_bonus_per_swarmer": 5
+            "attack_speed_bonus_per_swarmer": 15
           }
         },
         "zork_brood_lord": {
@@ -726,40 +726,39 @@
         "bomb_lobber": {
           "name": "Bomb Lobber", "grid_width": 1, "grid_height": 1, "cost": 15,
           "damage_min": 10, "damage_max": 12, "damage_type": "siege",
-          "range": 500, "attack_interval": 0.5, "projectile_speed": 95,
-          "attack_type": "projectile", "splash_radius": 600, "targets": ["ground"]
+          "range": 500, "attack_interval": 0.3, "projectile_speed": 95,
+          "attack_type": "projectile", "splash_radius": 600, "targets": ["ground", "air"]
         },
         "bomb_mine_field": {
-          "name": "Mine Field", "grid_width": 1, "grid_height": 1, "cost": 150,
+          "name": "Mine Field", 
+          "description": "A mine field that deals damage to ground units walking over it.",
+          "grid_width": 1, "grid_height": 1, "cost": 30,
           "damage_min": 35, "damage_max": 35, "damage_type": "siege",
           "range": 150, "attack_interval": 0.1, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 200, "targets": ["ground"],
           "traversable": true
         },
-        "bomb_cluster_launcher": {
-          "name": "Cluster Launcher", "grid_width": 2, "grid_height": 2, "cost": 90,
-          "damage_min": 40, "damage_max": 50, "damage_type": "siege", "target_selection": "random",
-          "range": 650, "attack_interval": 2.0, "projectile_speed": 350,
-          "attack_type": "projectile", "splash_radius": 600, "targets": ["ground"]
-        },
-        "bomb_sticky__bomb_launcher": {
-          "name": "Sticky Bomb Launcher", "grid_width": 2, "grid_height": 2, "cost": 280,
-          "damage_min": 40, "damage_max": 50, "damage_type": "siege", "target_selection": "random",
-          "range": 650, "attack_interval": 2.0, "projectile_speed": 350,
-          "attack_type": "projectile", "splash_radius": 600, "targets": ["ground"],
+        "bomb_grenade_launcher": {
+          "name": "Grenade Launcher", 
+          "description": "A bouncing grenade dealing damage to both ground and air units in a large area.",
+          "grid_width": 2, "grid_height": 2, "cost": 22,
+          "damage_min": 250, "damage_max": 325, "damage_type": "normal",
+          "range": 800, "attack_interval": 8.0, "projectile_speed": 175,
+          "attack_type": "projectile", "splash_radius": 300, "targets": ["ground", "air"],
           "special": {
-            "effect": "sticky_bomb",
-            "detonation_delay": 2.0,
-            "base_explosion_damage": 200,
-            "explosion_radius": 150,
-            "multiple_bomb_explosion_multiplier": 1.5,
-            "max_stacks": 5
+            "effect": "grenade_launcher",
+            "detonation_time": 2.0,
+            "max_bounces": 3,
+            "bounce_speed_loss": 0.5,
+            "explosion_radius": 300
           }
         },
-        "bomb_bombadier": {
-          "name": "Bombadier", "grid_width": 1, "grid_height": 1, "cost": 280,
-          "damage_min": 200, "damage_max": 220, "damage_type": "piercing",
-          "range": 700, "attack_interval": 2.2, "projectile_speed": 500,
+        "bomb_bombardier": {
+          "name": "Bombardier", 
+          "description": "A rocket launcher dealing high damage to both air and ground units.",
+          "grid_width": 1, "grid_height": 2, "cost": 280,
+          "damage_min": 335, "damage_max": 390, "damage_type": "siege",
+          "range": 700, "attack_interval": 2.2, "projectile_speed": 150,
           "attack_type": "projectile", "splash_radius": 600, "targets": ["ground", "air"]
         },
         "bomb_barrage_beacon": {
@@ -772,16 +771,16 @@
           "range": 1000,            
           "attack_interval": 999,  
           "projectile_speed": null,
-          "traversable": true,
+          "traversable": false,
           "attack_type": "none",     
           "splash_radius": null,   
-          "targets": [],           
+          "targets": ["ground"],           
           "special": {
             "effect": "random_bombardment",
             "bombardment_radius": 1000,      
             "strike_aoe_radius": 500,       
-            "strike_damage_min": 800,       
-            "strike_damage_max": 900,       
+            "strike_damage_min": 600,       
+            "strike_damage_max": 800,       
             "strike_damage_type": "siege",  
             "interval": 6.0,              
             "description": "Periodically calls down random artillery strikes within a large radius."
@@ -802,7 +801,7 @@
           "name": "Pebble Shooter", "grid_width": 1, "grid_height": 1, "cost": 6,
           "damage_min": 5, "damage_max": 6, "damage_type": "normal", "bounce": 2,
           "range": 550, "attack_interval": 0.5, "projectile_speed": 400,
-          "attack_type": "projectile", "splash_radius": 300, "targets": ["ground", "air"],
+          "attack_type": "projectile", "splash_radius": 350, "targets": ["ground", "air"],
           "critical_chance": 0.1,
           "critical_multiplier": 1.5,
           "special": {
@@ -824,11 +823,11 @@
             "description": "Critical hits have double the splash radius."
           }
         },
-        "stone_rockslider": {
-          "name": "Rockslider", "grid_width": 2, "grid_height": 2, "cost": 140,
+        "stone_stonebreaker": {
+          "name": "Stonebreaker", "grid_width": 2, "grid_height": 2, "cost": 140,
           "damage_min": 60, "damage_max": 70, "damage_type": "siege", "bounce": 3,
           "range": 850, "attack_interval": 2.8, "projectile_speed": 300,
-          "attack_type": "projectile", "splash_radius": 400, "targets": ["ground"],
+          "attack_type": "projectile", "splash_radius": 350, "targets": ["ground"],
           "critical_chance": 0.1,
           "critical_multiplier": 1.5,
           "special": {
@@ -1025,7 +1024,7 @@
         "igloo_glacier_cannon": {
           "name": "Glacier Cannon", "grid_width": 1, "grid_height": 1, "cost": 355,
           "damage_min": 400, "damage_max": 400, "damage_type": "normal",
-          "range": 500, "attack_interval": 2, "projectile_speed": 400,
+          "range": 775, "attack_interval": 2, "projectile_speed": 400,
           "attack_type": "projectile", "splash_radius": 200, "targets": ["ground", "air"],
           "special": {
             "effect": "shatter",
@@ -1387,23 +1386,23 @@
           "range": 550, "attack_interval": 0.1, "projectile_speed": 400,
           "attack_type": "beam", "splash_radius": null, "targets": ["ground", "air"]
         },
+        "husk_grunt": {
+          "name": "Grunt", "grid_width": 2, "grid_height": 2, "cost": 50,
+          "damage_min": 88, "damage_max": 260, "damage_type": "normal",
+          "range": 350, "attack_interval": 1, "projectile_speed": 400,
+          "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
+        },
         "husk_void_stalker": {
           "name": "Void Stalker", "grid_width": 2, "grid_height": 2, "cost": 30,
           "damage_min": 21, "damage_max": 23, "damage_type": "arcane",
-          "range": 600, "attack_interval": 1.3, "projectile_speed": 350,
-          "attack_type": "projectile", "splash_radius": 250, "targets": ["ground"]
-        },
-        "husk_deranged_husk": {
-          "name": "Deranged Husk", "grid_width": 2, "grid_height": 2, "cost": 50,
-          "damage_min": 88, "damage_max": 260, "damage_type": "normal",
-          "range": 350, "attack_interval": 1, "projectile_speed": null,
-          "attack_type": "instant", "splash_radius": null, "targets": ["ground"]
+          "range": 600, "attack_interval": 1.3, "projectile_speed": null,
+          "attack_type": "instant", "splash_radius": 250, "targets": ["ground"]
         },
         "husk_entropy_trooper": {
           "name": "Entropy Trooper", "grid_width": 2, "grid_height": 2, "cost": 150,
           "damage_min": 120, "damage_max": 180, "damage_type": "magic",
-          "range": 700, "attack_interval": 1.5, "projectile_speed": 500,
-          "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
+          "range": 700, "attack_interval": 1.5, "projectile_speed": null,
+          "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
           "special": {
             "effect": "max_hp_reduction_on_hit",
             "reduction_percentage": 2, 
@@ -1491,7 +1490,7 @@
           "name": "Apocalypse Mech", "grid_width": 3, "grid_height": 3, "cost": 450,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
           "range": 400, "attack_interval": 999, "projectile_speed": null,
-          "attack_type": "aura", "splash_radius": null, "targets": [],
+          "attack_type": "projectile", "splash_radius": null, "targets": [],
           "special": {
             "effect": "chance_ignore_armor_on_hit",
             "chance_percent": 25,
@@ -1527,19 +1526,6 @@
           "damage_min": 6, "damage_max": 8, "damage_type": "normal",
           "range": 550, "attack_interval": 0.4, "projectile_speed": 500,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
-        },
-        "police_grenade_launcher": {
-          "name": "Grenade Launcher", "grid_width": 1, "grid_height": 1, "cost": 22,
-          "damage_min": 20, "damage_max": 30, "damage_type": "normal",
-          "range": 500, "attack_interval": 2.0, "projectile_speed": 175,
-          "attack_type": "projectile", "splash_radius": 200, "targets": ["ground", "air"],
-          "special": {
-            "effect": "grenade_launcher",
-            "detonation_time": 2.0,
-            "max_bounces": 1,
-            "bounce_speed_loss": 0.2,
-            "explosion_radius": 100
-          }
         },
         "police_taser_turret": {
           "name": "Taser Turret", "grid_width": 1, "grid_height": 1, "cost": 50,

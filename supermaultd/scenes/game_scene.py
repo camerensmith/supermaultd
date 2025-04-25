@@ -16,6 +16,7 @@ from entities.enemy import Enemy # Import Enemy class
 from entities.projectile import Projectile # Import Projectile class
 from entities.offset_boomerang_projectile import OffsetBoomerangProjectile # <<< ADDED IMPORT
 from entities.grenade_projectile import GrenadeProjectile # <<< ADDED IMPORT
+from entities.cluster_projectile import ClusterProjectile # <<< ADDED IMPORT
 # Import all necessary effect classes at the top level
 from entities.effect import Effect, FloatingTextEffect, ChainLightningVisual, RisingFadeEffect, GroundEffectZone, FlamethrowerParticleEffect, SuperchargedZapEffect, AcidSpewParticleEffect, PulseImageEffect, ExpandingCircleEffect, DrainParticleEffect, WhipVisual # Added AcidSpewParticleEffect, PulseImageEffect, ExpandingCircleEffect, DrainParticleEffect, WhipVisual
 from entities.orbiting_damager import OrbitingDamager # NEW IMPORT
@@ -1433,9 +1434,10 @@ class GameScene:
         newly_created_effects = [] # List to hold effects from impacts
         
         for proj in self.projectiles[:]:
-            # --- CHECK IF BOOMERANG ---
-            is_boomerang = type(proj).__name__ == 'OffsetBoomerangProjectile' # Dynamic check
-            is_grenade = type(proj).__name__ == 'GrenadeProjectile' # Check for grenade
+            # --- CHECK PROJECTILE TYPE ---
+            is_boomerang = type(proj).__name__ == 'OffsetBoomerangProjectile'
+            is_grenade = type(proj).__name__ == 'GrenadeProjectile'
+            is_cluster = type(proj).__name__ == 'ClusterProjectile'
 
             if is_boomerang:
                 # --- Update Boomerang (which manages its own 'finished' state) ---
@@ -1456,6 +1458,20 @@ class GameScene:
                     if explosion_result.get('new_effects'):
                         newly_created_effects.extend(explosion_result['new_effects'])
                     # Remove the grenade
+                    self.projectiles.remove(proj)
+            elif is_cluster:
+                # --- Update Cluster Projectile ---
+                proj.move(time_delta, self.enemies)
+                if proj.has_detonated:
+                    # Get detonation result
+                    detonation_result = proj.detonate(self.enemies)
+                    # Add any new projectiles
+                    if detonation_result.get('projectiles'):
+                        newly_created_projectiles.extend(detonation_result['projectiles'])
+                    # Add any new effects
+                    if detonation_result.get('new_effects'):
+                        newly_created_effects.extend(detonation_result['new_effects'])
+                    # Remove the cluster projectile
                     self.projectiles.remove(proj)
             else:
                 # --- Standard Projectile Update ---

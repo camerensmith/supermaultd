@@ -15,6 +15,7 @@ from entities.orbiting_damager import OrbitingDamager
 from entities.effect import Effect, FloatingTextEffect, ChainLightningVisual, RisingFadeEffect, GroundEffectZone # Added GroundEffectZone
 from entities.harpoon_projectile import HarpoonProjectile
 from entities.grenade_projectile import GrenadeProjectile
+from entities.cluster_projectile import ClusterProjectile
 
 class Tower:
     def __init__(self, x, y, tower_id, tower_data):
@@ -1433,6 +1434,31 @@ class Tower:
                             chain_effect = ChainLightningVisual(adjusted_path, duration=0.3) # Use existing visual
                             results['effects'].append(chain_effect)
                     # --- END Chain Lightning Logic ---
+
+        # --- Special Projectile Types ---
+        if self.special and self.special.get("effect") == "cluster_shot":
+            # Create cluster projectile
+            cluster = ClusterProjectile(
+                start_x=self.x,
+                start_y=self.y,
+                damage=initial_damage,
+                speed=self.projectile_speed,
+                projectile_id=self.tower_data.get('projectile_asset_id', self.tower_id),
+                direction_angle=math.atan2(-(target.y - self.y), target.x - self.x),
+                max_distance=self.range,
+                splash_radius=effective_splash_radius_pixels,
+                source_tower=self,
+                is_crit=is_crit,
+                special_effect=self.special,
+                damage_type=self.damage_type,
+                asset_loader=self.asset_loader,
+                pellets=self.special.get("pellets", 5),
+                spread_angle=self.special.get("spread_angle", 30),
+                detonation_time=self.special.get("detonation_time", 2.0),
+                explosion_radius=self.special.get("explosion_radius", 100)
+            )
+            results['projectiles'].append(cluster)
+            return results
 
         # --- Beam Logic --- 
         # ... (existing beam logic - sound doesn't make sense here) ...

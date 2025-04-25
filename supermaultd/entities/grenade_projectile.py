@@ -107,13 +107,20 @@ class GrenadeProjectile(Projectile):
         self.has_detonated = True
         self.collided = True
         
+        # Play explosion sound
+        try:
+            explosion_sound = pygame.mixer.Sound("assets/sounds/grenade_explode.mp3")
+            explosion_sound.play()
+        except:
+            print("Could not play grenade explosion sound")
+        
         # Create explosion effect
         explosion = Effect(
             self.x,
             self.y,
             self.source_tower.asset_loader("assets/effects/fire_burst.png"),
-            duration=0.5,
-            target_size=(self.explosion_radius * 2, self.explosion_radius * 2)
+            duration=0.1,
+            target_size=(80, 80)
         )
         
         # Deal damage to enemies in radius
