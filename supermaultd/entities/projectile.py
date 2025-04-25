@@ -468,10 +468,9 @@ class Projectile:
             # --- Apply standard on-hit effects AFTER primary damage --- 
             if collided_enemy and collided_enemy.health > 0: # Only apply effects if target survived
                 # Apply special effects from projectile/tower
-                if self.special_effect:
-                    effect_result = self.apply_special_effects(collided_enemy, current_time)
-                    if effect_result:
-                        results['special_effects_applied'].append((collided_enemy, effect_result))
+                effect_result = self.apply_special_effects(collided_enemy, current_time)
+                if effect_result:
+                    results['special_effects_applied'].append((collided_enemy, effect_result))
                 
                 # --- NEW: Apply Bash Chance from Source Tower --- 
                 if self.source_tower and self.source_tower.special:
@@ -485,7 +484,7 @@ class Projectile:
                                 print(f"Projectile from {self.source_tower.tower_id} BASHED {collided_enemy.enemy_id} for {stun_duration}s (Chance: {chance}%)")
                 # --- END Bash Chance --- 
                 
-                # --- Apply Armor Reduction on Hit (from source tower's special) --- 
+                # --- Apply Armor Reduction on Hit (from source tower's special) ---
                 if self.source_tower and self.source_tower.special and self.source_tower.special.get("effect") == "armor_reduction_on_hit":
                     amount = self.source_tower.special.get("armor_reduction_amount", 1)
                     if hasattr(collided_enemy, 'reduce_armor'):
@@ -638,10 +637,9 @@ class Projectile:
                         if damage_dealt > 0:
                             results['damage_dealt'].append((enemy_to_pierce, damage_dealt, self.damage_type))
                             # Apply standard effects to pierced target?
-                            if self.special_effect:
-                                effect_result = self.apply_special_effects(enemy_to_pierce, current_time)
-                                if effect_result:
-                                   results['special_effects_applied'].append((enemy_to_pierce, effect_result))
+                            effect_result = self.apply_special_effects(enemy_to_pierce, current_time)
+                            if effect_result:
+                               results['special_effects_applied'].append((enemy_to_pierce, effect_result))
                             # Apply tower-specific on-hit effects?
                             # ... add logic if needed ...
                         if was_killed:
@@ -766,46 +764,32 @@ class Projectile:
         return damage_result_dict
 
     def apply_special_effects(self, enemy, current_time):
-        """Applies special effects defined in self.special_effect to the enemy."""
-        if not self.special_effect or not enemy or enemy.health <= 0:
-            return
+        """Applies special effects associated with THIS projectile to the enemy."""
+        # --- Shatter Effect ---
+        if self.shatter_data:
+            chance = self.shatter_data.get("chance_percent", 0)
+            if random.random() * 100 < chance:
+                # Apply a significant temporary armor reduction
+                reduction = self.shatter_data.get("armor_reduction", 9999)
+                duration = self.shatter_data.get("duration", 1.0)
+                if hasattr(enemy, 'apply_timed_armor_reduction'):
+                    enemy.apply_timed_armor_reduction(reduction, duration, current_time)
+                    print(f"!!! Projectile {self.projectile_id} Shattered {enemy.enemy_id}'s armor by {reduction} for {duration}s! (Chance: {chance}%)")
+                    return "shatter" # Return effect name
 
-        effect_type = self.special_effect.get("effect")
-
-        # --- Handle Damage Over Time ---
-        # Check if required DoT keys exist
-        if ("dot_damage" in self.special_effect and
-            "dot_interval" in self.special_effect and
-            "duration" in self.special_effect): # Check for 'duration'
-
-            dot_damage = self.special_effect["dot_damage"]
-            dot_interval = self.special_effect["dot_interval"]
-            dot_duration = self.special_effect["duration"] # Read 'duration'
-            # Use effect_type as the identifier, allow specific damage type override
-            dot_damage_type = self.special_effect.get("dot_damage_type", "normal") # Default DoT type
-
-            # Call a new method on the enemy to apply/refresh the DoT
-            enemy.apply_dot_effect(effect_type, dot_damage, dot_interval, dot_duration, dot_damage_type, current_time)
-
-        # --- Handle Slow Effect (Example, if needed) ---
-        elif effect_type == "slow":
-            slow_percentage = self.special_effect.get('slow_percentage', 20)
-            slow_duration = self.special_effect.get('duration', 2.0) # Assuming 'duration' key for slow
-            slow_multiplier = 1.0 - (slow_percentage / 100.0)
-            enemy.apply_status_effect('slow', slow_duration, slow_multiplier, current_time)
-
-        # --- Handle Stun Effect ---
-        elif effect_type == "stun" and "duration" in self.special_effect:
-            stun_duration = self.special_effect["duration"]
-            enemy.apply_status_effect('stun', stun_duration, True, current_time) # Value (True) is ignored for stun
-
-        # --- Handle Max HP Reduction ---
-        if self.max_hp_reduction_data and hasattr(enemy, 'reduce_max_health'):
+        # --- Max HP Reduction --- # NEW
+        if self.max_hp_reduction_data:
             percentage = self.max_hp_reduction_data.get("reduction_percentage", 0)
-            if percentage > 0:
-                enemy.reduce_max_health(percentage)
-        # --- End Max HP Reduction ---
+            if percentage > 0 and hasattr(enemy, 'reduce_max_hp_percentage'):
+                original_max_hp = enemy.max_hp
+                enemy.reduce_max_hp_percentage(percentage)
+                print(f"... applied max HP reduction ({percentage}%) to {enemy.enemy_id}. HP: {original_max_hp:.1f} -> {enemy.max_hp:.1f}")
+                return "max_hp_reduction" # Return effect name
 
-        # --- Add other special effect types here ---
+        # --- Chance Ignore Armor ---
+        # Note: This is handled directly in apply_damage as it modifies the damage calculation itself
         
-        # TODO: Handle bounce - projectile could create a new projectile on hit? 
+        # Add other projectile-specific effects here
+        # elif self.some_other_projectile_effect_data: ...
+        
+        return None # Return None if no relevant effect applied

@@ -442,8 +442,8 @@ class GameScene:
                 self.spawn_test_enemy("soldier")
                 print("Spawned Soldier (press 'T')")
             elif event.key == pygame.K_1: # 1 for Dust Mite
-                self.spawn_test_enemy("dust_mite")
-                print("Spawned Dust Mite (press '1')")
+                self.spawn_test_enemy("lord_supermaul")
+                print("Spawned Lord Supermaul (press '1')")
             elif event.key == pygame.K_2: # 2 for Doom Lord
                 self.spawn_test_enemy("doomlord")
                 print("Spawned Doom Lord (press '2')")
@@ -1769,12 +1769,20 @@ class GameScene:
 
                     
                 # TODO: Add money/score for killing enemy?
-                self.money += enemy.value # Add enemy value to player money
+                # Check if this enemy was killed by a bounty hunter
+                if hasattr(enemy, 'killed_by') and enemy.killed_by and enemy.killed_by.special and enemy.killed_by.special.get("effect") == "bounty_on_kill":
+                    # If killed by bounty hunter, subtract 1 from the value
+                    reward = max(0, enemy.value - 1)  # Ensure we don't go below 0
+                    print(f"!!! Bounty Hunter penalty applied! Original value: {enemy.value}, New value: {reward}")
+                else:
+                    reward = enemy.value
+                
+                self.money += reward # Add adjusted value to player money
                 self.tower_selector.update_money(self.money) # UPDATE UI DISPLAY
-                print(f"*** ENEMY KILLED: {enemy.enemy_id}. Decrementing wave counter from {self.enemies_alive_this_wave}...") # DEBUG
+                print(f"*** ENEMY KILLED: {enemy.enemy_id}. Decrementing wave counter from {self.enemies_alive_this_wave}...")
                 if self.enemies_alive_this_wave > 0: self.enemies_alive_this_wave -= 1 
                 self.enemies.remove(enemy)
-                print(f"Enemy {enemy.enemy_id} defeated. Gained ${enemy.value}. Current Money: ${self.money}")
+                print(f"Enemy {enemy.enemy_id} defeated. Gained ${reward}. Current Money: ${self.money}")
                 print(f"  Enemies left this wave NOW: {self.enemies_alive_this_wave}") # DEBUG
             
     def draw(self, screen, time_delta, current_time):

@@ -165,9 +165,13 @@ class RaceSelector:
         for index, race_id in enumerate(self.races):
             # Rect is relative to the scroll container
             button_rect = pygame.Rect(h_padding, current_scroll_y, button_width, button_height)
+            # Special case for "tac" to ensure it's displayed as "TAC"
+            display_name = race_id.replace('_', ' ').title()
+            if race_id == "tac":
+                display_name = "TAC"
             button = pygame_gui.elements.UIButton(
                 relative_rect=button_rect,
-                text=race_id.replace('_', ' ').title(),
+                text=display_name,
                 manager=self.manager,
                 container=self.button_scroll_container.get_container(), 
                 object_id=f"#race_button_{race_id}"

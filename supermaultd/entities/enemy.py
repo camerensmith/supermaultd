@@ -280,6 +280,8 @@ class Enemy:
             bounty_triggered = True
             gold_penalty = source_special.get("gold_penalty", 0) # Get penalty amount
             print(f"!!! Enemy {self.enemy_id} killed by Bounty Hunter! Triggering {gold_penalty} gold penalty.")
+            # Store the tower that killed this enemy
+            self.killed_by = source_special.get("source_tower")
 
         # Return a dictionary with results
         return {

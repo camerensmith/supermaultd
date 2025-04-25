@@ -371,7 +371,7 @@ ENEMY_DATA = {
     },
     "lord_supermaul": {
         "health": 255000, # Boss
-        "speed": 2,
+        "speed": 0.5,
         "value": 250, # Big reward
         "armor_type": "Medium",
         "armor_value": 100,

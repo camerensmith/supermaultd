@@ -16,6 +16,9 @@ from entities.effect import Effect, FloatingTextEffect, ChainLightningVisual, Ri
 from entities.harpoon_projectile import HarpoonProjectile
 from entities.grenade_projectile import GrenadeProjectile
 from entities.cluster_projectile import ClusterProjectile
+from .double_strike_effect import DoubleStrikeEffect
+from .every_nth_strike_effect import EveryNthStrikeEffect
+from .strategic_strike_effect import StrategicStrikeEffect
 
 class Tower:
     def __init__(self, x, y, tower_id, tower_data):
@@ -393,6 +396,14 @@ class Tower:
         else:
             self.last_attack_time = 0
 
+        # Initialize strike counter for every_nth_strike effect
+        self.strike_counter = 0
+
+        # Initialize special effects if tower has them
+        if hasattr(self, 'special') and self.special:
+            if self.special.get('effect') == 'strategic_strike':
+                self.strategic_strike_effect = StrategicStrikeEffect(self)
+
     def calculate_derived_stats(self):
         """Calculates pixel dimensions and ranges based on grid size and tower data."""
         # Pixel dimensions based on grid size
@@ -673,21 +684,7 @@ class Tower:
         return damage, is_crit # Level 1 (8 spaces)
 
     def attack(self, target, current_time, all_enemies, tower_buff_auras, grid_offset_x, grid_offset_y, visual_assets=None, all_towers=None):
-        """Calculates damage, creates projectiles/effects, or applies instant damage based on attack type.
-        
-        Args:
-            target: The target Enemy object (can be None for some attack types).
-            current_time: The current game time.
-            all_enemies: List of all current enemies (for splash/AoE).
-            tower_buff_auras: List of active auras affecting towers.
-            grid_offset_x: X offset for drawing.
-            grid_offset_y: Y offset for drawing.
-            visual_assets: Dictionary of loaded visual assets.
-            all_towers: List of all placed towers (for adjacency checks).
-
-        Returns:
-            A dictionary containing lists of 'projectiles' and 'effects' created, or None if no attack occurs.
-        """
+        """Perform an attack on the target enemy."""
         results = {'projectiles': [], 'effects': []}
         
         # --- Adjacency Requirement Check --- 
@@ -1463,6 +1460,56 @@ class Tower:
         # --- Beam Logic --- 
         # ... (existing beam logic - sound doesn't make sense here) ...
 
+        # Calculate initial damage
+        initial_damage, is_crit = self.calculate_damage(target, buffed_stats, current_time)
+        
+        # Check for double strike special effect
+        if self.special and self.special.get("effect") == "double_strike":
+            chance = self.special.get("chance_percent", 20)
+            if random.random() * 100 < chance:
+                # Create double strike effect
+                double_strike = DoubleStrikeEffect(self, target, initial_damage, current_time)
+                if self.game_scene_add_effect_callback:
+                    self.game_scene_add_effect_callback(double_strike)
+                print(f"Double Strike triggered on {target.enemy_id} with {chance}% chance")
+            else:
+                # Normal attack if double strike doesn't trigger
+                target.take_damage(initial_damage, self.damage_type)
+        else:
+            # Normal attack if no double strike special
+            target.take_damage(initial_damage, self.damage_type)
+
+        # Check for every_nth_strike special effect
+        if self.special and self.special.get("effect") == "every_nth_strike":
+            self.strike_counter += 1
+            n = self.special.get("n", 5)
+            bonus_damage = self.special.get("bonus_damage", 50)
+            
+            # Apply normal damage
+            target.take_damage(initial_damage, self.damage_type)
+            
+            # Check if it's the nth strike
+            if self.strike_counter >= n:
+                # Create every_nth_strike effect
+                nth_strike = EveryNthStrikeEffect(self, target, bonus_damage, current_time)
+                if self.game_scene_add_effect_callback:
+                    self.game_scene_add_effect_callback(nth_strike)
+                print(f"Every Nth Strike triggered on {target.enemy_id} (strike {self.strike_counter})")
+                self.strike_counter = 0  # Reset counter
+        else:
+            # Normal attack if no every_nth_strike special
+            target.take_damage(initial_damage, self.damage_type)
+
+        # Apply damage to the target
+        damage_result = target.take_damage(
+            base_damage=initial_damage,
+            damage_type=self.damage_type,
+            bonus_multiplier=damage_multiplier,
+            ignore_armor_amount=0,
+            source_special={"effect": self.special.get("effect") if self.special else None, 
+                          "source_tower": self}  # Pass the tower as source
+        )
+
         return results
 
     def apply_instant_special_effects(self, target, current_time):
@@ -1472,14 +1519,22 @@ class Tower:
 
         effect_type = self.special.get("effect")
 
-        # --- Handle DoT Effects ---
-        if (effect_type and # First check if effect exists
-            "dot_damage" in self.special and 
-            "dot_interval" in self.special and 
-            "duration" in self.special): # Use "duration" from JSON for direct DoTs
+        # --- Handle Max HP Reduction --- # <<<< ADDED HERE
+        if effect_type == "max_hp_reduction_on_hit":
+            percentage = self.special.get("reduction_percentage", 0)
+            if percentage > 0 and hasattr(target, 'reduce_max_health'): # Changed method name check
+                # Call the existing method on the enemy object
+                target.reduce_max_health(percentage) # Use the correct method name
+                # The log message is now handled inside Enemy.reduce_max_health
+                # Potentially return an indicator if needed, otherwise just proceed
 
+        # --- Handle DoT Effects ---
+        # Using elif now, assuming an instant attack has only ONE primary special effect
+        elif ("dot_damage" in self.special and 
+              "dot_interval" in self.special and 
+              "duration" in self.special):
             # Extract DoT parameters
-            dot_name = effect_type # Use effect_type as the DoT name
+            dot_name = effect_type if effect_type else "unknown_instant_dot" # Use effect_type as the DoT name
             base_dot_damage = self.special.get("dot_damage", 0)
             dot_interval = self.special.get("dot_interval", 1.0)
             dot_duration = self.special.get("duration", 1.0) # Use "duration" from JSON
@@ -2111,7 +2166,7 @@ class Tower:
                         if tower_race == required_race:
                             if dist_sq <= self.aura_radius_pixels * self.aura_radius_pixels:
                                 # Apply attack speed buff
-                                tower.apply_status_effect('attack_speed_buff', 0.2, speed_multiplier, current_time)
+                                tower.apply_pulsed_buff('attack_speed_buff', speed_multiplier, 0.2, current_time)
                                 print(f"DEBUG: Attack Speed Aura from {self.tower_id} buffed {tower.tower_id} with x{speed_multiplier} attack speed")
                             else:
                                 print(f"DEBUG: Tower {tower.tower_id} is too far away ({dist:.1f} > {self.aura_radius_pixels})")
@@ -2431,3 +2486,19 @@ class Tower:
         # Calculate sell value (50% of cost)
         sell_value = self.cost // 2
         return sell_value
+
+    def find_target(self, enemies):
+        """
+        Find the optimal target based on tower's special effects.
+        
+        Args:
+            enemies: List of potential target enemies
+            
+        Returns:
+            The optimal target enemy, or None if no valid targets
+        """
+        if self.strategic_strike_effect:
+            return self.strategic_strike_effect.find_optimal_target(enemies)
+            
+        # Default targeting behavior
+        return super().find_target(enemies)
