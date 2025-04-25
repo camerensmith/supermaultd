@@ -58,6 +58,9 @@ class Enemy:
         self.status_effects = {} # To track effects like { 'slow': { 'end_time': timestamp, 'multiplier': 0.8 } }
         self.active_dots = {} # Store active DoT effects
         
+        # <<< ADDED: Initialize gold_on_kill attribute >>>
+        self.pending_gold_on_kill = 0
+        
         # Movement properties
         self.wander_radius = 10  # How far the enemy can wander from the direct path
         self.wander_angle = random.uniform(0, 2 * math.pi)  # Random starting angle
@@ -220,6 +223,7 @@ class Enemy:
         
     def take_damage(self, base_damage, damage_type="normal", bonus_multiplier=1.0, ignore_armor_amount=0, source_special=None):
         """Apply damage to the enemy, taking into account resistances, status effects, and armor."""
+        print(f" >>> ENTERING Enemy.take_damage for {self.enemy_id} (Damage: {base_damage}, Type: {damage_type}, IgnoreArmor: {ignore_armor_amount})") # <<< ADDED DEBUG & IgnoreArmor
         # 1. Apply Armor Type vs Damage Type multiplier
         type_modifier = self.damage_modifiers.get(damage_type, 1.0)
         damage_after_type = base_damage * type_modifier
@@ -227,16 +231,9 @@ class Enemy:
         # Note: We don't apply dot_amplification here anymore since it's already applied when creating the DoT
         # The amplification is handled in apply_dot_effect and other places where DoTs are created
 
-        # --- NEW: Check source_special for 'ignore_armor_on_hit' --- 
-        if source_special and source_special.get("effect") == "ignore_armor_on_hit":
-            ignore_amount_from_source = source_special.get("amount", 0)
-            ignore_armor_amount += ignore_amount_from_source # Add to existing ignore amount
-            print(f"... Applying ignore_armor_on_hit ({ignore_amount_from_source}) from source. Total ignore: {ignore_armor_amount}")
-        # --- END NEW CHECK ---
-
         # --- Apply Aura Armor Reduction ---
         if self.aura_armor_reduction > 0:
-            ignore_armor_amount += self.aura_armor_reduction
+            ignore_armor_amount += self.aura_armor_reduction # Add aura reduction to any passed-in ignore
             print(f"... Applying aura armor reduction ({self.aura_armor_reduction}). Total ignore: {ignore_armor_amount}")
         # --- End Aura Armor Reduction ---
 
@@ -275,20 +272,36 @@ class Enemy:
         was_killed = self.health <= 0
         bounty_triggered = False # Initialize bounty flag
         gold_penalty = 0 # Initialize penalty
+        gold_on_kill_triggered = False # Initialize gold_on_kill flag
+        gold_on_kill_amount = 0 # Initialize gold_on_kill amount
 
-        if was_killed and source_special and source_special.get("effect") == "bounty_on_kill":
-            bounty_triggered = True
-            gold_penalty = source_special.get("gold_penalty", 0) # Get penalty amount
-            print(f"!!! Enemy {self.enemy_id} killed by Bounty Hunter! Triggering {gold_penalty} gold penalty.")
-            # Store the tower that killed this enemy
-            self.killed_by = source_special.get("source_tower")
+        if was_killed:
+            if source_special and source_special.get("effect") == "bounty_on_kill":
+                bounty_triggered = True
+                gold_penalty = source_special.get("gold_penalty", 0) # Get penalty amount
+                print(f"!!! Enemy {self.enemy_id} killed by Bounty Hunter! Triggering {gold_penalty} gold penalty.")
+                # Store the tower that killed this enemy
+                self.killed_by = source_special.get("source_tower")
+            elif source_special and source_special.get("effect") == "gold_on_kill":
+                chance = source_special.get("chance_percent", 0)
+                amount = source_special.get("gold_amount", 0)
+                if random.random() * 100 < chance:
+                    gold_on_kill_triggered = True
+                    gold_on_kill_amount = amount
+                    # <<< ADDED: Store amount on enemy object >>>
+                    self.pending_gold_on_kill = amount 
+                    print(f"$$$ Gold on Kill CHANCE ({chance}%) SUCCEEDED! Granting {amount} extra gold for killing {self.enemy_id}.")
+                # else: # Optional log for failure
+                #    print(f"... Gold on Kill CHANCE ({chance}%) failed for killing {self.enemy_id}.")
 
         # Return a dictionary with results
         return {
             "damage_dealt": final_damage,
             "was_killed": was_killed,
             "bounty_triggered": bounty_triggered,
-            "gold_penalty": gold_penalty # Return penalty amount (0 if not triggered)
+            "gold_penalty": gold_penalty, # Return penalty amount (0 if not triggered)
+            "gold_on_kill_triggered": gold_on_kill_triggered, # ADDED
+            "gold_on_kill_amount": gold_on_kill_amount      # ADDED
         }
         
     def reduce_armor(self, amount):

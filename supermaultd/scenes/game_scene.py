@@ -836,8 +836,8 @@ class GameScene:
                 is_pulse_aura = effect_type and effect_type.endswith('_pulse_aura')
                 is_continuous_aura = tower.attack_type in ['aura', 'hybrid']
                 
-                # Consider it if it's a standard continuous aura OR a pulse aura (even if attack_type is none)
-                if is_continuous_aura or is_pulse_aura:
+                # Consider it if it's a standard continuous aura OR a pulse aura OR radiance_aura
+                if is_continuous_aura or is_pulse_aura or effect_type == 'radiance_aura':
                     aura_targets = tower.special.get('targets', []) # Pulse auras might still define targets
                     # Check if the targets list contains enemy types or the old "enemies" string
                     # Ensure the aura isn't targeting towers (handled above in tower_buff_auras)
@@ -1583,7 +1583,7 @@ class GameScene:
                         if dist_sq <= aura_radius_sq:
                             # Apply the reduction - use max if multiple auras could stack, or just set if non-stacking
                             enemy.aura_armor_reduction = max(enemy.aura_armor_reduction, reduction_amount)
-                            # print(f"DEBUG: Applied aura reduction {reduction_amount} from {aura_tower.tower_id} to {enemy.enemy_id}. Current total: {enemy.aura_armor_reduction}") # Optional Debug
+                            print(f"DEBUG: Applied aura reduction {reduction_amount} from {aura_tower.tower_id} to {enemy.enemy_id}. Current total: {enemy.aura_armor_reduction}") # Optional Debug
         # --- END Enemy Aura Effects ---
         
         # --- Update Enemies (Main Loop) --- 
@@ -1616,6 +1616,15 @@ class GameScene:
                                     damage_type = special.get('dot_damage_type', 'normal')
                                     enemy.take_damage(damage_this_frame, damage_type)
                                     
+                            elif effect_type == 'radiance_aura': # Handle Sun King's Radiance
+                                dot_damage = special.get('dot_damage', 0)
+                                dot_interval = special.get('dot_interval', 1.0)
+                                if dot_interval > 0:
+                                    damage_per_sec = dot_damage / dot_interval
+                                    damage_this_frame = damage_per_sec * time_delta
+                                    damage_type = special.get('dot_damage_type', 'fire') # Use fire as default for radiance
+                                    enemy.take_damage(damage_this_frame, damage_type)
+
                             elif effect_type == 'slow_aura':
                                 slow_percentage = special.get('slow_percentage', 0)
                                 multiplier = 1.0 - (slow_percentage / 100.0)
@@ -1778,11 +1787,19 @@ class GameScene:
                     reward = enemy.value
                 
                 self.money += reward # Add adjusted value to player money
+                
+                # <<< ADD CHECK FOR GOLD_ON_KILL BONUS >>>
+                if hasattr(enemy, 'pending_gold_on_kill') and enemy.pending_gold_on_kill > 0:
+                    bonus_gold = enemy.pending_gold_on_kill
+                    self.money += bonus_gold
+                    print(f"$$$ Awarded {bonus_gold} extra gold from Gold on Kill effect!")
+                # <<< END CHECK >>>
+                
                 self.tower_selector.update_money(self.money) # UPDATE UI DISPLAY
                 print(f"*** ENEMY KILLED: {enemy.enemy_id}. Decrementing wave counter from {self.enemies_alive_this_wave}...")
                 if self.enemies_alive_this_wave > 0: self.enemies_alive_this_wave -= 1 
                 self.enemies.remove(enemy)
-                print(f"Enemy {enemy.enemy_id} defeated. Gained ${reward}. Current Money: ${self.money}")
+                print(f"Enemy {enemy.enemy_id} defeated. Gained ${reward}. Current Money: ${self.money}") # Base reward still logged here
                 print(f"  Enemies left this wave NOW: {self.enemies_alive_this_wave}") # DEBUG
             
     def draw(self, screen, time_delta, current_time):
@@ -2178,6 +2195,71 @@ class GameScene:
                             dead_zone_color = (255, 100, 0, 100) # Orange-ish, semi-transparent
                             # Draw outline for dead zone
                             pygame.draw.circle(screen, dead_zone_color, center_pos, min_range_pixels, 2) # Use thickness 2 like outer range
+
+            # --- NEW: Draw Tooltip ---
+            try:
+                tooltip_font = pygame.font.Font(None, 22) # Small font for tooltip
+                text_color = (255, 255, 255)
+                bg_color = (30, 30, 30, 200) # Dark semi-transparent background
+                padding = 5
+
+                # Gather data
+                tower = self.hovered_tower
+                # Access data via tower.tower_data
+                name = tower.tower_data.get('name', 'Unknown') # Use .get() for safety
+                dmg_min = tower.base_damage_min
+                dmg_max = tower.base_damage_max
+                dmg_type = tower.damage_type
+                sell_price = int(tower.cost * 0.5)
+
+                # Format text lines
+                lines = [
+                    f"Name: {name}",
+                    f"Damage: {dmg_min}-{dmg_max} {dmg_type}",
+                    f"Sell: {sell_price} G"
+                ]
+
+                # Render lines and calculate size
+                rendered_lines = [tooltip_font.render(line, True, text_color) for line in lines]
+                max_width = max(line.get_width() for line in rendered_lines)
+                total_height = sum(line.get_height() for line in rendered_lines) + (padding * (len(lines) + 1))
+                tooltip_width = max_width + (padding * 2)
+                tooltip_height = total_height
+
+                # Calculate position near mouse, with screen boundary checks
+                mouse_x, mouse_y = pygame.mouse.get_pos()
+                tooltip_x = mouse_x + 15 # Offset slightly right
+                tooltip_y = mouse_y + 15 # Offset slightly down
+
+                # Adjust if tooltip goes off right edge
+                if tooltip_x + tooltip_width > self.screen_width:
+                    tooltip_x = mouse_x - tooltip_width - 15
+                # Adjust if tooltip goes off bottom edge
+                if tooltip_y + tooltip_height > self.screen_height:
+                    tooltip_y = mouse_y - tooltip_height - 15
+                # Adjust if tooltip goes off left edge (less likely with right offset)
+                if tooltip_x < 0:
+                    tooltip_x = 0
+                # Adjust if tooltip goes off top edge (less likely with down offset)
+                if tooltip_y < 0:
+                    tooltip_y = 0
+                    
+                # Draw background rectangle
+                tooltip_rect = pygame.Rect(tooltip_x, tooltip_y, tooltip_width, tooltip_height)
+                # Use a surface for transparency
+                tooltip_surface = pygame.Surface((tooltip_width, tooltip_height), pygame.SRCALPHA)
+                tooltip_surface.fill(bg_color)
+                screen.blit(tooltip_surface, tooltip_rect.topleft)
+                
+                # Draw text lines onto the background
+                current_y = tooltip_y + padding
+                for line_surface in rendered_lines:
+                    screen.blit(line_surface, (tooltip_x + padding, current_y))
+                    current_y += line_surface.get_height() + padding
+
+            except Exception as e:
+                print(f"Error drawing tooltip: {e}")
+            # --- END NEW Tooltip ---
 
         # --- End Hovered Range Indicator ---
         

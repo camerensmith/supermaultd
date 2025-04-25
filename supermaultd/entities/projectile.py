@@ -257,6 +257,7 @@ class Projectile:
         """Handles what happens when the projectile collides with an enemy or reaches its target location.
            Returns a dictionary containing results like damage dealt, new effects, etc.
         """
+        print(f">>> Entering Projectile.on_collision for {self.projectile_id}") # <<< ADDED DEBUG
         # --- Visual Only Check --- 
         if self.is_visual_only:
             print(f"DEBUG: Visual projectile {self.projectile_id} collided, ignoring.") # Optional debug
@@ -455,6 +456,11 @@ class Projectile:
 
             if was_killed:
                 results['enemies_killed'].append(collided_enemy)
+                # --- Increment Tower Kill Count --- # NEW
+                if self.source_tower:
+                    self.source_tower.kill_count += 1
+                    print(f"+++ Kill registered for Tower {self.source_tower.tower_id} (via projectile). Total kills: {self.source_tower.kill_count}")
+                # --- End Increment --- 
                 # Check for gold on kill (only primary target for projectile)
                 if self.special_on_kill_data:
                     chance = self.special_on_kill_data.get("chance_percent", 0)
@@ -644,6 +650,11 @@ class Projectile:
                             # ... add logic if needed ...
                         if was_killed:
                             results['enemies_killed'].append(enemy_to_pierce)
+                            # --- Increment Tower Kill Count (Pierce) --- # NEW
+                            if self.source_tower:
+                                self.source_tower.kill_count += 1
+                                print(f"+++ Kill registered for Tower {self.source_tower.tower_id} (via pierce). Total kills: {self.source_tower.kill_count}")
+                            # --- End Increment --- 
                             # Gold on kill for pierced?
                             if self.special_on_kill_data:
                                 chance = self.special_on_kill_data.get("chance_percent", 0)
@@ -676,6 +687,21 @@ class Projectile:
                 impact_sound.play()
             except:
                 print("Could not play nuke impact sound")
+
+        if self.source_tower and self.source_tower.tower_id == "gaia_treant_boulder_thrower":
+            try:
+                impact_sound = pygame.mixer.Sound("assets/sounds/boulder_crash.mp3")
+                impact_sound.play()
+            except:
+                print("Could not play boulder crash sound")
+
+
+        if self.source_tower and self.source_tower.tower_id == "pyro_searing_tower":
+            try:
+                impact_sound = pygame.mixer.Sound("assets/sounds/sear.mp3")
+                impact_sound.play()
+            except:
+                print("Could not play boulder crash sound")
                 
         # Play impact sound for igloo snowball tosser
         if self.source_tower and self.source_tower.tower_id == "igloo_snowball_tosser":

@@ -404,6 +404,38 @@ class Tower:
             if self.special.get('effect') == 'strategic_strike':
                 self.strategic_strike_effect = StrategicStrikeEffect(self)
 
+        # --- Kill Counter --- # NEW
+        self.kill_count = 0
+        # --- End Kill Counter ---
+
+        # --- NEW: Double Strike Sound (Jaguar Mech Specific) ---
+        self.double_strike_sound = None
+        if self.tower_id == 'tac_jaguar_mech':
+            growl_sound_path = os.path.join(sound_dir, "jaguar_growl.mp3")
+            if os.path.exists(growl_sound_path):
+                try:
+                    self.double_strike_sound = pygame.mixer.Sound(growl_sound_path)
+                    print(f"Loaded double strike sound for {self.tower_id} from {growl_sound_path}")
+                except pygame.error as e:
+                    print(f"Error loading double strike sound {growl_sound_path}: {e}")
+            else:
+                print(f"Warning: Double strike sound file not found: {growl_sound_path}")
+        # --- END Double Strike Sound ---
+
+        # --- NEW: Samurai Armor Ignore Sound --- 
+        self.ignore_armor_sound = None
+        if self.tower_id == 'tac_samurai_mech':
+            samurai_sound_path = os.path.join(sound_dir, "samurai.mp3")
+            if os.path.exists(samurai_sound_path):
+                try:
+                    self.ignore_armor_sound = pygame.mixer.Sound(samurai_sound_path)
+                    print(f"Loaded ignore armor sound for {self.tower_id} from {samurai_sound_path}")
+                except pygame.error as e:
+                    print(f"Error loading ignore armor sound {samurai_sound_path}: {e}")
+            else:
+                print(f"Warning: Ignore armor sound file not found: {samurai_sound_path}")
+        # --- END Samurai Armor Ignore Sound ---
+
     def calculate_derived_stats(self):
         """Calculates pixel dimensions and ranges based on grid size and tower data."""
         # Pixel dimensions based on grid size
@@ -633,6 +665,13 @@ class Tower:
         dmg_min, dmg_max, _ = self.get_stats_for_target(enemy.type)
         
         damage = random.uniform(dmg_min, dmg_max)
+        
+        # --- Reaper Mech Bonus Damage --- # NEW
+        if self.tower_id == "tac_reaper_mech" and self.kill_count > 0:
+            reaper_bonus = 0.25 * self.kill_count
+            print(f"+++ Reaper Mech ({self.tower_id}) applying +{reaper_bonus:.2f} bonus damage (Kills: {self.kill_count}). Base Dmg: {damage:.2f} -> {damage + reaper_bonus:.2f}")
+            damage += reaper_bonus
+        # --- End Reaper Mech Bonus ---
         
         # Apply damage buffs (from auras)
         damage *= damage_multiplier
@@ -1252,16 +1291,93 @@ class Tower:
                                               is_visual_only=False) 
                         results['projectiles'].append(projectile)
                 elif self.attack_type == 'instant':
+                    print(f"DEBUG: Executing INSTANT attack for {self.tower_id}") # <<< ADDED DEBUG PRINT
                     # <<< PLAY SOUND >>>
                     if self.attack_sound:
                         self.attack_sound.play()
                     # <<< END PLAY SOUND >>>
-                    # Apply instant damage if needed
+                    
+                    # <<< ADD ARMOR IGNORE LOGIC HERE (BEFORE DAMAGE) >>>
+                    effective_armor_ignore = 0 # Default to 0
+                    if self.special: # Check if special exists first
+                        effect_type = self.special.get("effect")
+                        # Handle Samurai's CHANCE to ignore armor
+                        if effect_type == "chance_ignore_armor_on_hit" and self.tower_id == 'tac_samurai_mech':
+                            chance = self.special.get("chance_percent", 25)
+                            if random.random() * 100 < chance:
+                                if hasattr(self, 'ignore_armor_sound') and self.ignore_armor_sound:
+                                    self.ignore_armor_sound.play()
+                                effective_armor_ignore = self.special.get("ignore_amount", 15)
+                                print(f"Samurai Mech ({self.tower_id}) triggered CHANCE ARMOR IGNORE! (Ignoring {effective_armor_ignore} armor)")
+                        # Handle GUARANTEED ignore armor (like Archangel)
+                        elif effect_type == "ignore_armor_on_hit": 
+                            effective_armor_ignore = self.special.get("amount", 0) # Use 'amount' key from JSON
+                            if effective_armor_ignore > 0:
+                                print(f"Tower ({self.tower_id}) applying GUARANTEED ARMOR IGNORE! (Ignoring {effective_armor_ignore} armor)")
+                    # <<< END ARMOR IGNORE LOGIC >>>
+                            
+                    # <<< ADD PRIMARY INSTANT DAMAGE APPLICATION HERE >>>
                     if initial_damage > 0:
-                       # Pass the tower's special dict to take_damage for instant attacks
-                       target.take_damage(initial_damage, self.damage_type, source_special=self.special)
-                       results['damage_dealt'] = initial_damage # Track damage
-                    # Apply INSTANT special effects
+                        # Apply only base damage and type here.
+                        # Special effects like stun/DoT are handled later or by source_special in take_damage.
+                        # <<< PASS source_special AND ignore amount HERE >>>
+                        target.take_damage(
+                            initial_damage, 
+                            self.damage_type, 
+                            source_special=self.special, 
+                            ignore_armor_amount=effective_armor_ignore # Pass the calculated ignore amount
+                        )
+                        # Keep the kill count check associated with this primary damage application.
+                        damage_result = {'was_killed': target.health <= 0} # Simplification, assuming take_damage modified health
+                        if damage_result.get("was_killed", False):
+                            self.kill_count += 1
+                            print(f"+++ Kill registered for Tower {self.tower_id} (via instant attack). Total kills: {self.kill_count}")
+                            # If target is killed by first hit, don't proceed to double strike
+                            was_killed_by_first_hit = True
+                        else:
+                            was_killed_by_first_hit = False
+                    else:
+                        was_killed_by_first_hit = False
+                    # <<< END PRIMARY INSTANT DAMAGE >>>
+
+                    # <<< ADD DOUBLE STRIKE LOGIC HERE (for Instant Attacks) >>>
+                    if not was_killed_by_first_hit and self.special and self.special.get("effect") == "double_strike":
+                        chance = self.special.get("chance_percent", 20) # Default 20%
+                        if random.random() * 100 < chance:
+                            # <<< PLAY DOUBLE STRIKE SOUND >>>
+                            if hasattr(self, 'double_strike_sound') and self.double_strike_sound:
+                                self.double_strike_sound.play()
+                            # <<< END PLAY SOUND >>>
+                            print(f"Double Strike triggered on {target.enemy_id} with {chance:.0f}% chance! Applying second hit.")
+                            # Apply the same damage again
+                            if initial_damage > 0:
+                                # Pass special again in case take_damage needs it for armor ignore etc.
+                                # <<< PASS ignore amount HERE TOO FOR SECOND HIT >>>
+                                second_damage_result = target.take_damage(
+                                    initial_damage, 
+                                    self.damage_type, 
+                                    source_special=self.special,
+                                    ignore_armor_amount=effective_armor_ignore # Pass ignore amount for second hit
+                                )
+                                # Check for kill on second hit
+                                if second_damage_result.get("was_killed", False):
+                                    self.kill_count += 1
+                                    print(f"+++ Kill registered for Tower {self.tower_id} (via double strike). Total kills: {self.kill_count}")
+                                # TODO: Decide if double strike should also trigger splash again? For simplicity, no for now.
+                    # <<< END DOUBLE STRIKE LOGIC >>>
+                            
+                    # Apply instant damage if needed -- THIS BLOCK SEEMS REDUNDANT NOW
+                    # if initial_damage > 0:
+                    #    # Pass the tower's special dict to take_damage for instant attacks
+                    #    damage_result = target.take_damage(initial_damage, self.damage_type, source_special=self.special)
+                    #    results['damage_dealt'] = initial_damage # Track damage
+                    #    # --- Check for Kill & Increment Count --- # NEW
+                    #    if damage_result.get("was_killed", False):
+                    #        self.kill_count += 1
+                    #        print(f"+++ Kill registered for Tower {self.tower_id} (via instant attack). Total kills: {self.kill_count}")
+                    #    # --- End Check --- 
+                    
+                    # Apply INSTANT special effects (DoT, Max HP Reduction, etc.)
                     self.apply_instant_special_effects(target, current_time) 
                     
                     # --- Try to Create Projectile-Style Visual First ---
@@ -1373,7 +1489,12 @@ class Tower:
                             if dist_sq <= splash_radius_sq:
                                 print(f"    ... splashing {enemy.enemy_id} for {splash_damage:.2f}")
                                 # Pass the tower's special dict to take_damage for instant splash attacks
-                                enemy.take_damage(splash_damage, self.damage_type, source_special=self.special)
+                                splash_damage_result = enemy.take_damage(splash_damage, self.damage_type, source_special=self.special)
+                                # --- Check for Splash Kill & Increment Count --- # NEW
+                                if splash_damage_result.get("was_killed", False):
+                                     self.kill_count += 1 # Attributed to the tower that caused the splash
+                                     print(f"+++ Kill registered for Tower {self.tower_id} (via instant splash). Total kills: {self.kill_count}")
+                                # --- End Check --- 
                                 # Also apply instant special effects (like stun) to splashed targets?
                                 self.apply_instant_special_effects(enemy, current_time) 
                                 enemies_splashed += 1
@@ -1417,7 +1538,12 @@ class Tower:
                                 current_chain_damage *= (1.0 - damage_falloff)
                                 print(f"    ... chaining to {next_target.enemy_id} for {current_chain_damage:.2f} damage")
                                 # Pass the tower's special dict to take_damage for chain lightning attacks
-                                next_target.take_damage(current_chain_damage, self.damage_type, source_special=self.special)
+                                chain_damage_result = next_target.take_damage(current_chain_damage, self.damage_type, source_special=self.special)
+                                # --- Check for Chain Kill & Increment Count --- # NEW
+                                if chain_damage_result.get("was_killed", False):
+                                    self.kill_count += 1 # Attributed to the tower that started the chain
+                                    print(f"+++ Kill registered for Tower {self.tower_id} (via chain lightning). Total kills: {self.kill_count}")
+                                # --- End Check --- 
                                 targets_hit.add(next_target)
                                 chain_path_visual.append((next_target.x, next_target.y)) # Add position for visual
                                 current_chain_target = next_target # Move to the next link
@@ -1463,6 +1589,9 @@ class Tower:
         # Calculate initial damage
         initial_damage, is_crit = self.calculate_damage(target, buffed_stats, current_time)
         
+        # Apply primary damage for instant attacks here -- THIS LINE SHOULD BE REMOVED
+        # target.take_damage(initial_damage, self.damage_type) # REMOVED
+        
         # Check for double strike special effect
         if self.special and self.special.get("effect") == "double_strike":
             chance = self.special.get("chance_percent", 20)
@@ -1472,12 +1601,7 @@ class Tower:
                 if self.game_scene_add_effect_callback:
                     self.game_scene_add_effect_callback(double_strike)
                 print(f"Double Strike triggered on {target.enemy_id} with {chance}% chance")
-            else:
-                # Normal attack if double strike doesn't trigger
-                target.take_damage(initial_damage, self.damage_type)
-        else:
-            # Normal attack if no double strike special
-            target.take_damage(initial_damage, self.damage_type)
+        # REMOVED else block that contained take_damage
 
         # Check for every_nth_strike special effect
         if self.special and self.special.get("effect") == "every_nth_strike":
@@ -1485,8 +1609,7 @@ class Tower:
             n = self.special.get("n", 5)
             bonus_damage = self.special.get("bonus_damage", 50)
             
-            # Apply normal damage
-            target.take_damage(initial_damage, self.damage_type)
+            # REMOVED Apply normal damage call from here
             
             # Check if it's the nth strike
             if self.strike_counter >= n:
@@ -1496,19 +1619,6 @@ class Tower:
                     self.game_scene_add_effect_callback(nth_strike)
                 print(f"Every Nth Strike triggered on {target.enemy_id} (strike {self.strike_counter})")
                 self.strike_counter = 0  # Reset counter
-        else:
-            # Normal attack if no every_nth_strike special
-            target.take_damage(initial_damage, self.damage_type)
-
-        # Apply damage to the target
-        damage_result = target.take_damage(
-            base_damage=initial_damage,
-            damage_type=self.damage_type,
-            bonus_multiplier=damage_multiplier,
-            ignore_armor_amount=0,
-            source_special={"effect": self.special.get("effect") if self.special else None, 
-                          "source_tower": self}  # Pass the tower as source
-        )
 
         return results
 
@@ -1634,6 +1744,26 @@ class Tower:
                 except Exception as e:
                     print(f"Error drawing creep colony glow effect: {e}")
         # --- End Creep Colony Glow --- 
+
+        # --- NEW: Draw Heaven Radiant Tower Aura --- 
+        elif self.tower_id == "heaven_radiant_tower" and self.aura_radius_pixels > 0:
+            center_x = int(self.x + offset_x)
+            center_y = int(self.y + offset_y)
+            radius = int(self.aura_radius_pixels)
+            # Define a light blue color with some transparency
+            aura_color = (173, 216, 230, 80) # Light blue with 80 alpha (approx 31% opaque)
+            
+            if radius > 0:
+                try:
+                    # Create a temporary surface for alpha blending
+                    temp_surface = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
+                    # Draw the circle onto the center of the temporary surface
+                    pygame.draw.circle(temp_surface, aura_color, (radius, radius), radius, 2) # Draw outline (width 2)
+                    # Blit the temporary surface onto the main screen, centered correctly
+                    screen.blit(temp_surface, (center_x - radius, center_y - radius))
+                except Exception as e:
+                    print(f"Error drawing heaven_radiant_tower aura effect: {e}")
+        # --- END Heaven Radiant Tower Aura --- 
 
         # --- Special Handling for Storm Generator Aura Visual Path --- 
         aura_visual_img = None # Initialize
