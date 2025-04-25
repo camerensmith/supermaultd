@@ -232,33 +232,48 @@ class RaceSelector:
     def handle_event(self, event):
         """Handle pygame_gui events"""
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
+            button_pressed = event.ui_element
             # Check race buttons
-            for race, button in self.race_buttons:
-                if event.ui_element == button:
-                    if self.click_sound: self.click_sound.play() 
-                    self.selected_race = race
-                    print(f"Selected race: {race}")
+            new_selection_made = False
+            for race_id, button in self.race_buttons:
+                if button_pressed == button:
+                    if self.click_sound: self.click_sound.play()
+                    self.selected_race = race_id
+                    print(f"Selected race: {race_id}")
+                    new_selection_made = True
+
                     # --- UPDATE DESCRIPTION & IMAGE --- 
                     description = self.race_descriptions.get(self.selected_race, "Description not found.")
                     self.description_text_box.set_text(description)
-                    
+
                     display_image = self.race_images.get(self.selected_race)
                     if not display_image:
                          display_image = self.placeholder_image # Fallback to placeholder
-                         
+
                     # Ensure we have something to display before setting
                     if display_image:
-                        self.race_image_display.set_image(display_image)
-                    else: # If placeholder also failed
-                        # Optionally clear the image or set a tiny surface
+                         self.race_image_display.set_image(display_image)
+                    else:
+                        # Handle case where even placeholder failed (should be rare)
                         self.race_image_display.set_image(pygame.Surface((1,1))) 
                     # --- END UPDATE --- 
-                    return False # Indicate race selected but not confirmed
-            # Check confirm button
-            if event.ui_element == self.confirm_button and self.selected_race:
-                if self.click_sound: self.click_sound.play() # Play click sound
-                print(f"Confirmed race selection: {self.selected_race}")
-                return True
+                    break # Stop checking race buttons once found
+
+            # --- ADD BUTTON SELECTION VISUAL UPDATE --- 
+            if new_selection_made:
+                # Iterate through all race buttons again to set selected/unselected state
+                for r_id, btn in self.race_buttons:
+                    if r_id == self.selected_race:
+                        btn.select() # Select the clicked button
+                    else:
+                        btn.unselect() # Unselect all others
+            # --- END BUTTON SELECTION UPDATE ---
+
+            # Check confirm button (No changes needed here)
+            elif button_pressed == self.confirm_button:
+                # Confirmation logic is handled in game.py based on get_selected_race()
+                # We might play a sound here if desired, but state change is external
+                pass
         # Process other UI events (needed for tooltips, etc.)
         self.manager.process_events(event)
         return False

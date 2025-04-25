@@ -1,7 +1,6 @@
 import pygame
 import os
 from config import WIDTH, HEIGHT, FPS, WINDOWED_FULLSCREEN
-from scenes.menu import MenuScene
 from scenes.game_scene import GameScene
 from ui.race_selector import RaceSelector
 import pygame_gui
@@ -49,6 +48,11 @@ class Game:
         self.game_state = "race_selection" # Start with race selection
         self.active_game_scene = None # To hold the GameScene instance when playing
         # --------------------------------------
+        
+        # --- Add Wave Mode Selection State ---
+        self.selected_wave_mode = "classic" # 'classic' or 'advanced'
+        self.wave_mode_buttons = {} # To hold references to the buttons
+        # --- End Wave Mode Selection State ---
         
         # Extract specific data sections for easier access (optional but recommended)
         self.ranges = game_data.get("ranges", {})
@@ -186,6 +190,14 @@ class Game:
                  print(f"[Game Init] Error rendering placeholder text: {font_e}")
         # --- End Load Title Image --- 
         
+        # --- Calculate Title Image Position (used for placing buttons below) ---
+        self.title_rect = None
+        image_to_use = self.title_image if self.title_image else self.placeholder_surface
+        if image_to_use:
+            self.title_rect = image_to_use.get_rect(centerx=self.screen_width // 2)
+            self.title_rect.top = 20 # Match drawing padding
+        # --- End Calculate Title Image Position ---
+        
         # --- Load Custom Cursor --- 
         self.custom_cursor_image = None
         try:
@@ -209,6 +221,34 @@ class Game:
         self.race_selector = RaceSelector(self.game_data, self.ui_manager, 
                                           self.screen_width, self.screen_height,
                                           self.click_sound) # Pass sound
+        
+        # --- Create Wave Mode Buttons ---
+        button_width = 150
+        button_height = 40
+        button_y_start = self.title_rect.bottom + 20 if self.title_rect else 100 # Place below title or default Y
+        button_x_pos = 50 # Place on the left side
+
+        classic_rect = pygame.Rect(button_x_pos, button_y_start, button_width, button_height)
+        self.wave_mode_buttons['classic'] = pygame_gui.elements.UIButton(
+            relative_rect=classic_rect,
+            text='Classic',
+            manager=self.ui_manager,
+            object_id='#classic_wave_button' # Use specific ID if needed for theme
+        )
+
+        advanced_rect = pygame.Rect(button_x_pos, button_y_start + button_height + 10, button_width, button_height)
+        self.wave_mode_buttons['advanced'] = pygame_gui.elements.UIButton(
+            relative_rect=advanced_rect,
+            text='Advanced',
+            manager=self.ui_manager,
+            object_id='#advanced_wave_button' # Use specific ID if needed for theme
+        )
+
+        # Set initial selected state visually
+        self.wave_mode_buttons['classic'].select()
+        self.wave_mode_buttons['advanced'].unselect() # Ensure advanced is not selected
+        print("[Game Init] Created Classic/Advanced wave mode buttons.")
+        # --- End Create Wave Mode Buttons ---
         
         print("Game initialized")
         if WINDOWED_FULLSCREEN:
@@ -293,18 +333,37 @@ class Game:
                     
             # Pass events to UI Manager FIRST - essential for pygame_gui
             # The manager will dispatch events to the RaceSelector and other UI elements
-            self.ui_manager.process_events(event)
+            processed_by_manager = self.ui_manager.process_events(event)
             
             # Then handle game state specific logic based on events
             if self.game_state == "race_selection":
                 # Allow RaceSelector to handle its internal button clicks (selection, preview update)
+                # If the manager processed the event, maybe RaceSelector doesn't need to?
+                # Let's assume RaceSelector might still need some events (e.g., non-UI ones if any)
                 if hasattr(self.race_selector, 'handle_event'): # Check if method exists
                     self.race_selector.handle_event(event) 
                 
-                # Check if the CONFIRM button in RaceSelector was pressed (for state transition)
+                # Check for UI Button Presses (including our new buttons and RaceSelector's confirm)
                 if event.type == pygame_gui.UI_BUTTON_PRESSED:
-                    # Ensure race_selector and its confirm_button exist before checking
-                    if hasattr(self.race_selector, 'confirm_button') and event.ui_element == self.race_selector.confirm_button:
+                    # --- Handle Wave Mode Button Clicks ---
+                    if event.ui_element == self.wave_mode_buttons['classic']:
+                        if self.selected_wave_mode != 'classic':
+                            self.selected_wave_mode = 'classic'
+                            self.wave_mode_buttons['classic'].select()
+                            self.wave_mode_buttons['advanced'].unselect()
+                            print("[Game Event] Switched to Classic wave mode.")
+                            if self.click_sound: self.click_sound.play()
+                    elif event.ui_element == self.wave_mode_buttons['advanced']:
+                        if self.selected_wave_mode != 'advanced':
+                            self.selected_wave_mode = 'advanced'
+                            self.wave_mode_buttons['advanced'].select()
+                            self.wave_mode_buttons['classic'].unselect()
+                            print("[Game Event] Switched to Advanced wave mode.")
+                            if self.click_sound: self.click_sound.play()
+                    # --- End Wave Mode Button Handling ---
+
+                    # Check if the CONFIRM button in RaceSelector was pressed
+                    elif hasattr(self.race_selector, 'confirm_button') and event.ui_element == self.race_selector.confirm_button:
                         selected_race = self.race_selector.get_selected_race()
                         if selected_race:
                             # Play click sound if confirm is successful
@@ -314,12 +373,27 @@ class Game:
                             pygame.mixer.music.stop() # Stop menu music
                             print("[Game Event] Stopped race selection music.")
                             
-                            self.race_selector.kill() # Remove race selector UI
-                            print("[Game Event] Race selector UI killed.")
+                            # --- Determine Wave File (Revised Path) ---
+                            # Get the directory where game.py resides
+                            current_dir = os.path.dirname(os.path.abspath(__file__))
+                            data_dir = os.path.join(current_dir, 'data') # Path to the data directory
                             
+                            wave_filename = 'waves_advanced.json' if self.selected_wave_mode == 'advanced' else 'waves.json'
+                            wave_file_path = os.path.join(data_dir, wave_filename)
+                            
+                            print(f"[Game Event] Using wave file: {wave_file_path}")
+                            # --- End Determine Wave File ---
+
+                            # Kill UI elements specific to race selection
+                            self.race_selector.kill() # Remove race selector UI
+                            self.wave_mode_buttons['classic'].kill() # Remove classic button
+                            self.wave_mode_buttons['advanced'].kill() # Remove advanced button
+                            print("[Game Event] Race selector and wave mode UI killed.")
+
                             try:
-                                # Create the actual GameScene instance
+                                # Create the actual GameScene instance, passing the wave file path
                                 self.active_game_scene = GameScene(self, selected_race,
+                                                       wave_file_path, # Pass the determined path
                                                        self.screen_width, self.screen_height,
                                                        self.click_sound,        # Pass click sound
                                                        self.placement_sound,   # Pass placement sound
@@ -357,6 +431,7 @@ class Game:
         
         if self.game_state == "race_selection":
             # RaceSelector UI is updated by the manager
+            # Our new buttons are also updated by the manager
             pass 
         elif self.game_state == "playing" and self.active_game_scene:
             # Update the active game scene
@@ -373,18 +448,13 @@ class Game:
         if self.game_state == "race_selection":
             # --- Draw Title Image or Placeholder FIRST --- 
             image_to_draw = self.title_image if self.title_image else self.placeholder_surface
-            if image_to_draw:
-                # Position near top, centered horizontally
-                title_rect = image_to_draw.get_rect(centerx=self.screen_width // 2)
-                title_rect.top = 20 # 20 pixels padding from the top
-                
-                self.screen.blit(image_to_draw, title_rect)
-                # pygame.draw.rect(self.screen, RED, title_rect, 1) # Debug border removed
+            if image_to_draw and self.title_rect: # Use pre-calculated rect
+                self.screen.blit(image_to_draw, self.title_rect)
             else:
-                 print("[Draw] No title image or placeholder available.") # Should not happen if placeholder logic works
+                 print("[Draw] No title image or placeholder available.") # Should not happen
             # --- End Title Image Draw --- 
             
-            # UI Manager draws the RaceSelector UI elements
+            # UI Manager draws the RaceSelector UI elements AND our new buttons
             self.ui_manager.draw_ui(self.screen)
             
         elif self.game_state == "playing" and self.active_game_scene:

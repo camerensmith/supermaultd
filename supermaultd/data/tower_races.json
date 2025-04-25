@@ -1953,7 +1953,7 @@
           "attack_type": "beam", "beam_color": [165, 42, 42], "splash_radius": null, "targets": ["ground", "air"]
         },
         "nomad_bazaar": {
-          "name": "Bazaar", "grid_width": 2, "grid_height": 2, "cost": 75,
+          "name": "Bazaar", "grid_width": 2, "grid_height": 2, "cost": 101,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": [],
@@ -2270,7 +2270,7 @@
           "name": "Oil Rig",
           "grid_width": 3,
           "grid_height": 3,
-          "cost": 180,
+          "cost": 101,
           "damage_min": 0,
           "damage_max": 0,
           "damage_type": "normal",

@@ -37,12 +37,13 @@ MUSIC_END_EVENT = pygame.USEREVENT + 0 # Custom event for music track ending
 # ----------------------
 
 class GameScene:
-    def __init__(self, game, selected_race, screen_width, screen_height, click_sound, placement_sound, cancel_sound, sell_sound, invalid_placement_sound):
+    def __init__(self, game, selected_race, wave_file_path, screen_width, screen_height, click_sound, placement_sound, cancel_sound, sell_sound, invalid_placement_sound):
         """
         Initialize the game scene with new layout using actual screen dimensions.
         
         :param game: Reference to the game instance
         :param selected_race: The race selected by the player
+        :param wave_file_path: Path to the wave definition file to load
         :param screen_width: Actual width of the screen/window
         :param screen_height: Actual height of the screen/window
         :param click_sound: Sound to play when clicking on the UI
@@ -54,6 +55,8 @@ class GameScene:
         print(f"Initializing GameScene with race: {selected_race}")
         self.game = game
         self.selected_race = selected_race
+        # Store the passed wave file path
+        self.wave_file_path = wave_file_path
         self.screen_width = screen_width # Store actual dimensions
         self.screen_height = screen_height
         # Restore sounds from arguments
@@ -238,9 +241,11 @@ class GameScene:
        
         # --- End Data Loading --- 
         
-        # --- Load Wave Data ---
-        wave_file_path = os.path.join(data_dir, "waves.json")
-        self.all_wave_data = self.load_wave_data(wave_file_path)
+        # --- Load Wave Data --- 
+        # Remove the hardcoded path construction here
+        # wave_file_path = os.path.join(data_dir, "waves.json") 
+        # Call load_wave_data with the path passed to __init__
+        self.all_wave_data = self.load_wave_data(self.wave_file_path) 
         # ---------------------
         
         # Initialize tower assets
@@ -2791,21 +2796,21 @@ class GameScene:
                  initiating_tower.last_attack_time = current_time
 
     def load_wave_data(self, file_path):
-        """Loads wave definitions from a JSON file."""
+        """Loads wave data from the specified JSON file."""
+        print(f"[GameScene] Attempting to load waves from: {file_path}")
         try:
             with open(file_path, 'r') as f:
                 data = json.load(f)
-                print(f"Successfully loaded wave data from {file_path}. Found {len(data)} waves.")
-                # TODO: Add validation logic here if needed
-                return data
+            print(f"[GameScene] Successfully loaded {len(data)} waves from {file_path}")
+            return data
         except FileNotFoundError:
-            print(f"ERROR: Wave data file not found: {file_path}")
-            return []
+            print(f"[GameScene] Error: Wave file not found at {file_path}")
+            return [] # Return empty list on error
         except json.JSONDecodeError as e:
-            print(f"ERROR: Failed to decode JSON from {file_path}: {e}")
-            return []
+            print(f"[GameScene] Error decoding JSON from wave file {file_path}: {e}")
+            return [] # Return empty list on error
         except Exception as e:
-            print(f"An unexpected error occurred loading wave data: {e}")
+            print(f"[GameScene] An unexpected error occurred loading wave data from {file_path}: {e}")
             return []
 
     # --- Wave System Logic --- 
