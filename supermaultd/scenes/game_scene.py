@@ -78,6 +78,34 @@ class GameScene:
             print(f"[GameScene Init] Error loading death sound: {e}")
         # --- End Death Sound Loading ---
 
+        # --- Placeholder Toggle Button ---
+        self.debug_toggle_state = False # State of the toggle
+        self.toggle_font = None
+        self.toggle_off_surface = None
+        self.toggle_on_surface = None
+        self.toggle_button_rect = None # Rect for clicking
+        self.toggle_padding = 10 # Pixels from corner
+        try:
+            self.toggle_font = pygame.font.Font(None, 24) # Default font, size 24
+            off_text = "Debug OFF"
+            on_text = "Debug ON"
+            text_color = (255, 255, 255) # White text
+            bg_color_off = (100, 0, 0) # Dark red background for OFF
+            bg_color_on = (0, 100, 0) # Dark green background for ON
+            # Render with antialiasing and background color
+            self.toggle_off_surface = self.toggle_font.render(off_text, True, text_color, bg_color_off)
+            self.toggle_on_surface = self.toggle_font.render(on_text, True, text_color, bg_color_on)
+            print("[GameScene Init] Loaded font and created toggle button surfaces.")
+        except Exception as e:
+            print(f"[GameScene Init] Error loading font or creating toggle surfaces: {e}")
+            # Fallback: Create simple placeholder surfaces if font fails
+            fallback_size = (80, 20)
+            self.toggle_off_surface = pygame.Surface(fallback_size)
+            self.toggle_off_surface.fill((100, 0, 0)) # Dark red
+            self.toggle_on_surface = pygame.Surface(fallback_size)
+            self.toggle_on_surface.fill((0, 100, 0)) # Dark green
+        # --- End Placeholder Toggle Button ---
+
         # --- MERGE Tower Data from Selected Races --- 
         self.available_towers = {}
         for race_id in self.selected_races:
@@ -361,6 +389,19 @@ class GameScene:
         # Handle UI events first
         self.tower_selector.handle_event(event)
         
+        # <<< START ADDED CODE >>>
+        # --- Handle Toggle Button Click --- 
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1: # Left click
+                # Check if the click was on the toggle button
+                if self.toggle_button_rect and self.toggle_button_rect.collidepoint(event.pos):
+                    self.debug_toggle_state = not self.debug_toggle_state
+                    print(f"[DEBUG] Toggle button clicked! New state: {self.debug_toggle_state}")
+                    # Prevent other MOUSEBUTTONDOWN handlers from processing this click
+                    return # Early exit after handling the toggle click
+        # --- End Handle Toggle Button Click ---
+        # <<< END ADDED CODE >>>
+
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # Left click
                 # Convert mouse position to grid coordinates
@@ -2273,6 +2314,30 @@ class GameScene:
 
         # --- End Hovered Range Indicator ---
         
+        # Draw tower placement preview - REMOVED as it's drawn above and this causes AttributeError
+        # if self.tower_preview:
+        #    self.tower_preview.draw(screen, self.tower_assets, grid_offset_x, grid_offset_y)
+
+        # Draw UI elements (Tower selector, money, lives etc.)
+        self.draw_ui(screen)
+
+        # <<< START ADDED CODE >>>
+        # --- Draw Placeholder Toggle Button (Draw LAST to overlay everything) ---
+        if self.toggle_off_surface and self.toggle_on_surface: # Check if surfaces exist
+            surface_to_draw = self.toggle_on_surface if self.debug_toggle_state else self.toggle_off_surface
+            # Calculate position based on screen width and padding
+            button_rect = surface_to_draw.get_rect()
+            button_rect.topright = (self.screen_width - self.toggle_padding, self.toggle_padding)
+            # Update the stored rect for click detection
+            self.toggle_button_rect = button_rect 
+            # Draw the button
+            screen.blit(surface_to_draw, button_rect)
+        # --- End Placeholder Toggle Button ---
+        # <<< END ADDED CODE >>>
+
+        # Update the display
+        # pygame.display.flip() # REMOVED - Main game loop should handle flip
+
     def draw_ui(self, screen):
         """Draw UI elements"""
         # Draw money and lives

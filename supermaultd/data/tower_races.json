@@ -2224,23 +2224,24 @@
         },
         "industry_machinist": {
           "name": "Machinist",
+          "description": "The backbone of Industry, high damage output for a starting tower.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 8,
-          "damage_min": 8,
-          "damage_max": 13,
+          "cost": 10,
+          "damage_min": 15,
+          "damage_max": 18,
           "damage_type": "normal",
           "range": 300,
-          "attack_interval": 1.8,
-          "projectile_speed": null,
-          "attack_type": "instant",
-          "splash_radius": null,
-          "targets": ["ground"]
+          "attack_interval": 1,
+          "projectile_speed": 500,
+          "attack_type": "projectile",
+          "splash_radius": 185,
+          "targets": ["ground", "air"]
         },
         "industry_smog_generator": {
           "name": "Factory", 
           "description": "Factory smog increases the vulnerability of Air units.",
-          "grid_width": 1, "grid_height": 1, "cost": 25,
+          "grid_width": 2, "grid_height": 2, "cost": 25,
           "damage_min": 0, "damage_max": 0, "damage_type": "normal",
           "range": 700, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "aura", "splash_radius": null, "targets": [],
@@ -2252,29 +2253,9 @@
             "description": "Nearby projectile towers deal 20% more damage to Air units."
           }
         },
-        "industry_missile_battery": {
-          "name": "Missile Battery Platform",
-          "grid_width": 2,
-          "grid_height": 2,
-          "cost": 180,
-          "damage_min": 120,         
-          "damage_max": 150,
-          "damage_type": "siege",
-          "range": 750,             
-          "attack_interval": 4.0,     
-          "projectile_speed": 600,    
-          "attack_type": "projectile",  
-          "splash_radius": 50,      
-          "targets": ["ground", "air"], 
-          "special": {
-            "effect": "salvo_attack",
-            "salvo_count": 6,         
-            "salvo_interval": 0.15,   
-            "description": "Fires a rapid salvo of 6 missiles, then reloads."
-          }
-        },
         "industry_oil_rig": {
           "name": "Oil Rig",
+          "description": "Oil rigs generate gold for the player.",
           "grid_width": 3,
           "grid_height": 3,
           "cost": 101,
@@ -2293,17 +2274,40 @@
             "description": "Periodically generates between 1 and 10 gold."
           }
         },
+        "industry_missile_battery": {
+          "name": "Missile Battery Platform",
+          "description": "A missile battery platform that fires a rapid salvo of 6 missiles, then reloads.",
+          "grid_width": 2,
+          "grid_height": 2,
+          "cost": 135,
+          "damage_min": 120,         
+          "damage_max": 150,
+          "damage_type": "siege",
+          "range": 750,             
+          "attack_interval": 4.0,     
+          "projectile_speed": 600,    
+          "attack_type": "projectile",  
+          "splash_radius": 50,      
+          "targets": ["ground", "air"], 
+          "special": {
+            "effect": "salvo_attack",
+            "salvo_count": 6,         
+            "salvo_interval": 0.15,   
+            "description": "Fires a rapid salvo of 6 missiles, then reloads."
+          }
+        },
         "industry_gattling_gun": {
           "name": "Gattling Gun",
+          "description": "A gun that revs up to 5 levels, increasing damage and speed.",
           "grid_x": 1,
           "grid_y": 1,
-          "cost": 350,
+          "cost": 375,
           "attack_type": "projectile",
           "damage_min": 5,
           "damage_max": 8,
           "damage_type": "pierce",
           "range": 600,
-          "attack_interval": 1,
+          "attack_interval": 0.1,
           "projectile_speed": 800,
           "splash_radius": null,
           "targets": ["ground", "air"],
@@ -2316,7 +2320,7 @@
           }
         },
         "industry_nuclear_silo": {
-          "name": "Nuclear Silo", "grid_width": 3, "grid_height": 3, "cost": 600,
+          "name": "Nuclear Silo", "grid_width": 3, "grid_height": 3, "cost": 1000,
           "damage_min": 30000, "damage_max": 35000,
           "damage_type": "chaos",
           "min_range": 1500,

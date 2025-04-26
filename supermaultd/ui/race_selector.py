@@ -197,6 +197,11 @@ class RaceSelector:
             manager=self.manager,
             container=self.panel
         )
+        # Set initial title based on the mode
+        if self.wave_mode == 'advanced':
+            self.title_label.set_text('Select Two Races')
+        else:
+            self.title_label.set_text('Select Your Race') # Default for classic or other modes
         
         # Calculate space for scrolling container and confirm button on the left
         confirm_button_height = 40
@@ -304,6 +309,13 @@ class RaceSelector:
                 self.race_image_display.set_image(display_image)
             else:
                 self.race_image_display.set_image(pygame.Surface((1,1)))
+            
+            # Update the title label based on the new mode
+            if self.title_label: # Check if label exists
+                if self.wave_mode == 'advanced':
+                    self.title_label.set_text('Select Two Races')
+                else:
+                    self.title_label.set_text('Select Your Race')
 
     def handle_event(self, event):
         """Handle pygame_gui events, considering wave_mode"""
