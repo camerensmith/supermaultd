@@ -37,12 +37,12 @@ MUSIC_END_EVENT = pygame.USEREVENT + 0 # Custom event for music track ending
 # ----------------------
 
 class GameScene:
-    def __init__(self, game, selected_race, wave_file_path, screen_width, screen_height, click_sound, placement_sound, cancel_sound, sell_sound, invalid_placement_sound):
+    def __init__(self, game, selected_races_list, wave_file_path, screen_width, screen_height, click_sound, placement_sound, cancel_sound, sell_sound, invalid_placement_sound):
         """
         Initialize the game scene with new layout using actual screen dimensions.
         
         :param game: Reference to the game instance
-        :param selected_race: The race selected by the player
+        :param selected_races_list: LIST of race IDs selected by the player
         :param wave_file_path: Path to the wave definition file to load
         :param screen_width: Actual width of the screen/window
         :param screen_height: Actual height of the screen/window
@@ -52,12 +52,11 @@ class GameScene:
         :param sell_sound: Sound to play when selling a tower
         :param invalid_placement_sound: Sound to play when tower placement is invalid
         """
-        print(f"Initializing GameScene with race: {selected_race}")
+        print(f"Initializing GameScene with races: {selected_races_list}")
         self.game = game
-        self.selected_race = selected_race
-        # Store the passed wave file path
+        self.selected_races = selected_races_list # Store the list
         self.wave_file_path = wave_file_path
-        self.screen_width = screen_width # Store actual dimensions
+        self.screen_width = screen_width
         self.screen_height = screen_height
         # Restore sounds from arguments
         self.click_sound = click_sound
@@ -79,11 +78,17 @@ class GameScene:
             print(f"[GameScene Init] Error loading death sound: {e}")
         # --- End Death Sound Loading ---
 
-        # Get race data
-        self.race_data = self.game.get_race_info(selected_race)
-        if not self.race_data:
-            raise ValueError(f"Race data not found for {selected_race}")
-        self.available_towers = self.race_data.get("towers", {}) # <<< MOVED HERE
+        # --- MERGE Tower Data from Selected Races --- 
+        self.available_towers = {}
+        for race_id in self.selected_races:
+            race_info = self.game.get_race_info(race_id) # Use game helper method
+            if race_info:
+                race_towers = race_info.get("towers", {})
+                self.available_towers.update(race_towers) # Merge dictionaries
+            else:
+                print(f"Warning: Could not find race info for {race_id} when merging towers.")
+        print(f"Initialized with {len(self.available_towers)} available towers from races: {self.selected_races}")
+        # --- End Merging Tower Data --- 
 
         # --- Get Base Directory for Path Construction ---
         # Get the directory where this game_scene.py file is located

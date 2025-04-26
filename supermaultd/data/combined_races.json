@@ -1,0 +1,285 @@
+[
+    {
+      "races": ["alien", "igloo"],
+      "combined_name": "Grey Ice",
+      "combined_description": "Chilling invaders from beyond, wielding frozen technology.",
+      "combined_image": "greyice.png"
+    },
+    {
+      "races": ["alien", "goblin_hovel"],
+      "combined_name": "Goblien",
+      "combined_description": "Mind-controlled goblins using alien technology for chaotic deeds.",
+      "combined_image": "goblien.png"
+    },
+    {
+      "races": ["alien", "brine"],
+      "combined_name": "uso",
+      "combined_description": "Alien forces empowered by the crushing depths of the ocean, blending cosmic and oceanic powers.",
+      "combined_image": "uso.png"
+    },
+    {
+      "races": ["alien", "police_station"],
+      "combined_name": "Galactic Federation",
+      "combined_description": "Cosmic enforcers who twist the law of the universe to their will, seeking to conquer and control.",
+      "combined_image": "galactic_federation.png"
+    },
+    {
+      "races": ["alien", "tech_center"],
+      "combined_name": "Forerunners",
+      "combined_description": "Engineers of the cosmos, capable of manipulating the fabric of reality with advanced alien technology.",
+      "combined_image": "forerunners.png"
+    },
+    {
+      "races": ["alien", "seadogs"],
+      "combined_name": "Space Corsairs",
+      "combined_description": "The Space Corsairs are a group of pirates from the void, plundering ships and planets with their formidable space fleets.",
+      "combined_image": "space_corsairs.png"
+    },
+    {
+      "races": ["alien", "heaven"],
+      "combined_name": "Cosmic Seraphs",
+      "combined_description": "Angelic beings from another dimension, wielding starlight and celestial energy.",
+      "combined_image": "cosmic_seraphs.png"
+    },
+    {
+      "races": ["alien", "solar"],
+      "combined_name": "Solarflare Dominion",
+      "combined_description": "Alien forces using the power of solar flares to burn their enemies to cinders.",
+      "combined_image": "solarflare_dominion.png"
+    },
+    {
+      "races": ["alien", "nomad_clans"],
+      "combined_name": "Stellar Nomads",
+      "combined_description": "Alien wanderers who travel the cosmos in vast fleets, seeking new worlds to conquer.",
+      "combined_image": "stellar_nomads.png"
+    },
+    {
+      "races": ["alien", "ogre_stronghold"],
+      "combined_name": "Astrogres",
+      "combined_description": "Brutal alien ogres that strike from the void, crushing all in their path with unimaginable strength.",
+      "combined_image": "astrogres.png"
+    },
+    {
+      "races": ["alien", "industry"],
+      "combined_name": "Xeno Industries",
+      "combined_description": "A group of highly industrialized aliens using their vast machines to dominate worlds.",
+      "combined_image": "xeno_industry.png"
+    },
+    {
+      "races": ["igloo", "goblin"],
+      "combined_name": "Frost Goblins",
+      "combined_description": "Savage goblins with an icy twist, using frozen weapons and traps to ambush their enemies.",
+      "combined_image": "frost_goblins.png"
+    },
+    {
+      "races": ["igloo", "brine"],
+      "combined_name": "Frozen Depths",
+      "combined_description": "A cold and calculating race, combining the ferocity of the ocean's depths with the unyielding chill of the frozen wastes.",
+      "combined_image": "frozen_depths.png"
+    },
+    {
+      "races": ["igloo", "police_station"],
+      "combined_name": "Snow Patrol",
+      "combined_description": "Frozen enforcers, turning the cold of the arctic into a weapon of control and dominance.",
+      "combined_image": "snow_patrol.png"
+    },
+    {
+      "races": ["igloo", "tech_center"],
+      "combined_name": "Cryo Technologists",
+      "combined_description": "Innovative minds from the coldest regions, creating cutting-edge technology powered by ice and frost.",
+      "combined_image": "cryo_technologists.png"
+    },
+    {
+      "races": ["igloo", "seadogs"],
+      "combined_name": "Frost Pirates",
+      "combined_description": "Pirates of the frozen seas, their ships cutting through ice as they plunder the frozen world.",
+      "combined_image": "frost_pirates.png"
+    },
+    {
+      "races": ["igloo", "heaven"],
+      "combined_name": "Frostborne Angels",
+      "combined_description": "Angelic beings empowered by ice, wielding cold as a tool of divine punishment.",
+      "combined_image": "frostborne_angels.png"
+    },
+    {
+      "races": ["igloo", "solar"],
+      "combined_name": "Frostflare",
+      "combined_description": "The harsh cold of the poles meets the unrelenting heat of solar power, creating an unstoppable force.",
+      "combined_image": "frostflare.png"
+    },
+    {
+      "races": ["igloo", "nomad_clans"],
+      "combined_name": "Ice Caravans",
+      "combined_description": "Wanderers of the frozen tundra, relying on the land and ice to survive and thrive in hostile environments.",
+      "combined_image": "ice_caravans.png"
+    },
+    {
+      "races": ["igloo", "ogre_stronghold"],
+      "combined_name": "Ice Ogres",
+      "combined_description": "Brutish ogres from the frozen north, wielding massive ice-infused weapons to crush anything in their path.",
+      "combined_image": "ice_ogres.png"
+    },
+    {
+      "races": ["igloo", "industry"],
+      "combined_name": "Frostworks",
+      "combined_description": "Ice-bound industrialists, turning the frozen earth into an engine of production and domination.",
+      "combined_image": "frostworks.png"
+    },
+    {
+      "races": ["goblin", "brine"],
+      "combined_name": "Sea Goblins",
+      "combined_description": "Mischievous goblins who thrive on the oceans, using aquatic creatures and sea monsters in their schemes.",
+      "combined_image": "sea_goblins.png"
+    },
+    {
+        "races": ["goblin", "bomb_brigade"],
+        "combined_name": "Bomb Goblins",
+        "combined_description": "Bombs and goblins, what could possibly go wrong?",
+        "combined_image": "bomb_goblins.png"
+      },
+    {
+      "races": ["goblin", "police_station"], 
+      "combined_name": "Goblin Enforcers",
+      "combined_description": "A mix of goblin trickery and police authority, keeping the law on their side with little regard for justice.",
+      "combined_image": "goblin_enforcers.png"
+    },
+    {
+      "races": ["goblin", "tech_center"],
+      "combined_name": "Gadget Tech Goblins",
+      "combined_description": "Inventive goblins who use explosive gadgets and mechanical devices to create chaos.",
+      "combined_image": "gadget_tech_goblins.png"
+    },
+    {
+      "races": ["goblin", "seadogs"],
+      "combined_name": "Scurvy Goblins",
+      "combined_description": "A band of goblin pirates sailing the seas, pillaging towns and evading capture.",
+      "combined_image": "scurvy_goblins.png"
+    },
+    {
+      "races": ["goblin", "heaven"],
+      "combined_name": "Celestial Goblins",
+      "combined_description": "Crafty goblins endowed with otherworldly powers, using their wits to manipulate divine forces.",
+      "combined_image": "celestial_goblins.png"
+    },
+    {
+      "races": ["goblin", "solar"],
+      "combined_name": "Solar Goblins",
+      "combined_description": "Goblins empowered by the sun's rays, using solar-based devices and weapons to wreak havoc.",
+      "combined_image": "solar_goblins.png"
+    },
+    {
+      "races": ["goblin", "nomad_clans"],
+      "combined_name": "Nomad Goblins",
+      "combined_description": "Goblins on the move, wandering the world in search of new opportunities to exploit.",
+      "combined_image": "nomad_goblins.png"
+    },
+    {
+      "races": ["goblin", "ogre_stronghold"],
+      "combined_name": "Green Alliance",
+      "combined_description": "Goblins riding massive ogres, combining speed and strength to dominate the battlefield.",
+      "combined_image": "green_alliance.png"
+    },
+    {
+        "races": ["goblin", "knights_keep"],
+        "combined_name": "Goblin Knights",
+        "combined_description": "Nobility and goblins?",
+        "combined_image": "goblin_knights.png"
+      },
+    {
+      "races": ["goblin", "industry"],
+      "combined_name": "Industrial Goblins",
+      "combined_description": "Goblins with a knack for industrial revolution, turning scrap metal and junk into deadly contraptions.",
+      "combined_image": "industrial_goblins.png"
+    },
+    {
+      "races": ["brine", "police_station"],
+      "combined_name": "Brine Enforcers",
+      "combined_description": "Oceanic police who bring law and order to the deep seas, holding sway over all aquatic creatures.",
+      "combined_image": "brine_enforcers.png"
+    },
+    {
+      "races": ["brine", "tech_center"],
+      "combined_name": "Aqua Engineers",
+      "combined_description": "Masters of underwater technology, creating devices that control the ocean depths and beyond.",
+      "combined_image": "aqua_engineers.png"
+    },
+    {
+      "races": ["brine", "seadogs"],
+      "combined_name": "Tidal Raiders",
+      "combined_description": "Ruthless pirates who command the oceans, raiding villages and plundering ships.",
+      "combined_image": "tidal_raiders.png"
+    },
+    {
+      "races": ["brine", "heaven"],
+      "combined_name": "Deep Sea Seraphs",
+      "combined_description": "Angelic beings of the deep, their power drawn from the crushing depths of the oceans.",
+      "combined_image": "deep_sea_seraphs.png"
+    },
+    {
+      "races": ["brine", "solar"],
+      "combined_name": "Sunken Rays",
+      "combined_description": "A blend of solar and oceanic power, bringing destruction from both the depths and the sky.",
+      "combined_image": "sunken_rays.png"
+    },
+    {
+      "races": ["brine", "nomad_clans"],
+      "combined_name": "Nomadic Depths",
+      "combined_description": "Wanderers of the deep seas, traveling the oceans in search of treasures and lost civilizations.",
+      "combined_image": "nomadic_depths.png"
+    },
+    {
+      "races": ["brine", "ogre_stronghold"],
+      "combined_name": "Titanic Brine",
+      "combined_description": "Ogres from the deep seas, wielding the raw power of the ocean to crush their foes.",
+      "combined_image": "titanic_brine.png"
+    },
+    {
+      "races": ["brine", "industry"],
+      "combined_name": "Hydro Foundries",
+      "combined_description": "Industrialists who use the power of water to fuel their massive ocean-based factories.",
+      "combined_image": "hydro_foundries.png"
+    },
+    {
+      "races": ["police_station", "tech_center"],
+      "combined_name": "Enforcer Engineers",
+      "combined_description": "A fusion of law enforcement and technology, using high-tech gadgets to control their domain.",
+      "combined_image": "enforcer_engineers.png"
+    },
+    {
+      "races": ["police_station", "seadogs"],
+      "combined_name": "Coastal Enforcers",
+      "combined_description": "Lawmen who patrol the seas, ensuring that order is maintained on the open waters.",
+      "combined_image": "coastal_enforcers.png"
+    },
+    {
+      "races": ["police_station", "heaven"],
+      "combined_name": "Heavenly Enforcers",
+      "combined_description": "Divine lawmen who bring justice with an iron fist, wielding celestial power to maintain order.",
+      "combined_image": "heavenly_enforcers.png"
+    },
+    {
+      "races": ["police_station", "solar"],
+      "combined_name": "Solar Enforcers",
+      "combined_description": "Enforcers of the law, powered by solar energy, bringing light and justice to the galaxy.",
+      "combined_image": "solar_enforcers.png"
+    },
+    {
+      "races": ["police_station", "nomad_clans"],
+      "combined_name": "Nomadic Lawkeepers",
+      "combined_description": "Wandering enforcers of the law, roaming from place to place to ensure justice is upheld.",
+      "combined_image": "nomadic_lawkeepers.png"
+    },
+    {
+      "races": ["police_station", "ogre_stronghold"],
+      "combined_name": "Titan Enforcers",
+      "combined_description": "Massive enforcers, using their brute strength to uphold the law and crush anyone who stands against them.",
+      "combined_image": "titan_enforcers.png"
+    },
+    {
+      "races": ["police_station", "industry"],
+      "combined_name": "Industrial Enforcers",
+      "combined_description": "Lawmen with a penchant for industry, using massive machines and technology to maintain order.",
+      "combined_image": "industrial_enforcers.png"
+    }
+  ]
+  

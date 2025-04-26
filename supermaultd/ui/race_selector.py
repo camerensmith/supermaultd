@@ -1,11 +1,12 @@
 import pygame
 import pygame_gui
 import os
+import json
 # Remove direct WIDTH/HEIGHT import for layout
 # from config import WIDTH, HEIGHT 
 
 class RaceSelector:
-    def __init__(self, game_data, manager, screen_width, screen_height, click_sound):
+    def __init__(self, game_data, manager, screen_width, screen_height, click_sound, initial_wave_mode):
         """
         Initialize the race selector UI.
         
@@ -14,13 +15,15 @@ class RaceSelector:
         :param screen_width: Actual width of the screen
         :param screen_height: Actual height of the screen
         :param click_sound: Loaded pygame.mixer.Sound object for clicks
+        :param initial_wave_mode: 'classic' or 'advanced'
         """
         self.game_data = game_data
         self.manager = manager
-        self.selected_race = None
+        self.selected_races = []
         self.screen_width = screen_width   # Store dimensions
         self.screen_height = screen_height # Store dimensions
         self.click_sound = click_sound     # Store sound effect
+        self.wave_mode = initial_wave_mode  # Store wave mode
         
         # Load and scale title image
         title_image_path = os.path.join("assets", "images", "supermaultd.png")
@@ -86,6 +89,62 @@ class RaceSelector:
             else:
                 print(f"Image not found for race '{race_id}' at {image_path}")
                 self.race_images[race_id] = None # Store None if not found/loaded
+        
+        # --- Load Combined Race Data --- 
+        self.combined_race_lookup = {}
+        self.combined_race_images = {}
+        images_base_path = os.path.join("assets", "images")
+        
+        # <<< Robust Path Construction >>>
+        # Get the directory where this race_selector.py file is located
+        current_script_dir = os.path.dirname(os.path.abspath(__file__))
+        # Go up one level to the project root (supermaultd), then into data
+        project_root = os.path.dirname(current_script_dir) # This should be supermaultd dir
+        data_dir = os.path.join(project_root, 'data')
+        combined_data_path = os.path.join(data_dir, "combined_races.json")
+        # <<< End Robust Path Construction >>>
+        
+        try:
+            with open(combined_data_path, 'r') as f:
+                combined_data = json.load(f)
+            print(f"Loaded combined race data from: {combined_data_path}")
+            
+            for combo_info in combined_data:
+                base_races = combo_info.get("races", [])
+                if len(base_races) == 2: # Ensure it's a pair
+                    # Create a consistent key by sorting race IDs
+                    combo_key = tuple(sorted(base_races))
+                    self.combined_race_lookup[combo_key] = combo_info
+                    print(f"  - Processed combination for: {combo_key}")
+                    
+                    # Load the combined image
+                    img_filename = combo_info.get("combined_image")
+                    if img_filename:
+                        img_path = os.path.join(images_base_path, img_filename)
+                        try:
+                            loaded_image = pygame.image.load(img_path).convert_alpha()
+                            # Reuse scaling logic from base images
+                            max_img_width = 300
+                            max_img_height = 300
+                            original_width, original_height = loaded_image.get_size()
+                            ratio = min(max_img_width / original_width, max_img_height / original_height)
+                            scaled_width = int(original_width * ratio)
+                            scaled_height = int(original_height * ratio)
+                            scaled_image = pygame.transform.smoothscale(loaded_image, (scaled_width, scaled_height))
+                            self.combined_race_images[combo_key] = scaled_image
+                            print(f"    - Loaded combined image: {img_filename}")
+                        except Exception as e:
+                            print(f"    - Error loading/scaling combined image '{img_filename}' for {combo_key}: {e}")
+                            self.combined_race_images[combo_key] = None # Store None on error
+                    else:
+                         self.combined_race_images[combo_key] = None # Store None if no image specified
+        except FileNotFoundError:
+            print(f"Warning: Combined race data file not found: {combined_data_path}")
+        except json.JSONDecodeError as e:
+            print(f"Error decoding JSON from {combined_data_path}: {e}")
+        except Exception as e:
+            print(f"Error processing combined race data: {e}")
+        # --- End Combined Race Data Loading --- 
         
         # --- Panel sizing and positioning based on screen size ---
         # Make panel wider to accommodate description panel
@@ -158,7 +217,7 @@ class RaceSelector:
         # Create buttons for each race INSIDE the scrolling container
         self.race_buttons = []
         # Width slightly less than container for padding & scrollbar
-        button_width = left_section_width - (2 * h_padding) - 20 
+        button_width = left_section_width - (2 * h_padding) - 20
         button_height = 40
         current_scroll_y = h_padding # Start with padding inside scroll container
         
@@ -173,13 +232,13 @@ class RaceSelector:
                 relative_rect=button_rect,
                 text=display_name,
                 manager=self.manager,
-                container=self.button_scroll_container.get_container(), 
+                container=self.button_scroll_container.get_container(),
                 object_id=f"#race_button_{race_id}"
             )
             self.race_buttons.append((race_id, button))
-            current_scroll_y += button_height + h_padding 
+            current_scroll_y += button_height + h_padding
             
-        # Set the size of the scrollable area 
+        # Set the size of the scrollable area
         self.button_scroll_container.set_scrollable_area_dimensions((left_section_width - (2*h_padding), current_scroll_y))
             
         # Add confirm button (relative to main panel, below scroll container on left)
@@ -229,54 +288,102 @@ class RaceSelector:
         )
         # --- End Right Side Elements ---
 
+    def set_selection_mode(self, new_mode):
+        if new_mode in ['classic', 'advanced'] and self.wave_mode != new_mode:
+            print(f"[RaceSelector] Mode changed to: {new_mode}")
+            self.wave_mode = new_mode
+            # Clear current selection when mode changes
+            self.selected_races = []
+            # Unselect all buttons visually
+            for _, btn in self.race_buttons:
+                btn.unselect()
+            # Update description/image to default/placeholder
+            self.description_text_box.set_text("Select a race...")
+            display_image = self.placeholder_image
+            if display_image:
+                self.race_image_display.set_image(display_image)
+            else:
+                self.race_image_display.set_image(pygame.Surface((1,1)))
+
     def handle_event(self, event):
-        """Handle pygame_gui events"""
+        """Handle pygame_gui events, considering wave_mode"""
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             button_pressed = event.ui_element
-            # Check race buttons
-            new_selection_made = False
+            clicked_race_id = None
+
+            # Check if a race button was clicked
             for race_id, button in self.race_buttons:
                 if button_pressed == button:
-                    if self.click_sound: self.click_sound.play()
-                    self.selected_race = race_id
-                    print(f"Selected race: {race_id}")
-                    new_selection_made = True
+                    clicked_race_id = race_id
+                    break
 
-                    # --- UPDATE DESCRIPTION & IMAGE --- 
-                    description = self.race_descriptions.get(self.selected_race, "Description not found.")
-                    self.description_text_box.set_text(description)
+            if clicked_race_id:
+                if self.click_sound: self.click_sound.play()
+                print(f"Clicked race: {clicked_race_id}")
 
-                    display_image = self.race_images.get(self.selected_race)
-                    if not display_image:
-                         display_image = self.placeholder_image # Fallback to placeholder
+                # --- Mode-Dependent Selection Logic ---
+                if self.wave_mode == 'classic':
+                    # Classic mode: Select only one
+                    if clicked_race_id not in self.selected_races:
+                        self.selected_races = [clicked_race_id]
+                        # Update visuals
+                        for r_id, btn in self.race_buttons:
+                            if r_id == clicked_race_id:
+                                btn.select()
+                            else:
+                                btn.unselect()
+                    # If already selected, do nothing (classic mode doesn't deselect)
 
-                    # Ensure we have something to display before setting
-                    if display_image:
-                         self.race_image_display.set_image(display_image)
+                elif self.wave_mode == 'advanced':
+                    # Advanced mode: Select up to two
+                    if clicked_race_id in self.selected_races:
+                        # Deselect if already selected
+                        self.selected_races.remove(clicked_race_id)
+                        button_pressed.unselect() # Unselect the clicked button
+                    elif len(self.selected_races) < 2:
+                        # Select if less than 2 are already selected
+                        self.selected_races.append(clicked_race_id)
+                        button_pressed.select() # Select the clicked button
                     else:
-                        # Handle case where even placeholder failed (should be rare)
-                        self.race_image_display.set_image(pygame.Surface((1,1))) 
-                    # --- END UPDATE --- 
-                    break # Stop checking race buttons once found
+                        # Limit reached, maybe provide feedback (e.g., sound)
+                        print("[RaceSelector] Cannot select more than 2 races in Advanced mode.")
+                # --- End Mode-Dependent Logic ---
 
-            # --- ADD BUTTON SELECTION VISUAL UPDATE --- 
-            if new_selection_made:
-                # Iterate through all race buttons again to set selected/unselected state
-                for r_id, btn in self.race_buttons:
-                    if r_id == self.selected_race:
-                        btn.select() # Select the clicked button
-                    else:
-                        btn.unselect() # Unselect all others
-            # --- END BUTTON SELECTION UPDATE ---
+                # --- Update Description & Image (Check for Combination) ---
+                description_to_show = "Select a race..."
+                image_to_show = self.placeholder_image
+                combination_found = False
 
-            # Check confirm button (No changes needed here)
+                if self.wave_mode == 'advanced' and len(self.selected_races) == 2:
+                    # Try to find a combined entry
+                    combo_key = tuple(sorted(self.selected_races))
+                    combo_data = self.combined_race_lookup.get(combo_key)
+                    if combo_data:
+                        description_to_show = combo_data.get("combined_description", "Combined description missing.")
+                        image_to_show = self.combined_race_images.get(combo_key) # Get pre-loaded image
+                        combination_found = True
+                        print(f"Displaying combined info for: {combo_key}")
+
+                # Fallback if no combination found or not in advanced/2 selected mode
+                if not combination_found and self.selected_races:
+                    first_selected_race = self.selected_races[0]
+                    description_to_show = self.race_descriptions.get(first_selected_race, "Description not found.")
+                    image_to_show = self.race_images.get(first_selected_race)
+                
+                # Final update to UI elements
+                self.description_text_box.set_text(description_to_show)
+                if not image_to_show: image_to_show = self.placeholder_image # Ensure placeholder if needed
+                if image_to_show: self.race_image_display.set_image(image_to_show)
+                else: self.race_image_display.set_image(pygame.Surface((1,1))) # Ultimate fallback
+                # --- END UPDATE --- 
+
             elif button_pressed == self.confirm_button:
-                # Confirmation logic is handled in game.py based on get_selected_race()
-                # We might play a sound here if desired, but state change is external
-                pass
-        # Process other UI events (needed for tooltips, etc.)
+                # Confirmation logic is handled in game.py
+                pass 
+
+        # Process other events AFTER our button logic
         self.manager.process_events(event)
-        return False
+        return False # Indicate event was handled locally
         
     def update(self, time_delta):
         """Update the UI manager"""
@@ -290,9 +397,9 @@ class RaceSelector:
         # Draw the UI manager elements
         self.manager.draw_ui(surface)
         
-    def get_selected_race(self):
-        """Get the currently selected race"""
-        return self.selected_race 
+    def get_selected_races(self):
+        """Get the currently selected list of race IDs"""
+        return self.selected_races
 
     def kill(self):
         """Remove the race selector panel and its elements from the UI manager."""

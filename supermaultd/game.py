@@ -135,67 +135,86 @@ class Game:
             print(f"[Game Init] Error loading invalid placement sound: {e}")
         # --- End Invalid Placement Sound Loading --- 
         
-        # --- Load and Play Menu Music --- 
+        # --- Store Menu Music Paths --- 
+        self.classic_music_path = None
+        self.advanced_music_path = None
         try:
-            music_path = os.path.join("assets", "sounds", "Theme.mp3") 
-            if os.path.exists(music_path):
-                pygame.mixer.music.load(music_path)
-                pygame.mixer.music.play(-1) # Play indefinitely (-1)
-                print(f"[Game Init] Loaded and playing race selection music: {music_path}")
-            else:
-                print(f"[Game Init] Warning: Race selection music file not found: {music_path}")
-        except pygame.error as e:
-            print(f"[Game Init] Error loading or playing music: {e}")
-        # --- End Music Loading --- 
-        
-        # --- Load Title Image --- 
-        self.title_image = None
-        self.placeholder_surface = None
-        try:
-            image_path = os.path.join("assets", "images", "supermaultd.png")
-            absolute_image_path = os.path.abspath(image_path)
-            print(f"[Game Init] Checking for title image at: {absolute_image_path}")
-            if os.path.exists(absolute_image_path):
-                print(f"[Game Init] Title image FOUND. Loading...")
-                temp_image = pygame.image.load(absolute_image_path).convert_alpha()
-                print(f"[Game Init] Title image loaded. Original size: {temp_image.get_size()}")
-                target_width = int(self.screen_width * 0.6)
-                if temp_image.get_height() > 0:
-                    image_ratio = temp_image.get_width() / temp_image.get_height()
-                    target_height = int(target_width / image_ratio) if image_ratio > 0 else 0
-                    if target_height > 0:
-                        self.title_image = pygame.transform.scale(temp_image, (target_width, target_height))
-                        print(f"[Game Init] Scaled title image to: {self.title_image.get_size()}")
-                    else: self.title_image = None
-                else: self.title_image = None
-            else:
-                print(f"[Game Init] Title image NOT FOUND at {absolute_image_path}")
-                self.title_image = None
-        except Exception as e:
-            print(f"[Game Init] Error loading/scaling title image: {e}")
-            self.title_image = None
+            classic_path = os.path.join("assets", "sounds", "Theme.mp3")
+            advanced_path = os.path.join("assets", "sounds", "Theme_advanced.mp3")
             
-        if self.title_image is None:
+            if os.path.exists(classic_path):
+                self.classic_music_path = classic_path
+                print(f"[Game Init] Found classic music: {classic_path}")
+            else:
+                print(f"[Game Init] Warning: Classic music file not found: {classic_path}")
+                
+            if os.path.exists(advanced_path):
+                self.advanced_music_path = advanced_path
+                print(f"[Game Init] Found advanced music: {advanced_path}")
+            else:
+                print(f"[Game Init] Warning: Advanced music file not found: {advanced_path}")
+        except Exception as e:
+             print(f"[Game Init] Error checking music paths: {e}")
+        # --- End Music Path Storing ---
+
+        # --- Load Title Images --- 
+        self.title_classic_img = None
+        self.title_advanced_img = None
+        self.placeholder_surface = None # Single placeholder for fallback
+
+        # Function to load and scale a title image
+        def load_and_scale_title(filename):
+            try:
+                image_path = os.path.join("assets", "images", filename)
+                absolute_image_path = os.path.abspath(image_path)
+                print(f"[Game Init] Checking for title image at: {absolute_image_path}")
+                if os.path.exists(absolute_image_path):
+                    print(f"[Game Init] Title image FOUND. Loading {filename}...")
+                    temp_image = pygame.image.load(absolute_image_path).convert_alpha()
+                    target_width = int(self.screen_width * 0.6)
+                    if temp_image.get_height() > 0:
+                        image_ratio = temp_image.get_width() / temp_image.get_height()
+                        target_height = int(target_width / image_ratio) if image_ratio > 0 else 0
+                        if target_height > 0:
+                            scaled_img = pygame.transform.scale(temp_image, (target_width, target_height))
+                            print(f"[Game Init] Scaled {filename} to: {scaled_img.get_size()}")
+                            return scaled_img
+                else:
+                    print(f"[Game Init] Title image NOT FOUND: {filename}")
+            except Exception as e:
+                print(f"[Game Init] Error loading/scaling {filename}: {e}")
+            return None
+
+        # Load classic and advanced images
+        self.title_classic_img = load_and_scale_title("supermaultd.png")
+        self.title_advanced_img = load_and_scale_title("supermaul_advanced.png")
+
+        # Create placeholder if either image failed (or if both failed)
+        if not self.title_classic_img or not self.title_advanced_img:
             print("[Game Init] Creating placeholder for title image.")
             placeholder_width = int(self.screen_width * 0.6)
             placeholder_height = int(placeholder_width * 0.2)
             self.placeholder_surface = pygame.Surface((placeholder_width, placeholder_height))
             self.placeholder_surface.fill(BLUE)
-            try: # Ensure font is loaded before rendering
+            try:
                 font = pygame.font.Font(None, 36)
                 placeholder_text = font.render("TITLE IMG MISSING", True, WHITE)
                 text_rect = placeholder_text.get_rect(center=self.placeholder_surface.get_rect().center)
                 self.placeholder_surface.blit(placeholder_text, text_rect)
             except Exception as font_e:
                  print(f"[Game Init] Error rendering placeholder text: {font_e}")
-        # --- End Load Title Image --- 
         
-        # --- Calculate Title Image Position (used for placing buttons below) ---
+        # Set active image initially (use placeholder if classic failed)
+        self.active_title_img = self.title_classic_img if self.title_classic_img else self.placeholder_surface
+        # --- End Title Image Loading --- 
+
+        # --- Calculate Initial Title Image Position --- 
         self.title_rect = None
-        image_to_use = self.title_image if self.title_image else self.placeholder_surface
-        if image_to_use:
-            self.title_rect = image_to_use.get_rect(centerx=self.screen_width // 2)
+        if self.active_title_img:
+            self.title_rect = self.active_title_img.get_rect(centerx=self.screen_width // 2)
             self.title_rect.top = 20 # Match drawing padding
+        else:
+             print("[Game Init] ERROR: No active title image or placeholder available!")
         # --- End Calculate Title Image Position ---
         
         # --- Load Custom Cursor --- 
@@ -218,14 +237,15 @@ class Game:
         # --- End Custom Cursor --- 
         
         # Initialize race selector AFTER loading title image
-        self.race_selector = RaceSelector(self.game_data, self.ui_manager, 
+        self.race_selector = RaceSelector(self.game_data, self.ui_manager,
                                           self.screen_width, self.screen_height,
-                                          self.click_sound) # Pass sound
+                                          self.click_sound,
+                                          self.selected_wave_mode)
         
         # --- Create Wave Mode Buttons ---
         button_width = 150
         button_height = 40
-        button_y_start = self.title_rect.bottom + 20 if self.title_rect else 100 # Place below title or default Y
+        button_y_start = self.title_rect.bottom + 20 if self.title_rect else 100 # Place below title
         button_x_pos = 50 # Place on the left side
 
         classic_rect = pygame.Rect(button_x_pos, button_y_start, button_width, button_height)
@@ -249,6 +269,10 @@ class Game:
         self.wave_mode_buttons['advanced'].unselect() # Ensure advanced is not selected
         print("[Game Init] Created Classic/Advanced wave mode buttons.")
         # --- End Create Wave Mode Buttons ---
+        
+        # --- Start Initial Menu Music --- 
+        self._play_menu_music(self.classic_music_path) # Start with classic theme
+        # --- End Initial Music --- 
         
         print("Game initialized")
         if WINDOWED_FULLSCREEN:
@@ -351,6 +375,17 @@ class Game:
                             self.selected_wave_mode = 'classic'
                             self.wave_mode_buttons['classic'].select()
                             self.wave_mode_buttons['advanced'].unselect()
+                            if hasattr(self.race_selector, 'set_selection_mode'):
+                                self.race_selector.set_selection_mode('classic')
+                            # <<< UPDATE ACTIVE IMAGE and RECT >>>
+                            self.active_title_img = self.title_classic_img if self.title_classic_img else self.placeholder_surface
+                            if self.active_title_img: # Recalculate rect
+                                self.title_rect = self.active_title_img.get_rect(centerx=self.screen_width // 2)
+                                self.title_rect.top = 20
+                            # <<< END UPDATE >>>
+                            # <<< PLAY CLASSIC MUSIC >>>
+                            self._play_menu_music(self.classic_music_path)
+                            # <<< END MUSIC CHANGE >>>
                             print("[Game Event] Switched to Classic wave mode.")
                             if self.click_sound: self.click_sound.play()
                     elif event.ui_element == self.wave_mode_buttons['advanced']:
@@ -358,60 +393,79 @@ class Game:
                             self.selected_wave_mode = 'advanced'
                             self.wave_mode_buttons['advanced'].select()
                             self.wave_mode_buttons['classic'].unselect()
+                            if hasattr(self.race_selector, 'set_selection_mode'):
+                                self.race_selector.set_selection_mode('advanced')
+                            # <<< UPDATE ACTIVE IMAGE and RECT >>>
+                            self.active_title_img = self.title_advanced_img if self.title_advanced_img else self.placeholder_surface
+                            if self.active_title_img: # Recalculate rect
+                                self.title_rect = self.active_title_img.get_rect(centerx=self.screen_width // 2)
+                                self.title_rect.top = 20
+                            # <<< END UPDATE >>>
+                            # <<< PLAY ADVANCED MUSIC >>>
+                            self._play_menu_music(self.advanced_music_path)
+                            # <<< END MUSIC CHANGE >>>
                             print("[Game Event] Switched to Advanced wave mode.")
                             if self.click_sound: self.click_sound.play()
                     # --- End Wave Mode Button Handling ---
 
                     # Check if the CONFIRM button in RaceSelector was pressed
                     elif hasattr(self.race_selector, 'confirm_button') and event.ui_element == self.race_selector.confirm_button:
-                        selected_race = self.race_selector.get_selected_race()
-                        if selected_race:
-                            # Play click sound if confirm is successful
+                        # <<< GET LIST of selected races >>>
+                        selected_races = self.race_selector.get_selected_races() # Expecting a list
+
+                        # <<< VALIDATE number of races based on mode >>>
+                        valid_selection = False
+                        if self.selected_wave_mode == 'classic' and len(selected_races) == 1:
+                            valid_selection = True
+                        elif self.selected_wave_mode == 'advanced' and len(selected_races) == 2:
+                            valid_selection = True
+                        else:
+                            # Provide feedback if invalid
+                            if self.selected_wave_mode == 'classic':
+                                print("[Game Event] Invalid Selection: Classic mode requires exactly 1 race.")
+                                # TODO: Show visual feedback to user?
+                            else:
+                                print("[Game Event] Invalid Selection: Advanced mode requires exactly 2 races.")
+                                # TODO: Show visual feedback to user?
+                            # Play an error sound?
+
+                        if valid_selection:
                             if self.click_sound: self.click_sound.play()
-                                
-                            print(f"[Game Event] Race confirmed: {selected_race}")
-                            pygame.mixer.music.stop() # Stop menu music
-                            print("[Game Event] Stopped race selection music.")
-                            
-                            # --- Determine Wave File (Revised Path) ---
-                            # Get the directory where game.py resides
+
+                            print(f"[Game Event] Races confirmed: {selected_races}")
+                            # <<< Stop Menu Music >>>
+                            pygame.mixer.music.stop()
+                            print("[Game Event] Stopped menu music.")
+
+                            # Determine Wave File (Path logic is okay now)
                             current_dir = os.path.dirname(os.path.abspath(__file__))
-                            data_dir = os.path.join(current_dir, 'data') # Path to the data directory
-                            
+                            data_dir = os.path.join(current_dir, 'data')
                             wave_filename = 'waves_advanced.json' if self.selected_wave_mode == 'advanced' else 'waves.json'
                             wave_file_path = os.path.join(data_dir, wave_filename)
-                            
                             print(f"[Game Event] Using wave file: {wave_file_path}")
-                            # --- End Determine Wave File ---
 
-                            # Kill UI elements specific to race selection
-                            self.race_selector.kill() # Remove race selector UI
-                            self.wave_mode_buttons['classic'].kill() # Remove classic button
-                            self.wave_mode_buttons['advanced'].kill() # Remove advanced button
+                            # Kill UI elements
+                            self.race_selector.kill()
+                            self.wave_mode_buttons['classic'].kill()
+                            self.wave_mode_buttons['advanced'].kill()
                             print("[Game Event] Race selector and wave mode UI killed.")
 
                             try:
-                                # Create the actual GameScene instance, passing the wave file path
-                                self.active_game_scene = GameScene(self, selected_race,
-                                                       wave_file_path, # Pass the determined path
+                                # <<< PASS LIST of races to GameScene >>>
+                                self.active_game_scene = GameScene(self, selected_races, # Pass the list
+                                                       wave_file_path,
                                                        self.screen_width, self.screen_height,
-                                                       self.click_sound,        # Pass click sound
-                                                       self.placement_sound,   # Pass placement sound
-                                                       self.cancel_sound,      # Pass cancel sound
-                                                       self.sell_sound,        # Pass sell sound
-                                                       self.invalid_placement_sound) # Pass invalid placement sound
+                                                       self.click_sound, self.placement_sound,
+                                                       self.cancel_sound, self.sell_sound,
+                                                       self.invalid_placement_sound)
                                 self.game_state = "playing"
                                 print("[Game Event] Game scene initialized successfully")
                             except Exception as e:
                                 print(f"[Game Event] Error initializing game scene: {e}")
-                                # Revert state? Show error message?
-                                self.game_state = "error" # Example: go to an error state
-                                self.active_game_scene = None 
-                        else:
-                            # Optional: Add feedback if confirm is pressed with no race selected
-                            print("[Game Event] Confirm button pressed, but no race selected.")
-                            # Maybe play an error sound?
-                                
+                                self.game_state = "error"
+                                self.active_game_scene = None
+                        # else: Handled above with validation feedback
+
             elif self.game_state == "playing" and self.active_game_scene:
                 # Handle game scene events
                 self.active_game_scene.handle_event(event)
@@ -447,11 +501,10 @@ class Game:
         # Draw based on game state
         if self.game_state == "race_selection":
             # --- Draw Title Image or Placeholder FIRST --- 
-            image_to_draw = self.title_image if self.title_image else self.placeholder_surface
-            if image_to_draw and self.title_rect: # Use pre-calculated rect
-                self.screen.blit(image_to_draw, self.title_rect)
+            if self.active_title_img and self.title_rect:
+                self.screen.blit(self.active_title_img, self.title_rect)
             else:
-                 print("[Draw] No title image or placeholder available.") # Should not happen
+                 print("[Draw] No active title image or rect available.")
             # --- End Title Image Draw --- 
             
             # UI Manager draws the RaceSelector UI elements AND our new buttons
@@ -502,3 +555,17 @@ class Game:
 
         print("Exiting game loop")
         pygame.quit()
+
+    def _play_menu_music(self, music_path):
+        """Helper function to load and play menu music, handling errors."""
+        if music_path and os.path.exists(music_path):
+            try:
+                pygame.mixer.music.load(music_path)
+                pygame.mixer.music.play(-1) # Play indefinitely
+                print(f"[Music] Started playing: {os.path.basename(music_path)}")
+            except pygame.error as e:
+                print(f"[Music] Error loading/playing {os.path.basename(music_path)}: {e}")
+                pygame.mixer.music.stop() # Ensure it's stopped if error occurred
+        else:
+            print(f"[Music] Path invalid or file not found, cannot play: {music_path}")
+            pygame.mixer.music.stop() # Stop any potentially playing music
