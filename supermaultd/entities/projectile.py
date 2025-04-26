@@ -777,10 +777,17 @@ class Projectile:
         # Pass self.source_tower.special, NOT self.special_effect for bounty check
         # Because the bounty effect is defined on the TOWER, not the projectile's special effect block
         source_special_for_bounty = self.source_tower.special if self.source_tower else None
+
+        # Ensure the dictionary includes the source tower itself for the bounty check in take_damage
+        if source_special_for_bounty and self.source_tower:
+             # Make a copy to avoid modifying the original tower's special dictionary
+             source_special_for_bounty = source_special_for_bounty.copy() 
+             source_special_for_bounty['source_tower'] = self.source_tower 
+
         damage_result_dict = enemy.take_damage(base_damage, self.damage_type,
                                              bonus_multiplier=bonus_multiplier,
                                              ignore_armor_amount=ignore_armor_amount,
-                                             source_special=source_special_for_bounty) # Pass TOWER's special for bounty check
+                                             source_special=source_special_for_bounty) # Pass potentially modified dictionary
         
         # Optional: Add visual effect for crit damage
         if self.is_crit:

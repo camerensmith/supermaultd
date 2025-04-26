@@ -276,12 +276,25 @@ class Enemy:
         gold_on_kill_amount = 0 # Initialize gold_on_kill amount
 
         if was_killed:
+            # <<< START RE-ADDED BOUNTY CHECK >>>
             if source_special and source_special.get("effect") == "bounty_on_kill":
                 bounty_triggered = True
-                gold_penalty = source_special.get("gold_penalty", 0) # Get penalty amount
+                gold_penalty = source_special.get("gold_penalty", 1) # Default penalty to 1
                 print(f"!!! Enemy {self.enemy_id} killed by Bounty Hunter! Triggering {gold_penalty} gold penalty.")
-                # Store the tower that killed this enemy
-                self.killed_by = source_special.get("source_tower")
+                # Store the tower that killed this enemy - THIS IS THE CRITICAL LINE
+                if hasattr(source_special, 'get') and callable(source_special.get):
+                     # Assuming source_special is a dict containing tower reference
+                     # Adjust key if needed (e.g., 'parent_tower', 'source_tower')
+                     if 'source_tower' in source_special: # Make sure key exists
+                         self.killed_by = source_special.get("source_tower")
+                     else:
+                         print("Warning: bounty_on_kill special missing 'source_tower' key.")
+                         self.killed_by = None # Or handle error appropriately
+                else:
+                     print("Warning: source_special is not a dict or missing get method for bounty_on_kill.")
+                     self.killed_by = None
+            # <<< END RE-ADDED BOUNTY CHECK >>>
+            # Check for gold_on_kill as a separate possibility
             elif source_special and source_special.get("effect") == "gold_on_kill":
                 chance = source_special.get("chance_percent", 0)
                 amount = source_special.get("gold_amount", 0)
