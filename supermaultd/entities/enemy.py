@@ -408,3 +408,50 @@ class Enemy:
         pygame.draw.rect(screen, GREEN,
                         (health_x, health_y, 
                          current_health_width, health_height))
+
+    def rewind_waypoints(self, num_waypoints):
+        """Instantly moves the enemy back a specified number of waypoints."""
+        if num_waypoints <= 0 or self.path_index == 0:
+            return # Nothing to rewind
+
+        current_index = self.path_index
+        new_index = max(0, current_index - num_waypoints)
+
+        if new_index == current_index:
+            return # No change in index
+
+        print(f"REWIND: Enemy {self.enemy_id} moving from waypoint {current_index} back to {new_index} (rewound {num_waypoints} steps)")
+
+        self.path_index = new_index
+
+        # Get target grid cell coords for the NEW waypoint
+        target_grid_x, target_grid_y = self.grid_path[self.path_index]
+        
+        # Convert target grid cell to target pixel coordinates (center of cell)
+        target_x_pixel = (target_grid_x * GRID_SIZE) + (GRID_SIZE // 2)
+        target_y_pixel = (target_grid_y * GRID_SIZE) + (GRID_SIZE // 2)
+        
+        # Instantly update position to the center of the new target waypoint
+        self.x = target_x_pixel
+        self.y = target_y_pixel
+        self.rect.center = (int(self.x), int(self.y)) # Update rect position too
+
+        # --- Optional: Recalculate direction immediately (to prevent weird initial movement) ---
+        # Get the NEXT waypoint after the rewind
+        next_waypoint_index = self.path_index + 1
+        if next_waypoint_index < len(self.grid_path):
+            next_grid_x, next_grid_y = self.grid_path[next_waypoint_index]
+            next_x_pixel = (next_grid_x * GRID_SIZE) + (GRID_SIZE // 2)
+            next_y_pixel = (next_grid_y * GRID_SIZE) + (GRID_SIZE // 2)
+            
+            dx = next_x_pixel - self.x
+            dy = next_y_pixel - self.y
+            distance = math.sqrt(dx**2 + dy**2)
+            
+            if distance > 0:
+                # Update internal direction if your movement logic uses it
+                # Assuming self.direction is used, otherwise adapt to your specific move logic
+                # If move() calculates direction on the fly, this might not be needed
+                # self.direction = pygame.Vector2(dx / distance, dy / distance) 
+                pass # If move() recalculates direction each time, no need to set it here
+        # --- End Optional Direction Recalculation ---

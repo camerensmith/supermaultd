@@ -47,7 +47,7 @@ SKY_BLUE = (135, 206, 235)
 
 # Game settings
 GRID_SIZE = 32  # Size of each grid cell in pixels
-STARTING_MONEY = 100
+STARTING_MONEY = 1000
 STARTING_LIVES = 10
 RESTRICTED_TOWER_AREA_HEIGHT = 1  # Number of rows at top and bottom where towers cannot be placed
 RESTRICTED_TOWER_AREA_WIDTH = 1   # Number of columns at left and right where towers cannot be placed
@@ -355,14 +355,14 @@ ENEMY_DATA = {
     },
     "wendigo": {
         "health": 200000,
-        "speed": 0.9,
+        "speed": 0.6,
         "value": 6,
         "armor_type": "Unarmored",
         "armor_value": 0,
         "type": "ground"
     },
     "captain": {
-        "health": 90000,
+        "health": 88000,
         "speed": 1,
         "value": 6,
         "armor_type": "Heavy",
@@ -371,7 +371,7 @@ ENEMY_DATA = {
     },
     "lord_supermaul": {
         "health": 255000, # Boss
-        "speed": 0.5,
+        "speed": 0.7,
         "value": 250, # Big reward
         "armor_type": "Medium",
         "armor_value": 100,

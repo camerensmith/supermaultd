@@ -436,6 +436,35 @@ class Tower:
                 print(f"Warning: Ignore armor sound file not found: {samurai_sound_path}")
         # --- END Samurai Armor Ignore Sound ---
 
+        # --- NEW: Time Machine Rewind Sound --- 
+        self.rewind_sound = None
+        if self.tower_id == 'tech_time_machine':
+            rewind_sound_path = os.path.join(sound_dir, "tech_rewind.mp3")
+            if os.path.exists(rewind_sound_path):
+                try:
+                    self.rewind_sound = pygame.mixer.Sound(rewind_sound_path)
+                    print(f"Loaded rewind sound for {self.tower_id} from {rewind_sound_path}")
+                except pygame.error as e:
+                    print(f"Error loading rewind sound {rewind_sound_path}: {e}")
+            else:
+                print(f"Warning: Rewind sound file not found: {rewind_sound_path}")
+        # --- END Time Machine Rewind Sound ---
+
+        # --- NEW: Time Machine Rewind Visual --- 
+        self.rewind_visual_surface = None
+        if self.tower_id == 'tech_time_machine':
+            visual_path = os.path.join("assets", "effects", "warp.png")
+            if os.path.exists(visual_path):
+                try:
+                    # Load image directly here, similar to sounds
+                    self.rewind_visual_surface = pygame.image.load(visual_path).convert_alpha()
+                    print(f"Loaded rewind visual for {self.tower_id} from {visual_path}")
+                except pygame.error as e:
+                    print(f"Error loading rewind visual {visual_path}: {e}")
+            else:
+                print(f"Warning: Rewind visual file not found: {visual_path}")
+        # --- END Time Machine Rewind Visual ---
+
     def calculate_derived_stats(self):
         """Calculates pixel dimensions and ranges based on grid size and tower data."""
         # Pixel dimensions based on grid size
@@ -1641,7 +1670,7 @@ class Tower:
         # --- Handle DoT Effects ---
         # Using elif now, assuming an instant attack has only ONE primary special effect
         elif ("dot_damage" in self.special and 
-              "dot_interval" in self.special and 
+            "dot_interval" in self.special and 
               "duration" in self.special):
             # Extract DoT parameters
             dot_name = effect_type if effect_type else "unknown_instant_dot" # Use effect_type as the DoT name
@@ -1708,7 +1737,7 @@ class Tower:
                     print(f"Error drawing pulse effect for {self.tower_id}: {e}")
 
             # --- Draw Ground Effect Zone for Nuclear Silo ---
-            if self.tower_id == 'tech_nuclear_silo' and self.aura_radius_pixels > 0:
+            if self.tower_id == 'industry_nuclear_silo' and self.aura_radius_pixels > 0:
                 try:
                     center_x = int(self.x + offset_x)
                     center_y = int(self.y + offset_y)
@@ -1944,6 +1973,13 @@ class Tower:
                     if self.aura_radius_pixels > 0: # Scale to aura if defined
                         target_diameter = int(self.aura_radius_pixels * 2)
                         target_size = (target_diameter, target_diameter)
+                    center_on_tower = False # Center on logical center for aura match
+                elif self.tower_id == "industry_smog_generator": # <<< ADDED BLOCK
+                    rotation_speed_degrees = -5 # Slow counter-clockwise rotation for smog
+                    if self.aura_radius_pixels > 0: # Scale to aura if defined
+                        target_diameter = int(self.aura_radius_pixels * 2)
+                        target_size = (target_diameter, target_diameter)
+                    center_on_tower = False # Center on logical center for aura match
                 elif self.tower_id == "spark_storm_generator":
                     rotation_speed_degrees = 0 # No rotation for storm
                     # Scale to tower's range instead of aura radius
@@ -2293,16 +2329,80 @@ class Tower:
                         tower_race = tower.tower_id.split('_')[0]  # Extract race from tower_id
                         print(f"DEBUG: Checking tower {tower.tower_id} (race: {tower_race}, distance: {dist:.1f})")
                         
+                        # <<< Check if the tower is the required race >>>
                         if tower_race == required_race:
                             if dist_sq <= self.aura_radius_pixels * self.aura_radius_pixels:
-                                # Apply attack speed buff
-                                tower.apply_pulsed_buff('attack_speed_buff', speed_multiplier, 0.2, current_time)
-                                print(f"DEBUG: Attack Speed Aura from {self.tower_id} buffed {tower.tower_id} with x{speed_multiplier} attack speed")
+                                # <<< APPLY BUFF >>>
+                                # Ensure the buff isn't already maximally applied or something similar if needed
+                                # Example: Tower applies buff directly
+                                # tower.apply_attack_speed_buff(speed_multiplier) 
+                                pass # Assume buff application logic is elsewhere or handled by buff system
+                        # --- End Attack Speed Aura Effect ---
+
+        # --- Time Machine Rewind Logic --- 
+        if self.special and self.special.get("effect") == "rewind_waypoints":
+            # Check cooldown based on attack_interval
+            if hasattr(self, 'last_attack_time') and current_time - self.last_attack_time >= self.attack_interval:
+                print(f"TIME MACHINE {self.tower_id}: Cooldown ready. Scanning for target...")
+                # Find the valid target furthest along the path
+                best_target = None
+                max_path_index = -1
+
+                for enemy in all_enemies:
+                    # Check if enemy is alive, of a valid target type, and in range
+                    if (enemy.health > 0 and 
+                        enemy.type in self.targets and 
+                        self.is_in_range(enemy.x, enemy.y)):
+                        
+                        # Check progress
+                        if enemy.path_index > max_path_index:
+                            max_path_index = enemy.path_index
+                            best_target = enemy
+                
+                # If a valid target was found
+                if best_target:
+                    waypoints_to_rewind = self.special.get("waypoints_to_rewind", 3)
+                    print(f"TIME MACHINE {self.tower_id}: Targeting {best_target.enemy_id} (at waypoint {best_target.path_index}). Rewinding {waypoints_to_rewind} waypoints.")
+                    
+                    # Call the enemy's rewind method
+                    best_target.rewind_waypoints(waypoints_to_rewind)
+                    
+                    # <<< PLAY REWIND SOUND >>>
+                    if hasattr(self, 'rewind_sound') and self.rewind_sound:
+                        self.rewind_sound.play()
+                    # <<< END PLAY SOUND >>>
+
+                    # Reset cooldown timer
+                    self.last_attack_time = current_time
+                    
+                    # --- Create Rewind Visual Effect --- 
+                    if hasattr(self, 'rewind_visual_surface') and self.rewind_visual_surface:
+                        if hasattr(self, 'game_scene_add_effect_callback') and callable(self.game_scene_add_effect_callback):
+                            try:
+                                effect_instance = Effect(
+                                    self.x, # Center effect on tower's X
+                                    self.y, # Center effect on tower's Y
+                                    self.rewind_visual_surface, # Use pre-loaded image
+                                    duration=0.5, # Quick fade-out duration
+                                    target_size=(self.width_pixels, self.height_pixels), # Match tower size
+                                    fade_type='fade_out' # Default fade out is fine
+                                )
+                                self.game_scene_add_effect_callback(effect_instance)
+                                print(f"TIME MACHINE {self.tower_id}: Created rewind visual effect.")
+                            except Exception as e:
+                                print(f"Error creating rewind visual effect: {e}")
                             else:
-                                print(f"DEBUG: Tower {tower.tower_id} is too far away ({dist:.1f} > {self.aura_radius_pixels})")
+                             print(f"ERROR: Missing game_scene_add_effect_callback for {self.tower_id} visual effect.")
+                    # --- End Rewind Visual Effect ---
+                    
+                    # --- Placeholder for potential future visual/sound --- 
+                    # if self.rewind_sound: self.rewind_sound.play() # Sound moved earlier
+                    # effect = RewindEffect(best_target.x, best_target.y)
+                    # self.game_scene_add_effect_callback(effect)
+                    # --- End Placeholder --- 
                         else:
-                            print(f"DEBUG: Tower {tower.tower_id} is not the required race ({tower_race} != {required_race})")
-        # --- End Attack Speed Aura Effect ---
+                            print(f"TIME MACHINE {self.tower_id}: No valid target in range.")
+        # --- End Time Machine Rewind Logic ---
 
         # --- Splash Radius Buff Aura Effect ---
         if self.special and self.special.get("effect") == "splash_radius_buff_aura":

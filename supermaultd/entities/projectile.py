@@ -681,7 +681,7 @@ class Projectile:
                 print("Could not play bomb bombardier impact sound")
                 
         # Play impact sound for tech nuclear silo
-        if self.source_tower and self.source_tower.tower_id == "tech_nuclear_silo":
+        if self.source_tower and self.source_tower.tower_id == "industry_nuclear_silo":
             try:
                 impact_sound = pygame.mixer.Sound("assets/sounds/nuke.mp3")
                 impact_sound.play()

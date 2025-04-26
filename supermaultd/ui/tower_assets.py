@@ -83,6 +83,7 @@ class TowerAssets:
             "goblin_shredder": "buzzsaw.png", # Added shredder mapping
             "brine_vortex_monument": "brine_vortex_monument.png",
             "spark_storm_generator": "storm_effect.png", # Add storm effect here
+            "industry_smog_generator": "industry_smog_generator.png",
             # Add other towers/overlay visuals here
         }
 
