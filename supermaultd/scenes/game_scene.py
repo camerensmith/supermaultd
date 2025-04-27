@@ -32,6 +32,10 @@ WAVE_STATE_COMPLETE = "WAVE_COMPLETE" # Optional: Wait for enemies to clear
 WAVE_STATE_ALL_DONE = "ALL_WAVES_COMPLETE"
 WAVE_STATE_INTERMISSION = "INTERMISSION" # Added new state
 
+# --- Game State ---
+GAME_STATE_RUNNING = "RUNNING"
+GAME_STATE_GAME_OVER = "GAME_OVER"
+
 # --- Global Constants ---
 MUSIC_END_EVENT = pygame.USEREVENT + 0 # Custom event for music track ending
 # ----------------------
@@ -77,6 +81,46 @@ class GameScene:
         except pygame.error as e:
             print(f"[GameScene Init] Error loading death sound: {e}")
         # --- End Death Sound Loading ---
+
+        # --- Load Life Loss Sound ---
+        self.loss_life_sound = None
+        try:
+            loss_life_sound_path = os.path.join("assets", "sounds", "loss_life.mp3")
+            if os.path.exists(loss_life_sound_path):
+                self.loss_life_sound = pygame.mixer.Sound(loss_life_sound_path)
+                print(f"[GameScene Init] Loaded life loss sound: {loss_life_sound_path}")
+            else:
+                print(f"[GameScene Init] Warning: Life loss sound file not found: {loss_life_sound_path}")
+        except pygame.error as e:
+            print(f"[GameScene Init] Error loading life loss sound: {e}")
+        # --- End Life Loss Sound Loading ---
+
+        # --- Load Game Over Sound --- 
+        self.game_over_sound = None
+        try:
+            game_over_sound_path = os.path.join("assets", "sounds", "game_over.mp3")
+            if os.path.exists(game_over_sound_path):
+                self.game_over_sound = pygame.mixer.Sound(game_over_sound_path)
+                print(f"[GameScene Init] Loaded game over sound: {game_over_sound_path}")
+            else:
+                print(f"[GameScene Init] Warning: Game over sound file not found: {game_over_sound_path}")
+        except pygame.error as e:
+            print(f"[GameScene Init] Error loading game over sound: {e}")
+        # --- End Game Over Sound Loading ---
+
+        # --- Load Game Over Image --- 
+        self.game_over_image = None
+        try:
+            game_over_image_path = os.path.join("assets", "images", "game_over.png")
+            if os.path.exists(game_over_image_path):
+                # Load with convert_alpha for potential transparency
+                self.game_over_image = pygame.image.load(game_over_image_path).convert_alpha()
+                print(f"[GameScene Init] Loaded game over image: {game_over_image_path}")
+            else:
+                print(f"[GameScene Init] Warning: Game over image file not found: {game_over_image_path}")
+        except pygame.error as e:
+            print(f"[GameScene Init] Error loading game over image: {e}")
+        # --- End Game Over Image Loading ---
 
         # --- Placeholder Toggle Button ---
         self.debug_toggle_state = False # State of the toggle
@@ -173,6 +217,7 @@ class GameScene:
         self.spawning_groups = [] # List to track groups currently spawning
         self.enemies_alive_this_wave = 0 # Track enemies spawned in current wave
         self.wave_started = False # Flag to prevent restarting wave 0
+        self.game_state = GAME_STATE_RUNNING # Initial game state
         # -------------------------
         
         # Tower Chain Link Update Timer -- REMOVED
@@ -410,6 +455,19 @@ class GameScene:
 
     def handle_event(self, event):
         """Handle pygame events"""
+        # --- Check Game State First ---
+        if self.game_state == GAME_STATE_GAME_OVER:
+            # Only allow specific events in game over state (e.g., quitting)
+            if event.type == pygame.QUIT:
+                self.game.running = False # Or call a quit method
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE: # Example: ESC to go back to menu
+                    print("Game Over - ESC pressed. Returning to menu (TODO)")
+                    # self.game.change_scene('main_menu') # Placeholder for scene change
+            # Ignore other events during game over
+            return
+        # --- End Game State Check ---
+
         # --- DEBUG: Print all events --- 
         # print(f"Event received: {event}") 
         # Uncomment the above line temporarily if needed to see ALL events
@@ -738,6 +796,11 @@ class GameScene:
             
     def update(self, time_delta):
         """Update game state"""
+        # --- Game State Check ---
+        if self.game_state == GAME_STATE_GAME_OVER:
+            return # Don't update anything if game is over
+        # --- End Game State Check ---
+
         # --- Soundtrack Advancement (Manual Check) --- 
         if self.soundtrack_files and self.current_track_index != -1: # Check if music should be playing
             if not pygame.mixer.music.get_busy():
@@ -1816,15 +1879,29 @@ class GameScene:
             # --- Objective check --- 
             if enemy.path_index >= len(enemy.grid_path):
                 self.lives -= 1
+                # --- Play Life Loss Sound ---
+                if self.loss_life_sound:
+                    self.loss_life_sound.play()
+                # --- End Play Sound ---
                 print(f"*** OBJECTIVE REACHED by {enemy.enemy_id}. Decrementing wave counter from {self.enemies_alive_this_wave}...") # DEBUG
-                if self.enemies_alive_this_wave > 0: self.enemies_alive_this_wave -= 1 
+                if self.enemies_alive_this_wave > 0: self.enemies_alive_this_wave -= 1
                 self.enemies.remove(enemy)
                 print(f"Enemy reached objective. Lives remaining: {self.lives}")
                 print(f"  Enemies left this wave NOW: {self.enemies_alive_this_wave}") # DEBUG
                 if self.lives <= 0:
                     print("Game Over!")
-                    # TODO: Handle game over state
-                    continue # Skip death check if already removed
+                    # --- Play Game Over Sound ---
+                    if self.game_over_sound:
+                        # Stop music first for dramatic effect?
+                        pygame.mixer.music.fadeout(500) # Fade out music over 0.5 seconds
+                        self.game_over_sound.play()
+                    # --- End Play Sound ---
+                    # --- Set Game State to Game Over ---
+                    self.game_state = GAME_STATE_GAME_OVER
+                    # --- End Set Game State ---
+                    # TODO: Handle game over state more formally (e.g., return to menu option)
+                    # We no longer need 'continue' here, the state check at the start of update handles the pause.
+                    # continue # Skip death check if already removed 
         
         # --- Remove dead enemies --- 
         # Check remaining enemies for death AFTER objective check
@@ -2381,9 +2458,11 @@ class GameScene:
                                     hp = enemy_data.get('health', '?') # Use 'health' key
                                     armor_value = enemy_data.get('armor_value', '?')
                                     armor_type = enemy_data.get('armor_type', 'unknown')
+                                    enemy_type = enemy_data.get('type', 'unknown') # <<< GET ENEMY TYPE >>>
                                     lines.append(f"  Name: {enemy_name}")
                                     lines.append(f"  Health: {hp}")
                                     lines.append(f"  Armor: {armor_value} ({armor_type})")
+                                    lines.append(f"  Type: {enemy_type}") # <<< ADD TYPE DISPLAY >>>
                                 else:
                                     lines.append(f"  ID '{first_enemy_id}' (No Data)")
                             else:
@@ -2460,6 +2539,12 @@ class GameScene:
 
         # Update the display
         # pygame.display.flip() # REMOVED - Main game loop should handle flip
+
+        # --- Draw Game Over Overlay (If Applicable) ---
+        if self.game_state == GAME_STATE_GAME_OVER and self.game_over_image:
+            overlay_rect = self.game_over_image.get_rect(center=screen.get_rect().center)
+            screen.blit(self.game_over_image, overlay_rect)
+        # --- End Game Over Overlay ---
 
     def draw_ui(self, screen):
         """Draw UI elements"""
