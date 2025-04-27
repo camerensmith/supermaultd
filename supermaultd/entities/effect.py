@@ -237,7 +237,7 @@ class WhipVisual(Effect):
 
 class FloatingTextEffect(Effect):
     """Displays text that floats upwards and fades out."""
-    def __init__(self, x, y, text, duration=1.5, color=(255, 215, 0), font_size=20, rise_speed=20):
+    def __init__(self, x, y, text, duration=1.5, color=(255, 215, 0), font_size=33, rise_speed=20):
         """
         Initialize the floating text effect.
 

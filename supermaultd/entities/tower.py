@@ -249,15 +249,61 @@ class Tower:
                     drum_sound = pygame.mixer.Sound(drums_sound_path)
                     self.looping_sound_channel = pygame.mixer.find_channel() # Find an available channel
                     if self.looping_sound_channel:
-                        self.looping_sound_channel.play(drum_sound, loops=-1) # Play looping
-                        print(f"Started looping sound {drums_sound_path} on channel {self.looping_sound_channel}")
+                        self.looping_sound_channel.play(drum_sound, loops=-1) # Start looping indefinitely
+                        print(f"Started looping war drums sound for {self.tower_id} on channel {self.looping_sound_channel}")
                     else:
-                        print("Warning: No available sound channels for ogre_war_drums loop.")
+                        print(f"Warning: Could not find available channel for looping {self.tower_id} sound.")
                 except pygame.error as e:
-                    print(f"Error loading or playing ogre_war_drums sound {drums_sound_path}: {e}")
+                    print(f"Error loading or playing looping sound {drums_sound_path}: {e}")
             else:
                 print(f"Warning: Looping sound file not found: {drums_sound_path}")
-        # --- END Looping Sound ---
+                
+        # --- Beam Sound State ---
+        self.is_beam_sound_playing = False # Flag to track if the beam sound is currently looping
+        # --- End Beam Sound State ---
+        
+        # --- Jaguar Double Strike Sound (Specific Loading) ---
+        self.double_strike_sound = None
+        if self.tower_id == 'tac_jaguar_mech':
+            double_strike_sound_path = os.path.join(sound_dir, "jaguar_growl.mp3")
+            if os.path.exists(double_strike_sound_path):
+                try:
+                    self.double_strike_sound = pygame.mixer.Sound(double_strike_sound_path)
+                    print(f"Loaded double strike sound for {self.tower_id} from {double_strike_sound_path}")
+                except pygame.error as e:
+                    print(f"Error loading double strike sound {double_strike_sound_path}: {e}")
+            else:
+                print(f"Warning: Double strike sound file not found: {double_strike_sound_path}")
+                
+        # --- Samurai Armor Ignore Sound (Specific Loading) ---
+        self.ignore_armor_sound = None
+        if self.tower_id == 'tac_samurai_mech':
+            ignore_armor_sound_path = os.path.join(sound_dir, "samurai.mp3")
+            if os.path.exists(ignore_armor_sound_path):
+                try:
+                    self.ignore_armor_sound = pygame.mixer.Sound(ignore_armor_sound_path)
+                    print(f"Loaded ignore armor sound for {self.tower_id} from {ignore_armor_sound_path}")
+                except pygame.error as e:
+                    print(f"Error loading ignore armor sound {ignore_armor_sound_path}: {e}")
+            else:
+                print(f"Warning: Ignore armor sound file not found: {ignore_armor_sound_path}")
+                
+        # --- Pass Through Launch Sound (Conditional Loading) ---
+        self.pass_through_launch_sound = None
+        if self.special and self.special.get("effect") == "fixed_distance_pass_through_explode":
+            sound_filename = self.special.get("pass_through_launch_sound_file")
+            if sound_filename:
+                launch_sound_path = os.path.join(sound_dir, sound_filename)
+                if os.path.exists(launch_sound_path):
+                    try:
+                        self.pass_through_launch_sound = pygame.mixer.Sound(launch_sound_path)
+                        print(f"Loaded pass through launch sound for {self.tower_id} from {launch_sound_path}")
+                    except pygame.error as e:
+                        print(f"Error loading pass through launch sound {launch_sound_path}: {e}")
+                else:
+                    print(f"Warning: Pass through launch sound file not found: {launch_sound_path}")
+            else:
+                 print(f"Warning: Tower {self.tower_id} has fixed_distance_pass_through_explode effect but no 'pass_through_launch_sound_file' key in special.")
 
         # --- NEW: Looping sound for Spark Storm Generator ---
         if self.tower_id == 'spark_storm_generator':
@@ -307,10 +353,6 @@ class Tower:
             else:
                 print(f"Warning: Miss sound file not found: {miss_sound_path}")
         # --- END Miss Sound Loading ---
-
-        # --- Beam Sound State ---
-        self.is_beam_sound_playing = False
-        # --- End Beam Sound State ---
 
         # --- NEW: Continuous Aura Tick Timer ---
         self.last_aura_tick_time = 0.0
@@ -407,34 +449,6 @@ class Tower:
         # --- Kill Counter --- # NEW
         self.kill_count = 0
         # --- End Kill Counter ---
-
-        # --- NEW: Double Strike Sound (Jaguar Mech Specific) ---
-        self.double_strike_sound = None
-        if self.tower_id == 'tac_jaguar_mech':
-            growl_sound_path = os.path.join(sound_dir, "jaguar_growl.mp3")
-            if os.path.exists(growl_sound_path):
-                try:
-                    self.double_strike_sound = pygame.mixer.Sound(growl_sound_path)
-                    print(f"Loaded double strike sound for {self.tower_id} from {growl_sound_path}")
-                except pygame.error as e:
-                    print(f"Error loading double strike sound {growl_sound_path}: {e}")
-            else:
-                print(f"Warning: Double strike sound file not found: {growl_sound_path}")
-        # --- END Double Strike Sound ---
-
-        # --- NEW: Samurai Armor Ignore Sound --- 
-        self.ignore_armor_sound = None
-        if self.tower_id == 'tac_samurai_mech':
-            samurai_sound_path = os.path.join(sound_dir, "samurai.mp3")
-            if os.path.exists(samurai_sound_path):
-                try:
-                    self.ignore_armor_sound = pygame.mixer.Sound(samurai_sound_path)
-                    print(f"Loaded ignore armor sound for {self.tower_id} from {samurai_sound_path}")
-                except pygame.error as e:
-                    print(f"Error loading ignore armor sound {samurai_sound_path}: {e}")
-            else:
-                print(f"Warning: Ignore armor sound file not found: {samurai_sound_path}")
-        # --- END Samurai Armor Ignore Sound ---
 
         # --- NEW: Time Machine Rewind Sound --- 
         self.rewind_sound = None
@@ -870,7 +884,7 @@ class Tower:
                         text_x = self.x
                         text_y = self.y - (self.height_pixels / 2) # Start above tower center
                         
-                        miss_text = "MISSFIRE!"
+                        miss_text = "MISFIRE!"
                         miss_color = (255, 0, 0) # Red color
                         text_effect = FloatingTextEffect(text_x, text_y, miss_text, 
                                                        duration=1.5, 
@@ -1239,8 +1253,8 @@ class Tower:
                     # --- Check for Pass-Through Exploder ---
                     elif self.special and self.special.get("effect") == "fixed_distance_pass_through_explode":
                         # <<< PLAY SOUND >>> 
-                        if self.attack_sound:
-                            self.attack_sound.play()
+                        if hasattr(self, 'pass_through_launch_sound') and self.pass_through_launch_sound:
+                            self.pass_through_launch_sound.play()
                         # <<< END PLAY SOUND >>> 
                         self.last_attack_time = current_time # Update attack time
                         
@@ -2039,7 +2053,7 @@ class Tower:
         # Define this tower's bounding box in grid coordinates
         self_start_x = self.top_left_grid_x
         self_end_x = self_start_x + self.grid_width - 1
-        self_start_y = self_start_y
+        self_start_y = self.top_left_grid_y # Corrected assignment
         self_end_y = self_start_y + self.grid_height - 1
         
         # Define the adjacency check area (this tower's box expanded by 1 cell)

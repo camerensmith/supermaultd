@@ -87,8 +87,8 @@ class GameScene:
         self.toggle_padding = 10 # Pixels from corner
         try:
             self.toggle_font = pygame.font.Font(None, 24) # Default font, size 24
-            off_text = "Debug OFF"
-            on_text = "Debug ON"
+            off_text = "Wave Menu OFF"
+            on_text = "Wave Menu ON"
             text_color = (255, 255, 255) # White text
             bg_color_off = (100, 0, 0) # Dark red background for OFF
             bg_color_on = (0, 100, 0) # Dark green background for ON
@@ -105,6 +105,35 @@ class GameScene:
             self.toggle_on_surface = pygame.Surface(fallback_size)
             self.toggle_on_surface.fill((0, 100, 0)) # Dark green
         # --- End Placeholder Toggle Button ---
+
+        # --- Debug Menu Panel --- 
+        self.debug_menu_open = False # Is the menu visible?
+        self.debug_menu_width = 200
+        self.debug_menu_height = 280 # <<< INCREASED HEIGHT SLIGHTLY
+        self.debug_menu_surface = None
+        self.debug_menu_rect = None # Rect for positioning
+        self.debug_menu_font = None
+        try:
+            # Use a slightly smaller font for the menu content
+            self.debug_menu_font = pygame.font.Font(None, 20)
+            # <<< REMOVED SURFACE CREATION FROM INIT >>>
+            # self.debug_menu_surface = pygame.Surface((self.debug_menu_width, self.debug_menu_height))
+            # self.debug_menu_surface.fill((30, 30, 30)) # Dark gray background
+            # # Draw a border
+            # pygame.draw.rect(self.debug_menu_surface, (100, 100, 100), self.debug_menu_surface.get_rect(), 1)
+            # 
+            # # Add placeholder text
+            # placeholder_text = "Debug Info:"
+            # text_color = (220, 220, 220) # Light gray text
+            # text_surf = self.debug_menu_font.render(placeholder_text, True, text_color)
+            # text_rect = text_surf.get_rect(topleft=(5, 5)) # Add padding
+            # self.debug_menu_surface.blit(text_surf, text_rect)
+            print("[GameScene Init] Loaded debug menu font.") # Adjusted print
+        except Exception as e:
+            print(f"[GameScene Init] Error loading debug menu font: {e}")
+            # Leave self.debug_menu_surface as None if error
+            self.debug_menu_surface = None # Explicitly set to None on error
+        # --- End Debug Menu Panel ---
 
         # --- MERGE Tower Data from Selected Races --- 
         self.available_towers = {}
@@ -389,18 +418,18 @@ class GameScene:
         # Handle UI events first
         self.tower_selector.handle_event(event)
         
-        # <<< START ADDED CODE >>>
         # --- Handle Toggle Button Click --- 
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1: # Left click
                 # Check if the click was on the toggle button
                 if self.toggle_button_rect and self.toggle_button_rect.collidepoint(event.pos):
                     self.debug_toggle_state = not self.debug_toggle_state
-                    print(f"[DEBUG] Toggle button clicked! New state: {self.debug_toggle_state}")
+                    # <<< MODIFIED LINE >>>
+                    self.debug_menu_open = self.debug_toggle_state # Link menu visibility to toggle state
+                    print(f"[DEBUG] Toggle button clicked! New state: {self.debug_toggle_state}, Menu Open: {self.debug_menu_open}")
                     # Prevent other MOUSEBUTTONDOWN handlers from processing this click
                     return # Early exit after handling the toggle click
         # --- End Handle Toggle Button Click ---
-        # <<< END ADDED CODE >>>
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # Left click
@@ -2332,6 +2361,100 @@ class GameScene:
             self.toggle_button_rect = button_rect 
             # Draw the button
             screen.blit(surface_to_draw, button_rect)
+
+            # <<< START ADDED CODE >>>
+            # --- Draw Debug Menu if Open --- 
+            # <<< MODIFIED BLOCK START >>>
+            if self.debug_menu_open and self.debug_menu_font: # Check if open and font loaded
+                # --- Helper function to get wave info string list ---
+                def get_wave_info_lines(wave_index, label):
+                    lines = [f"{label}:"]
+                    if 0 <= wave_index < len(self.all_wave_data):
+                        wave_data = self.all_wave_data[wave_index]
+                        enemy_groups = wave_data.get('enemies', [])
+                        if enemy_groups:
+                            first_enemy_id = enemy_groups[0].get('type')
+                            if first_enemy_id:
+                                enemy_data = config.ENEMY_DATA.get(first_enemy_id)
+                                if enemy_data:
+                                    enemy_name = enemy_data.get('name', first_enemy_id)
+                                    hp = enemy_data.get('health', '?') # Use 'health' key
+                                    armor_value = enemy_data.get('armor_value', '?')
+                                    armor_type = enemy_data.get('armor_type', 'unknown')
+                                    lines.append(f"  Name: {enemy_name}")
+                                    lines.append(f"  Health: {hp}")
+                                    lines.append(f"  Armor: {armor_value} ({armor_type})")
+                                else:
+                                    lines.append(f"  ID '{first_enemy_id}' (No Data)")
+                            else:
+                                lines.append("  (Invalid Group)")
+                        else:
+                            lines.append("  (No Enemies)")
+                    elif self.wave_state == WAVE_STATE_ALL_DONE and wave_index >= len(self.all_wave_data):
+                         lines.append("  All Waves Complete")
+                    else: # Index out of bounds or wave data error
+                         lines.append("  -")
+                    return lines
+                # --- End Helper ---
+
+                # --- Re-render Surface Content --- 
+                # Create or reuse the surface (adjust height)
+                if self.debug_menu_surface is None or self.debug_menu_surface.get_height() != self.debug_menu_height:
+                    self.debug_menu_surface = pygame.Surface((self.debug_menu_width, self.debug_menu_height))
+                
+                # Clear surface
+                self.debug_menu_surface.fill((30, 30, 30)) # Dark gray background
+                # Draw border
+                pygame.draw.rect(self.debug_menu_surface, (100, 100, 100), self.debug_menu_surface.get_rect(), 1)
+                
+                # Basic padding and color
+                padding = 5
+                text_color = (220, 220, 220)
+                current_y = padding
+
+                # Draw title
+                title_text = "Info"
+                title_surf = self.debug_menu_font.render(title_text, True, text_color)
+                self.debug_menu_surface.blit(title_surf, (padding, current_y))
+                current_y += title_surf.get_height() + padding // 2
+                
+                # --- Get and Render Info for Next Two Waves --- 
+                all_lines_to_render = []
+                next_wave_index_0 = self.current_wave_index
+                next_wave_index_1 = self.current_wave_index + 1
+                next_wave_index_2 = self.current_wave_index + 2
+                next_wave_index_3 = self.current_wave_index + 3
+
+                all_lines_to_render.extend(get_wave_info_lines(next_wave_index_0, "Current wave:"))
+                all_lines_to_render.append("") # Add a blank line for spacing
+                all_lines_to_render.extend(get_wave_info_lines(next_wave_index_1, "Upcoming wave:"))
+                all_lines_to_render.append("") # Add a blank line for spacing
+                all_lines_to_render.extend(get_wave_info_lines(next_wave_index_2, "Future wave:"))
+
+
+                # Render and draw each line
+                for line_text in all_lines_to_render:
+                    if current_y + self.debug_menu_font.get_height() < self.debug_menu_height - padding: # Check height bounds
+                        line_surf = self.debug_menu_font.render(line_text, True, text_color)
+                        self.debug_menu_surface.blit(line_surf, (padding, current_y))
+                        current_y += line_surf.get_height() # Move down for next line
+                    else:
+                        break # Stop rendering if out of vertical space
+
+                # --- Position and Draw the Menu --- 
+                menu_rect = self.debug_menu_surface.get_rect()
+                menu_rect.topleft = button_rect.bottomleft # Align top-left of menu with bottom-left of button
+                menu_rect.clamp_ip(screen.get_rect()) # Clamp to screen
+                self.debug_menu_rect = menu_rect # Store rect
+                screen.blit(self.debug_menu_surface, menu_rect) # Draw updated surface
+            
+            # <<< MODIFIED BLOCK END >>>
+            else:
+                # Ensure menu rect is None when closed
+                self.debug_menu_rect = None 
+            # --- End Debug Menu Drawing ---
+            # <<< END ADDED CODE >>>
+            
         # --- End Placeholder Toggle Button ---
         # <<< END ADDED CODE >>>
 
