@@ -201,8 +201,18 @@ class GameScene:
         # Game state
         self.towers = []
         self.enemies = []
-        self.money = config.STARTING_MONEY
-        self.lives = config.STARTING_LIVES
+        # --- Load Money/Lives Based on Difficulty (Inferred from wave file path) ---
+        if "advanced" in self.wave_file_path.lower(): # Check if it's advanced waves
+            print(f"[GameScene Init] Loading ADVANCED settings (money/lives) due to wave file: {self.wave_file_path}")
+            self.money = getattr(config, 'STARTING_MONEY_ADVANCED', config.STARTING_MONEY) # Fallback to default if advanced not found
+            self.lives = getattr(config, 'STARTING_LIVES_ADVANCED', config.STARTING_LIVES) # Fallback to default if advanced not found
+        else:
+            print(f"[GameScene Init] Loading DEFAULT settings (money/lives) for wave file: {self.wave_file_path}")
+            self.money = config.STARTING_MONEY
+            self.lives = config.STARTING_LIVES
+        # --- End Money/Lives Loading ---
+        # self.money = config.STARTING_MONEY # <<< REMOVED OLD ASSIGNMENT
+        # self.lives = config.STARTING_LIVES # <<< REMOVED OLD ASSIGNMENT
         self.projectiles = [] # List to hold active projectiles
         self.active_beams = [] # List to hold active beam effects { 'tower': tower, 'target': enemy, 'end_time': timestamp }
         self.effects = [] # List to hold active visual effects
