@@ -3313,8 +3313,21 @@ class GameScene:
                          is_air_unit=is_air) # Pass the flag
 
         if path:
-            # Use VISUAL spawn coordinates for initial position
-            enemy = Enemy(self.visual_spawn_x_pixel, self.visual_spawn_y_pixel, 
+            # --- Randomize Spawn X Position within Spawn Area --- \
+            # Calculate min/max grid X coords for spawn area\
+            min_grid_x = self.spawn_area_x
+            max_grid_x = self.spawn_area_x + config.SPAWN_AREA_WIDTH - 1
+            # Choose a random grid cell within the spawn width\
+            random_grid_x = random.randint(min_grid_x, max_grid_x)
+            # Convert random grid X to center pixel X\
+            random_spawn_x_pixel = (random_grid_x * config.GRID_SIZE) + (config.GRID_SIZE // 2)
+            # -----------------------------------------------------
+            # +++ ADDED DEBUG PRINT +++
+            print(f"  SPAWN DEBUG: Spawn Area X={self.spawn_area_x}, Width={config.SPAWN_AREA_WIDTH}, Chosen Grid X={random_grid_x}, Pixel X={random_spawn_x_pixel}")
+            # ++++++++++++++++++++++++
+            \
+            # Use RANDOMIZED spawn X, but keep original visual spawn Y\
+            enemy = Enemy(random_spawn_x_pixel, self.visual_spawn_y_pixel, \
                           path, enemy_id, enemy_base_data, armor_type_name, damage_modifiers)
             self.enemies.append(enemy)
             self.enemies_alive_this_wave += 1 # Increment count for wave tracking
