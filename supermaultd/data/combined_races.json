@@ -205,9 +205,9 @@
     },
     {
       "races": ["brine", "seadogs"],
-      "combined_name": "Tidal Raiders",
+      "combined_name": "Tide Hunters",
       "combined_description": "Ruthless pirates who command the oceans, raiding villages and plundering ships.",
-      "combined_image": "tidal_raiders.png"
+      "combined_image": "tide_hunters.png"
     },
     {
       "races": ["brine", "heaven"],

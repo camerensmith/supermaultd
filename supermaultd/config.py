@@ -47,7 +47,7 @@ SKY_BLUE = (135, 206, 235)
 
 # Game settings
 GRID_SIZE = 32  # Size of each grid cell in pixels
-STARTING_MONEY = 1000
+STARTING_MONEY = 100
 STARTING_LIVES = 20
 STARTING_MONEY_ADVANCED = 100
 STARTING_LIVES_ADVANCED = 10
@@ -153,7 +153,7 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "groundhogger": {
-        "health": 1540,
+        "health": 1340,
         "speed": 0.4,
         "value": 2, "armor_value": 24,
         "armor_type": "Fortified",
@@ -175,7 +175,7 @@ ENEMY_DATA = {
         "armor_value": 8,
         "type": "ground"
     },
-    "fire_elemental ": {
+    "fire_elemental": {
         "health": 8800,
         "speed": 0.1,
         "value": 2,
@@ -223,15 +223,15 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "war_turtle": { 
-        "health": 40000,
-        "speed": 0.1,
+        "health": 33000,
+        "speed": 0.3,
         "value": 3, "armor_value": 0,
         "armor_type": "Light",
         "type": "ground"
     },
     "gremlin": { #gold increase
         "health": 5000,
-        "speed": 1.8,
+        "speed": 1.5,
         "value": 3,
         "armor_type": "Medium",
         "armor_value": 22,
@@ -239,7 +239,7 @@ ENEMY_DATA = {
     },
     "witch_doctor": {
         "health": 6000,
-        "speed": 2,
+        "speed": 1.2,
         "value": 4,
         "armor_type": "Heavy",
         "armor_value": 20,
@@ -247,7 +247,7 @@ ENEMY_DATA = {
     },
     "spectral_dog": {
         "health": 1300, 
-        "speed": 0.5, 
+        "speed": 0.6, 
         "value": 4,
         "armor_type": "Ethereal",
         "armor_value": 28,
