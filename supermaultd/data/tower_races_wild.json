@@ -53,7 +53,7 @@
           "name": "Crystal Wall", 
           "description": "A crystalline wall, impenetrable to all.",
           "grid_width": 1, "grid_height": 1, "cost": 1,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "chaos",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": [],
           "special": {
@@ -459,7 +459,7 @@
           "cost": 6,
           "damage_min": 3,
           "damage_max": 4,
-          "damage_type": "normal",
+          "damage_type": "swarm",
           "range": 400,
           "attack_interval": 0.3,
           "projectile_speed": 400,
@@ -475,7 +475,7 @@
           "cost": 15,
           "damage_min": 5,
           "damage_max": 7,
-          "damage_type": "normal",
+          "damage_type": "swarm",
           "range": 500,
           "attack_interval": 0.5,
           "projectile_speed": 350,
@@ -493,7 +493,7 @@
           "cost": 30,
           "damage_min": 0,
           "damage_max": 0,
-          "damage_type": "normal",
+          "damage_type": "swarm",
           "range": 200, 
           "attack_interval": 999,
           "projectile_speed": null,
@@ -515,7 +515,7 @@
           "cost": 50,
           "damage_min": 89,
           "damage_max": 129,
-          "damage_type": "chaos",
+          "damage_type": "swarm",
           "range": 600,
           "attack_interval": 1.67,
           "projectile_speed": 500,
@@ -531,7 +531,7 @@
           "cost": 95,
           "damage_min": 85,
           "damage_max": 127,
-          "damage_type": "normal",
+          "damage_type": "swarm",
           "range": 700,
           "attack_interval": 0.3,
           "projectile_speed": 300,
@@ -552,7 +552,7 @@
           "cost": 285,
           "damage_min": 674,
           "damage_max": 783,
-          "damage_type": "normal",
+          "damage_type": "swarm",
           "range": 820,
           "attack_interval": 1.0,
           "projectile_speed": null,
@@ -579,7 +579,7 @@
           "cost": 1,
           "damage_min": 0,
           "damage_max": 0,
-          "damage_type": "normal",
+          "damage_type": "nature",
           "range": 0,
           "attack_interval": 999, 
           "projectile_speed": null,
@@ -599,7 +599,7 @@
           "attack_interval": 1,
           "range": 625,
           "splash_radius": 75,
-          "damage_type": "normal",
+          "damage_type": "nature",
           "attack_type": "projectile",
           "projectile_speed": 380,
           "targets": ["ground", "air"]
@@ -616,7 +616,7 @@
           "range": 850,
           "bounce": 1,
           "splash_radius": 600,
-          "damage_type": "siege",
+          "damage_type": "nature",
           "attack_type": "projectile",
           "projectile_speed": 200,
           "targets": ["ground", "air"]
@@ -632,7 +632,7 @@
           "attack_interval": 0.7,
           "range": 700,
           "splash_radius": 100,
-          "damage_type": "normal",
+          "damage_type": "nature",
           "attack_type": "beam",
           "beam_color": [218, 165, 32],
           "projectile_speed": 400,
@@ -650,7 +650,7 @@
           "attack_interval": 1.55, 
           "range": 700,
           "splash_radius": 100,
-          "damage_type": "normal",
+          "damage_type": "nature",
           "attack_type": "projectile",
           "projectile_speed": 300,
           "targets": ["ground", "air"]
@@ -666,7 +666,7 @@
           "attack_interval": 0.9,
           "range": 550,
           "splash_radius": 120,
-          "damage_type": "normal",
+          "damage_type": "nature",
           "attack_type": "instant",
           "targets": ["ground"],
           "critical_chance": 0.1,
@@ -683,7 +683,7 @@
           "attack_interval": 0.8,
           "range": 900,
           "splash_radius": 100,
-          "damage_type": "normal",
+          "damage_type": "nature",
           "attack_type": "beam",
           "projectile_speed": null,
           "targets": ["ground", "air"],
@@ -698,7 +698,7 @@
           "name": "Castle Wall", 
           "description": "The castle wall is a sturdy defense designed to keep invaders out.",
           "grid_width": 1, "grid_height": 1, "cost": 1,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "order",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": [],
           "special": {
@@ -709,7 +709,7 @@
           "name": "Footman", 
           "description": "The footman takes up arms to defend the kingdom.",
           "grid_width": 1, "grid_height": 1, "cost": 8,
-          "damage_min": 8, "damage_max": 10, "damage_type": "piercing",
+          "damage_min": 8, "damage_max": 10, "damage_type": "order",
           "range": 350, "attack_interval": 1, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 225, "targets": ["ground"]
         },
@@ -717,7 +717,7 @@
           "name": "Watchtower", 
           "description": "The guards in the watchtower tirelessly guard the kingdom.",
           "grid_width": 2, "grid_height": 2, "cost": 26,
-          "damage_min": 20, "damage_max": 30, "damage_type": "piercing", "pierce_adjacent": 1,
+          "damage_min": 20, "damage_max": 30, "damage_type": "order", "pierce_adjacent": 1,
           "range": 750, "attack_interval": 0.8, "projectile_speed": 650,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
         },
@@ -725,7 +725,7 @@
           "name": "Arcanum Tower", 
           "description": "Wizards research arcane magic to use against the forces of evil",
           "grid_width": 2, "grid_height": 2, "cost": 65,
-          "damage_min": 70, "damage_max": 80, "damage_type": "arcane",
+          "damage_min": 70, "damage_max": 80, "damage_type": "order",
           "range": 700, "attack_interval": 1, "projectile_speed": 330,
           "attack_type": "projectile", "splash_radius": 280, "targets": ["ground", "air"]
         },
@@ -733,7 +733,7 @@
             "name": "Arrow Tower", 
             "description": "Armed with archers at the ready, the arrow tower prepares to defend the kingdom.",
             "grid_width": 2, "grid_height": 2, "cost": 109,
-            "damage_min": 35, "damage_max": 65, "damage_type": "piercing", "pierce_adjacent": 1,
+            "damage_min": 35, "damage_max": 65, "damage_type": "order", "pierce_adjacent": 1,
             "range": 750, "attack_interval": 0.3, "projectile_speed": 650, "target_selection": "random",
             "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
         },
@@ -749,7 +749,7 @@
           "name": "Knight", 
           "description": "The knight is a powerful melee unit that can execute his foes.",
           "grid_width": 1, "grid_height": 1, "cost": 315,
-          "damage_min": 436, "damage_max": 501, "damage_type": "normal",
+          "damage_min": 436, "damage_max": 501, "damage_type": "order",
           "range": 350, "attack_interval": 0.8, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 150, "targets": ["ground"],
           "special": {
@@ -768,7 +768,7 @@
       "towers": {
         "bomb_wall": {
           "name": "Barricade", "grid_width": 1, "grid_height": 1, "cost": 1,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "explosive",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": [],
           "special": {
@@ -777,7 +777,7 @@
         },
         "bomb_lobber": {
           "name": "Bomb Lobber", "grid_width": 1, "grid_height": 1, "cost": 15,
-          "damage_min": 10, "damage_max": 12, "damage_type": "siege",
+            "damage_min": 10, "damage_max": 12, "damage_type": "explosive",
           "range": 500, "attack_interval": 0.3, "projectile_speed": 95,
           "attack_type": "projectile", "splash_radius": 800, "targets": ["ground", "air"]
         },
@@ -785,7 +785,7 @@
           "name": "Mine Field", 
           "description": "A mine field that deals damage to ground units walking over it.",
           "grid_width": 1, "grid_height": 1, "cost": 30,
-          "damage_min": 35, "damage_max": 35, "damage_type": "siege",
+          "damage_min": 35, "damage_max": 35, "damage_type": "explosive",
           "range": 150, "attack_interval": 0.1, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 200, "targets": ["ground"],
           "traversable": true
@@ -794,7 +794,7 @@
           "name": "Grenade Launcher", 
           "description": "A bouncing grenade dealing damage to both ground and air units in a large area.",
           "grid_width": 2, "grid_height": 2, "cost": 22,
-          "damage_min": 250, "damage_max": 325, "damage_type": "normal",
+          "damage_min": 250, "damage_max": 325, "damage_type": "explosive",
           "range": 800, "attack_interval": 8.0, "projectile_speed": 175,
           "attack_type": "projectile", "splash_radius": 800, "targets": ["ground", "air"],
           "special": {
@@ -809,7 +809,7 @@
           "name": "Bombardier", 
           "description": "A rocket launcher dealing high damage to both air and ground units.",
           "grid_width": 1, "grid_height": 2, "cost": 280,
-          "damage_min": 325, "damage_max": 390, "damage_type": "siege",
+          "damage_min": 325, "damage_max": 390, "damage_type": "explosive",
           "range": 700, "attack_interval": 2.2, "projectile_speed": 150,
           "attack_type": "projectile", "splash_radius": 800, "targets": ["ground", "air"]
         },
@@ -819,7 +819,7 @@
           "grid_width": 1, "grid_height": 1, "cost": 490,
           "damage_min": 0,       
           "damage_max": 0,       
-          "damage_type": "siege", 
+          "damage_type": "explosive", 
           "range": 1000,            
           "attack_interval": 999,  
           "projectile_speed": null,
@@ -833,7 +833,7 @@
             "strike_aoe_radius": 500,       
             "strike_damage_min": 600,       
             "strike_damage_max": 800,       
-            "strike_damage_type": "siege",  
+            "strike_damage_type": "explosive",  
             "interval": 6.0,              
             "description": "Periodically calls down random artillery strikes within a large radius."
           }
@@ -845,13 +845,13 @@
       "towers": {
         "stone_wall": {
           "name": "Stone Wall", "grid_width": 1, "grid_height": 1, "cost": 1,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "earthen",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": []
         },
         "stone_pebble_shooter": {
           "name": "Pebble Shooter", "grid_width": 1, "grid_height": 1, "cost": 6,
-          "damage_min": 5, "damage_max": 6, "damage_type": "normal", "bounce": 2,
+          "damage_min": 5, "damage_max": 6, "damage_type": "earthen", "bounce": 2,
           "range": 550, "attack_interval": 0.5, "projectile_speed": 400,
           "attack_type": "projectile", "splash_radius": 150, "targets": ["ground", "air"],
           "critical_chance": 0.2,
@@ -866,7 +866,7 @@
           "name": "Stonebreaker", 
           "description": "Shoots a large, enchanted rock, used by the stone shamans to break through all earthen materials.",
           "grid_width": 2, "grid_height": 2, "cost": 99,
-          "damage_min": 85, "damage_max": 176, "damage_type": "siege", "pierce_adjacent": 1,
+          "damage_min": 85, "damage_max": 176, "damage_type": "earthen", "pierce_adjacent": 1,
           "range": 850, "attack_interval": 2, "projectile_speed": 300,
           "attack_type": "projectile", "splash_radius": 350, "targets": ["ground", "air"],
           "critical_chance": 0.2,
@@ -881,7 +881,7 @@
           "name": "Golem", 
           "description": "A large, stone golem that can be used to break through all earthen materials.",
           "grid_width": 2, "grid_height": 2, "cost": 195,
-          "damage_min": 280, "damage_max": 490, "damage_type": "normal",
+          "damage_min": 280, "damage_max": 490, "damage_type": "earthen",
           "range": 600, "attack_interval": 1.3, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 350, "targets": ["ground"],
           "critical_chance": 0.2,
@@ -896,7 +896,7 @@
           "name": "Tremor Totem", 
           "description": "A totem that causes tremors to shake the ground, damaging units randomly in a small area.",
           "grid_width": 1, "grid_height": 1, "cost": 220,
-          "damage_min": 50, "damage_max": 150, "damage_type": "normal", "target_selection": "random",
+          "damage_min": 50, "damage_max": 150, "damage_type": "earthen", "target_selection": "random",
           "range": 400, "attack_interval": 0.2, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 200, "targets": ["ground"],
           "special": {
@@ -911,7 +911,7 @@
           "grid_width": 1, "grid_height": 3, "cost": 330,
           "traversable": true,
           "trigger_on_walkover": true, 
-          "damage_min": 100, "damage_max": 100, "damage_type": "siege",
+          "damage_min": 100, "damage_max": 100, "damage_type": "earthen",
           "range": 250, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "hybrid",
           "splash_radius": null, 
@@ -934,7 +934,7 @@
           "name": "Mercurial Wall", 
           "description": "These walls seal off the alchemists' labs and bunkers",
           "grid_width": 1, "grid_height": 1, "cost": 1,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "toxic",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": [],
           "special": {
@@ -945,11 +945,11 @@
           "name": "Poison Dart Launcher", 
           "description": "Albmeists need to keep intruders away, what better way than to throw darts with poison?",
           "grid_width": 1, "grid_height": 1, "cost": 11,
-          "damage_min": 5, "damage_max": 7, "damage_type": "arcane", "bounce": 1,
+          "damage_min": 5, "damage_max": 7, "damage_type": "toxic", "bounce": 1,
           "range": 1300, "attack_interval": 0.6, "projectile_speed": 400,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
           "special": {"effect": "poison", "dot_damage": 8, "dot_interval": 0.5, 
-          "duration": 5.0, "dot_damage_type": "arcane"}
+          "duration": 5.0, "dot_damage_type": "toxic"}
         },
         "alchemists_miasma_pillar": {
           "name": "Miasma Pillar", 
@@ -959,7 +959,7 @@
           "damage_max": 25, 
           "attack_speed": 1.0,
           "range": 650, 
-          "damage_type": "arcane", 
+          "damage_type": "toxic", 
           "targets": ["air"], 
           "attack_type": "hybrid",
           "projectile_speed": 400,
@@ -972,24 +972,24 @@
             "dot_damage": 18,
             "dot_interval": 0.5,
             "dot_duration": 5.0,
-            "dot_damage_type": "arcane"
+            "dot_damage_type": "toxic"
           }
         },
         "alchemists_toxin_lab": {
           "name": "Toxin Lab", 
           "description": "Toxic substances must be handled with care.",
           "grid_width": 2, "grid_height": 2, "cost": 98,
-          "damage_min": 5, "damage_max": 26, "damage_type": "arcane",
+          "damage_min": 5, "damage_max": 26, "damage_type": "toxic",
           "range": 700, "attack_interval": 0.8, "projectile_speed": 180, "target_selection": "random",
           "attack_type": "projectile", "splash_radius": 120, "targets": ["ground", "air"],
           "special": {"effect": "toxin", "dot_damage": 87, "dot_interval": 0.5, 
-          "duration": 5.0, "dot_damage_type": "arcane"}
+          "duration": 5.0, "dot_damage_type": "toxic"}
         },
         "alchemists_caustic_cannon": {
           "name": "Caustic Cannon", 
           "description": "The alchemists' experimentation often leaves them with a surplus of detritus.",
           "grid_width": 2, "grid_height": 2, "cost": 112,
-          "damage_min": 452, "damage_max": 790, "damage_type": "chaos",
+          "damage_min": 452, "damage_max": 790, "damage_type": "toxic",
           "range": 650, "attack_interval": 1.5, "projectile_speed": 300,
           "attack_type": "projectile", "splash_radius": 120, "targets": ["ground", "air"]
         },
@@ -997,17 +997,17 @@
           "name": "Chemical Plant", 
           "description": "A tower that spits a particularly vile chemical developed as a byproduct of transmutation.",
           "grid_width": 3, "grid_height": 3, "cost": 177,
-          "damage_min": 80, "damage_max": 120, "damage_type": "chaos", "target_selection": "random",
+          "damage_min": 80, "damage_max": 120, "damage_type": "toxic", "target_selection": "random",
           "range": 800, "attack_interval": 0.2, "projectile_speed": 200,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
           "special": {"effect": "vile_chemical", "dot_damage": 388, "dot_interval": 0.5, 
-          "duration": 5.0, "dot_damage_type": "chaos"}
+          "duration": 5.0, "dot_damage_type": "toxic"}
         },
         "alchemists_plague_reactor": {
           "name": "Plague Reactor", 
           "description": "A tower of wretched experimentation, mutating and amplifying all damage-over-time effects in a large radius.",
           "grid_width": 4, "grid_height": 4, "cost": 256,
-          "damage_min": 0, "damage_max": 0, "damage_type": "chaos",
+          "damage_min": 0, "damage_max": 0, "damage_type": "toxic",
           "range": 3000, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "aura", "splash_radius": null, "targets": ["ground", "air"],
           "special": {
@@ -1026,7 +1026,7 @@
           "name": "Ice Block", 
           "description": "A block of ice, blocking the way of all invaders.",
           "grid_width": 1, "grid_height": 1, "cost": 1,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "frost",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": [],
           "special": {
@@ -1037,7 +1037,7 @@
           "name": "Snowball Tosser", 
           "description": "Throwing 'harmless' snowballs at enemies signals that intruders should probably stay back.",
           "grid_width": 1, "grid_height": 1, "cost": 8,
-          "damage_min": 6, "damage_max": 7, "damage_type": "piercing",
+          "damage_min": 6, "damage_max": 7, "damage_type": "frost",
           "range": 500, "attack_interval": 0.7, "projectile_speed": 400,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
           "special": {
@@ -1051,7 +1051,7 @@
         "name": "Glacial Heart", 
         "description": "A frozen heart, sending an unrelenting chill through all enemies attempting to traverse the tundra.",
         "grid_width": 3, "grid_height": 3, "cost": 20,
-        "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+        "damage_min": 0, "damage_max": 0, "damage_type": "frost",
         "range": 700, "attack_interval": 1.5, "projectile_speed": null,
         "attack_type": "none", "splash_radius": null, "targets": ["ground", "air"],
         "special": {
@@ -1066,7 +1066,7 @@
           "name": "Frost Pulse", 
           "description": "A tower that sends out frozen pulses, causing enemies to slow down considerably.",
           "grid_width": 1, "grid_height": 1, "cost": 60,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "frost",
           "range": 0, 
           "attack_interval": 999, 
           "attack_type": "aura", 
@@ -1084,7 +1084,7 @@
           "name": "Icicle Launcher", 
           "description": "Hurls incredibly sharp, incredibly dangerous icicles at enemies.",
           "grid_width": 1, "grid_height": 1, "cost": 142,
-          "damage_min": 100, "damage_max": 120, "damage_type": "piercing", "pierce_adjacent": 3,
+          "damage_min": 100, "damage_max": 120, "damage_type": "frost", "pierce_adjacent": 3,
           "range": 700, "attack_interval": 1.2, "projectile_speed": 600,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
           "special": {
@@ -1098,7 +1098,7 @@
           "name": "Yeti", 
           "description": "The yeti is a savage beast, capable of crushing enemies with its massive fists.",
           "grid_width": 1, "grid_height": 1, "cost": 180,
-          "damage_min": 388, "damage_max": 505, "damage_type": "normal",
+          "damage_min": 388, "damage_max": 505, "damage_type": "frost",
           "range": 350, "attack_interval": 1.3, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 300, "targets": ["ground"],
           "special": {
@@ -1112,7 +1112,7 @@
           "name": "Glacier Cannon", 
           "description": "Fires a gigantic glacier at enemies.",
           "grid_width": 1, "grid_height": 1, "cost": 325,
-          "damage_min": 400, "damage_max": 400, "damage_type": "normal",
+          "damage_min": 400, "damage_max": 400, "damage_type": "frost",
           "range": 775, "attack_interval": 2, "projectile_speed": 400,
           "attack_type": "projectile", "splash_radius": 200, "targets": ["ground", "air"],
           "special": {
@@ -1131,7 +1131,7 @@
           "name": "Alien Wall", 
           "description": "A strange wall made of alien technology, blocking the way of all invaders.",
           "grid_width": 1, "grid_height": 1, "cost": 1,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "arcane",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": [],
           "special": {
@@ -1158,7 +1158,7 @@
           "name": "UFO", 
           "description": "A flying saucer that shoots destructive discs at enemies.",
           "grid_width": 2, "grid_height": 2, "cost": 144, "bounce": 3,
-          "damage_min": 205, "damage_max": 211, "damage_type": "normal",
+          "damage_min": 205, "damage_max": 211, "damage_type": "arcane",
           "range": 800, "attack_interval": 1.8, "projectile_speed": 280,
           "attack_type": "projectile", "splash_radius": 330, "targets": ["ground", "air"]
         },
@@ -1166,7 +1166,7 @@
           "name": "Nether Ray", 
           "description": "A tower that shoots a beam of harnessed nether energy, cutting through all enemies alike.",
           "grid_width": 1, "grid_height": 1, "cost": 170,
-          "damage_min": 89, "damage_max": 105, "damage_type": "chaos",
+          "damage_min": 89, "damage_max": 105, "damage_type": "arcane",
           "range": 700, "attack_interval": 0.3, "projectile_speed": null,
           "attack_type": "beam", "splash_radius": null, "targets": ["ground", "air"]
         },
@@ -1174,7 +1174,7 @@
           "name": "Orbiter", 
           "description": "A tower that creates a ring of energy orbs that orbit around it, damaging enemies.",
           "grid_width": 3, "grid_height": 3, "cost": 275,
-          "damage_min": 0, "damage_max": 0, "damage_type": "piercing",
+          "damage_min": 0, "damage_max": 0, "damage_type": "arcane",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": [],
           "special": {
@@ -1198,7 +1198,7 @@
           "cost": 445,
           "damage_min": 0,
           "damage_max": 0,
-          "damage_type": "chaos",
+          "damage_type": "arcane",
           "range": 1000,
           "attack_interval": 999,
           "projectile_speed": null,
@@ -1211,7 +1211,7 @@
             "aura_radius": 1000,
             "interval": 7.0,
             "pulse_damage": 4000,
-            "pulse_damage_type": "chaos"
+            "pulse_damage_type": "arcane"
           }
         }
       }
@@ -1223,7 +1223,7 @@
           "name": "Skrapheep", 
           "description": "One mans trash is goblins treasure. A wall made of scrap metal and junk.",
           "grid_width": 1, "grid_height": 1, "cost": 1,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "savage",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": [],
           "special": {
@@ -1234,7 +1234,7 @@
           "name": "Snotlins", 
           "description": "Goblin slaves with crude clubs and axes. A bit of a mess, but they're cheap... and relentless.",
           "grid_width": 1, "grid_height": 1, "cost": 6,
-          "damage_min": 5, "damage_max": 16, "damage_type": "normal",
+          "damage_min": 5, "damage_max": 16, "damage_type": "savage",
           "range": 750, "attack_interval": 1, "projectile_speed": 400,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
         },
@@ -1242,7 +1242,7 @@
           "name": "Goblin Junkka", 
           "description": "An interesting contraption shoots a shower of junk that somehow manages to hit everything and nothing all at once.t",
           "grid_width": 2, "grid_height": 2, "cost": 25,
-          "damage_min": 25, "damage_max": 159, "damage_type": "normal",
+          "damage_min": 25, "damage_max": 159, "damage_type": "savage",
           "range": 950, "attack_interval": 1.3, "projectile_speed": 150,
           "attack_type": "projectile", "splash_radius": 60, "targets": ["ground", "air"],
           "special": {
@@ -1254,7 +1254,7 @@
           "name": "Goblin Skrappaa", 
           "description": "These goblins are masters of junkyard engineering, and their creations are... 'uniquely' effective.",
           "grid_width": 2, "grid_height": 2, "cost": 101,
-          "damage_min": 44, "damage_max": 312, "damage_type": "normal",
+          "damage_min": 44, "damage_max": 312, "damage_type": "savage",
           "range": 400, "attack_interval": 1, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 300, "targets": ["ground"],
           "special": {
@@ -1268,7 +1268,7 @@
           "name": "Goblin Katapult Skwad", 
           "description": "Who needs precision when you can just launch everything? These goblins are more about chaos than accuracy, but they sure know how to make a big impact.",
           "grid_width": 2, "grid_height": 2, "cost": 150,
-          "damage_min": 300, "damage_max": 3000, "damage_type": "normal",
+          "damage_min": 300, "damage_max": 3000, "damage_type": "savage",
           "range_min": 2500, "range": 3000, "attack_interval": 5, "projectile_speed": 350,
           "attack_type": "projectile", "splash_radius": 450, "targets": ["ground"],
           "special": {
@@ -1281,7 +1281,7 @@
           "name": "Skrap Tank", 
           "description": "A crudely built goblin tank made of scavenged parts, held together with duct tape and hope.",
           "grid_width": 2, "grid_height": 2, "cost": 145,
-          "damage_min": 1, "damage_max": 1000, "damage_type": "normal",
+          "damage_min": 1, "damage_max": 1000, "damage_type": "savage",
           "range": 980, "attack_interval": 4.25, "projectile_speed": 800,
           "attack_type": "projectile", "splash_radius": 500, "targets": ["ground", "air"],
           "special": {
@@ -1297,7 +1297,7 @@
         "goblin_shredder": {
           "name": "Goblin Shreddaa", "grid_width": 3, "grid_height": 3, "cost": 172,
           "description": "Goblin savagery at its finest. A brutal cage contraption that rips enemies apart. Causes heavy hemmorhage damage over time.",
-          "damage_min": 45, "damage_max": 85, "damage_type": "chaos", 
+          "damage_min": 45, "damage_max": 85, "damage_type": "savage", 
           "range": 350, "attack_interval": 0.1,
           "attack_type": "instant", "traversable": true, "walkover_damage": 20,
           "splash_radius": null, "targets": ["ground"], 
@@ -1312,7 +1312,7 @@
           "name": "Altar of the Deep", 
           "description": "A sacred altar blocking the deep waters from invaders.",
           "grid_width": 1, "grid_height": 1, "cost": 1,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "salty",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": [],
           "special": {
@@ -1323,7 +1323,7 @@
           "name": "Coral Trident",
           "description": "Even the coral have spears. Don't try to reach the sunken cities.",
           "grid_width": 1, "grid_height": 1, "cost": 10,
-          "damage_min": 10, "damage_max": 13, "damage_type": "normal",
+          "damage_min": 10, "damage_max": 13, "damage_type": "salty",
           "range": 250, "attack_interval": 0.5, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 333, "targets": ["ground", "air"],
           "pierce_adjacent": 1, 
@@ -1339,7 +1339,7 @@
           "name": "Serpent Coiler", 
           "description": "A serpent coiler that coils around its foes, causing them to lose control.",
           "grid_width": 1, "grid_height": 1, "cost": 51,
-          "damage_min": 40, "damage_max": 45, "damage_type": "arcane",
+          "damage_min": 40, "damage_max": 45, "damage_type": "salty",
           "range": 650, "attack_interval": 0.7, "projectile_speed": 600,
           "attack_type": "projectile", "splash_radius": 450, "targets": ["ground", "air"],
           "special": {
@@ -1355,7 +1355,7 @@
         "grid_width": 2, "grid_height": 2, "cost": 90,
         "damage_min": 0,            
         "damage_max": 0,            
-        "damage_type": "normal",      
+        "damage_type": "salty",      
         "range": 0,                 
         "attack_interval": 999,       
         "projectile_speed": null,
@@ -1374,7 +1374,7 @@
           "name": "Naga Depth Guard", 
           "description": "Going through a Depth Guard is a challenge in and of itself.",
           "grid_width": 2, "grid_height": 2, "cost": 90,
-          "damage_min": 100, "damage_max": 120, "damage_type": "normal",
+          "damage_min": 100, "damage_max": 120, "damage_type": "salty",
           "range": 500, "attack_interval": 0.6, "projectile_speed": 400,
           "attack_type": "instant", "splash_radius": 325, "targets": ["ground"],
           "special": {
@@ -1388,7 +1388,7 @@
           "name": "Tidal Guardian", 
           "description": "A guardian of the deep sea, entrusted with protection of their sacred temples.",
           "grid_width": 2, "grid_height": 2, "cost": 150,
-          "damage_min": 120, "damage_max": 190, "damage_type": "normal",
+          "damage_min": 120, "damage_max": 190, "damage_type": "salty",
           "range": 700, "attack_interval": 1.0, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 375, "targets": ["ground", "air"],
           "special": {
@@ -1406,7 +1406,7 @@
           "cost": 239,
           "damage_min": 0,
           "damage_max": 0,
-          "damage_type": "arcane",
+          "damage_type": "salty",
           "range": 0,
           "attack_interval": 999,
           "attack_type": "aura",
@@ -1419,7 +1419,7 @@
             "tick_interval": 0.1,
             "min_damage_at_edge": 1.0,
             "max_damage_at_center": 25.0,
-            "damage_type": "arcane",
+            "damage_type": "salty",
             "targets": ["ground", "air"],
             "description": "Continuously damages nearby enemies. Damage increases closer to the monument."
           }
@@ -1433,7 +1433,7 @@
           "name": "Electric Fence", 
           "description": "An electrified barrier that enemies don't dare to cross.",
           "grid_width": 1, "grid_height": 1, "cost": 1,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "electrical",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": [],
           "special": {
@@ -1444,7 +1444,7 @@
           "name": "Static Post", 
           "description": "A tower that shocks enemies with electricity.",
           "grid_width": 1, "grid_height": 2, "cost": 8,
-          "damage_min": 7, "damage_max": 8, "damage_type": "normal", "bounce": 1,
+          "damage_min": 7, "damage_max": 8, "damage_type": "electrical", "bounce": 1,
           "range": 580, "attack_interval": 0.4, "projectile_speed": 600,
           "attack_type": "instant", "splash_radius": 225, "targets": ["ground", "air"]
         },
@@ -1452,14 +1452,14 @@
           "name": "Shock Pylon", 
           "description": "A pylon that discharges electricity to any foe foolish enough to come in contact.",
           "grid_width": 1, "grid_height": 1, "cost": 15,
-          "damage_min": 30, "damage_max": 32, "damage_type": "normal",
+          "damage_min": 30, "damage_max": 32, "damage_type": "electrical",
           "range": 215, "attack_interval": 0.8, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"]
         },
         "spark_arc_tower": {
           "name": "Arc Tower", "grid_width": 1, "grid_height": 1, "cost": 35,
           "damage_min": 41, "damage_max": 43,
-          "damage_type": "normal", 
+          "damage_type": "electrical", 
           "range": 600, 
           "attack_interval": 0.9, 
           "projectile_speed": 500, 
@@ -1475,7 +1475,7 @@
           "name": "Zap Coil", 
           "description": "A large coil that paralyzes its foes with electricity.",
           "grid_width": 1, "grid_height": 2, "cost": 61,
-          "damage_min": 75, "damage_max": 145, "damage_type": "normal",
+          "damage_min": 75, "damage_max": 145, "damage_type": "electrical",
           "range": 450, "attack_interval": 1.5, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 300, "targets": ["ground", "air"],
           "special": {"effect": "stun", "duration": 0.2}
@@ -1484,7 +1484,7 @@
           "name": "Lightning Rod",
           "description": "A lightning rod that attracts lightning from the sky.",
           "grid_width": 1, "grid_height": 2, "cost": 126,
-          "damage_min": 180, "damage_max": 200, "damage_type": "piercing",
+          "damage_min": 180, "damage_max": 200, "damage_type": "electrical",
           "range": 800, "attack_interval": 1.5, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
           "special": {
@@ -1498,7 +1498,7 @@
           "name": "Power Plant", 
           "description": "A power plant that generates overloads their towers with excessive energy.",
           "grid_width": 2, "grid_height": 2, "cost": 165,
-          "damage_min": 0, "damage_max": 0, "damage_type": "chaos",
+          "damage_min": 0, "damage_max": 0, "damage_type": "electrical",
           "range": 400, "attack_interval": 0, "projectile_speed": null,
           "attack_type": "aura", "splash_radius": null,
           "special": {
@@ -1512,7 +1512,7 @@
           "name": "Storm Generator", 
           "description": "Unleashes a turbulent, violent storm across the battlefield.",
           "grid_width": 2, "grid_height": 2, "cost": 224,
-          "damage_min": 400, "damage_max": 800, "damage_type": "arcane", "target_selection": "random",
+          "damage_min": 400, "damage_max": 800, "damage_type": "electrical", "target_selection": "random",
           "range": 3000, "attack_interval": 2, "projectile_speed": null, "traversable": true,
           "attack_type": "instant", "instant_hold": 0.5, "splash_radius": 500, "targets": ["ground", "air"],
           "stats_air": {
@@ -1527,7 +1527,7 @@
           "name": "Unstable Barrier", 
           "description": "A barrier of void energy, manipulating the field.",
           "grid_width": 1, "grid_height": 1, "cost": 1,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "void",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": [],
           "special": {
@@ -1538,7 +1538,7 @@
           "name": "Void Leecher", 
           "description": "A tower that drains the life force of its foes.",
           "grid_width": 2, "grid_height": 2, "cost": 14,
-          "damage_min": 1, "damage_max": 12, "damage_type": "arcane",
+          "damage_min": 1, "damage_max": 12, "damage_type": "void",
           "range": 550, "attack_interval": 0.1, "projectile_speed": 400,
           "attack_type": "beam", "splash_radius": null, "targets": ["ground", "air"]
         },
@@ -1546,7 +1546,7 @@
           "name": "Soulless", 
           "description": "A drone whose soul has been ripped away by the void.",
           "grid_width": 2, "grid_height": 2, "cost": 50,
-          "damage_min": 88, "damage_max": 260, "damage_type": "normal",
+          "damage_min": 88, "damage_max": 260, "damage_type": "void",
           "range": 350, "attack_interval": 1, "projectile_speed": 400,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
         },
@@ -1554,7 +1554,7 @@
           "name": "Void Stalker", 
           "description": "The void stalkers inject the void into their foes.",
           "grid_width": 2, "grid_height": 2, "cost": 30,
-          "damage_min": 21, "damage_max": 23, "damage_type": "arcane",
+          "damage_min": 21, "damage_max": 23, "damage_type": "void",
           "range": 600, "attack_interval": 1.3, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 250, "targets": ["ground"]
         },
@@ -1562,7 +1562,7 @@
           "name": "Entropy Trooper", 
           "description": "The entropy trooper injects the void into every unfortunate soul they come across.",
           "grid_width": 2, "grid_height": 2, "cost": 150,
-          "damage_min": 120, "damage_max": 180, "damage_type": "normal",
+          "damage_min": 120, "damage_max": 180, "damage_type": "void",
           "range": 700, "attack_interval": 1.5, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
           "special": {
@@ -1575,7 +1575,7 @@
           "name": "Rift Walker", 
           "description": "The rift walker manipulates the void to steal the souls across the multiverse.",
           "grid_width": 2, "grid_height": 2, "cost": 220,
-          "damage_min": 120, "damage_max": 180, "damage_type": "normal",
+          "damage_min": 120, "damage_max": 180, "damage_type": "void",
           "range": 700, "attack_interval": 1.5, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
           "special": {
@@ -1588,7 +1588,7 @@
           "name": "Void Horror", 
           "description": "The void horror is unleashed to decimate entire armies who oppose the call of the void.",
           "grid_width": 2, "grid_height": 2, "cost": 600,
-          "damage_min": 280, "damage_max": 350, "damage_type": "normal",
+          "damage_min": 280, "damage_max": 350, "damage_type": "void",
           "range": 500, "attack_interval": 0.3, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 200, "targets": ["ground", "air"],
           "special": {
@@ -1608,7 +1608,7 @@
           "name": "Machine Core", 
           "description": "A dormant core waiting to be assembled into a Titan.",
           "grid_width": 1, "grid_height": 1, "cost": 1,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "kinetic",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": []
         },
@@ -1616,7 +1616,7 @@
           "name": "Assembly Golem", 
           "description": "Assembles the mightiest Titans.",
           "grid_width": 2, "grid_height": 2, "cost": 15,
-          "damage_min": 10, "damage_max": 15, "damage_type": "normal",
+          "damage_min": 10, "damage_max": 15, "damage_type": "kinetic",
           "range": 1000, "attack_interval": 0.5, "projectile_speed": 400,
           "attack_type": "instant", "splash_radius": 50, "targets": ["ground"],
           "special": {
@@ -1630,7 +1630,7 @@
           "name": "Jaguar Mech", 
           "description": "A swift and deadly predator, striking with unmatched speed and precision.",
           "grid_width": 3, "grid_height": 2, "cost": 117,
-          "damage_min": 67, "damage_max": 89, "damage_type": "piercing",
+          "damage_min": 67, "damage_max": 89, "damage_type": "kinetic",
           "range": 900, "attack_interval": 1, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 100, "targets": ["ground", "air"],
           "special": {
@@ -1643,7 +1643,7 @@
           "name": "Samurai Mech", 
           "description": "A perfect blend of ancient discipline and modern power.",
           "grid_width": 2, "grid_height": 3, "cost": 132,
-          "damage_min": 100, "damage_max": 120, "damage_type": "siege",
+          "damage_min": 100, "damage_max": 120, "damage_type": "kinetic",
           "range": 500, "attack_interval": 2.5, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 180, "targets": ["ground"],
           "critical_chance": 0.15, "critical_multiplier": 1.2,
@@ -1658,7 +1658,7 @@
           "name": "Athena Mech", 
           "description": "Athena Mech targets the greatest threats, delivering a calculated blow to ensure victory",
           "grid_width": 2, "grid_height": 3, "cost": 211,
-          "damage_min": 200, "damage_max": 268, "damage_type": "normal",
+          "damage_min": 200, "damage_max": 268, "damage_type": "kinetic",
           "range": 500, "attack_interval": 2.5, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 180, "targets": ["ground"],
           "special": {
@@ -1670,13 +1670,13 @@
           "name": "Pummeler Mech", 
           "description": "Devastating blows shake the ground, dealing immense splash to nearby enemies.",
           "grid_width": 2, "grid_height": 3, "cost": 300,
-          "damage_min": 511, "damage_max": 521, "damage_type": "normal",
+          "damage_min": 511, "damage_max": 521, "damage_type": "kinetic",
           "range": 550, "attack_interval": 3.3, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 600, "targets": ["ground"]
         },
         "tac_reaper_mech": {
           "name": "Reaper Mech", "grid_width": 2, "grid_height": 3, "cost": 334,
-          "damage_min": 500, "damage_max": 743, "damage_type": "siege",
+          "damage_min": 500, "damage_max": 743, "damage_type": "kinetic",
           "range": 1000, "attack_interval": 0.8, "projectile_speed": 300,
           "attack_type": "projectile", "splash_radius": 400, "targets": ["ground", "air"],
           "special": {
@@ -1695,7 +1695,7 @@
           "name": "Police Blockade", 
           "description": "This blockade allows the police to funnel enemies into a more advantageous space.",
           "grid_width": 1, "grid_height": 1, "cost": 1,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "piercing",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": [],
           "special": {
@@ -1704,7 +1704,7 @@
         },
         "police_peacekeeper": {
           "name": "Peacekeeper", "grid_width": 1, "grid_height": 1, "cost": 14,
-          "damage_min": 13, "damage_max": 15, "damage_type": "normal",
+          "damage_min": 13, "damage_max": 15, "damage_type": "piercing",
           "range": 550, "attack_interval": 0.4, "projectile_speed": 570,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
         },
@@ -1712,7 +1712,7 @@
           "name": "SWAT Officer", 
           "description": "Highly trained and equipped to take on any threat.",
           "grid_width": 1, "grid_height": 1, "cost": 50,
-          "damage_min": 65, "damage_max": 95, "damage_type": "normal",
+          "damage_min": 65, "damage_max": 95, "damage_type": "piercing",
           "range": 800, "attack_interval": 1, "projectile_speed": 700,
           "attack_type": "projectile", "splash_radius": 250, "targets": ["ground", "air"]
         },
@@ -1745,7 +1745,7 @@
           "name": "Police HQ", 
           "description": "The Police may rally around their HQ to hold the line from illicit activity.",
           "grid_width": 5, "grid_height": 5, "cost": 300,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "piercing",
           "range": 500, 
           "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", 
@@ -1766,7 +1766,7 @@
           "name": "Energy Wall", 
           "description": "A wall comprised of pure science.",
           "grid_width": 1, "grid_height": 1, "cost": 1,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "plasma",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": [],
           "special": {
@@ -1777,7 +1777,7 @@
           "name": "Laser", 
           "description": "A high tech laser beam that deals damage to its intended target.",
           "grid_width": 1, "grid_height": 1, "cost": 10,
-          "damage_min": 4, "damage_max": 5, "damage_type": "normal",
+          "damage_min": 4, "damage_max": 5, "damage_type": "plasma",
           "range": 850, "attack_interval": 0.2, "projectile_speed": null,
           "attack_type": "beam", "beam_color": "DEEP_PINK", "splash_radius": null, "targets": ["ground", "air"]
         },
@@ -1785,7 +1785,7 @@
           "name": "Upgraded Laser", 
           "description": "A more powerful laser that expands the capabilities of the laser.",
           "grid_width": 1, "grid_height": 1, "cost": 21,
-          "damage_min": 11, "damage_max": 12, "damage_type": "normal",
+          "damage_min": 11, "damage_max": 12, "damage_type": "plasma",
           "range": 1000, "attack_interval": 0.2, "projectile_speed": null,
           "attack_type": "beam", "beam_color": "HOT_PINK", "splash_radius": null, "targets": ["ground", "air"]
         },
@@ -1793,7 +1793,7 @@
           "name": "Particle Accelerator", 
           "description": "A particle accelerator that fires a high-speed particle beam, dealing damage to its intended target.",
           "grid_width": 1, "grid_height": 1, "cost": 45,
-          "damage_min": 10, "damage_max": 12, "damage_type": "piercing",
+          "damage_min": 10, "damage_max": 12, "damage_type": "plasma",
           "range": 1100, "attack_interval": 0.7, "projectile_speed": 1500,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
         },
@@ -1801,7 +1801,7 @@
           "name": "Targeting Computer", 
           "description": "A targeting computer that allows towers to lock on to enemies.",
           "grid_width": 1, "grid_height": 1, "cost": 45,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "plasma",
           "range": 700, 
           "attack_interval": 1.5, 
           "projectile_speed": null,
@@ -1818,7 +1818,7 @@
           "name": "Freeze Ray", 
           "description": "Manipulating the molecular structure of the air, this tower can slow enemies to a crawl.",
           "grid_width": 1, "grid_height": 1, "cost": 80,
-          "damage_min": 1, "damage_max": 5, "damage_type": "normal", "target_selection": "random",
+          "damage_min": 1, "damage_max": 5, "damage_type": "plasma", "target_selection": "random",
           "range": 500, "attack_interval": 0.1, "projectile_speed": null,
           "attack_type": "beam", "beam_color": "CYAN",
            "splash_radius": null, "targets": ["ground", "air"],
@@ -1832,7 +1832,7 @@
           "name": "Railgun", 
           "description": "A supremely advanced superpowered railgun that deals high chaos damage.",
           "grid_width": 1, "grid_height": 2, "cost": 245,
-          "damage_min": 875, "damage_max": 1250, "damage_type": "chaos",
+          "damage_min": 875, "damage_max": 1250, "damage_type": "plasma",
           "range": 1000, "attack_interval": 5.28, "projectile_speed": 1200,
           "attack_type": "projectile", "splash_radius": 100, "targets": ["ground", "air"]
         },
@@ -1844,7 +1844,7 @@
           "cost": 415,
           "damage_min": 0,
           "damage_max": 0,
-          "damage_type": "chaos",
+          "damage_type": "plasma",
           "range": 450,
           "attack_interval": 60.0,
           "projectile_speed": 0,
@@ -1865,7 +1865,7 @@
           "name": "Ship Banner", 
           "description": "Enemies know where not to tread.",
           "grid_width": 1, "grid_height": 1, "cost": 1,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "scurvy",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": [],
           "special": {
@@ -1876,7 +1876,7 @@
           "name": "Saltwater Scoundrel", 
           "description": "Small time cutthroats intent on stealing your valuables.",
           "grid_width": 1, "grid_height": 1, "cost": 8,
-          "damage_min": 6, "damage_max": 10, "damage_type": "normal",
+          "damage_min": 6, "damage_max": 10, "damage_type": "scurvy",
           "range": 500, "attack_interval": 0.6, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": null, "targets": ["ground"],
           "special": {
@@ -1890,7 +1890,7 @@
           "name": "Grog Barrel Launcher", 
           "description": "Roll out the barrels!",
           "grid_width": 1, "grid_height": 1, "cost": 23,
-          "damage_min": 26, "damage_max": 50, "damage_type": "siege", 
+          "damage_min": 26, "damage_max": 50, "damage_type": "scurvy", 
           "range": 500, "attack_interval": 2.0, "projectile_speed": 300, "bounce": 2,
           "attack_type": "projectile", "splash_radius": 800, "targets": ["ground"], 
           "projectile_asset_id": "grog_barrel_projectile",
@@ -1905,7 +1905,7 @@
           "name": "Chain Shot Cannon", 
           "description": "A cannon that fires small chain shot projectiles, slowing enemy movement.",
           "grid_width": 1, "grid_height": 1, "cost": 85,
-          "damage_min": 39, "damage_max": 85, "damage_type": "siege",
+          "damage_min": 39, "damage_max": 85, "damage_type": "scurvy",
           "range": 900, "attack_interval": 1.2, "projectile_speed": 350, "bounce": 5, 
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
           "special": {"effect": "slow", "slow_percentage": 22, "duration": 1.0}
@@ -1914,7 +1914,7 @@
           "name": "Slaver", 
           "description": "Ruthless slavers that use whips to attack enemies.",
           "grid_width": 1, "grid_height": 1, "cost": 133,
-          "damage_min": 91, "damage_max": 156, "damage_type": "piercing",
+          "damage_min": 91, "damage_max": 156, "damage_type": "scurvy",
           "range": 650, "attack_interval": 1, 
           "attack_type": "whip", 
           "targets": ["ground", "air"],
@@ -1930,7 +1930,7 @@
           "name": "Broadside", 
           "description": "A large ship that fires 3 cannons from each side.",
           "grid_width": 2, "grid_height": 3, "cost": 183,
-          "damage_min": 180, "damage_max": 200, "damage_type": "siege",
+          "damage_min": 180, "damage_max": 200, "damage_type": "scurvy",
           "range": 750, "attack_interval": 1.5, "projectile_speed": 400,
           "attack_type": "projectile", "splash_radius": 200, "targets": ["ground"],
           "special": { 
@@ -1943,7 +1943,7 @@
           "name": "Cannoneer", 
           "description": "Fires a massive cannonball, but takes a long time to reload.",
           "grid_width": 2, "grid_height": 2, "cost": 197,
-          "damage_min": 795, "damage_max": 861, "damage_type": "piercing",
+          "damage_min": 795, "damage_max": 861, "damage_type": "scurvy",
           "range": 1050, "attack_interval": 11, "projectile_speed": 600,
           "attack_type": "projectile", "splash_radius": 220, "targets": ["ground", "air"]
         },
@@ -1955,7 +1955,7 @@
           "cost": 328,
           "damage_min": 100,
           "damage_max": 100,
-          "damage_type": "normal",
+          "damage_type": "scurvy",
           "range": 900,
           "attack_interval": 9.0,
           "projectile_speed": 400,
@@ -1978,7 +1978,7 @@
           "name": "Angelic Wall", 
           "description": "This blessed structure helps coordinate the defense of the heavens.",
           "grid_width": 1, "grid_height": 1, "cost": 1,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "holy",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": [],
           "special": {
@@ -1989,7 +1989,7 @@
           "name": "Wrath Tower", 
           "description": "A holy spike that strikes with divine wrath.",
           "grid_width": 1, "grid_height": 1, "cost": 14,
-          "damage_min": 13, "damage_max": 13, "damage_type": "piercing",
+          "damage_min": 13, "damage_max": 13, "damage_type": "holy",
           "range": 550, "attack_interval": 1, "projectile_speed": 450,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
           "special": {
@@ -2002,7 +2002,7 @@
           "name": "Retribution Tower", 
           "description": "Invading forces will be met with a holy retribution.",
           "grid_width": 1, "grid_height": 1, "cost": 48,
-          "damage_min": 46, "damage_max": 46, "damage_type": "normal",
+          "damage_min": 46, "damage_max": 46, "damage_type": "holy",
           "range": 550, "attack_interval": 1, "projectile_speed": 450,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
           "special": {
@@ -2015,7 +2015,7 @@
           "name": "Judgment Tower", 
           "description": "The darkness will be illuminated by the light of judgment.",
           "grid_width": 1, "grid_height": 1, "cost": 112,
-          "damage_min": 130, "damage_max": 130, "damage_type": "arcane",
+          "damage_min": 130, "damage_max": 130, "damage_type": "holy",
           "range": 850, "attack_interval": 1, "projectile_speed": 500,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
           "special": {
@@ -2028,7 +2028,7 @@
           "name": "Beacon of Light", 
           "description": "A beacon of pure heavenly light that exposes enemy armor.",
           "grid_width": 1, "grid_height": 1, "cost": 120,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "holy",
           "range": 850, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "aura", "splash_radius": null, "targets": [],
           "special": {
@@ -2043,7 +2043,7 @@
           "name": "Archangel", 
           "description": "Archangels hold the line against the forces of darkness.",
           "grid_width": 2, "grid_height": 2, "cost": 300,
-          "damage_min": 400, "damage_max": 400, "damage_type": "normal",
+          "damage_min": 400, "damage_max": 400, "damage_type": "holy",
           "range": 1000, "attack_interval": 1, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
           "special": {
@@ -2056,7 +2056,7 @@
           "name": "Seraphim", 
           "description": "Defilers are condemed to death by the seraphim.",
           "grid_width": 3, "grid_height": 3, "cost": 565,
-          "damage_min": 1000, "damage_max": 1000, "damage_type": "piercing",
+          "damage_min": 1000, "damage_max": 1000, "damage_type": "holy",
           "range": 1000, "attack_interval": 1, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
           "special": {
@@ -2074,7 +2074,7 @@
           "name": "Solar Wall", 
           "description": "Cosmic energy manifests into upwellings of light.",
           "grid_width": 1, "grid_height": 1, "cost": 1,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "cosmic",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": [],
           "special": {
@@ -2085,7 +2085,7 @@
           "name": "Sun Spot", 
           "description": "The Sun Spot emits waves ofsolar energy, causing nearby enemies to melt away.",
           "grid_width": 1, "grid_height": 1, "cost": 18,
-          "damage_min": 2, "damage_max": 14, "damage_type": "piercing",
+          "damage_min": 2, "damage_max": 14, "damage_type": "cosmic",
           "range": 600, "attack_interval": 0.2, "projectile_speed": null,
           "attack_type": "beam", "beam_color": [255, 255, 100], "splash_radius": null, "targets": ["ground", "air"],
           "special": {
@@ -2102,7 +2102,7 @@
           "name": "Solar Ray", 
           "description": "The Solar Ray beam emits pure solar energy.",
           "grid_width": 1, "grid_height": 1, "cost": 55,
-          "damage_min": 33, "damage_max": 75, "damage_type": "normal",
+          "damage_min": 33, "damage_max": 75, "damage_type": "cosmic",
           "range": 700, "attack_interval": 0.8, "projectile_speed": null,
           "attack_type": "beam",
           "beam_color": [255, 255, 100],
@@ -2122,7 +2122,7 @@
           "name": "Photon Relay", 
           "description": "The Photon Relay absorbs nearby energy, amplifying nearby solar damage.",
           "grid_width": 1, "grid_height": 1, "cost": 65,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "cosmic",
           "range": 0,
           "attack_interval": 999, 
           "attack_type": "aura", 
@@ -2137,7 +2137,7 @@
           "name": "Helios", 
           "description": "The Helios beam is a nightmare for anyone who enjoys the cold.",
           "grid_width": 1, "grid_height": 1, "cost": 185,
-          "damage_min": 137, "damage_max": 149, "damage_type": "piercing",
+          "damage_min": 137, "damage_max": 149, "damage_type": "cosmic",
           "range": 900, "attack_interval": 1, "projectile_speed": null,
           "attack_type": "beam", "beam_color": [255, 215, 0], "splash_radius": null, "targets": ["ground", "air"],
           "special": {
@@ -2156,7 +2156,7 @@
           "grid_width": 2, "grid_height": 2, "cost": 236,
           "damage_min": 317, 
           "damage_max": 406, 
-          "damage_type": "siege", 
+          "damage_type": "cosmic", 
           "range": 880, 
           "attack_interval": 1.0, 
           "projectile_speed": null,
@@ -2178,7 +2178,7 @@
           "name": "Star Forge", 
           "description": "Harnessing the power of nearby solar emissions, one can wield the power of the sun itself.",
           "grid_width": 3, "grid_height": 3, "cost": 700,
-          "damage_min": 2000, "damage_max": 2200, "damage_type": "chaos", "target_selection": "random",
+          "damage_min": 2000, "damage_max": 2200, "damage_type": "cosmic", "target_selection": "random",
           "range": 1200, "attack_interval": 0.7, "projectile_speed": null,
           "attack_type": "beam", "beam_color": [255, 100, 0], "splash_radius": 100, "targets": ["ground", "air"],
           "special": {
@@ -2216,7 +2216,7 @@
           "name": "Seer", 
           "description": "The seer is considered the wisest of the nomads.",
           "grid_width": 2, "grid_height": 2, "cost": 72,
-            "damage_min": 56, "damage_max": 83, "damage_type": "piercing",
+            "damage_min": 56, "damage_max": 83, "damage_type": "normal",
             "range": 785, "attack_interval": 1.0, "projectile_speed": 550,
           "attack_type": "beam", "beam_color": [165, 42, 42], "splash_radius": null, "targets": ["ground", "air"]
         },
@@ -2238,7 +2238,7 @@
           "name": "Spirit Ward", 
           "description": "This shamanistic effigy defends nomadic society against evil spirits.",
           "grid_width": 1, "grid_height": 1, "cost": 72,
-          "damage_min": 999, "damage_max": 999, "damage_type": "arcane",
+          "damage_min": 999, "damage_max": 999, "damage_type": "normal",
           "range": 600, "attack_interval": 0.3, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": null, "targets": ["ground", "air"],
           "target_armor_type": ["Ethereal"],
@@ -2303,7 +2303,7 @@
             "pass_through_hit_cooldown": 0.1,      
             "explosion_radius_units": 450,         
             "explosion_damage": 4600,                
-            "explosion_damage_type": "siege",       
+            "explosion_damage_type": "normal",       
             "pass_through_asset_id": "nomad_caravan", 
             "explosion_effect_asset_id": "nomad_caravan",
             "pass_through_launch_sound_file": "caravan_launch.mp3",
@@ -2320,7 +2320,7 @@
           "name": "Spike Wall", 
           "description": "It's both crude and terrifying, adorned with the skulls of the fallen.",
           "grid_width": 1, "grid_height": 1, "cost": 1,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "brutal",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": [],
           "special": {
@@ -2335,7 +2335,7 @@
           "cost": 16,
           "damage_min": 8,
           "damage_max": 13,
-          "damage_type": "normal",
+          "damage_type": "brutal",
           "range": 235,
           "attack_interval": 1.3,
           "projectile_speed": null,
@@ -2353,7 +2353,7 @@
           "cost": 40,
           "damage_min": 32,
           "damage_max": 55,
-          "damage_type": "arcane",
+          "damage_type": "brutal",
           "range": 400,
           "attack_interval": 1.5,
           "projectile_speed": 250,
@@ -2371,7 +2371,7 @@
           "cost": 55,
           "damage_min": 45,
           "damage_max": 60,
-          "damage_type": "normal",
+          "damage_type": "brutal",
           "range": 235,
           "attack_interval": 1.5,
           "projectile_speed": null,
@@ -2389,7 +2389,7 @@
           "cost": 50,
           "damage_min": 0,
           "damage_max": 0,
-          "damage_type": "normal",
+          "damage_type": "brutal",
           "range": 400,
           "attack_interval": 999,
           "projectile_speed": null,
@@ -2414,7 +2414,7 @@
           "cost": 100,
           "damage_min": 0,
           "damage_max": 0,
-          "damage_type": "normal",
+          "damage_type": "brutal",
           "range": 0,
           "attack_interval": 999,
           "projectile_speed": null,
@@ -2437,7 +2437,7 @@
           "cost": 180,
           "damage_min": 120,
           "damage_max": 150,
-          "damage_type": "siege",
+          "damage_type": "brutal",
           "range": 400,
           "attack_interval": 2.5,
           "projectile_speed": null,
@@ -2462,7 +2462,7 @@
           "attack_speed": 0.9,
           "range": 400,
           "attack_type": "instant",
-          "damage_type": "normal",
+          "damage_type": "brutal",
           "targets": ["ground"],
           "splash_radius": 0,
           "critical_chance": 0.20,
@@ -2484,7 +2484,7 @@
           "name": "Factory Wall", 
           "description": "The factory wall is a sturdy structure allows industry to flourish.",
           "grid_width": 1, "grid_height": 1, "cost": 1,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "industrial",
           "range": 0, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "none", "splash_radius": null, "targets": [],
           "special": {
@@ -2499,7 +2499,7 @@
           "cost": 10,
           "damage_min": 15,
           "damage_max": 18,
-          "damage_type": "normal",
+          "damage_type": "industrial",
           "range": 300,
           "attack_interval": 1,
           "projectile_speed": 500,
@@ -2511,7 +2511,7 @@
           "name": "Factory", 
           "description": "Factory smog increases the vulnerability of Air units.",
           "grid_width": 2, "grid_height": 2, "cost": 25,
-          "damage_min": 0, "damage_max": 0, "damage_type": "normal",
+          "damage_min": 0, "damage_max": 0, "damage_type": "industrial",
           "range": 700, "attack_interval": 999, "projectile_speed": null,
           "attack_type": "aura", "splash_radius": null, "targets": [],
           "special": {
@@ -2530,7 +2530,7 @@
           "cost": 101,
           "damage_min": 0,
           "damage_max": 0,
-          "damage_type": "normal",
+          "damage_type": "industrial",
           "range": 0,
           "attack_interval": 999,
           "attack_type": "none",
@@ -2551,7 +2551,7 @@
           "cost": 135,
           "damage_min": 120,         
           "damage_max": 150,
-          "damage_type": "siege",
+          "damage_type": "industrial",
           "range": 750,             
           "attack_interval": 4.0,     
           "projectile_speed": 600,    
@@ -2574,7 +2574,7 @@
           "attack_type": "projectile",
           "damage_min": 5,
           "damage_max": 8,
-          "damage_type": "pierce",
+          "damage_type": "piercing",
           "range": 600,
           "attack_interval": 0.1,
           "projectile_speed": 800,
@@ -2591,7 +2591,7 @@
         "industry_nuclear_silo": {
           "name": "Nuclear Silo", "grid_width": 3, "grid_height": 3, "cost": 1000,
           "damage_min": 30000, "damage_max": 35000,
-          "damage_type": "chaos",
+          "damage_type": "industrial",
           "min_range": 1500,
           "range": 3000,
           "attack_interval": 30.0,

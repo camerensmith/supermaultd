@@ -180,6 +180,7 @@ ENEMY_DATA = {
         "speed": 0.1,
         "value": 2,
         "armor_type": "Ethereal", 
+        "armor_value": 0,
         "type": "ground"
     },
     "green_dragon": { #advanced only, gold increase after wave
