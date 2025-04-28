@@ -217,6 +217,27 @@ class GameScene:
         data_dir = os.path.join(os.path.dirname(current_dir), 'data') 
         # --- End Base Directory ---
         
+        # --- Load Armor Data Based on Game Mode ---
+        armor_filename = 'armortypes.json' # Default
+        if self.game.selected_wave_mode == 'advanced':
+            armor_filename = 'armortypes_advanced.json'
+        elif self.game.selected_wave_mode == 'wild':
+            armor_filename = 'armortypes_wild.json'
+        
+        armor_file_path = os.path.join(data_dir, armor_filename)
+        print(f"[GameScene Init] Determined armor file path based on mode '{self.game.selected_wave_mode}': {armor_file_path}")
+        self.armor_data = self.load_armor_data(armor_file_path)
+        if not self.armor_data:
+            print(f"WARNING: Failed to load armor data from {armor_file_path}. Enemies might use default modifiers.")
+            # Optionally, try loading the default as a fallback
+            # default_armor_path = os.path.join(data_dir, 'armortypes.json')
+            # print(f"Attempting fallback load from: {default_armor_path}")
+            # self.armor_data = self.load_armor_data(default_armor_path)
+            # if not self.armor_data:
+            #     print("ERROR: Fallback armor data load also failed!")
+            #     self.armor_data = {} # Ensure it's at least an empty dict
+        # --- End Armor Data Loading ---
+        
         # Game state
         self.towers = []
         self.enemies = []

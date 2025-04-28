@@ -294,7 +294,7 @@ class RaceSelector:
         # --- End Right Side Elements ---
 
     def set_selection_mode(self, new_mode):
-        if new_mode in ['classic', 'advanced'] and self.wave_mode != new_mode:
+        if new_mode in ['classic', 'advanced', 'wild'] and self.wave_mode != new_mode:
             print(f"[RaceSelector] Mode changed to: {new_mode}")
             self.wave_mode = new_mode
             # Clear current selection when mode changes
@@ -312,7 +312,7 @@ class RaceSelector:
             
             # Update the title label based on the new mode
             if self.title_label: # Check if label exists
-                if self.wave_mode == 'advanced':
+                if self.wave_mode == 'advanced' or self.wave_mode == 'wild':
                     self.title_label.set_text('Select Two Races')
                 else:
                     self.title_label.set_text('Select Your Race')
@@ -345,9 +345,8 @@ class RaceSelector:
                             else:
                                 btn.unselect()
                     # If already selected, do nothing (classic mode doesn't deselect)
-
-                elif self.wave_mode == 'advanced':
-                    # Advanced mode: Select up to two
+                elif self.wave_mode == 'advanced' or self.wave_mode == 'wild':
+                    # Advanced/Wild mode: Select up to two
                     if clicked_race_id in self.selected_races:
                         # Deselect if already selected
                         self.selected_races.remove(clicked_race_id)
@@ -366,7 +365,7 @@ class RaceSelector:
                 image_to_show = self.placeholder_image
                 combination_found = False
 
-                if self.wave_mode == 'advanced' and len(self.selected_races) == 2:
+                if (self.wave_mode == 'advanced' or self.wave_mode == 'wild') and len(self.selected_races) == 2:
                     # Try to find a combined entry
                     combo_key = tuple(sorted(self.selected_races))
                     combo_data = self.combined_race_lookup.get(combo_key)
@@ -412,6 +411,15 @@ class RaceSelector:
     def get_selected_races(self):
         """Get the currently selected list of race IDs"""
         return self.selected_races
+
+    def update_button_visuals(self):
+        """Updates the visual state of all race buttons based on current selections."""
+        for race_id, button in self.race_buttons:
+            if race_id in self.selected_races:
+                button.select() # Use pygame_gui select/unselect for visual state
+            else:
+                button.unselect()
+        # No need to rebuild here unless object_id changes drastically
 
     def kill(self):
         """Remove the race selector panel and its elements from the UI manager."""

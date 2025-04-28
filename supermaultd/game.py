@@ -50,7 +50,7 @@ class Game:
         # --------------------------------------
         
         # --- Add Wave Mode Selection State ---
-        self.selected_wave_mode = "classic" # 'classic' or 'advanced'
+        self.selected_wave_mode = "classic" # 'classic' or 'advanced' or 'wild'
         self.wave_mode_buttons = {} # To hold references to the buttons
         # --- End Wave Mode Selection State ---
         
@@ -138,9 +138,11 @@ class Game:
         # --- Store Menu Music Paths --- 
         self.classic_music_path = None
         self.advanced_music_path = None
+        self.wild_music_path = None
         try:
             classic_path = os.path.join("assets", "sounds", "Theme.mp3")
             advanced_path = os.path.join("assets", "sounds", "Theme_advanced.mp3")
+            wild_path = os.path.join("assets", "sounds", "theme_wild.mp3")
             
             if os.path.exists(classic_path):
                 self.classic_music_path = classic_path
@@ -153,6 +155,12 @@ class Game:
                 print(f"[Game Init] Found advanced music: {advanced_path}")
             else:
                 print(f"[Game Init] Warning: Advanced music file not found: {advanced_path}")
+                
+            if os.path.exists(wild_path):
+                self.wild_music_path = wild_path
+                print(f"[Game Init] Found wild music: {wild_path}")
+            else:
+                print(f"[Game Init] Warning: Wild music file not found: {wild_path}")
         except Exception as e:
              print(f"[Game Init] Error checking music paths: {e}")
         # --- End Music Path Storing ---
@@ -160,6 +168,7 @@ class Game:
         # --- Load Title Images --- 
         self.title_classic_img = None
         self.title_advanced_img = None
+        self.title_wild_img = None
         self.placeholder_surface = None # Single placeholder for fallback
 
         # Function to load and scale a title image
@@ -185,12 +194,13 @@ class Game:
                 print(f"[Game Init] Error loading/scaling {filename}: {e}")
             return None
 
-        # Load classic and advanced images
+        # Load classic, advanced, and wild images
         self.title_classic_img = load_and_scale_title("supermaultd.png")
-        self.title_advanced_img = load_and_scale_title("supermaul_advanced.png")
+        self.title_advanced_img = load_and_scale_title("supermaultd_advanced.png")
+        self.title_wild_img = load_and_scale_title("supermaul_wild.png")
 
         # Create placeholder if either image failed (or if both failed)
-        if not self.title_classic_img or not self.title_advanced_img:
+        if not self.title_classic_img or not self.title_advanced_img or not self.title_wild_img:
             print("[Game Init] Creating placeholder for title image.")
             placeholder_width = int(self.screen_width * 0.6)
             placeholder_height = int(placeholder_width * 0.2)
@@ -242,32 +252,47 @@ class Game:
                                           self.click_sound,
                                           self.selected_wave_mode)
         
-        # --- Create Wave Mode Buttons ---
-        button_width = 150
-        button_height = 40
-        button_y_start = self.title_rect.bottom + 20 if self.title_rect else 100 # Place below title
-        button_x_pos = 50 # Place on the left side
+        # --- Create Wave Mode Buttons (Classic/Advanced/Wild) ---
+        self.wave_mode_buttons = {}
+        self.selected_wave_mode = 'classic' # Default mode
+
+        button_width = 200
+        button_height = 50
+        # <<< RESTORE ORIGINAL POSITIONING LOGIC >>>
+        button_x_pos = 50 # Fixed X position from left
+        button_y_start = self.title_rect.bottom + 20 if self.title_rect else 100 # Y position below title
 
         classic_rect = pygame.Rect(button_x_pos, button_y_start, button_width, button_height)
         self.wave_mode_buttons['classic'] = pygame_gui.elements.UIButton(
             relative_rect=classic_rect,
             text='Classic',
             manager=self.ui_manager,
-            object_id='#classic_wave_button' # Use specific ID if needed for theme
+            object_id='#classic_wave_button'
         )
 
+        # Position Advanced below Classic
         advanced_rect = pygame.Rect(button_x_pos, button_y_start + button_height + 10, button_width, button_height)
         self.wave_mode_buttons['advanced'] = pygame_gui.elements.UIButton(
             relative_rect=advanced_rect,
             text='Advanced',
             manager=self.ui_manager,
-            object_id='#advanced_wave_button' # Use specific ID if needed for theme
+            object_id='#advanced_wave_button'
+        )
+
+        # Position Wild below Advanced
+        wild_rect = pygame.Rect(button_x_pos, button_y_start + 2 * (button_height + 10), button_width, button_height)
+        self.wave_mode_buttons['wild'] = pygame_gui.elements.UIButton(
+            relative_rect=wild_rect,
+            text='Wild',
+            manager=self.ui_manager,
+            object_id='#wild_wave_button'
         )
 
         # Set initial selected state visually
         self.wave_mode_buttons['classic'].select()
-        self.wave_mode_buttons['advanced'].unselect() # Ensure advanced is not selected
-        print("[Game Init] Created Classic/Advanced wave mode buttons.")
+        self.wave_mode_buttons['advanced'].unselect()
+        self.wave_mode_buttons['wild'].unselect()
+        print("[Game Init] Created Classic/Advanced/Wild wave mode buttons.")
         # --- End Create Wave Mode Buttons ---
         
         # --- Start Initial Menu Music --- 
@@ -365,7 +390,7 @@ class Game:
                 # If the manager processed the event, maybe RaceSelector doesn't need to?
                 # Let's assume RaceSelector might still need some events (e.g., non-UI ones if any)
                 if hasattr(self.race_selector, 'handle_event'): # Check if method exists
-                    self.race_selector.handle_event(event) 
+                    self.race_selector.handle_event(event)
                 
                 # Check for UI Button Presses (including our new buttons and RaceSelector's confirm)
                 if event.type == pygame_gui.UI_BUTTON_PRESSED:
@@ -373,8 +398,15 @@ class Game:
                     if event.ui_element == self.wave_mode_buttons['classic']:
                         if self.selected_wave_mode != 'classic':
                             self.selected_wave_mode = 'classic'
+                            # <<< CLEAR RACE SELECTIONS LIST >>>
+                            self.race_selector.selected_races = []
+                            # <<< CALL VISUAL UPDATE >>>
+                            if hasattr(self.race_selector, 'update_button_visuals'):
+                                self.race_selector.update_button_visuals()
+                            # <<< END CLEAR >>>
                             self.wave_mode_buttons['classic'].select()
                             self.wave_mode_buttons['advanced'].unselect()
+                            self.wave_mode_buttons['wild'].unselect() # <<< DESELECT WILD
                             if hasattr(self.race_selector, 'set_selection_mode'):
                                 self.race_selector.set_selection_mode('classic')
                             # <<< UPDATE ACTIVE IMAGE and RECT >>>
@@ -391,8 +423,15 @@ class Game:
                     elif event.ui_element == self.wave_mode_buttons['advanced']:
                         if self.selected_wave_mode != 'advanced':
                             self.selected_wave_mode = 'advanced'
+                            # <<< CLEAR RACE SELECTIONS LIST >>>
+                            self.race_selector.selected_races = []
+                            # <<< CALL VISUAL UPDATE >>>
+                            if hasattr(self.race_selector, 'update_button_visuals'):
+                                self.race_selector.update_button_visuals()
+                            # <<< END CLEAR >>>
                             self.wave_mode_buttons['advanced'].select()
                             self.wave_mode_buttons['classic'].unselect()
+                            self.wave_mode_buttons['wild'].unselect() # <<< DESELECT WILD
                             if hasattr(self.race_selector, 'set_selection_mode'):
                                 self.race_selector.set_selection_mode('advanced')
                             # <<< UPDATE ACTIVE IMAGE and RECT >>>
@@ -406,6 +445,33 @@ class Game:
                             # <<< END MUSIC CHANGE >>>
                             print("[Game Event] Switched to Advanced wave mode.")
                             if self.click_sound: self.click_sound.play()
+                    # <<< HANDLE WILD BUTTON CLICK >>>
+                    elif event.ui_element == self.wave_mode_buttons['wild']:
+                        if self.selected_wave_mode != 'wild':
+                            self.selected_wave_mode = 'wild'
+                            # <<< CLEAR RACE SELECTIONS LIST >>>
+                            self.race_selector.selected_races = []
+                            # <<< CALL VISUAL UPDATE >>>
+                            if hasattr(self.race_selector, 'update_button_visuals'):
+                                self.race_selector.update_button_visuals()
+                            # <<< END CLEAR >>>
+                            self.wave_mode_buttons['wild'].select()
+                            self.wave_mode_buttons['classic'].unselect()
+                            self.wave_mode_buttons['advanced'].unselect()
+                            # <<< ADD CALL TO set_selection_mode for wild >>>
+                            if hasattr(self.race_selector, 'set_selection_mode'):
+                                self.race_selector.set_selection_mode('wild')
+                            # <<< END ADD CALL >>>
+                            # Update active image
+                            self.active_title_img = self.title_wild_img if self.title_wild_img else self.placeholder_surface
+                            if self.active_title_img:
+                                self.title_rect = self.active_title_img.get_rect(centerx=self.screen_width // 2)
+                                self.title_rect.top = 20
+                            # Play wild music
+                            self._play_menu_music(self.wild_music_path)
+                            print("[Game Event] Switched to Wild wave mode.")
+                            if self.click_sound: self.click_sound.play()
+                    # <<< END WILD BUTTON HANDLING >>>
                     # --- End Wave Mode Button Handling ---
 
                     # Check if the CONFIRM button in RaceSelector was pressed
@@ -417,15 +483,17 @@ class Game:
                         valid_selection = False
                         if self.selected_wave_mode == 'classic' and len(selected_races) == 1:
                             valid_selection = True
-                        elif self.selected_wave_mode == 'advanced' and len(selected_races) == 2:
+                        # <<< ADD WILD TO 2-RACE CHECK >>>
+                        elif (self.selected_wave_mode == 'advanced' or self.selected_wave_mode == 'wild') and len(selected_races) == 2:
                             valid_selection = True
                         else:
                             # Provide feedback if invalid
                             if self.selected_wave_mode == 'classic':
                                 print("[Game Event] Invalid Selection: Classic mode requires exactly 1 race.")
                                 # TODO: Show visual feedback to user?
-                            else:
-                                print("[Game Event] Invalid Selection: Advanced mode requires exactly 2 races.")
+                            # <<< UPDATE ADVANCED/WILD MESSAGE >>>
+                            elif self.selected_wave_mode == 'advanced' or self.selected_wave_mode == 'wild':
+                                print(f"[Game Event] Invalid Selection: {self.selected_wave_mode.capitalize()} mode requires exactly 2 races.")
                                 # TODO: Show visual feedback to user?
                             # Play an error sound?
 
@@ -440,7 +508,14 @@ class Game:
                             # Determine Wave File (Path logic is okay now)
                             current_dir = os.path.dirname(os.path.abspath(__file__))
                             data_dir = os.path.join(current_dir, 'data')
-                            wave_filename = 'waves_advanced.json' if self.selected_wave_mode == 'advanced' else 'waves.json'
+                            # <<< UPDATE WAVE FILENAME LOGIC >>>
+                            if self.selected_wave_mode == 'advanced':
+                                wave_filename = 'waves_advanced.json'
+                            elif self.selected_wave_mode == 'wild':
+                                wave_filename = 'waves_wild.json'
+                            else: # Default to classic
+                                wave_filename = 'waves.json'
+                            # <<< END WAVE FILENAME LOGIC >>>
                             wave_file_path = os.path.join(data_dir, wave_filename)
                             print(f"[Game Event] Using wave file: {wave_file_path}")
 
@@ -448,6 +523,7 @@ class Game:
                             self.race_selector.kill()
                             self.wave_mode_buttons['classic'].kill()
                             self.wave_mode_buttons['advanced'].kill()
+                            self.wave_mode_buttons['wild'].kill() # <<< KILL WILD BUTTON
                             print("[Game Event] Race selector and wave mode UI killed.")
 
                             try:
