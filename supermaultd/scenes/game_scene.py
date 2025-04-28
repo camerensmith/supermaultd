@@ -122,6 +122,25 @@ class GameScene:
             print(f"[GameScene Init] Error loading game over image: {e}")
         # --- End Game Over Image Loading ---
 
+        # --- Load Goblin Destruct Sound --- 
+        self.goblin_destruct_sound = None
+        try:
+            destruct_sound_path = os.path.join("assets", "sounds", "goblin_destruct.mp3")
+            if os.path.exists(destruct_sound_path):
+                self.goblin_destruct_sound = pygame.mixer.Sound(destruct_sound_path)
+                print(f"[GameScene Init] Loaded goblin destruct sound: {destruct_sound_path}")
+            else:
+                print(f"[GameScene Init] Warning: Goblin destruct sound file not found: {destruct_sound_path}")
+        except pygame.error as e:
+            print(f"[GameScene Init] Error loading goblin destruct sound: {e}")
+        # --- End Goblin Destruct Sound Loading ---
+
+        # --- Load Explosion Effect Image (Placeholder) --- 
+        self.explosion_effect_image = self.load_single_image("assets/effects/explosion.png") # Adjust path if needed
+        if not self.explosion_effect_image:
+            print("Warning: Failed to load assets/effects/explosion.png for self-destruct effect.")
+        # --- End Explosion Effect Image Loading ---
+
         # --- Placeholder Toggle Button ---
         self.debug_toggle_state = False # State of the toggle
         self.toggle_font = None
@@ -1427,9 +1446,89 @@ class GameScene:
                                 all_towers=self.towers      # Pass all towers
                             )
 
-                            # --- Process Generic Attack Results ---
+                            # --- Process Generic Attack Results --- 
+                            # <<< MODIFIED: Check for self-destruct first >>>
+                            if isinstance(attack_results, dict) and attack_results.get('action') == 'self_destruct':
+                                destruct_data = attack_results
+                                tower_to_remove = destruct_data.get('tower_instance')
+
+                                if tower_to_remove:
+                                    radius_units = destruct_data.get('radius', 0)
+                                    damage = destruct_data.get('damage', 0)
+                                    damage_type = destruct_data.get('damage_type', 'normal')
+                                    allowed_targets = destruct_data.get('targets', ['ground', 'air'])
+                                    
+                                    radius_pixels = radius_units * (config.GRID_SIZE / 200.0)
+                                    radius_sq = radius_pixels ** 2
+                                    
+                                    print(f"Self-Destruct: Radius={radius_pixels:.1f}px, Damage={damage} {damage_type}, Targets={allowed_targets}")
+                                    
+                                    # Apply AoE Damage
+                                    enemies_hit = 0
+                                    print(f"  DEBUG: Exploding Tower Pos: ({tower_to_remove.x:.1f}, {tower_to_remove.y:.1f})") # <<< ADDED DEBUG
+                                    for enemy in self.enemies: # Check all enemies
+                                        # <<< ADDED DETAILED DEBUG >>>
+                                        print(f"    Checking Enemy: {enemy.enemy_id} Type: {enemy.type}, HP: {enemy.health:.1f}, Pos: ({enemy.x:.1f}, {enemy.y:.1f})")
+                                        # --- Check Type and Health ---
+                                        if enemy.health > 0 and enemy.type in allowed_targets:
+                                            dist_sq = (enemy.x - tower_to_remove.x)**2 + (enemy.y - tower_to_remove.y)**2
+                                            print(f"      DistSq: {dist_sq:.1f} vs RadiusSq: {radius_sq:.1f}. Target Type Allowed? {'Yes' if enemy.type in allowed_targets else 'No'}")
+                                            # --- Check Distance ---
+                                            if dist_sq <= radius_sq:
+                                                print(f"      >>> HIT! Applying {damage:.1f} {damage_type} damage.") # <<< MODIFIED DEBUG
+                                                enemy.take_damage(damage, damage_type)
+                                                enemies_hit += 1
+                                                # print(f"  -> Hit {enemy.enemy_id}") # <<< REMOVED Redundant Print
+                                            # <<< END Added Distance Check Block >>>
+                                        else:
+                                            print(f"    Skipping Enemy: Health <= 0 or Type '{enemy.type}' not in {allowed_targets}")
+                                        # <<< END DETAILED DEBUG >>>
+                                    if enemies_hit > 0:
+                                        print(f"Self-Destruct hit {enemies_hit} enemies.")
+                                    else: # <<< ADDED ELSE >>>
+                                        print(f"  DEBUG: No enemies hit by explosion.") # <<< ADDED DEBUG
+                                    # <<< END Added Distance Check Block >>>
+                                    # Play Sound
+                                    if self.goblin_destruct_sound:
+                                        self.goblin_destruct_sound.play()
+                                        
+                                    # Create Visual Effect
+                                    if self.explosion_effect_image:
+                                        # Use tower's screen coordinates (adjust for grid offset)
+                                        effect_x = tower_to_remove.x + grid_offset_x
+                                        effect_y = tower_to_remove.y + grid_offset_y
+                                        # Simple fading effect for the explosion image
+                                        explosion_effect = Effect(effect_x, effect_y, 
+                                                                  self.explosion_effect_image, 
+                                                                  duration=0.9, # Total duration (hold + fade)
+                                                                  target_size=(int(radius_pixels*2), int(radius_pixels*2)), # Scale effect to radius
+                                                                  hold_duration=0.3) # Time before starting fade
+                                        self.effects.append(explosion_effect)
+                                
+                                    # --- Clear Grid Cells for Non-Traversable Tower --- <<< ADDED
+                                    is_traversable = tower_to_remove.tower_data.get('traversable', False)
+                                    if not is_traversable:
+                                        print(f"  Clearing grid cells for self-destructed tower {tower_to_remove.tower_id}")
+                                        for y in range(tower_to_remove.top_left_grid_y, tower_to_remove.top_left_grid_y + tower_to_remove.grid_height):
+                                            for x in range(tower_to_remove.top_left_grid_x, tower_to_remove.top_left_grid_x + tower_to_remove.grid_width):
+                                                if 0 <= y < self.grid_height and 0 <= x < self.grid_width:
+                                                    if self.grid[y][x] == 1: # Only reset if it was marked as tower
+                                                        self.grid[y][x] = 0
+                                    # --- End Grid Clearing ---
+
+                                    # Remove tower from game (NO refund, NO grid clearing)
+                                    self.towers.remove(tower_to_remove)
+                                    # Ensure tower links are updated if an Arc Tower explodes (unlikely but safe)
+                                    if tower_to_remove.tower_id == 'spark_arc_tower':
+                                        self.update_tower_links()
+                                        
+                                    # Skip further processing for this (now removed) tower this frame
+                                    # Continue to the next tower in the main loop
+                                    continue 
+
+                            # --- Else: Process standard results (Projectiles/Effects) ---
                             self.process_attack_results(attack_results, grid_offset_x, grid_offset_y)
-                            # --- End Processing ---
+                            # --- End Processing --- 
                     # --- End Attack Check ---
 
         # --- Process Pulsed Auras (Affecting Enemies) ---

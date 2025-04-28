@@ -766,7 +766,29 @@ class Tower:
         return damage, is_crit # Level 1 (8 spaces)
 
     def attack(self, target, current_time, all_enemies, tower_buff_auras, grid_offset_x, grid_offset_y, visual_assets=None, all_towers=None):
-        """Perform an attack on the target enemy."""
+        """Perform an attack. Return a list of projectiles, effects, or None."""
+        # --- BEGIN ADDED CODE: Self-Destruct Check ---
+        if self.special and self.special.get("effect") == "self_destruct":
+            chance = self.special.get("self_destruct_percentage_chance", 0)
+            if random.uniform(0, 100) < chance:
+                print(f"Tower {self.tower_id} is self-destructing!")
+                # Return dictionary indicating self-destruct action and parameters
+                return {
+                    'action': 'self_destruct',
+                    'radius': self.special.get("self_destruct_radius", 0),
+                    'damage': self.special.get("self_destruct_damage", 0),
+                    'damage_type': self.special.get("self_destruct_damage_type", "normal"),
+                    'targets': self.special.get("self_destruct_targets", ["ground", "air"]),
+                    'tower_instance': self # Pass self for position/removal in GameScene
+                }
+            # Else: Chance failed, proceed to normal attack logic (if applicable)
+        # --- END ADDED CODE: Self-Destruct Check ---
+
+        # Determine target for salvo if applicable
+        if self.tower_id.endswith('gattling_turret'):
+            # Implement gattling turret logic
+            pass
+
         results = {'projectiles': [], 'effects': []}
         
         # --- Adjacency Requirement Check --- 

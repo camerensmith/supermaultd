@@ -679,6 +679,13 @@ class Projectile:
                 impact_sound.play()
             except:
                 print("Could not play bomb bombardier impact sound")
+
+        if self.source_tower and self.source_tower.tower_id == "goblin_catapult_brigade":
+            try:
+                impact_sound = pygame.mixer.Sound("assets/sounds/goblin_catapult_hit.mp3")
+                impact_sound.play()
+            except:
+                print("Could not play bomb bombardier impact sound")
                 
         # Play impact sound for tech nuclear silo
         if self.source_tower and self.source_tower.tower_id == "industry_nuclear_silo":

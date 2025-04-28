@@ -32,7 +32,7 @@
     "delay_before_wave": 20.0,
     "wave_completion_bonus": 35,
     "enemies": [
-      { "type": "red_flyer", "count": 50, "spawn_interval": 0.8, "initial_delay": 0.0 }
+      { "type": "redrum", "count": 50, "spawn_interval": 0.8, "initial_delay": 0.0 }
     ]
   },
 
@@ -104,7 +104,7 @@
     "delay_before_wave": 20.0,
     "wave_completion_bonus": 60,
     "enemies": [
-      { "type": "green_dragon", "count": 50, "spawn_interval": 0.8 }
+      { "type": "terrorizer", "count": 50, "spawn_interval": 0.8 }
     ]
   },
 
@@ -185,7 +185,7 @@
     "delay_before_wave": 20.0,
     "wave_completion_bonus": 96,
     "enemies": [
-      { "type": "blue_dragon", "count": 50, "spawn_interval": 0.8 }
+      { "type": "glinter", "count": 50, "spawn_interval": 0.8 }
     ]
   },
 
@@ -328,7 +328,8 @@
     "delay_before_wave": 30.0,
     "wave_completion_bonus": 300,
     "enemies": [
-      { "type": "lord_supermaul", "count": 1, "spawn_interval": 0.8 }
+      { "type": "imp", "count": 35, "spawn_interval": 5.0 },
+      { "type": "lord_supermaul", "count": 1, "spawn_interval": 0.0 }
     ]
   }
 ]
