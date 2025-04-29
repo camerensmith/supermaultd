@@ -32,7 +32,7 @@
     "delay_before_wave": 20.0,
     "wave_completion_bonus": 35,
     "enemies": [
-      { "type": "red_flyer", "count": 50, "spawn_interval": 0.8, "initial_delay": 0.0 }
+      { "type": "redrum", "count": 50, "spawn_interval": 0.8, "initial_delay": 0.0 }
     ]
   },
 
@@ -104,7 +104,7 @@
     "delay_before_wave": 20.0,
     "wave_completion_bonus": 60,
     "enemies": [
-      { "type": "green_dragon", "count": 50, "spawn_interval": 0.8 }
+      { "type": "terrorizer", "count": 50, "spawn_interval": 0.8 }
     ]
   },
 
@@ -185,7 +185,7 @@
     "delay_before_wave": 20.0,
     "wave_completion_bonus": 96,
     "enemies": [
-      { "type": "blue_dragon", "count": 50, "spawn_interval": 0.8 }
+      { "type": "glinter", "count": 50, "spawn_interval": 0.8 }
     ]
   },
 
@@ -329,149 +329,7 @@
     "wave_completion_bonus": 300,
     "enemies": [
       { "type": "imp", "count": 35, "spawn_interval": 5.0 },
-      { "type": "lord_supermaul", "count": 1, "spawn_interval": 0.8 }
+      { "type": "lord_supermaul", "count": 1, "spawn_interval": 0.0 }
     ]
-  },
-
-
-  {
-    "delay_before_wave": 30.0,
-    "wave_completion_bonus": 7,
-    "enemies": [
-        { "type": "kerberos", "count": 15, "spawn_interval": 0.8 }
-      ]
-    },
-    {
-      "delay_before_wave": 30.0,
-      "wave_completion_bonus": 7,
-      "enemies": [
-        { "type": "beasttamer", "count": 15, "spawn_interval": 0.8 }
-      ]
-    },
-    {
-      "delay_before_wave": 30.0,
-      "wave_completion_bonus": 7,
-      "enemies": [
-        { "type": "bladeodon", "count": 15, "spawn_interval": 0.8 }
-      ]
-    },
-    {
-      "delay_before_wave": 30.0,
-      "wave_completion_bonus": 7,
-      "enemies": [
-        { "type": "carnifex", "count": 15, "spawn_interval": 0.8 }
-      ]
-    },
-    {
-      "delay_before_wave": 30.0,
-      "wave_completion_bonus": 7,
-      "enemies": [
-        { "type": "curseborn", "count": 15, "spawn_interval": 0.8 }
-      ]
-    },
-    {
-      "delay_before_wave": 30.0,
-      "wave_completion_bonus": 7,
-      "enemies": [
-        { "type": "darkjaw", "count": 15, "spawn_interval": 0.8 }
-      ]
-    },
-    {
-      "delay_before_wave": 30.0,
-      "wave_completion_bonus": 7,
-      "enemies": [
-        { "type": "dragon_guard", "count": 15, "spawn_interval": 0.8 }
-      ]
-    },
-    {
-      "delay_before_wave": 30.0,
-      "wave_completion_bonus": 7,
-      "enemies": [
-        { "type": "etherhunter", "count": 15, "spawn_interval": 0.8 }
-      ]
-    },
-    {
-      "delay_before_wave": 30.0,
-      "wave_completion_bonus": 7,
-      "enemies": [
-        { "type": "gremlin_king", "count": 15, "spawn_interval": 0.8 }
-      ]
-    },
-    {
-      "delay_before_wave": 30.0,
-      "wave_completion_bonus": 7,
-      "enemies": [
-        { "type": "grutto_guard", "count": 15, "spawn_interval": 0.8 }
-      ]
-    },
-    {
-      "delay_before_wave": 30.0,
-      "wave_completion_bonus": 7,
-      "enemies": [
-        { "type": "legionnaire", "count": 15, "spawn_interval": 0.8 }
-      ]
-    },
-    {
-      "delay_before_wave": 30.0,
-      "wave_completion_bonus": 500,
-      "enemies": [
-        { "type": "lieutenant_krug", "count": 1, "spawn_interval": 0.8 }
-      ]
-    },
-    {
-      "delay_before_wave": 30.0,
-      "wave_completion_bonus": 8,
-      "enemies": [
-        { "type": "lizard_wizard", "count": 15, "spawn_interval": 0.8 }
-      ]
-    },
-    {
-      "delay_before_wave": 30.0,
-      "wave_completion_bonus": 8,
-      "enemies": [
-        { "type": "mechadon", "count": 15, "spawn_interval": 0.8 }
-      ]
-    },
-    {
-      "delay_before_wave": 30.0,
-      "wave_completion_bonus": 8,
-      "enemies": [
-        { "type": "rift_devil", "count": 15, "spawn_interval": 0.8 }
-      ]
-    },
-    {
-      "delay_before_wave": 30.0,
-      "wave_completion_bonus": 8,
-      "enemies": [
-        { "type": "supermaul_demon_spawn", "count": 15, "spawn_interval": 0.8 }
-      ]
-    },
-    {
-      "delay_before_wave": 30.0,
-      "wave_completion_bonus": 8,
-      "enemies": [
-        { "type": "voodoo_demon", "count": 15, "spawn_interval": 0.8 }
-      ]
-    },
-    {
-      "delay_before_wave": 30.0,
-      "wave_completion_bonus": 9,
-      "enemies": [
-        { "type": "voodoo_overlord", "count": 15, "spawn_interval": 0.8 }
-      ]
-    },
-    {
-      "delay_before_wave": 30.0,
-      "wave_completion_bonus": 9,
-      "enemies": [
-        { "type": "voodoo_tyrant", "count": 15, "spawn_interval": 0.8 }
-      ]
-    },
-    {
-      "delay_before_wave": 30.0,
-      "wave_completion_bonus": 400,
-      "enemies": [
-        { "type": "lord_supermaul_reborn", "count": 1, "spawn_interval": 0.8 }
-      ]
-    }
-  ]
+  }
+]

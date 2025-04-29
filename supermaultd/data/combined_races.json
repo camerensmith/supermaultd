@@ -193,9 +193,9 @@
     },
     {
       "races": ["brine", "police_station"],
-      "combined_name": "Brine Enforcers",
+      "combined_name": "Aquatic Enforcers",
       "combined_description": "Oceanic police who bring law and order to the deep seas, holding sway over all aquatic creatures.",
-      "combined_image": "brine_enforcers.png"
+      "combined_image": "aquatic_enforcers.png"
     },
     {
       "races": ["brine", "tech_center"],
@@ -211,75 +211,75 @@
     },
     {
       "races": ["brine", "heaven"],
-      "combined_name": "Deep Sea Seraphs",
+      "combined_name": "Deep Sea Angels",
       "combined_description": "Angelic beings of the deep, their power drawn from the crushing depths of the oceans.",
-      "combined_image": "deep_sea_seraphs.png"
+      "combined_image": "deep_sea_angels.png"
     },
     {
       "races": ["brine", "solar"],
-      "combined_name": "Sunken Rays",
+      "combined_name": "Aphotic Rays",
       "combined_description": "A blend of solar and oceanic power, bringing destruction from both the depths and the sky.",
-      "combined_image": "sunken_rays.png"
+      "combined_image": "aphotics.png"
     },
     {
       "races": ["brine", "nomad_clans"],
-      "combined_name": "Nomadic Depths",
+      "combined_name": "Sunken Temples",
       "combined_description": "Wanderers of the deep seas, traveling the oceans in search of treasures and lost civilizations.",
-      "combined_image": "nomadic_depths.png"
+      "combined_image": "sunken_temples.png"
     },
     {
       "races": ["brine", "ogre_stronghold"],
-      "combined_name": "Titanic Brine",
+      "combined_name": "Nagogres",
       "combined_description": "Ogres from the deep seas, wielding the raw power of the ocean to crush their foes.",
-      "combined_image": "titanic_brine.png"
+      "combined_image": "nagogres.png"
     },
     {
       "races": ["brine", "industry"],
-      "combined_name": "Hydro Foundries",
+      "combined_name": "Deep State",
       "combined_description": "Industrialists who use the power of water to fuel their massive ocean-based factories.",
-      "combined_image": "hydro_foundries.png"
+      "combined_image": "deep_state.png"
     },
     {
       "races": ["police_station", "tech_center"],
-      "combined_name": "Enforcer Engineers",
+      "combined_name": "Tech Police",
       "combined_description": "A fusion of law enforcement and technology, using high-tech gadgets to control their domain.",
-      "combined_image": "enforcer_engineers.png"
+      "combined_image": "tech_police.png"
     },
     {
       "races": ["police_station", "seadogs"],
-      "combined_name": "Coastal Enforcers",
+      "combined_name": "Privateers",
       "combined_description": "Lawmen who patrol the seas, ensuring that order is maintained on the open waters.",
-      "combined_image": "coastal_enforcers.png"
+      "combined_image": "privateers.png"
     },
     {
       "races": ["police_station", "heaven"],
-      "combined_name": "Heavenly Enforcers",
+      "combined_name": "Heavens Guard",
       "combined_description": "Divine lawmen who bring justice with an iron fist, wielding celestial power to maintain order.",
-      "combined_image": "heavenly_enforcers.png"
+      "combined_image": "heavens_guard.png"
     },
     {
       "races": ["police_station", "solar"],
-      "combined_name": "Solar Enforcers",
+      "combined_name": "Star Patrol",
       "combined_description": "Enforcers of the law, powered by solar energy, bringing light and justice to the galaxy.",
-      "combined_image": "solar_enforcers.png"
+      "combined_image": "star_patrol.png"
     },
     {
       "races": ["police_station", "nomad_clans"],
-      "combined_name": "Nomadic Lawkeepers",
+      "combined_name": "Law Men",
       "combined_description": "Wandering enforcers of the law, roaming from place to place to ensure justice is upheld.",
-      "combined_image": "nomadic_lawkeepers.png"
+      "combined_image": "law_men.png"
     },
     {
-      "races": ["police_station", "ogre_stronghold"],
-      "combined_name": "Titan Enforcers",
+      "races": ["police_station", "tac"],
+      "combined_name": "Mecha Sheriffs",
       "combined_description": "Massive enforcers, using their brute strength to uphold the law and crush anyone who stands against them.",
-      "combined_image": "titan_enforcers.png"
+      "combined_image": "mecha_sheriffs.png"
     },
     {
       "races": ["police_station", "industry"],
-      "combined_name": "Industrial Enforcers",
+      "combined_name": "Industrial Safety",
       "combined_description": "Lawmen with a penchant for industry, using massive machines and technology to maintain order.",
-      "combined_image": "industrial_enforcers.png"
+      "combined_image": "industrial_safety.png"
     }
   ]
   

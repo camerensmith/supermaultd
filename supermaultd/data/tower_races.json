@@ -174,7 +174,7 @@
           "damage_max": 500,
           "damage_type": "chaos",
           "range": 900,
-          "attack_interval": 3.5,
+          "attack_interval": 2.5,
           "projectile_speed": null,
           "splash_radius": null,
           "attack_type": "instant",
@@ -269,10 +269,10 @@
           "attack_type": "projectile",
           "splash_radius": 550,
           "special": {
-            "effect": "burn",
-            "dot_damage": 10,
+            "effect": "alight",
+            "dot_damage": 5,
             "dot_interval": 0.3,
-            "dot_duration": 3,
+            "dot_duration": 1,
             "description": "Burns enemies."
           }
         },
@@ -321,10 +321,10 @@
             "ground"
           ],
           "special": {
-            "effect": "burn",
-            "dot_damage": 26,
+            "effect": "flameslash",
+            "dot_damage": 46,
             "dot_interval": 0.3,
-            "dot_duration": 3,
+            "dot_duration": 1,
             "description": "Burns enemies."
           }
         },
@@ -352,7 +352,7 @@
             "air"
           ],
           "special": {
-            "effect": "burn",
+            "effect": "scorch",
             "dot_damage": 50,
             "dot_interval": 0.3,
             "dot_duration": 3,
@@ -380,7 +380,7 @@
           ],
           "attack_visual_effect": "fire_burst",
           "special": {
-            "effect": "burn",
+            "effect": "sear",
             "dot_damage": 75,
             "dot_interval": 0.3,
             "dot_duration": 3,
@@ -512,7 +512,7 @@
           "grid_height": 2,
           "cost": 217,
           "damage_min": 500,
-          "damage_max": 600,
+          "damage_max": 700,
           "damage_type": "normal",
           "range_min": 500,
           "range": 2200,
@@ -520,7 +520,7 @@
           "pierce_adjacent": 5,
           "projectile_speed": 210,
           "attack_type": "projectile",
-          "splash_radius": null,
+          "splash_radius": 325,
           "targets": [
             "ground"
           ]
@@ -550,7 +550,7 @@
       "towers": {
         "zork_wall": {
           "name": "Zork Wall",
-          "description": "A disgusting wall of pure biomass.",
+          "description": "A purely gross wall of pure biomass.",
           "grid_width": 1,
           "grid_height": 1,
           "cost": 1,
@@ -588,7 +588,7 @@
         },
         "zork_slime_spewer": {
           "name": "Slime Spewer",
-          "description": "Spews a caustic green slime across a large area.",
+          "description": "Spews a disgusting green slime across a large area.",
           "grid_width": 1,
           "grid_height": 1,
           "cost": 11,
@@ -633,7 +633,7 @@
             "targets": [
               "ground"
             ],
-            "slow_percentage": 25,
+            "slow_percentage": 20,
             "aura_radius": 800
           }
         },
@@ -650,7 +650,7 @@
           "attack_interval": 1.67,
           "projectile_speed": 500,
           "attack_type": "projectile",
-          "splash_radius": null,
+          "splash_radius": 200,
           "targets": [
             "ground",
             "air"
@@ -669,37 +669,39 @@
           "attack_interval": 0.3,
           "projectile_speed": 300,
           "attack_type": "projectile",
-          "splash_radius": 775,
+          "splash_radius": 330,
           "targets": [
             "ground",
             "air"
           ],
           "special": {
             "effect": "swarm_power",
+            "description": "Swarmers connected within 400 units of each other have their attack speed boosted by 10%",
             "check_radius": 400,
-            "attack_speed_bonus_per_swarmer": 15
+            "attack_speed_bonus_per_swarmer": 10
           }
         },
         "zork_brood_lord": {
           "name": "Zork Brood Lord",
-          "description": "A powerful unit that leads the Zork Swarm to overwhelming odds.",
+          "description": "A hideous, towering monstrosity that leads the Zork Swarm to overwhelming odds.",
           "grid_width": 2,
           "grid_height": 2,
           "cost": 206,
           "damage_min": 674,
           "damage_max": 783,
           "damage_type": "normal",
-          "range": 820,
+          "range": 520,
           "attack_interval": 1.0,
           "projectile_speed": null,
           "attack_type": "instant",
-          "splash_radius": 100,
+          "splash_radius": 300,
           "targets": [
             "ground"
           ],
           "special": {
             "effect": "attack_speed_aura",
-            "attack_speed_multiplier": 1.3,
+            "description": "Increases the attack speed of all Zorklings in the area by 20%.",
+            "attack_speed_multiplier": 1.2,
             "aura_radius": 1500,
             "required_race": "zork"
           }
@@ -797,13 +799,15 @@
           "grid_height": 1,
           "cost": 139,
           "damage_min": 50,
-          "damage_max": 850,
+          "damage_max": 650,
           "attack_interval": 1.55,
           "range": 700,
           "splash_radius": 100,
           "damage_type": "normal",
           "attack_type": "projectile",
           "projectile_speed": 300,
+          "critical_chance": 0.1,
+          "critical_multiplier": 1.5,
           "targets": [
             "ground",
             "air"
@@ -818,7 +822,7 @@
           "damage_min": 282,
           "damage_max": 318,
           "attack_interval": 0.9,
-          "range": 550,
+          "range": 350,
           "splash_radius": 120,
           "damage_type": "normal",
           "attack_type": "instant",
@@ -826,7 +830,7 @@
             "ground"
           ],
           "critical_chance": 0.1,
-          "critical_multiplier": 1.2
+          "critical_multiplier": 1.1
         },
         "gaia_gift_of_gaia": {
           "name": "Gift of Gaia",
@@ -1023,6 +1027,7 @@
         },
         "bomb_lobber": {
           "name": "Bomb Lobber",
+          "description": "This tower throws bombs at the enemy in rapid succession.",
           "grid_width": 1,
           "grid_height": 1,
           "cost": 11,
@@ -1044,9 +1049,9 @@
           "description": "A mine field that deals damage to ground units walking over it.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 22,
-          "damage_min": 35,
-          "damage_max": 35,
+          "cost": 30,
+          "damage_min": 15,
+          "damage_max": 25,
           "damage_type": "siege",
           "range": 150,
           "attack_interval": 0.1,
@@ -1061,11 +1066,11 @@
         "bomb_grenade_launcher": {
           "name": "Grenade Launcher",
           "description": "A bouncing grenade dealing damage to both ground and air units in a large area.",
-          "grid_width": 2,
-          "grid_height": 2,
-          "cost": 16,
-          "damage_min": 250,
-          "damage_max": 325,
+          "grid_width": 1,
+          "grid_height": 1,
+          "cost": 116,
+          "damage_min": 150,
+          "damage_max": 355,
           "damage_type": "normal",
           "range": 800,
           "attack_interval": 8.0,
@@ -1094,7 +1099,7 @@
           "damage_max": 390,
           "damage_type": "siege",
           "range": 700,
-          "attack_interval": 2.2,
+          "attack_interval": 2.0,
           "projectile_speed": 150,
           "attack_type": "projectile",
           "splash_radius": 800,
@@ -1104,7 +1109,7 @@
           ]
         },
         "bomb_barrage_beacon": {
-          "name": "Bombardment Barrage Beacon",
+          "name": "Bombardment Beacon",
           "description": "Periodically calls down random artillery strikes within a large radius.",
           "grid_width": 1,
           "grid_height": 1,
@@ -1126,7 +1131,7 @@
             "bombardment_radius": 1000,
             "strike_aoe_radius": 500,
             "strike_damage_min": 600,
-            "strike_damage_max": 800,
+            "strike_damage_max": 1200,
             "strike_damage_type": "siege",
             "interval": 6.0,
             "description": "Periodically calls down random artillery strikes within a large radius."
@@ -1315,6 +1320,7 @@
           "damage_min": 5,
           "damage_max": 7,
           "damage_type": "arcane",
+          "target_selection": "random",
           "bounce": 1,
           "range": 1300,
           "attack_interval": 0.6,
@@ -1358,7 +1364,7 @@
               "ground",
               "air"
             ],
-            "dot_damage": 18,
+            "dot_damage": 64,
             "dot_interval": 0.5,
             "dot_duration": 5.0,
             "dot_damage_type": "arcane"
@@ -1767,7 +1773,7 @@
             "orb_angular_speed": 60,
             "orb_damage": 650,
             "orb_damage_type": "chaos",
-            "orb_hit_cooldown": 0.75,
+            "orb_hit_cooldown": 0.25,
             "orb_collision_radius": 12,
             "description": "Deploys orbiting energy orbs that damage nearby enemies."
           }
@@ -2416,9 +2422,9 @@
           "description": "The entropy trooper injects the void into every unfortunate soul they come across.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 109,
-          "damage_min": 120,
-          "damage_max": 180,
+          "cost": 111,
+          "damage_min": 128,
+          "damage_max": 173,
           "damage_type": "normal",
           "range": 700,
           "attack_interval": 1.5,
@@ -2440,12 +2446,12 @@
           "description": "The rift walker manipulates the void to steal the souls across the multiverse.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 159,
-          "damage_min": 120,
-          "damage_max": 180,
+          "cost": 169,
+          "damage_min": 320,
+          "damage_max": 333,
           "damage_type": "normal",
           "range": 700,
-          "attack_interval": 1.5,
+          "attack_interval": 1,
           "projectile_speed": null,
           "attack_type": "instant",
           "splash_radius": null,
@@ -2464,7 +2470,7 @@
           "description": "The void horror is unleashed to decimate entire armies who oppose the call of the void.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 434,
+          "cost": 361,
           "damage_min": 280,
           "damage_max": 350,
           "damage_type": "normal",
@@ -3920,9 +3926,9 @@
           "description": "Chieftains are the biggest and the strongest of the ogres.",
           "grid_width": 2,
           "grid_height": 2,
-          "cost": 203,
-          "damage_min": 621,
-          "damage_max": 700,
+          "cost": 255,
+          "damage_min": 611,
+          "damage_max": 685,
           "attack_speed": 0.9,
           "range": 400,
           "attack_type": "instant",

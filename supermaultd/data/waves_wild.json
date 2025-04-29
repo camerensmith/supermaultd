@@ -328,6 +328,7 @@
     "delay_before_wave": 30.0,
     "wave_completion_bonus": 300,
     "enemies": [
+      { "type": "imp", "count": 35, "spawn_interval": 5.0 },
       { "type": "lord_supermaul", "count": 1, "spawn_interval": 0.8 }
     ]
   },
@@ -337,7 +338,7 @@
     "delay_before_wave": 30.0,
     "wave_completion_bonus": 7,
     "enemies": [
-        { "type": "turtlesaur", "count": 15, "spawn_interval": 0.8 }
+        { "type": "kerberos", "count": 15, "spawn_interval": 0.8 }
       ]
     },
     {

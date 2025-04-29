@@ -3,6 +3,7 @@ import pygame_gui
 from config import WIDTH, HEIGHT, GRID_SIZE
 from pygame_gui.elements import UIButton, UILabel
 from pygame_gui.elements import UIScrollingContainer # Import the scrolling container
+import os
 
 class TowerSelector:
     def __init__(self, available_towers, tower_assets, manager, initial_money, panel_rect, damage_type_data, click_sound):
@@ -25,6 +26,19 @@ class TowerSelector:
         self.money = initial_money
         self.damage_type_data = damage_type_data # Store damage type data
         self.click_sound = click_sound # Store sound effect
+        
+        # --- Load Cannot Select Sound ---
+        self.cannot_select_sound = None
+        try:
+            cannot_select_path = os.path.join("assets", "sounds", "cannot_select.mp3") 
+            if os.path.exists(cannot_select_path):
+                self.cannot_select_sound = pygame.mixer.Sound(cannot_select_path)
+                print(f"[TowerSelector Init] Loaded cannot select sound: {cannot_select_path}")
+            else:
+                print(f"[TowerSelector Init] Warning: Cannot select sound file not found: {cannot_select_path}")
+        except pygame.error as e:
+            print(f"[TowerSelector Init] Error loading cannot select sound: {e}")
+        # --- End Cannot Select Sound Loading ---
         
         # Store panel dimensions from rect
         self.panel_rect = panel_rect
@@ -276,28 +290,50 @@ class TowerSelector:
     def handle_event(self, event):
         """Handle pygame_gui events"""
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
-            # Check which tower button container was pressed
+            clicked_button = event.ui_element
+            clicked_tower_id = None
+            
+            # Find which tower button was clicked
             for tower_id, button in self.tower_buttons.items():
-                if event.ui_element == button:
-                    if self.click_sound: self.click_sound.play() # Play click sound
-                    # Check if player can afford the tower
-                    tower_data = self.available_towers.get(tower_id)
-                    if tower_data and self.money >= tower_data['cost']:
-                        if self.selected_tower == tower_id:
-                            self.selected_tower = None
-                            print("Deselected tower")
+                if clicked_button == button:
+                    clicked_tower_id = tower_id
+                    break
+
+            if clicked_tower_id:
+                if self.click_sound: self.click_sound.play() # Play click sound
+                
+                tower_data = self.available_towers.get(clicked_tower_id)
+                can_afford = tower_data and self.money >= tower_data['cost']
+
+                if clicked_tower_id == self.selected_tower:
+                    # Clicked the already selected tower - Deselect it
+                    self.selected_tower = None
+                    clicked_button.unselect() # Visually deselect
+                    print("Deselected tower by clicking active button")
+                elif can_afford:
+                    # Clicked a new, affordable tower - Select it
+                    self.selected_tower = clicked_tower_id
+                    # Visually select the new one and deselect others
+                    for t_id, btn in self.tower_buttons.items():
+                        if t_id == clicked_tower_id:
+                            btn.select()
                         else:
-                            self.selected_tower = tower_id
-                            print(f"[TowerSelector handle_event] Assigned self.selected_tower = {self.selected_tower}") 
-                            print(f"Selected tower: {tower_id}")
-                    else:
-                        # TODO: Add visual feedback (e.g., shake button, red flash?)
-                        print("Not enough money to select this tower!")
-                    # No return here, let manager process event fully
-                    break # Found the button
-                    
-        self.manager.process_events(event) # Process all events
+                            btn.unselect()
+                    print(f"Selected tower: {clicked_tower_id}")
+                else:
+                    # Clicked an unaffordable tower - Play sound
+                    if self.cannot_select_sound: 
+                        self.cannot_select_sound.play()
+                    # (Maybe add other visual feedback later?)
+                    print("Not enough money to select this tower!")
+                    # Ensure nothing is selected internally if can't afford
+                    if self.selected_tower == clicked_tower_id:
+                         self.selected_tower = None # Should not happen here, but safe
+                         clicked_button.unselect()
         
+        # Let the manager process the event regardless of our handling
+        self.manager.process_events(event)
+
     def update(self, time_delta):
         """Update the UI manager"""
         self.manager.update(time_delta)
@@ -311,8 +347,11 @@ class TowerSelector:
         return self.selected_tower
         
     def clear_selection(self):
-        """Clear the current tower selection"""
+        """Clear the current tower selection and visually deselect all buttons."""
         self.selected_tower = None
+        # Loop through buttons and call unselect()
+        for button in self.tower_buttons.values():
+            button.unselect()
         print("Cleared tower selection")
         
     def update_money(self, new_amount):

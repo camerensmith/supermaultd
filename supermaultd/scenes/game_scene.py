@@ -172,7 +172,7 @@ class GameScene:
         # --- Debug Menu Panel --- 
         self.debug_menu_open = False # Is the menu visible?
         self.debug_menu_width = 200
-        self.debug_menu_height = 280 # <<< INCREASED HEIGHT SLIGHTLY
+        self.debug_menu_height = 380 # <<< INCREASED HEIGHT SLIGHTLY
         self.debug_menu_surface = None
         self.debug_menu_rect = None # Rect for positioning
         self.debug_menu_font = None
@@ -584,7 +584,7 @@ class GameScene:
                     elif is_previewing:
                         # New behavior: No tower here, but we are previewing, so cancel preview
                         print(f"Right-clicked empty grid position: ({grid_x}, {grid_y}) while previewing. Cancelling placement.")
-                        self.tower_selector.clear_selection()
+                        self.tower_selector.clear_selection() # <<< CALL CLEAR SELECTION
                         self.selected_tower = None 
                         self.tower_preview = None
                         # Play cancel sound
@@ -617,7 +617,7 @@ class GameScene:
                 
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                self.tower_selector.clear_selection()
+                self.tower_selector.clear_selection() # <<< CALL CLEAR SELECTION
                 self.selected_tower = None
                 self.tower_preview = None
             elif event.key == pygame.K_g: # G for Gnoll
@@ -2589,10 +2589,12 @@ class GameScene:
                                     armor_value = enemy_data.get('armor_value', '?')
                                     armor_type = enemy_data.get('armor_type', 'unknown')
                                     enemy_type = enemy_data.get('type', 'unknown') # <<< GET ENEMY TYPE >>>
+                                    speed = enemy_data.get('speed', '?') # <<< GET ENEMY SPEED >>>
                                     lines.append(f"  Name: {enemy_name}")
                                     lines.append(f"  Health: {hp}")
                                     lines.append(f"  Armor: {armor_value} ({armor_type})")
                                     lines.append(f"  Type: {enemy_type}") # <<< ADD TYPE DISPLAY >>>
+                                    lines.append(f"  Speed: {speed}") # <<< ADD SPEED DISPLAY >>>
                                 else:
                                     lines.append(f"  ID '{first_enemy_id}' (No Data)")
                             else:
