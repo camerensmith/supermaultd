@@ -66,7 +66,7 @@ def main():
             } # Note: Truncated sample data for brevity
             with open(game_data_path, 'w') as f:
                 json.dump(sample_data, f, indent=2) # Use indent=2 for readability
-            print(f"Created sample game data file at: {game_data_path}")
+            #print(f"Created sample game data file at: {game_data_path}")
         
         # Load the consolidated game data
         game_data = load_game_data(game_data_path)

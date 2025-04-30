@@ -140,7 +140,7 @@
     "delay_before_wave": 20.0,
     "wave_completion_bonus": 78,
     "enemies": [
-      { "type": "war_turtle", "count": 50, "spawn_interval": 0.8 }
+      { "type": "lumberer", "count": 50, "spawn_interval": 0.8 }
     ]
   },
 

@@ -36,7 +36,8 @@ class RaceSelector:
             scaled_height = int(original_height * scale_factor)
             self.title_image = pygame.transform.smoothscale(title_image, (400, scaled_height))
         except Exception as e:
-            print(f"Error loading title image: {e}")
+            #print(f"Error loading title image: {e}")
+            pass
         
         # Get available races, load descriptions and images
         self.races = list(game_data.get("races", {}).keys())
@@ -57,7 +58,8 @@ class RaceSelector:
             text_rect = text_surf.get_rect(center=self.placeholder_image.get_rect().center)
             self.placeholder_image.blit(text_surf, text_rect)
         except Exception as e:
-            print(f"Error creating placeholder image: {e}")
+            pass
+            #print(f"Error creating placeholder image: {e}")
             # self.placeholder_image remains None
             
         for race_id in self.races:
@@ -70,7 +72,8 @@ class RaceSelector:
                 try:
                     loaded_image = pygame.image.load(image_path).convert_alpha()
                 except Exception as e:
-                    print(f"Error loading image for race '{race_id}' at {image_path}: {e}")
+                    #print(f"Error loading image for race '{race_id}' at {image_path}: {e}")
+                    pass
             
             if loaded_image:
                 # Calculate scaled size preserving aspect ratio
@@ -82,12 +85,12 @@ class RaceSelector:
                 try:
                     scaled_image = pygame.transform.smoothscale(loaded_image, (scaled_width, scaled_height))
                     self.race_images[race_id] = scaled_image
-                    print(f"Loaded and scaled image for race '{race_id}'")
+                    #print(f"Loaded and scaled image for race '{race_id}'")
                 except Exception as e:
-                    print(f"Error scaling image for race '{race_id}': {e}")
+                    #print(f"Error scaling image for race '{race_id}': {e}")
                     self.race_images[race_id] = None # Fallback if scaling fails
             else:
-                print(f"Image not found for race '{race_id}' at {image_path}")
+                #print(f"Image not found for race '{race_id}' at {image_path}")
                 self.race_images[race_id] = None # Store None if not found/loaded
         
         # --- Load Combined Race Data --- 
@@ -107,7 +110,7 @@ class RaceSelector:
         try:
             with open(combined_data_path, 'r') as f:
                 combined_data = json.load(f)
-            print(f"Loaded combined race data from: {combined_data_path}")
+            #print(f"Loaded combined race data from: {combined_data_path}")
             
             for combo_info in combined_data:
                 base_races = combo_info.get("races", [])
@@ -115,7 +118,7 @@ class RaceSelector:
                     # Create a consistent key by sorting race IDs
                     combo_key = tuple(sorted(base_races))
                     self.combined_race_lookup[combo_key] = combo_info
-                    print(f"  - Processed combination for: {combo_key}")
+                    #print(f"  - Processed combination for: {combo_key}")
                     
                     # Load the combined image
                     img_filename = combo_info.get("combined_image")
@@ -132,18 +135,21 @@ class RaceSelector:
                             scaled_height = int(original_height * ratio)
                             scaled_image = pygame.transform.smoothscale(loaded_image, (scaled_width, scaled_height))
                             self.combined_race_images[combo_key] = scaled_image
-                            print(f"    - Loaded combined image: {img_filename}")
+                            #print(f"    - Loaded combined image: {img_filename}")
                         except Exception as e:
-                            print(f"    - Error loading/scaling combined image '{img_filename}' for {combo_key}: {e}")
+                            #print(f"    - Error loading/scaling combined image '{img_filename}' for {combo_key}: {e}")
                             self.combined_race_images[combo_key] = None # Store None on error
                     else:
                          self.combined_race_images[combo_key] = None # Store None if no image specified
         except FileNotFoundError:
-            print(f"Warning: Combined race data file not found: {combined_data_path}")
+            #print(f"Warning: Combined race data file not found: {combined_data_path}")
+            pass
         except json.JSONDecodeError as e:
-            print(f"Error decoding JSON from {combined_data_path}: {e}")
+            #print(f"Error decoding JSON from {combined_data_path}: {e}")
+            pass
         except Exception as e:
-            print(f"Error processing combined race data: {e}")
+            #print(f"Error processing combined race data: {e}")
+            pass
         # --- End Combined Race Data Loading --- 
         
         # --- Panel sizing and positioning based on screen size ---
@@ -295,7 +301,7 @@ class RaceSelector:
 
     def set_selection_mode(self, new_mode):
         if new_mode in ['classic', 'advanced', 'wild'] and self.wave_mode != new_mode:
-            print(f"[RaceSelector] Mode changed to: {new_mode}")
+            #print(f"[RaceSelector] Mode changed to: {new_mode}")
             self.wave_mode = new_mode
             # Clear current selection when mode changes
             self.selected_races = []
@@ -425,4 +431,4 @@ class RaceSelector:
         """Remove the race selector panel and its elements from the UI manager."""
         if self.panel:
             self.panel.kill()
-            print("RaceSelector panel killed.") 
+            #print("RaceSelector panel killed.") 

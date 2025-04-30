@@ -75,11 +75,11 @@ class GameScene:
             death_sound_path = os.path.join("assets", "sounds", "death.mp3") 
             if os.path.exists(death_sound_path):
                 self.death_sound = pygame.mixer.Sound(death_sound_path)
-                print(f"[GameScene Init] Loaded death sound: {death_sound_path}")
+                #print(f"[GameScene Init] Loaded death sound: {death_sound_path}")
             else:
-                print(f"[GameScene Init] Warning: Death sound file not found: {death_sound_path}")
+                pass
         except pygame.error as e:
-            print(f"[GameScene Init] Error loading death sound: {e}")
+            pass
         # --- End Death Sound Loading ---
 
         # --- Load Life Loss Sound ---
@@ -88,11 +88,11 @@ class GameScene:
             loss_life_sound_path = os.path.join("assets", "sounds", "loss_life.mp3")
             if os.path.exists(loss_life_sound_path):
                 self.loss_life_sound = pygame.mixer.Sound(loss_life_sound_path)
-                print(f"[GameScene Init] Loaded life loss sound: {loss_life_sound_path}")
+                #print(f"[GameScene Init] Loaded life loss sound: {loss_life_sound_path}")
             else:
-                print(f"[GameScene Init] Warning: Life loss sound file not found: {loss_life_sound_path}")
+                pass
         except pygame.error as e:
-            print(f"[GameScene Init] Error loading life loss sound: {e}")
+            pass
         # --- End Life Loss Sound Loading ---
 
         # --- Load Game Over Sound --- 
@@ -101,11 +101,13 @@ class GameScene:
             game_over_sound_path = os.path.join("assets", "sounds", "game_over.mp3")
             if os.path.exists(game_over_sound_path):
                 self.game_over_sound = pygame.mixer.Sound(game_over_sound_path)
-                print(f"[GameScene Init] Loaded game over sound: {game_over_sound_path}")
+                #print(f"[GameScene Init] Loaded game over sound: {game_over_sound_path}")
             else:
-                print(f"[GameScene Init] Warning: Game over sound file not found: {game_over_sound_path}")
+                pass
+               # print(f"[GameScene Init] Warning: Game over sound file not found: {game_over_sound_path}")
         except pygame.error as e:
-            print(f"[GameScene Init] Error loading game over sound: {e}")
+            #print(f"[GameScene Init] Error loading game over sound: {e}")
+            pass
         # --- End Game Over Sound Loading ---
 
         # --- Load Game Over Image --- 
@@ -115,11 +117,13 @@ class GameScene:
             if os.path.exists(game_over_image_path):
                 # Load with convert_alpha for potential transparency
                 self.game_over_image = pygame.image.load(game_over_image_path).convert_alpha()
-                print(f"[GameScene Init] Loaded game over image: {game_over_image_path}")
+                #print(f"[GameScene Init] Loaded game over image: {game_over_image_path}")
             else:
-                print(f"[GameScene Init] Warning: Game over image file not found: {game_over_image_path}")
+                pass
+                #print(f"[GameScene Init] Warning: Game over image file not found: {game_over_image_path}")
         except pygame.error as e:
-            print(f"[GameScene Init] Error loading game over image: {e}")
+            #print(f"[GameScene Init] Error loading game over image: {e}")
+            pass
         # --- End Game Over Image Loading ---
 
         # --- Load Goblin Destruct Sound --- 
@@ -128,17 +132,20 @@ class GameScene:
             destruct_sound_path = os.path.join("assets", "sounds", "goblin_destruct.mp3")
             if os.path.exists(destruct_sound_path):
                 self.goblin_destruct_sound = pygame.mixer.Sound(destruct_sound_path)
-                print(f"[GameScene Init] Loaded goblin destruct sound: {destruct_sound_path}")
+                #print(f"[GameScene Init] Loaded goblin destruct sound: {destruct_sound_path}")
             else:
-                print(f"[GameScene Init] Warning: Goblin destruct sound file not found: {destruct_sound_path}")
+                pass
+                #print(f"[GameScene Init] Warning: Goblin destruct sound file not found: {destruct_sound_path}")
         except pygame.error as e:
-            print(f"[GameScene Init] Error loading goblin destruct sound: {e}")
+            #print(f"[GameScene Init] Error loading goblin destruct sound: {e}")
+            pass
         # --- End Goblin Destruct Sound Loading ---
 
         # --- Load Explosion Effect Image (Placeholder) --- 
         self.explosion_effect_image = self.load_single_image("assets/effects/explosion.png") # Adjust path if needed
         if not self.explosion_effect_image:
-            print("Warning: Failed to load assets/effects/explosion.png for self-destruct effect.")
+            pass
+            #print("Warning: Failed to load assets/effects/explosion.png for self-destruct effect.")
         # --- End Explosion Effect Image Loading ---
 
         # --- Placeholder Toggle Button ---
@@ -158,9 +165,9 @@ class GameScene:
             # Render with antialiasing and background color
             self.toggle_off_surface = self.toggle_font.render(off_text, True, text_color, bg_color_off)
             self.toggle_on_surface = self.toggle_font.render(on_text, True, text_color, bg_color_on)
-            print("[GameScene Init] Loaded font and created toggle button surfaces.")
+            #print("[GameScene Init] Loaded font and created toggle button surfaces.")
         except Exception as e:
-            print(f"[GameScene Init] Error loading font or creating toggle surfaces: {e}")
+            #print(f"[GameScene Init] Error loading font or creating toggle surfaces: {e}")
             # Fallback: Create simple placeholder surfaces if font fails
             fallback_size = (80, 20)
             self.toggle_off_surface = pygame.Surface(fallback_size)
@@ -191,9 +198,9 @@ class GameScene:
             # text_surf = self.debug_menu_font.render(placeholder_text, True, text_color)
             # text_rect = text_surf.get_rect(topleft=(5, 5)) # Add padding
             # self.debug_menu_surface.blit(text_surf, text_rect)
-            print("[GameScene Init] Loaded debug menu font.") # Adjusted print
+            #print("[GameScene Init] Loaded debug menu font.") # Adjusted print
         except Exception as e:
-            print(f"[GameScene Init] Error loading debug menu font: {e}")
+            #print(f"[GameScene Init] Error loading debug menu font: {e}")
             # Leave self.debug_menu_surface as None if error
             self.debug_menu_surface = None # Explicitly set to None on error
         # --- End Debug Menu Panel ---
@@ -206,8 +213,9 @@ class GameScene:
                 race_towers = race_info.get("towers", {})
                 self.available_towers.update(race_towers) # Merge dictionaries
             else:
-                print(f"Warning: Could not find race info for {race_id} when merging towers.")
-        print(f"Initialized with {len(self.available_towers)} available towers from races: {self.selected_races}")
+                #print(f"Warning: Could not find race info for {race_id} when merging towers.")
+                pass
+        #print(f"Initialized with {len(self.available_towers)} available towers from races: {self.selected_races}")
         # --- End Merging Tower Data --- 
 
         # --- Get Base Directory for Path Construction ---
@@ -225,10 +233,11 @@ class GameScene:
             armor_filename = 'armortypes_wild.json'
         
         armor_file_path = os.path.join(data_dir, armor_filename)
-        print(f"[GameScene Init] Determined armor file path based on mode '{self.game.selected_wave_mode}': {armor_file_path}")
+        #print(f"[GameScene Init] Determined armor file path based on mode '{self.game.selected_wave_mode}': {armor_file_path}")
         self.armor_data = self.load_armor_data(armor_file_path)
         if not self.armor_data:
-            print(f"WARNING: Failed to load armor data from {armor_file_path}. Enemies might use default modifiers.")
+            #print(f"WARNING: Failed to load armor data from {armor_file_path}. Enemies might use default modifiers.")
+            pass
             # Optionally, try loading the default as a fallback
             # default_armor_path = os.path.join(data_dir, 'armortypes.json')
             # print(f"Attempting fallback load from: {default_armor_path}")
@@ -243,11 +252,11 @@ class GameScene:
         self.enemies = []
         # --- Load Money/Lives Based on Difficulty (Inferred from wave file path) ---
         if "advanced" in self.wave_file_path.lower(): # Check if it's advanced waves
-            print(f"[GameScene Init] Loading ADVANCED settings (money/lives) due to wave file: {self.wave_file_path}")
+            #print(f"[GameScene Init] Loading ADVANCED settings (money/lives) due to wave file: {self.wave_file_path}")
             self.money = getattr(config, 'STARTING_MONEY_ADVANCED', config.STARTING_MONEY) # Fallback to default if advanced not found
             self.lives = getattr(config, 'STARTING_LIVES_ADVANCED', config.STARTING_LIVES) # Fallback to default if advanced not found
         else:
-            print(f"[GameScene Init] Loading DEFAULT settings (money/lives) for wave file: {self.wave_file_path}")
+            #print(f"[GameScene Init] Loading DEFAULT settings (money/lives) for wave file: {self.wave_file_path}")
             self.money = config.STARTING_MONEY
             self.lives = config.STARTING_LIVES
         # --- End Money/Lives Loading ---
@@ -362,13 +371,15 @@ class GameScene:
         # Check grid value *before* potentially modifying start/end if they land on tower (unlikely here)
         start_val = self.grid[self.path_start_y][self.path_start_x] if 0 <= self.path_start_y < self.grid_height and 0 <= self.path_start_x < self.grid_width else -1
         end_val = self.grid[self.path_end_y][self.path_end_x] if 0 <= self.path_end_y < self.grid_height and 0 <= self.path_end_x < self.grid_width else -1
-        print(f"DEBUG INIT: Calculated Path Start: ({self.path_start_x}, {self.path_start_y}), Grid Value: {start_val}")
-        print(f"DEBUG INIT: Calculated Path End: ({self.path_end_x}, {self.path_end_y}), Grid Value: {end_val}")
+        #print(f"DEBUG INIT: Calculated Path Start: ({self.path_start_x}, {self.path_start_y}), Grid Value: {start_val}")
+        #print(f"DEBUG INIT: Calculated Path End: ({self.path_end_x}, {self.path_end_y}), Grid Value: {end_val}")
         # Add a check to ensure start/end are actually walkable (value 0)
         if start_val != 0:
-            print(f"ERROR: Calculated Path Start ({self.path_start_x}, {self.path_start_y}) is NOT walkable (Value: {start_val})!")
+            #print(f"ERROR: Calculated Path Start ({self.path_start_x}, {self.path_start_y}) is NOT walkable (Value: {start_val})!")
+            pass
         if end_val != 0:
-             print(f"ERROR: Calculated Path End ({self.path_end_x}, {self.path_end_y}) is NOT walkable (Value: {end_val})!")
+            #print(f"ERROR: Calculated Path End ({self.path_end_x}, {self.path_end_y}) is NOT walkable (Value: {end_val})!")
+            pass
         # --- END DEBUG ---
 
         # --- End Layout Calculations ---
@@ -385,7 +396,8 @@ class GameScene:
                 (self.usable_grid_pixel_width, self.usable_grid_pixel_height)
             )
         except pygame.error as e:
-            print(f"Error loading background.jpg: {e}")
+            #print(f"Error loading background.jpg: {e}")
+            pass
             self.grid_background_texture = None # Fallback
         
         # --- Load Data using Constructed Paths --- 
@@ -421,20 +433,23 @@ class GameScene:
         # --- Load Kraken Effect Image ---
         self.kraken_effect_image = self.load_single_image("assets/effects/kraken.png")
         if not self.kraken_effect_image:
-            print("Warning: Failed to load assets/effects/kraken.png")
+            #print("Warning: Failed to load assets/effects/kraken.png")
+            pass
         # --- End Kraken Loading ---
 
         # --- Load Glacial Heart Pulse Image ---
         self.glacial_heart_pulse_image = self.load_single_image("assets/effects/igloo_glacial_heart.png")
         if not self.glacial_heart_pulse_image:
-            print("Warning: Failed to load assets/effects/igloo_glacial_heart.png")
+            #print("Warning: Failed to load assets/effects/igloo_glacial_heart.png")
+            pass
         # --- End Glacial Heart Pulse Loading ---
 
         # --- Font for Countdown Timer ---
         try:
             self.timer_font = pygame.font.Font(None, 48) # Use default font, size 48
         except Exception as e:
-            print(f"Error loading default font: {e}")
+            #print(f"Error loading default font: {e}")
+            pass
             self.timer_font = None # Fallback
         # -------------------------------
         
@@ -444,13 +459,15 @@ class GameScene:
         if fire_burst_img:
             self.attack_visuals["fire_burst"] = fire_burst_img
         else:
-            print("Warning: Failed to load assets/effects/fire_burst.png")
+            #print("Warning: Failed to load assets/effects/fire_burst.png")
+            pass
         # Add other attack visuals here as needed...
         flak_cannon_img = self.load_single_image("assets/effects/tank_aegis_flak_cannon.png")
         if flak_cannon_img:
             self.attack_visuals["tank_aegis_flak_cannon"] = flak_cannon_img
         else:
-            print("Warning: Failed to load assets/effects/tank_aegis_flak_cannon.png")
+            #print("Warning: Failed to load assets/effects/tank_aegis_flak_cannon.png")
+            pass
         # --- End Attack Visual Loading ---
 
         # Initialize tower selector AFTER panel dimensions are calculated
@@ -464,14 +481,13 @@ class GameScene:
             click_sound=self.click_sound # Pass sound here
         )
         
-        # Placeholder: Spawn a test enemy
-        # TODO: Replace with actual wave spawning logic
+
         self.spawn_test_enemy("enemy1") # Assuming you have an enemy1.png
         
-        print(f"GameScene initialized. Actual Size: {self.screen_width}x{self.screen_height}") # Use actual size
-        print(f"Grid Area (Pixels): {self.usable_grid_pixel_width}x{self.usable_grid_pixel_height} | Grid Cells: {self.grid_width}x{self.grid_height}")
-        print(f"UI Panel Area (Pixels): {self.panel_pixel_width}x{self.panel_pixel_height} at ({self.panel_x},{self.panel_y})")
-        print(f"Enemy Preview Area: {self.objective_area_rect}")
+        #print(f"GameScene initialized. Actual Size: {self.screen_width}x{self.screen_height}") # Use actual size
+        #print(f"Grid Area (Pixels): {self.usable_grid_pixel_width}x{self.usable_grid_pixel_height} | Grid Cells: {self.grid_width}x{self.grid_height}")
+        #print(f"UI Panel Area (Pixels): {self.panel_pixel_width}x{self.panel_pixel_height} at ({self.panel_x},{self.panel_y})")
+        #print(f"Enemy Preview Area: {self.objective_area_rect}")
         
         # --- Soundtrack Initialization (Added at the very end) --- 
         self.soundtrack_files = []
@@ -481,17 +497,18 @@ class GameScene:
             # Use absolute path for glob to be safe
             abs_soundtrack_dir = os.path.abspath(soundtrack_dir)
             track_pattern = os.path.join(abs_soundtrack_dir, "track*.mp3")
-            print(f"[Soundtrack Init] Searching for tracks: {track_pattern}")
+            #print(f"[Soundtrack Init] Searching for tracks: {track_pattern}")
             self.soundtrack_files = glob.glob(track_pattern)
             
             if not self.soundtrack_files:
-                print(f"[Soundtrack Init] No 'track*.mp3' files found in {abs_soundtrack_dir}")
+                #print(f"[Soundtrack Init] No 'track*.mp3' files found in {abs_soundtrack_dir}")
+                pass
             else:
-                print(f"[Soundtrack Init] Found tracks: {[os.path.basename(t) for t in self.soundtrack_files]}")
+                #print(f"[Soundtrack Init] Found tracks: {[os.path.basename(t) for t in self.soundtrack_files]}")
                 random.shuffle(self.soundtrack_files)
                 self.current_track_index = 0
                 track_to_play = self.soundtrack_files[self.current_track_index]
-                print(f"[Soundtrack Init] Loading and playing first track: {os.path.basename(track_to_play)}")
+                #print(f"[Soundtrack Init] Loading and playing first track: {os.path.basename(track_to_play)}")
                 pygame.mixer.music.load(track_to_play)
                 # Get volume from config, default to 0.4 if not found
                 volume = getattr(config, 'SOUNDTRACK_VOLUME', 0.4) 
@@ -534,7 +551,7 @@ class GameScene:
                     self.debug_toggle_state = not self.debug_toggle_state
                     # <<< MODIFIED LINE >>>
                     self.debug_menu_open = self.debug_toggle_state # Link menu visibility to toggle state
-                    print(f"[DEBUG] Toggle button clicked! New state: {self.debug_toggle_state}, Menu Open: {self.debug_menu_open}")
+                    #print(f"[DEBUG] Toggle button clicked! New state: {self.debug_toggle_state}, Menu Open: {self.debug_menu_open}")
                     # Prevent other MOUSEBUTTONDOWN handlers from processing this click
                     return # Early exit after handling the toggle click
         # --- End Handle Toggle Button Click ---
@@ -551,7 +568,7 @@ class GameScene:
                     # Calculate grid coordinates relative to the grid's top-left
                     grid_x = (mouse_x - grid_offset_x) // config.GRID_SIZE
                     grid_y = (mouse_y - grid_offset_y) // config.GRID_SIZE
-                    print(f"Left-clicked grid position: ({grid_x}, {grid_y})")
+                    #print(f"Left-clicked grid position: ({grid_x}, {grid_y})")
                     # self.handle_tower_placement(grid_x, grid_y) # REMOVED from MOUSEBUTTONDOWN
                 
             elif event.button == 3: # Right click
@@ -579,11 +596,11 @@ class GameScene:
                     # --- Decide action based on findings ---
                     if tower_at_location:
                         # Existing behavior: Tower exists, try to sell it
-                        print(f"Right-clicked grid position: ({grid_x}, {grid_y}) - Found Tower {tower_at_location.tower_id}. Attempting sell.")
+                        #print(f"Right-clicked grid position: ({grid_x}, {grid_y}) - Found Tower {tower_at_location.tower_id}. Attempting sell.")
                         self.sell_tower_at(grid_x, grid_y)
                     elif is_previewing:
                         # New behavior: No tower here, but we are previewing, so cancel preview
-                        print(f"Right-clicked empty grid position: ({grid_x}, {grid_y}) while previewing. Cancelling placement.")
+                        #print(f"Right-clicked empty grid position: ({grid_x}, {grid_y}) while previewing. Cancelling placement.")
                         self.tower_selector.clear_selection() # <<< CALL CLEAR SELECTION
                         self.selected_tower = None 
                         self.tower_preview = None
@@ -591,8 +608,9 @@ class GameScene:
                         if self.cancel_sound:
                             self.cancel_sound.play()
                     else:
+                        pass
                         # No tower here, and not previewing anything. Do nothing.
-                        print(f"Right-clicked empty grid position: ({grid_x}, {grid_y}) - Not previewing. Doing nothing.")
+                        #print(f"Right-clicked empty grid position: ({grid_x}, {grid_y}) - Not previewing. Doing nothing.")
                 
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1: # Left mouse button release
@@ -608,7 +626,7 @@ class GameScene:
                         # Calculate grid coordinates relative to the grid's top-left
                         grid_x = (mouse_x - grid_offset_x) // config.GRID_SIZE
                         grid_y = (mouse_y - grid_offset_y) // config.GRID_SIZE
-                        print(f"Left-button released at grid position: ({grid_x}, {grid_y})")
+                        #print(f"Left-button released at grid position: ({grid_x}, {grid_y})")
                         self.handle_tower_placement(grid_x, grid_y) # Place tower on release
                     # else: # Optional: If released outside grid, cancel placement
                         # self.tower_selector.clear_selection()
@@ -622,32 +640,32 @@ class GameScene:
                 self.tower_preview = None
             elif event.key == pygame.K_g: # G for Gnoll
                 self.spawn_test_enemy("gnoll")
-                print("Spawned Gnoll (press 'G')")
+                #print("Spawned Gnoll (press 'G')")
             elif event.key == pygame.K_s: # S for Spectre
                 self.spawn_test_enemy("quillpig")
-                print("Spawned Quillpig (press 'S')")
+                #print("Spawned Quillpig (press 'S')")
             elif event.key == pygame.K_t: # T for Soldier (replacing generic test)
                 self.spawn_test_enemy("soldier")
-                print("Spawned Soldier (press 'T')")
+                #print("Spawned Soldier (press 'T')")
             elif event.key == pygame.K_1: # 1 for Dust Mite
                 self.spawn_test_enemy("lord_supermaul")
-                print("Spawned Lord Supermaul (press '1')")
+                #print("Spawned Lord Supermaul (press '1')")
             elif event.key == pygame.K_2: # 2 for Doom Lord
                 self.spawn_test_enemy("doomlord")
-                print("Spawned Doom Lord (press '2')")
+                #print("Spawned Doom Lord (press '2')")
             elif event.key == pygame.K_3: # 3 for pixie
                 self.spawn_test_enemy("dragon_whelp")
-                print("Spawned Dragon Whelp (press '3')")
+                #print("Spawned Dragon Whelp (press '3')")
             elif event.key == pygame.K_4: # 4 for bloodfist ogre
                 self.spawn_test_enemy("bloodfist_ogre")
-                print("Spawned Bloodfist Ogre (press '4')")
+                #print("Spawned Bloodfist Ogre (press '4')")
             elif event.key == pygame.K_5: # 5 for cyborg
                 self.spawn_test_enemy("village_peasant")
-                print("Spawned Village Peasant (press '5')")
+                #print("Spawned Village Peasant (press '5')")
             elif event.key == pygame.K_RETURN: # ENTER key press
-                print("DEBUG: ENTER key pressed.")
+                #print("DEBUG: ENTER key pressed.")
                 if self.wave_state == WAVE_STATE_IDLE and not self.wave_started:
-                    print("Starting Wave System...")
+                    #print("Starting Wave System...")
                     self.wave_started = True # Set flag
                     # Find the first wave (index 0)
                     if self.all_wave_data: # Check if waves are loaded
@@ -655,12 +673,13 @@ class GameScene:
                         first_wave_data = self.all_wave_data[0]
                         self.wave_timer = first_wave_data.get('delay_before_wave', 5.0) # Use delay from JSON
                         self.wave_state = WAVE_STATE_WAITING
-                        print(f"Transitioning to WAITING_DELAY. Timer set to: {self.wave_timer}")
+                        #print(f"Transitioning to WAITING_DELAY. Timer set to: {self.wave_timer}")
                     else:
-                        print("ERROR: No wave data loaded. Cannot start waves.")
+                        #print("ERROR: No wave data loaded. Cannot start waves.")
                         self.wave_state = WAVE_STATE_IDLE # Remain idle
                 else:
-                    print(f"Cannot start wave. Current state: {self.wave_state}, Started: {self.wave_started}")
+                    #print(f"Cannot start wave. Current state: {self.wave_state}, Started: {self.wave_started}")
+                    pass
                 
         # --- Handle Music End Event --- 
         # REMOVED Block: elif event.type == MUSIC_END_EVENT:
@@ -731,15 +750,16 @@ class GameScene:
         # Use the comprehensive validation method which includes pathfinding
         is_valid = self.is_valid_tower_placement(grid_x, grid_y, grid_width, grid_height)
         if not is_valid:
-            print("Invalid tower placement location.") # is_valid prints specific reason
+            #print("Invalid tower placement location.") # is_valid prints specific reason
+            pass
             if self.invalid_placement_sound:
                 self.invalid_placement_sound.play()
             return
 
         # Check if player has enough money (separate from positional validation)
         if self.money < tower_data['cost']:
-            print("Not enough money!")
-            return
+            #print("Not enough money!")
+            pass
 
         # --- Placement ---
         # Calculate footprint again (needed for marking the grid)
@@ -752,7 +772,7 @@ class GameScene:
 
         # Check if tower is traversable
         is_traversable = tower_data.get('traversable', False)
-        print(f"DEBUG PLACEMENT: Tower {selected_tower_id} is_traversable = {is_traversable}") # DEBUG
+        #print(f"DEBUG PLACEMENT: Tower {selected_tower_id} is_traversable = {is_traversable}") # DEBUG
 
         # Mark occupied grid cells ONLY if not traversable
         if not is_traversable:
@@ -760,7 +780,7 @@ class GameScene:
             # Calculate the true top-left corner based on center and dimensions
             actual_top_left_x = grid_x - (grid_width - 1) // 2
             actual_top_left_y = grid_y - (grid_height - 1) // 2
-            print(f"  DEBUG PLACEMENT: Calculated Top-Left ({actual_top_left_x},{actual_top_left_y}). Width={grid_width}, Height={grid_height}") # DEBUG
+            #print(f"  DEBUG PLACEMENT: Calculated Top-Left ({actual_top_left_x},{actual_top_left_y}). Width={grid_width}, Height={grid_height}") # DEBUG
             # --------------------------------------------------------
             
             # Loop from the calculated top-left for the full width/height
@@ -770,13 +790,15 @@ class GameScene:
                     mark_y = actual_top_left_y + y_offset
                     # Check bounds within loop for safety
                     if 0 <= mark_y < self.grid_height and 0 <= mark_x < self.grid_width:
-                        print(f"    DEBUG PLACEMENT: Marking grid cell ({mark_x},{mark_y}) = 1") # DEBUG
+                        #print(f"    DEBUG PLACEMENT: Marking grid cell ({mark_x},{mark_y}) = 1") # DEBUG
                         self.grid[mark_y][mark_x] = 1 # Mark as obstacle
                     else:
-                        print(f"    DEBUG PLACEMENT: SKIPPING grid cell ({mark_x},{mark_y}) - out of bounds") # DEBUG
+                        #print(f"    DEBUG PLACEMENT: SKIPPING grid cell ({mark_x},{mark_y}) - out of bounds") # DEBUG
+                        pass
             # print(f"Marked grid for non-traversable tower at ({grid_x}, {grid_y})") # Old Print
         else:
-            print(f"Skipping grid mark for traversable tower at ({grid_x}, {grid_y})")
+            #print(f"Skipping grid mark for traversable tower at ({grid_x}, {grid_y})")
+            pass
 
         # Create and place the tower (using center grid coordinates)
         from entities.tower import Tower
@@ -826,14 +848,16 @@ class GameScene:
                     # Update enemy's path
                     enemy.grid_path = new_path
                     enemy.path_index = 0  # Reset path index
-                    print(f"Updated path for enemy after non-traversable tower placement.")
+                    #print(f"Updated path for enemy after non-traversable tower placement.")
+                    pass
                 else:
                     # If no path found, remove the enemy (it's trapped)
-                    print(f"Warning: No path found for enemy after non-traversable tower placement. Removing enemy.")
+                    #print(f"Warning: No path found for enemy after non-traversable tower placement. Removing enemy.")
                     self.enemies.remove(enemy)
         else:
-            print("Skipping path recalculation for traversable tower placement.")
-            print(f"  DEBUG PLACEMENT: Skipping enemy path recalculation because {selected_tower_id} is traversable.") # DEBUG
+            #print("Skipping path recalculation for traversable tower placement.")
+            #print(f"  DEBUG PLACEMENT: Skipping enemy path recalculation because {selected_tower_id} is traversable.") # DEBUG
+            pass
 
         # Clear selection
         self.tower_selector.clear_selection()
@@ -854,17 +878,17 @@ class GameScene:
         # --- Soundtrack Advancement (Manual Check) --- 
         if self.soundtrack_files and self.current_track_index != -1: # Check if music should be playing
             if not pygame.mixer.music.get_busy():
-                print(f"[Soundtrack Update] Mixer not busy, track likely finished.")
+                #print(f"[Soundtrack Update] Mixer not busy, track likely finished.")
                 # Advance index and wrap around
                 self.current_track_index = (self.current_track_index + 1) % len(self.soundtrack_files)
                 next_track_path = self.soundtrack_files[self.current_track_index]
-                print(f"[Soundtrack Update] Attempting to play next track ({self.current_track_index + 1}/{len(self.soundtrack_files)}): {os.path.basename(next_track_path)}")
+                #print(f"[Soundtrack Update] Attempting to play next track ({self.current_track_index + 1}/{len(self.soundtrack_files)}): {os.path.basename(next_track_path)}")
                 try:
                     pygame.mixer.music.load(next_track_path)
                     pygame.mixer.music.play(loops=0) # Play once
-                    print(f"[Soundtrack Update] Successfully started next track.")
+                    #print(f"[Soundtrack Update] Successfully started next track.")
                 except pygame.error as e:
-                    print(f"[Soundtrack Update] Error loading/playing track {next_track_path}: {e}")
+                    #print(f"[Soundtrack Update] Error loading/playing track {next_track_path}: {e}")
                     # Stop trying if error occurs
                     try: pygame.mixer.music.stop()
                     except: pass
@@ -917,7 +941,8 @@ class GameScene:
                             'special': tower.special
                         })
                         if is_dot_amp_aura:
-                            print(f"DEBUG: Added {tower.tower_id} (dot_amp_aura) to tower_buff_auras with radius {aura_radius_pixels:.1f}px")
+                            #print(f"DEBUG: Added {tower.tower_id} (dot_amp_aura) to tower_buff_auras with radius {aura_radius_pixels:.1f}px")
+                            pass
 
         # --- BEGIN Adjacency Buff Calculation --- 
         hq_towers = [t for t in self.towers if t.tower_id == 'police_police_hq']
@@ -959,7 +984,8 @@ class GameScene:
                         # Ensure the HQ special targets towers
                         if hq.special and hq.special.get('effect') == 'adjacency_damage_buff' and "towers" in hq.special.get('targets', []):
                             # Add the HQ's buff data to the list
-                            print(f"DEBUG: Police HQ at ({hq.center_grid_x},{hq.center_grid_y}) applying adjacency buff to {other_tower.tower_id} at ({other_tower.center_grid_x},{other_tower.center_grid_y})")
+                            #print(f"DEBUG: Police HQ at ({hq.center_grid_x},{hq.center_grid_y}) applying adjacency buff to {other_tower.tower_id} at ({other_tower.center_grid_x},{other_tower.center_grid_y})")
+                            pass
                             self.tower_buff_auras.append({
                                 'tower': hq, # The tower providing the buff
                                 'radius_sq': 0, # Radius doesn't apply here
@@ -1006,7 +1032,8 @@ class GameScene:
                     if is_adjacent:
                         # Check if the plant's special is the correct buff and targets towers
                         if plant.special and plant.special.get('effect') == 'adjacency_attack_speed_buff' and "towers" in plant.special.get('targets', []):
-                            print(f"DEBUG: Power Plant at ({plant.center_grid_x},{plant.center_grid_y}) applying adjacency buff to {other_tower.tower_id} at ({other_tower.center_grid_x},{other_tower.center_grid_y})")
+                            #print(f"DEBUG: Power Plant at ({plant.center_grid_x},{plant.center_grid_y}) applying adjacency buff to {other_tower.tower_id} at ({other_tower.center_grid_x},{other_tower.center_grid_y})")
+                            pass
                             # Add the plant's buff data to the list
                             self.tower_buff_auras.append({
                                 'tower': plant, 
@@ -1048,7 +1075,8 @@ class GameScene:
                             'special': tower.special
                         })
                         # Debug print to confirm inclusion
-                        print(f"DEBUG: Included {tower.tower_id} (Type: {tower.attack_type}, Effect: {effect_type}) in enemy_aura_towers.")
+                        #print(f"DEBUG: Included {tower.tower_id} (Type: {tower.attack_type}, Effect: {effect_type}) in enemy_aura_towers.")
+                        pass
 
         
         # --- NEW: Process Tower-Targeting PULSE Auras --- 
@@ -1069,7 +1097,7 @@ class GameScene:
             # Check if it's time to pulse
             if current_time >= pulse_tower.last_pulse_time + interval:
                 pulse_tower.last_pulse_time = current_time # Update last pulse time
-                print(f"--- Tower {pulse_tower.tower_id} pulsing crit damage buff! ---")
+                #print(f"--- Tower {pulse_tower.tower_id} pulsing crit damage buff! ---")
 
                 # <<< ADDED: Create Visual Pulse Effect for Tower Buff Auras >>>
                 try:
@@ -1103,10 +1131,12 @@ class GameScene:
                         # Apply the temporary buff
                         target_tower.apply_pulsed_buff('crit_damage', crit_bonus, duration, current_time)
                         targets_found += 1
-                        print(f"    -> Applied pulsed crit buff (+{crit_bonus}) to {target_tower.tower_id}")
+                        #print(f"    -> Applied pulsed crit buff (+{crit_bonus}) to {target_tower.tower_id}")
+                        pass
                 
                 if targets_found > 0:
-                    print(f"--- Pulse buff applied to {targets_found} towers. ---")
+                    #print(f"--- Pulse buff applied to {targets_found} towers. ---")
+                    pass
         # --- END Tower Pulse Aura Processing ---
         
         # --- Update Towers --- 
@@ -1146,7 +1176,7 @@ class GameScene:
                     if amount > 0:
                         self.money += amount
                         self.tower_selector.update_money(self.money)
-                        print(f"Tower {tower.tower_id} generated ${amount}. Current Money: ${self.money}")
+                        #print(f"Tower {tower.tower_id} generated ${amount}. Current Money: ${self.money}")
                         
                         # Create Floating Text Effect
                         try:
@@ -1162,7 +1192,8 @@ class GameScene:
                             text_effect = FloatingTextEffect(text_x, text_y, gold_text, color=gold_color)
                             self.effects.append(text_effect)
                         except Exception as e:
-                            print(f"Error creating gold text effect: {e}")
+                            #print(f"Error creating gold text effect: {e}")
+                            pass
                             
                     # Update pulse time ONLY if the interval check passed
                     tower.last_pulse_time = current_time 
@@ -1172,7 +1203,8 @@ class GameScene:
             is_broadside = tower.special and tower.special.get("effect") == "broadside"
             if is_broadside:
                 if current_time - tower.last_attack_time >= effective_interval:
-                    print(f"DEBUG: Broadside tower {tower.tower_id} firing based on interval.")
+                    #print(f"DEBUG: Broadside tower {tower.tower_id} firing based on interval.")
+                    pass
                     grid_offset_x = config.UI_PANEL_PADDING
                     grid_offset_y = config.UI_PANEL_PADDING
                     # Capture and process results for broadside
@@ -1182,7 +1214,8 @@ class GameScene:
                         new_projectiles = attack_results.get('projectiles', [])
                         if new_projectiles:
                             self.projectiles.extend(new_projectiles)
-                            print(f"Added {len(new_projectiles)} broadside projectiles.")
+                            #print(f"Added {len(new_projectiles)} broadside projectiles.")
+                            pass
                         new_effects = attack_results.get('effects', [])
                         if new_effects:
                             self.effects.extend(new_effects)
@@ -1216,14 +1249,15 @@ class GameScene:
                                 try:
                                     tower.attack_sound.play(loops=-1) # Start looping
                                     tower.is_beam_sound_playing = True
-                                    print(f"DEBUG: Started looping beam sound for {tower.tower_id}")
+                                    #print(f"DEBUG: Started looping beam sound for {tower.tower_id}")
                                 except pygame.error as e:
-                                    print(f"Error playing beam sound for {tower.tower_id}: {e}")
+                                    #print(f"Error playing beam sound for {tower.tower_id}: {e}")
+                                    pass
                         else: # Beam is inactive (no targets)
                             if tower.is_beam_sound_playing:
                                 tower.attack_sound.stop()
                                 tower.is_beam_sound_playing = False
-                                print(f"DEBUG: Stopped looping beam sound for {tower.tower_id}")
+                                #print(f"DEBUG: Stopped looping beam sound for {tower.tower_id}")
                     # --- END Beam Sound Management ---
 
                     # --- Laser Painter Target Tracking ---
@@ -1232,7 +1266,7 @@ class GameScene:
                         if current_primary_target != tower.painting_target:
                             # Target changed or lost
                             if current_primary_target: # Indentation Level 4 (24 spaces)
-                                print(f"Laser Painter {tower.tower_id} started painting {current_primary_target.enemy_id}")
+                                #print(f"Laser Painter {tower.tower_id} started painting {current_primary_target.enemy_id}")
                                 tower.paint_start_time = current_time # Reset timer for new target
                             else:
                                 # print(f"Laser Painter {tower.tower_id} lost target.") # Optional debug
@@ -1250,19 +1284,19 @@ class GameScene:
                         target_for_effect = tower.beam_targets[0] if tower.beam_targets else None # Get target from stored list
                         if target_for_effect and not tower.active_flame_effect: # Indentation Level 4 (24 spaces)
                             # Start new effect
-                            print(f"Pyromaniac starting flame effect on {target_for_effect.enemy_id}")
+                            #print(f"Pyromaniac starting flame effect on {target_for_effect.enemy_id}")
                             flame_effect = FlamethrowerParticleEffect(tower, target_for_effect)
                             self.effects.append(flame_effect)
                             tower.active_flame_effect = flame_effect
                         elif not target_for_effect and tower.active_flame_effect:
                             # Target lost, stop spawning
-                            print(f"Pyromaniac lost target, stopping flame effect spawning.")
+                            #print(f"Pyromaniac lost target, stopping flame effect spawning.")
                             tower.active_flame_effect.stop_spawning()
                             tower.active_flame_effect = None # Remove reference
                         elif target_for_effect and tower.active_flame_effect and \
                              target_for_effect != tower.active_flame_effect.target_enemy:
                             # Target changed, stop old effect, start new one
-                            print(f"Pyromaniac changed target, restarting flame effect on {target_for_effect.enemy_id}")
+                            #print(f"Pyromaniac changed target, restarting flame effect on {target_for_effect.enemy_id}")
                             tower.active_flame_effect.stop_spawning() # Stop old one
                             flame_effect = FlamethrowerParticleEffect(tower, target_for_effect) # Start new one
                             self.effects.append(flame_effect)
@@ -1278,19 +1312,19 @@ class GameScene:
                         target_for_effect = tower.beam_targets[0] if tower.beam_targets else None # Get target from stored list
                         if target_for_effect and not tower.active_acid_effect:
                             # Start new effect
-                            print(f"Acid Spewer starting effect on {target_for_effect.enemy_id}")
+                            #print(f"Acid Spewer starting effect on {target_for_effect.enemy_id}")
                             acid_effect = AcidSpewParticleEffect(tower, target_for_effect)
                             self.effects.append(acid_effect)
                             tower.active_acid_effect = acid_effect
                         elif not target_for_effect and tower.active_acid_effect:
                             # Target lost, stop spawning
-                            print(f"Acid Spewer lost target, stopping effect spawning.")
+                            #print(f"Acid Spewer lost target, stopping effect spawning.")
                             tower.active_acid_effect.stop_spawning()
                             tower.active_acid_effect = None # Remove reference
                         elif target_for_effect and tower.active_acid_effect and \
                              target_for_effect != tower.active_acid_effect.target_enemy:
                             # Target changed, stop old effect, start new one
-                            print(f"Acid Spewer changed target, restarting effect on {target_for_effect.enemy_id}")
+                            #print(f"Acid Spewer changed target, restarting effect on {target_for_effect.enemy_id}")
                             tower.active_acid_effect.stop_spawning() # Stop old one
                             acid_effect = AcidSpewParticleEffect(tower, target_for_effect) # Start new one
                             self.effects.append(acid_effect)
@@ -1307,19 +1341,19 @@ class GameScene:
                         
                         if target_for_effect and not tower.active_drain_effect:
                             # Start new drain effect
-                            print(f"Void Leecher starting drain effect from {target_for_effect.enemy_id}")
+                            #print(f"Void Leecher starting drain effect from {target_for_effect.enemy_id}")
                             drain_effect = DrainParticleEffect(tower, target_for_effect)
                             self.effects.append(drain_effect)
                             tower.active_drain_effect = drain_effect
                         elif not target_for_effect and tower.active_drain_effect:
                             # Target lost, stop spawning drain particles
-                            print(f"Void Leecher lost target, stopping drain effect spawning.")
+                            #print(f"Void Leecher lost target, stopping drain effect spawning.")
                             tower.active_drain_effect.stop_spawning()
                             tower.active_drain_effect = None # Remove reference
                         elif target_for_effect and tower.active_drain_effect and \
                              target_for_effect != tower.active_drain_effect.target_enemy:
                             # Target changed, stop old drain effect, start new one
-                            print(f"Void Leecher changed target, restarting drain effect from {target_for_effect.enemy_id}")
+                            #print(f"Void Leecher changed target, restarting drain effect from {target_for_effect.enemy_id}")
                             tower.active_drain_effect.stop_spawning() # Stop old one
                             drain_effect = DrainParticleEffect(tower, target_for_effect) # Start new one
                             self.effects.append(drain_effect)
@@ -1360,7 +1394,7 @@ class GameScene:
                                         current_damage_multiplier = buffed_stats.get('damage_multiplier', 1.0)
                                         damage = random.uniform(dmg_min, dmg_max) * current_damage_multiplier # Use the retrieved multiplier
                                         target_enemy.take_damage(damage, tower.damage_type)
-                                        print(f"Beam tower {tower.tower_id} dealt {damage:.2f} {tower.damage_type} damage to {target_enemy.enemy_id}")
+                                        #print(f"Beam tower {tower.tower_id} dealt {damage:.2f} {tower.damage_type} damage to {target_enemy.enemy_id}")
                                         effects_applied_this_tick = True
                                     # --- End Apply Damage ---
                                     
@@ -1482,21 +1516,21 @@ class GameScene:
                                     radius_pixels = radius_units * (config.GRID_SIZE / 200.0)
                                     radius_sq = radius_pixels ** 2
                                     
-                                    print(f"Self-Destruct: Radius={radius_pixels:.1f}px, Damage={damage} {damage_type}, Targets={allowed_targets}")
+                                    #print(f"Self-Destruct: Radius={radius_pixels:.1f}px, Damage={damage} {damage_type}, Targets={allowed_targets}")
                                     
                                     # Apply AoE Damage
                                     enemies_hit = 0
-                                    print(f"  DEBUG: Exploding Tower Pos: ({tower_to_remove.x:.1f}, {tower_to_remove.y:.1f})") # <<< ADDED DEBUG
+                                    #print(f"  DEBUG: Exploding Tower Pos: ({tower_to_remove.x:.1f}, {tower_to_remove.y:.1f})") # <<< ADDED DEBUG
                                     for enemy in self.enemies: # Check all enemies
                                         # <<< ADDED DETAILED DEBUG >>>
-                                        print(f"    Checking Enemy: {enemy.enemy_id} Type: {enemy.type}, HP: {enemy.health:.1f}, Pos: ({enemy.x:.1f}, {enemy.y:.1f})")
+                                        #print(f"    Checking Enemy: {enemy.enemy_id} Type: {enemy.type}, HP: {enemy.health:.1f}, Pos: ({enemy.x:.1f}, {enemy.y:.1f})")
                                         # --- Check Type and Health ---
                                         if enemy.health > 0 and enemy.type in allowed_targets:
                                             dist_sq = (enemy.x - tower_to_remove.x)**2 + (enemy.y - tower_to_remove.y)**2
-                                            print(f"      DistSq: {dist_sq:.1f} vs RadiusSq: {radius_sq:.1f}. Target Type Allowed? {'Yes' if enemy.type in allowed_targets else 'No'}")
+                                            #print(f"      DistSq: {dist_sq:.1f} vs RadiusSq: {radius_sq:.1f}. Target Type Allowed? {'Yes' if enemy.type in allowed_targets else 'No'}")
                                             # --- Check Distance ---
                                             if dist_sq <= radius_sq:
-                                                print(f"      >>> HIT! Applying {damage:.1f} {damage_type} damage.") # <<< MODIFIED DEBUG
+                                                #print(f"      >>> HIT! Applying {damage:.1f} {damage_type} damage.") # <<< MODIFIED DEBUG
                                                 enemy.take_damage(damage, damage_type)
                                                 enemies_hit += 1
                                                 # print(f"  -> Hit {enemy.enemy_id}") # <<< REMOVED Redundant Print
@@ -1506,8 +1540,6 @@ class GameScene:
                                         # <<< END DETAILED DEBUG >>>
                                     if enemies_hit > 0:
                                         print(f"Self-Destruct hit {enemies_hit} enemies.")
-                                    else: # <<< ADDED ELSE >>>
-                                        print(f"  DEBUG: No enemies hit by explosion.") # <<< ADDED DEBUG
                                     # <<< END Added Distance Check Block >>>
                                     # Play Sound
                                     if self.goblin_destruct_sound:
@@ -1529,7 +1561,7 @@ class GameScene:
                                     # --- Clear Grid Cells for Non-Traversable Tower --- <<< ADDED
                                     is_traversable = tower_to_remove.tower_data.get('traversable', False)
                                     if not is_traversable:
-                                        print(f"  Clearing grid cells for self-destructed tower {tower_to_remove.tower_id}")
+                                        #print(f"  Clearing grid cells for self-destructed tower {tower_to_remove.tower_id}")
                                         for y in range(tower_to_remove.top_left_grid_y, tower_to_remove.top_left_grid_y + tower_to_remove.grid_height):
                                             for x in range(tower_to_remove.top_left_grid_x, tower_to_remove.top_left_grid_x + tower_to_remove.grid_width):
                                                 if 0 <= y < self.grid_height and 0 <= x < self.grid_width:
@@ -1560,15 +1592,17 @@ class GameScene:
             
             # Special debug for miasma pillar
             if tower.tower_id == 'alchemists_miasma_pillar':
-                print(f"DEBUG: Found miasma_pillar in aura towers loop with effect_type={effect_type}")
+                #print(f"DEBUG: Found miasma_pillar in aura towers loop with effect_type={effect_type}")
+                pass
 
             # Check if this aura is a pulsed type
             if effect_type and effect_type.endswith('_pulse_aura'):
                 interval = special.get('interval', 1.0)
                 # Check pulse timing ONCE per tower
-                print(f"PULSE-DEBUG: Tower {tower.tower_id} checking pulse timing | Current time: {current_time:.2f} | Last pulse: {tower.last_pulse_time:.2f} | Interval: {interval}")
+                #print(f"PULSE-DEBUG: Tower {tower.tower_id} checking pulse timing | Current time: {current_time:.2f} | Last pulse: {tower.last_pulse_time:.2f} | Interval: {interval}")
+                pass
                 if current_time - tower.last_pulse_time >= interval:
-                    print(f"PULSE-DEBUG: Tower {tower.tower_id} TRIGGERING PULSE NOW!")
+                    #print(f"PULSE-DEBUG: Tower {tower.tower_id} TRIGGERING PULSE NOW!")
                     tower.last_pulse_time = current_time # Update time immediately
 
                     radius_sq = aura_data['radius_sq']
@@ -1596,7 +1630,7 @@ class GameScene:
                                 filled=True  # Use filled circle instead of outline
                             )
                             self.effects.append(pulse_effect)
-                            print(f"ULTRA-VISIBLE: Created FILLED miasma_pillar effect")
+                            #print(f"ULTRA-VISIBLE: Created FILLED miasma_pillar effect")
                         elif tower.tower_id == 'igloo_frost_pulse':
                             pulse_color = (0, 200, 255, 120)  # Light blue with transparency
                             pulse_thickness = 0  # Use filled circle
@@ -1611,7 +1645,7 @@ class GameScene:
                                 filled=True  # Use filled circle instead of outline
                             )
                             self.effects.append(pulse_effect)
-                            print(f"PULSE-DEBUG: Created {pulse_color} pulse effect for {tower.tower_id} with radius {pulse_radius_pixels:.1f}px")
+                            #print(f"PULSE-DEBUG: Created {pulse_color} pulse effect for {tower.tower_id} with radius {pulse_radius_pixels:.1f}px")
                         else:
                             pulse_color = (255, 0, 0, 100)  # Default faint red (RGBA)
                             pulse_thickness = 2  # Default thickness
@@ -1622,19 +1656,22 @@ class GameScene:
                                                                 pulse_duration, 
                                                                 pulse_color, thickness=pulse_thickness)
                             self.effects.append(pulse_effect)
-                            print(f"PULSE-DEBUG: Created {pulse_color} pulse effect for {tower.tower_id} with radius {pulse_radius_pixels:.1f}px")
+                            #print(f"PULSE-DEBUG: Created {pulse_color} pulse effect for {tower.tower_id} with radius {pulse_radius_pixels:.1f}px")
                 
                     except NameError: # Catch if ExpandingCircleEffect wasn't imported
-                        print(f"ERROR: ExpandingCircleEffect class not found for {tower.tower_id}. Please ensure it's defined and imported.")
+                        #print(f"ERROR: ExpandingCircleEffect class not found for {tower.tower_id}. Please ensure it's defined and imported.")
+                        pass
                     except Exception as e:
-                        print(f"Error creating pulse effect for {tower.tower_id}: {e}")
+                        #print(f"Error creating pulse effect for {tower.tower_id}: {e}")
+                        pass
                     # --- End Visual Pulse Effect ---
 
                     # Now find and affect ALL valid enemies in range
                     for enemy in self.enemies: # Iterate through all current enemies
                         # --- DEBUG: Target Type & Range Pre-check ---
                         if tower.tower_id == 'igloo_frost_pulse': # Log for frost pulse
-                            print(f"FROST PULSE DEBUG: Checking {enemy.enemy_id} at distance {math.sqrt((enemy.x - tower.x)**2 + (enemy.y - tower.y)**2):.1f}px")
+                            #print(f"FROST PULSE DEBUG: Checking {enemy.enemy_id} at distance {math.sqrt((enemy.x - tower.x)**2 + (enemy.y - tower.y)**2):.1f}px")
+                            pass
                         # --- END DEBUG ---
                         
                         # Handle both array format ["ground", "air"] and string format "enemies"
@@ -1856,7 +1893,7 @@ class GameScene:
                         if dist_sq <= aura_radius_sq:
                             # Apply the reduction - use max if multiple auras could stack, or just set if non-stacking
                             enemy.aura_armor_reduction = max(enemy.aura_armor_reduction, reduction_amount)
-                            print(f"DEBUG: Applied aura reduction {reduction_amount} from {aura_tower.tower_id} to {enemy.enemy_id}. Current total: {enemy.aura_armor_reduction}") # Optional Debug
+                            #print(f"DEBUG: Applied aura reduction {reduction_amount} from {aura_tower.tower_id} to {enemy.enemy_id}. Current total: {enemy.aura_armor_reduction}") # Optional Debug
         # --- END Enemy Aura Effects ---
         
         # --- Update Enemies (Main Loop) --- 
@@ -1988,7 +2025,7 @@ class GameScene:
                                     amplified_dot_damage = base_dot_damage * amp_multiplier
                                     # Apply the burn DoT
                                     enemy.apply_dot_effect(effect_type, amplified_dot_damage, dot_interval, dot_duration, dot_damage_type, current_time)
-                                    print(f"Enemy {enemy.enemy_id} walked over Fire Pit {tower.tower_id}, applied burn.")
+                                    #print(f"Enemy {enemy.enemy_id} walked over Fire Pit {tower.tower_id}, applied burn.")
                                 # --- Add check for Earth Spine --- 
                                 elif effect_type == "ground_spike_dot":
                                     base_dot_damage = tower.special.get("dot_damage", 0)
@@ -2000,7 +2037,7 @@ class GameScene:
                                     amplified_dot_damage = base_dot_damage * amp_multiplier
                                     # Apply the spike DoT
                                     enemy.apply_dot_effect(effect_type, amplified_dot_damage, dot_interval, dot_duration, dot_damage_type, current_time)
-                                    print(f"Enemy {enemy.enemy_id} walked over Earth Spine {tower.tower_id}, applied {effect_type}.")
+                                    #print(f"Enemy {enemy.enemy_id} walked over Earth Spine {tower.tower_id}, applied {effect_type}.")
                                 # Add other walkover effects here if needed (e.g., instant damage)
                                 # elif effect_type == "walkover_damage": ... 
                                 break # Stop checking towers for this enemy once triggered
@@ -2013,13 +2050,13 @@ class GameScene:
                 if self.loss_life_sound:
                     self.loss_life_sound.play()
                 # --- End Play Sound ---
-                print(f"*** OBJECTIVE REACHED by {enemy.enemy_id}. Decrementing wave counter from {self.enemies_alive_this_wave}...") # DEBUG
+                #print(f"*** OBJECTIVE REACHED by {enemy.enemy_id}. Decrementing wave counter from {self.enemies_alive_this_wave}...") # DEBUG
                 if self.enemies_alive_this_wave > 0: self.enemies_alive_this_wave -= 1
                 self.enemies.remove(enemy)
-                print(f"Enemy reached objective. Lives remaining: {self.lives}")
-                print(f"  Enemies left this wave NOW: {self.enemies_alive_this_wave}") # DEBUG
+                #print(f"Enemy reached objective. Lives remaining: {self.lives}")
+                #print(f"  Enemies left this wave NOW: {self.enemies_alive_this_wave}") # DEBUG
                 if self.lives <= 0:
-                    print("Game Over!")
+                    #print("Game Over!")
                     # --- Play Game Over Sound ---
                     if self.game_over_sound:
                         # Stop music first for dramatic effect?
@@ -2064,12 +2101,11 @@ class GameScene:
                     self.effects.append(splatter)
 
                     
-                # TODO: Add money/score for killing enemy?
-                # Check if this enemy was killed by a bounty hunter
+
                 if hasattr(enemy, 'killed_by') and enemy.killed_by and enemy.killed_by.special and enemy.killed_by.special.get("effect") == "bounty_on_kill":
                     # If killed by bounty hunter, subtract 1 from the value
                     reward = max(0, enemy.value - 1)  # Ensure we don't go below 0
-                    print(f"!!! Bounty Hunter penalty applied! Original value: {enemy.value}, New value: {reward}")
+                    #print(f"!!! Bounty Hunter penalty applied! Original value: {enemy.value}, New value: {reward}")
                 else:
                     reward = enemy.value
                 
@@ -2079,15 +2115,15 @@ class GameScene:
                 if hasattr(enemy, 'pending_gold_on_kill') and enemy.pending_gold_on_kill > 0:
                     bonus_gold = enemy.pending_gold_on_kill
                     self.money += bonus_gold
-                    print(f"$$$ Awarded {bonus_gold} extra gold from Gold on Kill effect!")
+                    #print(f"$$$ Awarded {bonus_gold} extra gold from Gold on Kill effect!")
                 # <<< END CHECK >>>
                 
                 self.tower_selector.update_money(self.money) # UPDATE UI DISPLAY
-                print(f"*** ENEMY KILLED: {enemy.enemy_id}. Decrementing wave counter from {self.enemies_alive_this_wave}...")
+                #print(f"*** ENEMY KILLED: {enemy.enemy_id}. Decrementing wave counter from {self.enemies_alive_this_wave}...")
                 if self.enemies_alive_this_wave > 0: self.enemies_alive_this_wave -= 1 
                 self.enemies.remove(enemy)
-                print(f"Enemy {enemy.enemy_id} defeated. Gained ${reward}. Current Money: ${self.money}") # Base reward still logged here
-                print(f"  Enemies left this wave NOW: {self.enemies_alive_this_wave}") # DEBUG
+                #print(f"Enemy {enemy.enemy_id} defeated. Gained ${reward}. Current Money: ${self.money}") # Base reward still logged here
+                #print(f"  Enemies left this wave NOW: {self.enemies_alive_this_wave}") # DEBUG
             
     def draw(self, screen, time_delta, current_time):
         """Draw the game scene with new layout"""
@@ -2545,7 +2581,8 @@ class GameScene:
                     current_y += line_surface.get_height() + padding
 
             except Exception as e:
-                print(f"Error drawing tooltip: {e}")
+                #print(f"Error drawing tooltip: {e}")
+                pass
             # --- END NEW Tooltip ---
 
         # --- End Hovered Range Indicator ---
@@ -2698,13 +2735,7 @@ class GameScene:
         
         screen.blit(lives_text_surface, lives_text_rect)
         
-        # Draw tower selection UI
-        # TODO: Implement tower selection UI
-        # This could include:
-        # 1. Tower icons in a bar at the bottom
-        # 2. Tower costs
-        # 3. Tower descriptions
-        # 4. Selected tower highlight
+
 
     def is_valid_tower_placement(self, grid_x, grid_y, grid_width, grid_height):
         """Check if a tower can be placed at the given position"""
@@ -2719,7 +2750,7 @@ class GameScene:
         # 1. Check Grid Bounds
         if not (0 <= new_start_x < self.grid_width and 0 <= new_end_x < self.grid_width and
                 0 <= new_start_y < self.grid_height and 0 <= new_end_y < self.grid_height):
-            print("Validation failed: Outside grid bounds.")
+            #print("Validation failed: Outside grid bounds.")
             return False
 
         # 2. Check for Existing Towers (Overlap Check)
@@ -2732,7 +2763,7 @@ class GameScene:
             # Simple Axis-Aligned Bounding Box (AABB) overlap check
             if not (new_end_x < existing_start_x or new_start_x > existing_end_x or
                     new_end_y < existing_start_y or new_start_y > existing_end_y):
-                print("Validation failed: Cannot place on existing tower.")
+                #print("Validation failed: Cannot place on existing tower.")
                 return False # Found an overlap
 
         # 3. Check for Restricted Cells ('2') and Non-Traversable Towers ('1')
@@ -2740,23 +2771,23 @@ class GameScene:
             for x in range(new_start_x, new_end_x + 1):
                 # Check if the cell is restricted ('2')
                 if self.grid[y][x] == 2:
-                    print("Validation failed: Cannot place in restricted area.")
+                    #print("Validation failed: Cannot place in restricted area.")
                     return False
                 # Check if the cell is occupied by a non-traversable tower ('1')
                 # (This might be redundant with the overlap check above, but is safe)
                 if self.grid[y][x] == 1:
-                    print("Validation failed: Cannot place on existing non-traversable tower footprint.")
+                    #print("Validation failed: Cannot place on existing non-traversable tower footprint.")
                     return False
                     
         # --- 4. Pathfinding Check --- 
         # Get the tower data to check if it's traversable
         selected_tower_id = self.tower_selector.get_selected_tower() # Assumes tower is selected
         if not selected_tower_id: # Should not happen if called from placement, but safety check
-            print("Validation Error: No tower selected for pathfinding check.")
+            #print("Validation Error: No tower selected for pathfinding check.")
             return False 
         tower_data = self.available_towers.get(selected_tower_id)
         if not tower_data:
-            print(f"Validation Error: Tower data not found for {selected_tower_id}")
+            #print(f"Validation Error: Tower data not found for {selected_tower_id}")
             return False
         is_traversable = tower_data.get('traversable', False)
 
@@ -2774,7 +2805,7 @@ class GameScene:
             # Check if a path still exists on the modified temp grid
             path = find_path(self.path_start_x, self.path_start_y, self.path_end_x, self.path_end_y, temp_grid)
             if not path: 
-                print(f"Pathfinding failed: Placing non-traversable tower at ({grid_x},{grid_y}) would block the path.")
+                #print(f"Pathfinding failed: Placing non-traversable tower at ({grid_x},{grid_y}) would block the path.")
                 return False
         # If traversable, skip the temp_grid modification and path check above
         # else: # Implicitly uses self.grid for path check if traversable
@@ -2790,7 +2821,7 @@ class GameScene:
         # Get enemy data from config
         enemy_data = config.ENEMY_DATA.get(enemy_id)
         if not enemy_data:
-            print(f"Warning: Enemy data not found for ID '{enemy_id}' in config.ENEMY_DATA. Cannot spawn.")
+            #print(f"Warning: Enemy data not found for ID '{enemy_id}' in config.ENEMY_DATA. Cannot spawn.")
             return
         
         # Determine if the unit is an air unit
@@ -2800,7 +2831,7 @@ class GameScene:
         armor_type_name = enemy_data.get("armor_type", "Unarmored") # Default to Unarmored if missing
         armor_details = self.armor_data.get(armor_type_name)
         if not armor_details:
-            print(f"Warning: Armor details not found for type '{armor_type_name}'. Using defaults for enemy '{enemy_id}'.")
+            #print(f"Warning: Armor details not found for type '{armor_type_name}'. Using defaults for enemy '{enemy_id}'.")
             # Use default Unarmored modifiers if lookup fails
             default_unarmored = self.armor_data.get("Unarmored", {})
             damage_modifiers = default_unarmored.get("damage_modifiers", {"normal": 1.0}) # Absolute fallback
@@ -2813,7 +2844,7 @@ class GameScene:
                               is_air_unit=is_air)
 
         if not grid_path:
-            print(f"Warning: Could not find path to spawn enemy '{enemy_id}'.")
+            #print(f"Warning: Could not find path to spawn enemy '{enemy_id}'.")
             return
 
         # Create the enemy with specific data including armor
@@ -2824,7 +2855,7 @@ class GameScene:
                       armor_type=armor_type_name, # Pass armor name
                       damage_modifiers=damage_modifiers) # Pass modifiers dict
         self.enemies.append(enemy)
-        print(f"Spawned test enemy: {enemy_id} (Armor: {armor_type_name}) with path length {len(grid_path)}")
+        #print(f"Spawned test enemy: {enemy_id} (Armor: {armor_type_name}) with path length {len(grid_path)}")
 
     def sell_tower_at(self, grid_x, grid_y):
         """Finds and sells a tower located at the given grid coordinates."""
@@ -2839,7 +2870,7 @@ class GameScene:
         if tower_to_sell:
             sell_value = int(tower_to_sell.cost * 0.5) # 50% sell value, rounded down
             self.money += sell_value
-            print(f"Sold {tower_to_sell.tower_id} for ${sell_value}. Current Money: ${self.money}")
+            #print(f"Sold {tower_to_sell.tower_id} for ${sell_value}. Current Money: ${self.money}")
 
             # Play sell sound
             if self.sell_sound:
@@ -2848,13 +2879,13 @@ class GameScene:
             # --- Stop Beam Sound If Playing ---
             if hasattr(tower_to_sell, 'is_beam_sound_playing') and tower_to_sell.is_beam_sound_playing and tower_to_sell.attack_sound:
                 tower_to_sell.attack_sound.stop()
-                print(f"DEBUG: Stopped beam sound for sold tower {tower_to_sell.tower_id}")
+                #print(f"DEBUG: Stopped beam sound for sold tower {tower_to_sell.tower_id}")
             # --- End Stop Beam Sound ---
 
             # --- NEW: Stop Looping Sound (Ogre War Drums) --- 
             if tower_to_sell.tower_id == 'ogre_war_drums':
                 if hasattr(tower_to_sell, 'looping_sound_channel') and tower_to_sell.looping_sound_channel:
-                    print(f"Stopping looping sound for sold {tower_to_sell.tower_id} on channel {tower_to_sell.looping_sound_channel}")
+                    #print(f"Stopping looping sound for sold {tower_to_sell.tower_id} on channel {tower_to_sell.looping_sound_channel}")
                     tower_to_sell.looping_sound_channel.stop()
                     tower_to_sell.looping_sound_channel = None # Clear reference
             # --- END Stop Looping Sound ---
@@ -2862,7 +2893,7 @@ class GameScene:
             # --- NEW: Stop Looping Sound (Goblin Shredder) --- 
             if tower_to_sell.tower_id == 'goblin_shredder':
                 if hasattr(tower_to_sell, 'looping_sound_channel') and tower_to_sell.looping_sound_channel:
-                    print(f"Stopping looping sound for sold {tower_to_sell.tower_id} on channel {tower_to_sell.looping_sound_channel}")
+                    #print(f"Stopping looping sound for sold {tower_to_sell.tower_id} on channel {tower_to_sell.looping_sound_channel}")
                     tower_to_sell.looping_sound_channel.stop()
                     tower_to_sell.looping_sound_channel = None # Clear reference
             # --- END Stop Looping Sound ---
@@ -2870,7 +2901,7 @@ class GameScene:
             # --- NEW: Stop Looping Sound (Bomb Barrage Beacon) --- 
             if tower_to_sell.tower_id == 'bomb_barrage_beacon':
                 if hasattr(tower_to_sell, 'looping_sound_channel') and tower_to_sell.looping_sound_channel:
-                    print(f"Stopping looping sound for sold {tower_to_sell.tower_id} on channel {tower_to_sell.looping_sound_channel}")
+                    #   print(f"Stopping looping sound for sold {tower_to_sell.tower_id} on channel {tower_to_sell.looping_sound_channel}")
                     tower_to_sell.looping_sound_channel.stop()
                     tower_to_sell.looping_sound_channel = None # Clear reference
             # --- END Stop Looping Sound ---
@@ -2890,9 +2921,10 @@ class GameScene:
                             # Only clear if it was marked as 1 (tower), leave restricted areas (2) alone
                             if self.grid[y][x] == 1:
                                 self.grid[y][x] = 0 # Set back to empty
-                print(f"Cleared grid cells for sold non-traversable tower {tower_to_sell.tower_id}.")
+                #print(f"Cleared grid cells for sold non-traversable tower {tower_to_sell.tower_id}.")
             else:
-                print(f"Skipped clearing grid cells for sold traversable tower {tower_to_sell.tower_id}.")
+                pass
+                #print(f"Skipped clearing grid cells for sold traversable tower {tower_to_sell.tower_id}.")
                         
             # Remove tower from list
             self.towers.remove(tower_to_sell)
@@ -2905,29 +2937,30 @@ class GameScene:
             # self.recalculate_all_enemy_paths() # Add this if pathing doesn't auto-update
             
         else:
-            print("No tower found at that location to sell.")
+            #print("No tower found at that location to sell.")
+            pass
             
     def load_single_image(self, image_path):
         """Loads a single image, handling errors."""
         try:
             # Ensure path uses correct separators for the OS
             full_path = os.path.join(*image_path.split('/')) # Split by / and rejoin with os separator
-            print(f"Attempting to load single image: {full_path}") # Debug print
+            #print(f"Attempting to load single image: {full_path}") # Debug print
             image = pygame.image.load(full_path).convert_alpha()
-            print(f"  Successfully loaded: {full_path}")
+            #print(f"  Successfully loaded: {full_path}")
             return image
         except pygame.error as e:
-            print(f"Error loading image '{full_path}': {e}")
+            #print(f"Error loading image '{full_path}': {e}")
             return None
         except FileNotFoundError:
-            print(f"Error: File not found at '{full_path}'")
+            #print(f"Error: File not found at '{full_path}'")
             return None
 
     def load_armor_data(self, file_path):
         """Loads armor type data from a JSON file."""
         armor_types = {}
         if not os.path.isfile(file_path):
-            print(f"Warning: Armor data file not found: {file_path}")
+            #print(f"Warning: Armor data file not found: {file_path}")
             return armor_types
         try:
             with open(file_path, 'r') as f:
@@ -2935,18 +2968,20 @@ class GameScene:
             for armor in data.get("armor_types", []):
                 if "name" in armor and "damage_modifiers" in armor:
                     armor_types[armor["name"]] = armor # Store the whole armor object
-            print(f"Loaded {len(armor_types)} armor types.")
+            #print(f"Loaded {len(armor_types)} armor types.")
         except json.JSONDecodeError as e:
-            print(f"Error decoding armor JSON file {file_path}: {e}")
+            #print(f"Error decoding armor JSON file {file_path}: {e}")
+            pass
         except Exception as e:
-            print(f"An unexpected error occurred loading armor data {file_path}: {e}")
+            #print(f"An unexpected error occurred loading armor data {file_path}: {e}")
+            pass
         return armor_types
 
     def load_damage_types(self, file_path):
         """Loads damage type descriptions from the tower races JSON file."""
         damage_types = {}
         if not os.path.isfile(file_path):
-            print(f"Warning: Damage type data file not found: {file_path}")
+            #print(f"Warning: Damage type data file not found: {file_path}")
             return damage_types
         try:
             with open(file_path, 'r') as f:
@@ -2955,11 +2990,13 @@ class GameScene:
             for dtype_name, dtype_data in data.get("damagetypes", {}).items():
                 if "description" in dtype_data:
                     damage_types[dtype_name] = dtype_data # Store the whole dict
-            print(f"Loaded {len(damage_types)} damage types.")
+            #print(f"Loaded {len(damage_types)} damage types.")
         except json.JSONDecodeError as e:
-            print(f"Error decoding damage type JSON file {file_path}: {e}")
+            #print(f"Error decoding damage type JSON file {file_path}: {e}")
+            pass
         except Exception as e:
-            print(f"An unexpected error occurred loading damage type data {file_path}: {e}")
+            #print(f"An unexpected error occurred loading damage type data {file_path}: {e}")
+            pass
         return damage_types
 
     def update_tower_links(self):
@@ -2970,7 +3007,7 @@ class GameScene:
                 t.linked_neighbors = []
             return
 
-        print(f"DEBUG: Updating tower links for {len(arc_towers)} Arc Towers...") # Keep this print
+        #print(f"DEBUG: Updating tower links for {len(arc_towers)} Arc Towers...") # Keep this print
         for tower1 in arc_towers:
             tower1.linked_neighbors = [] 
             link_radius_units = tower1.tower_data.get("chain_link_radius", 0)
@@ -2979,7 +3016,7 @@ class GameScene:
                 
             link_radius_pixels = link_radius_units * (config.GRID_SIZE / 200.0)
             link_radius_sq = link_radius_pixels ** 2
-            print(f"  DEBUG: Tower1 ({tower1.center_grid_x},{tower1.center_grid_y}) LinkRadiusSq={link_radius_sq:.1f}") # Added detail
+            #print(f"  DEBUG: Tower1 ({tower1.center_grid_x},{tower1.center_grid_y}) LinkRadiusSq={link_radius_sq:.1f}") # Added detail
             
             for tower2 in arc_towers:
                 if tower1 == tower2: 
@@ -2987,16 +3024,16 @@ class GameScene:
                 
                 dist_sq = (tower1.x - tower2.x)**2 + (tower1.y - tower2.y)**2
                 # Enhanced Debug Print
-                print(f"    DEBUG: Check ({tower1.center_grid_x},{tower1.center_grid_y})<->({tower2.center_grid_x},{tower2.center_grid_y}) | DistSq={dist_sq:.1f} | RadiusSq={link_radius_sq:.1f} | Link? {dist_sq <= link_radius_sq}")
+                #print(f"    DEBUG: Check ({tower1.center_grid_x},{tower1.center_grid_y})<->({tower2.center_grid_x},{tower2.center_grid_y}) | DistSq={dist_sq:.1f} | RadiusSq={link_radius_sq:.1f} | Link? {dist_sq <= link_radius_sq}")
                 
                 if dist_sq <= link_radius_sq:
                     if tower2 not in tower1.linked_neighbors:
                         tower1.linked_neighbors.append(tower2)
                         # Enhanced Debug Print
-                        print(f"      DEBUG: LINK ADDED: ({tower1.center_grid_x},{tower1.center_grid_y}) -> ({tower2.center_grid_x},{tower2.center_grid_y})")
+                        #print(f"      DEBUG: LINK ADDED: ({tower1.center_grid_x},{tower1.center_grid_y}) -> ({tower2.center_grid_x},{tower2.center_grid_y})")
             # Print final list for tower1
             final_linked_ids = [f"({t.center_grid_x},{t.center_grid_y})" for t in tower1.linked_neighbors]
-            print(f"  DEBUG: Tower1 ({tower1.center_grid_x},{tower1.center_grid_y}) final links: {final_linked_ids}")
+            #print(f"  DEBUG: Tower1 ({tower1.center_grid_x},{tower1.center_grid_y}) final links: {final_linked_ids}")
 
     def process_attack_results(self, attack_results, grid_offset_x, grid_offset_y):
         """Helper function to process the results dictionary from standard tower attacks."""
@@ -3051,9 +3088,9 @@ class GameScene:
         if current_time - initiating_tower.last_attack_time < initiating_tower.attack_interval:
              return # Standard attack interval cooldown
 
-        print(f"Tower ({initiating_tower.center_grid_x},{initiating_tower.center_grid_y}) attempting chain zap...") # Keep
+        #print(f"Tower ({initiating_tower.center_grid_x},{initiating_tower.center_grid_y}) attempting chain zap...") # Keep
         linked_ids = [f"({t.center_grid_x},{t.center_grid_y})" for t in initiating_tower.linked_neighbors]
-        print(f"  Initiator neighbors: {linked_ids}") # Keep
+        #print(f"  Initiator neighbors: {linked_ids}") # Keep
 
         # --- Pathfinding (DFS to find longest chain) --- 
         longest_chain = [initiating_tower] 
@@ -3064,13 +3101,13 @@ class GameScene:
             current_node, path = stack.pop() 
             current_node_id = f"({current_node.center_grid_x},{current_node.center_grid_y})"
             path_ids = [f"({t.center_grid_x},{t.center_grid_y})" for t in path]
-            print(f"    DFS Pop: Node={current_node_id}, Path={path_ids}") # Keep
+            #print(f"    DFS Pop: Node={current_node_id}, Path={path_ids}") # Keep
 
             if len(path) > max_len:
                 max_len = len(path)
                 longest_chain = path
                 path_ids = [f"({t.center_grid_x},{t.center_grid_y})" for t in path] # Re-calculate for print
-                print(f"      DFS: New longest_chain found! Length={max_len}, Path={path_ids}") # Keep
+                #print(f"      DFS: New longest_chain found! Length={max_len}, Path={path_ids}") # Keep
 
             for neighbor in current_node.linked_neighbors:
                 neighbor_id = f"({neighbor.center_grid_x},{neighbor.center_grid_y})"
@@ -3078,7 +3115,7 @@ class GameScene:
                      new_path = path + [neighbor]
                      stack.append((neighbor, new_path))
                      new_path_ids = [f"({t.center_grid_x},{t.center_grid_y})" for t in new_path]
-                     print(f"        DFS Pushing: Node={neighbor_id}, Path={new_path_ids}") # Keep
+                     #print(f"        DFS Pushing: Node={neighbor_id}, Path={new_path_ids}") # Keep
         # --- End DFS --- 
 
         # Check if a chain longer than 1 was found
@@ -3087,7 +3124,7 @@ class GameScene:
 
         if chain_found:
             # Correctly indent this block
-            print(f"... found chain: {[t.tower_id for t in longest_chain]}")
+            #print(f"... found chain: {[t.tower_id for t in longest_chain]}")
             # --- Target from End Node --- 
             target = None
             potential_targets = []
@@ -3098,9 +3135,10 @@ class GameScene:
             if potential_targets:
                 potential_targets.sort(key=lambda e: (e.x - end_node_tower.x)**2 + (e.y - end_node_tower.y)**2)
                 target = potential_targets[0]
-                print(f"... end node {end_node_tower.tower_id} targeting {target.enemy_id}")
+                #print(f"... end node {end_node_tower.tower_id} targeting {target.enemy_id}")
             else:
-                print(f"... end node {end_node_tower.tower_id} found no targets in range.")
+                #print(f"... end node {end_node_tower.tower_id} found no targets in range.")
+                pass
 
             if target:
                 # --- Apply Chain Zap Damage & Effects --- 
@@ -3109,7 +3147,7 @@ class GameScene:
                 total_damage = num_towers * damage_per_tower
                 damage_type = initiating_tower.damage_type
                 
-                print(f"... ZAPPING {target.enemy_id} for {total_damage} damage ({num_towers} towers)")
+                #print(f"... ZAPPING {target.enemy_id} for {total_damage} damage ({num_towers} towers)")
                 target.take_damage(total_damage, damage_type)
                 
                 # --- Create Chain Link Visual --- 
@@ -3135,16 +3173,19 @@ class GameScene:
                 if initiating_tower_sound_object:
                     try:
                         initiating_tower_sound_object.play() # Try playing the sound object directly
-                        print(f"Attempting to play chain zap sound for {initiating_tower.tower_id}") # Simpler debug print
+                        #print(f"Attempting to play chain zap sound for {initiating_tower.tower_id}") # Simpler debug print
                     except AttributeError as e:
                         # This error means the object doesn't have a .play() method
-                        print(f"Error: initiating_tower.attack_sound (type: {type(initiating_tower_sound_object)}) has no play() method. Problem loading sound? Error: {e}")
+                        #print(f"Error: initiating_tower.attack_sound (type: {type(initiating_tower_sound_object)}) has no play() method. Problem loading sound? Error: {e}")
+                        pass
                     except Exception as e:
                         # Catch any other sound playing errors
-                        print(f"Error playing sound object for {initiating_tower.tower_id}: {e}")
+                        #print(f"Error playing sound object for {initiating_tower.tower_id}: {e}")
+                        pass
                 else:
                     # This means the sound object wasn't loaded correctly in Tower.__init__
-                    print(f"Warning: initiating_tower.attack_sound is None for {initiating_tower.tower_id}. Cannot play sound.")
+                    #print(f"Warning: initiating_tower.attack_sound is None for {initiating_tower.tower_id}. Cannot play sound.")
+                    pass
                 # +++ END: ADD THIS CODE BLOCK +++
                 # Set cooldown for ALL participating towers
                 for tower in longest_chain:
@@ -3152,11 +3193,11 @@ class GameScene:
                     tower.last_attack_time = current_time
             else:
                 # Chain formed but no target found - Fallback?
-                print("... Chain formed but no target. Initiator goes on cooldown.")
+                #print("... Chain formed but no target. Initiator goes on cooldown.")
                 initiating_tower.last_attack_time = current_time
         else:
             # --- Fallback to Standard Attack --- 
-            print("... no chain found. Falling back to standard attack.")
+            #print("... no chain found. Falling back to standard attack.")
             fallback_target = None
             potential_targets = []
             for enemy in all_enemies:
@@ -3167,7 +3208,7 @@ class GameScene:
                  fallback_target = potential_targets[0]
                  
             if fallback_target:
-                 print(f"... initiator {initiating_tower.tower_id} firing standard projectile at {fallback_target.enemy_id}")
+                 #print(f"... initiator {initiating_tower.tower_id} firing standard projectile at {fallback_target.enemy_id}")
                  # Directly create the projectile instead of calling tower.attack
                  
                  # Calculate base damage (ignoring buffs for fallback simplicity for now)
@@ -3202,25 +3243,26 @@ class GameScene:
                  # attack_results = initiating_tower.attack(fallback_target, current_time, all_enemies, [], grid_offset_x, grid_offset_y, visual_assets=None)
                  # self.process_attack_results(attack_results, grid_offset_x, grid_offset_y)
             else:
-                 print("... no standard target found either.")
+                 #print("... no standard target found either.")
+                 pass
                  initiating_tower.last_attack_time = current_time
 
     def load_wave_data(self, file_path):
         """Loads wave data from the specified JSON file."""
-        print(f"[GameScene] Attempting to load waves from: {file_path}")
+        #print(f"[GameScene] Attempting to load waves from: {file_path}")
         try:
             with open(file_path, 'r') as f:
                 data = json.load(f)
-            print(f"[GameScene] Successfully loaded {len(data)} waves from {file_path}")
+            #print(f"[GameScene] Successfully loaded {len(data)} waves from {file_path}")
             return data
         except FileNotFoundError:
-            print(f"[GameScene] Error: Wave file not found at {file_path}")
+            #print(f"[GameScene] Error: Wave file not found at {file_path}")
             return [] # Return empty list on error
         except json.JSONDecodeError as e:
-            print(f"[GameScene] Error decoding JSON from wave file {file_path}: {e}")
+            #print(f"[GameScene] Error decoding JSON from wave file {file_path}: {e}")
             return [] # Return empty list on error
         except Exception as e:
-            print(f"[GameScene] An unexpected error occurred loading wave data from {file_path}: {e}")
+            #print(f"[GameScene] An unexpected error occurred loading wave data from {file_path}: {e}")
             return []
 
     # --- Wave System Logic --- 
@@ -3235,7 +3277,7 @@ class GameScene:
                     current_wave = self.all_wave_data[self.current_wave_index]
                     self.spawning_groups = []
                     self.enemies_alive_this_wave = 0 # Reset counter for the new wave
-                    print(f"--- Starting Wave {self.current_wave_index + 1} ---")
+                    #print(f"--- Starting Wave {self.current_wave_index + 1} ---")
                     for group_data in current_wave.get('enemies', []):
                         # Prepare group state for spawning logic
                         self.spawning_groups.append({
@@ -3247,16 +3289,16 @@ class GameScene:
                         })
                     self.wave_state = WAVE_STATE_SPAWNING
                 else:
-                    print("ERROR: Invalid wave index. Transitioning back to IDLE.")
+                    #print("ERROR: Invalid wave index. Transitioning back to IDLE.")
                     self.wave_state = WAVE_STATE_IDLE # Should not happen
         
         elif self.wave_state == WAVE_STATE_SPAWNING:
             # Check if all groups have finished spawning
             if not self.spawning_groups:
-                print(f"Wave {self.current_wave_index + 1} finished spawning. Total Spawned Counted: {self.enemies_alive_this_wave}") # DEBUG
+                #print(f"Wave {self.current_wave_index + 1} finished spawning. Total Spawned Counted: {self.enemies_alive_this_wave}") # DEBUG
                 # Transition to INTERMISSION state
                 self.wave_state = WAVE_STATE_INTERMISSION # CORRECTED TRANSITION
-                print(f"--> Entering INTERMISSION state. Waiting for count to reach 0.") # DEBUG
+                #print(f"--> Entering INTERMISSION state. Waiting for count to reach 0.") # DEBUG
                 return # Stop processing spawns for this frame
 
             # Process active spawning groups
@@ -3282,9 +3324,9 @@ class GameScene:
         elif self.wave_state == WAVE_STATE_INTERMISSION: # CORRECTED BLOCK
             # In this state, we wait until all enemies spawned *in this wave* are gone
             # (enemies_alive_this_wave is decremented on death or objective reach)
-            print(f"DEBUG: In INTERMISSION. Checking enemies_alive_this_wave: {self.enemies_alive_this_wave}") # DEBUG
+            #print(f"DEBUG: In INTERMISSION. Checking enemies_alive_this_wave: {self.enemies_alive_this_wave}") # DEBUG
             if self.enemies_alive_this_wave <= 0:
-                print(f"Wave {self.current_wave_index + 1} cleared!")
+                #print(f"Wave {self.current_wave_index + 1} cleared!")
                 
                 # --- Award Wave Completion Bonus --- 
                 # Make sure we have a valid current wave index
@@ -3294,7 +3336,7 @@ class GameScene:
                     if bonus > 0:
                         self.money += bonus
                         self.tower_selector.update_money(self.money) # Update UI
-                        print(f"$$$ Wave Bonus Added: +{bonus}. Current Money: {self.money}")
+                        #print(f"$$$ Wave Bonus Added: +{bonus}. Current Money: {self.money}")
                         # Optional: Add a floating text effect for the bonus?
                 # --- End Bonus Award --- 
                 
@@ -3305,9 +3347,9 @@ class GameScene:
                     next_wave_data = self.all_wave_data[self.current_wave_index]
                     self.wave_timer = next_wave_data.get('delay_before_wave', 10.0)
                     self.wave_state = WAVE_STATE_WAITING
-                    print(f"Wave complete. Waiting {self.wave_timer:.1f}s for Wave {self.current_wave_index + 1}")
+                    #print(f"Wave complete. Waiting {self.wave_timer:.1f}s for Wave {self.current_wave_index + 1}")
                 else:
-                    print("--- All waves spawned! --- ")
+                    #print("--- All waves spawned! --- ")
                     self.wave_state = WAVE_STATE_ALL_DONE # Or potentially WAVE_COMPLETE to wait for kills
                 return # Stop processing spawns for this frame
 
@@ -3317,7 +3359,7 @@ class GameScene:
         # Get enemy data from config
         enemy_base_data = config.ENEMY_DATA.get(enemy_id)
         if not enemy_base_data:
-            print(f"ERROR: Could not find enemy data for ID: {enemy_id}")
+            #print(f"ERROR: Could not find enemy data for ID: {enemy_id}")
             return
 
         # Get armor data
@@ -3327,7 +3369,7 @@ class GameScene:
 
         # --- Determine if enemy is air unit ---
         is_air = enemy_base_data.get("type", "ground") == "air"
-        print(f"DEBUG Spawn: Spawning {enemy_id}, Type={enemy_base_data.get('type', 'ground')}, Is Air? {is_air}") # DEBUG
+        #print(f"DEBUG Spawn: Spawning {enemy_id}, Type={enemy_base_data.get('type', 'ground')}, Is Air? {is_air}") # DEBUG
         # -------------------------------------
 
         # Find initial path, passing air unit status
@@ -3346,7 +3388,7 @@ class GameScene:
             random_spawn_x_pixel = (random_grid_x * config.GRID_SIZE) + (config.GRID_SIZE // 2)
             # -----------------------------------------------------
             # +++ ADDED DEBUG PRINT +++
-            print(f"  SPAWN DEBUG: Spawn Area X={self.spawn_area_x}, Width={config.SPAWN_AREA_WIDTH}, Chosen Grid X={random_grid_x}, Pixel X={random_spawn_x_pixel}")
+            #print(f"  SPAWN DEBUG: Spawn Area X={self.spawn_area_x}, Width={config.SPAWN_AREA_WIDTH}, Chosen Grid X={random_grid_x}, Pixel X={random_spawn_x_pixel}")
             # ++++++++++++++++++++++++
             \
             # Use RANDOMIZED spawn X, but keep original visual spawn Y\
@@ -3354,9 +3396,10 @@ class GameScene:
                           path, enemy_id, enemy_base_data, armor_type_name, damage_modifiers)
             self.enemies.append(enemy)
             self.enemies_alive_this_wave += 1 # Increment count for wave tracking
-            print(f"Spawned enemy: {enemy_id} (Wave: {self.current_wave_index + 1})")
+            #print(f"Spawned enemy: {enemy_id} (Wave: {self.current_wave_index + 1})")
         else:
-            print(f"ERROR: Could not find path for enemy: {enemy_id}. Enemy not spawned.")
+            pass
+            #print(f"ERROR: Could not find path for enemy: {enemy_id}. Enemy not spawned.")
             # Handle this case - maybe game over or error message?
 
     # --- NEW: Callback for Towers to Add Entities --- 
@@ -3365,7 +3408,8 @@ class GameScene:
         if isinstance(exploder_instance, PassThroughExploder):
             self.pass_through_exploders.append(exploder_instance)
         else:
-            print(f"Warning: Attempted to add non-PassThroughExploder instance via callback: {exploder_instance}")
+            #print(f"Warning: Attempted to add non-PassThroughExploder instance via callback: {exploder_instance}")
+            pass
     # --- End Callback --- 
 
     # --- NEW: Callback Method for Adding Standard Effects ---
@@ -3385,10 +3429,10 @@ class GameScene:
         if self.can_afford(cost):
             self.money -= cost
             self.tower_selector.update_money(self.money) # Ensure UI is updated
-            print(f"$$$ Deducted {cost}. Current Money: {self.money}") # Optional log
+            #print(f"$$$ Deducted {cost}. Current Money: {self.money}") # Optional log
             return True
         else:
-            print(f"Warning: Attempted to deduct {cost} but only have {self.money}.")
+            #print(f"Warning: Attempted to deduct {cost} but only have {self.money}.")
             return False
     # --- END Money Callbacks ---
 

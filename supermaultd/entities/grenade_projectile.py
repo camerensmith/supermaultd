@@ -112,7 +112,8 @@ class GrenadeProjectile(Projectile):
             explosion_sound = pygame.mixer.Sound("assets/sounds/grenade_explode.mp3")
             explosion_sound.play()
         except:
-            print("Could not play grenade explosion sound")
+            #print("Could not play grenade explosion sound")
+            pass
         
         # Create explosion effect
         explosion = Effect(

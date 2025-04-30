@@ -73,7 +73,7 @@ class Enemy:
             if current_time >= data['end_time']:
                 del self.status_effects[effect_type]
                 effects_removed = True
-                print(f"Enemy {self.enemy_id}: {effect_type} expired.")
+                #print(f"Enemy {self.enemy_id}: {effect_type} expired.")
         
         if effects_removed:
             self.recalculate_speed()
@@ -88,7 +88,7 @@ class Enemy:
         else:
             self.status_effects[effect_type] = { 'end_time': end_time, 'value': value }
         
-        print(f"Enemy {self.enemy_id}: Applied {effect_type} until {end_time:.2f}")
+        #print(f"Enemy {self.enemy_id}: Applied {effect_type} until {end_time:.2f}")
         # Recalculate speed immediately after applying any status effect
         self.recalculate_speed()
 
@@ -118,7 +118,7 @@ class Enemy:
 
         # Check if overwriting existing effect of the same name
         if effect_name in self.active_dots:
-            print(f"Enemy {self.enemy_id}: Refreshing DoT '{effect_name}'.")
+            #print(f"Enemy {self.enemy_id}: Refreshing DoT '{effect_name}'.")
             pass # Overwrite below
 
         # Store base damage and let update_dots handle amplification
@@ -129,7 +129,7 @@ class Enemy:
             'end_time': end_time,
             'damage_type': damage_type
         }
-        print(f"Enemy {self.enemy_id}: Applied DoT '{effect_name}' (Base: {damage}/{interval}s for {duration}s, type: {damage_type}). Ends at {end_time:.2f}.")
+        #print(f"Enemy {self.enemy_id}: Applied DoT '{effect_name}' (Base: {damage}/{interval}s for {duration}s, type: {damage_type}). Ends at {end_time:.2f}.")
 
     def update_dots(self, current_time):
         """Processes active DoT effects, applying damage and removing expired ones."""
@@ -140,7 +140,7 @@ class Enemy:
         dot_amp_multiplier = 1.0
         if 'dot_amplification' in self.status_effects:
             dot_amp_multiplier = self.status_effects['dot_amplification']['multiplier']
-            print(f"Enemy {self.enemy_id}: DoT amplification active (x{dot_amp_multiplier})")
+            #print(f"Enemy {self.enemy_id}: DoT amplification active (x{dot_amp_multiplier})")
 
         # Use list keys for safe iteration if removing items
         for effect_name in list(self.active_dots.keys()):
@@ -148,7 +148,7 @@ class Enemy:
 
             # Check for expiry
             if current_time >= dot_data['end_time']:
-                print(f"Enemy {self.enemy_id}: DoT '{effect_name}' expired.")
+                #print(f"Enemy {self.enemy_id}: DoT '{effect_name}' expired.")
                 del self.active_dots[effect_name]
                 continue # Move to next DoT
 
@@ -156,7 +156,7 @@ class Enemy:
             if current_time >= dot_data['next_tick']:
                 # Apply dot amplification multiplier to base damage
                 amplified_damage = dot_data['base_damage'] * dot_amp_multiplier
-                print(f"Enemy {self.enemy_id}: DoT '{effect_name}' ticking for {amplified_damage} damage (base: {dot_data['base_damage']}, amp: x{dot_amp_multiplier}, type: {dot_data['damage_type']}).")
+                #print(f"Enemy {self.enemy_id}: DoT '{effect_name}' ticking for {amplified_damage} damage (base: {dot_data['base_damage']}, amp: x{dot_amp_multiplier}, type: {dot_data['damage_type']}).")
                 self.take_damage(amplified_damage, dot_data['damage_type'])
                 # Schedule next tick
                 dot_data['next_tick'] += dot_data['interval']
@@ -211,7 +211,7 @@ class Enemy:
                 # Check if we've reached the target area
                 if distance <= self.wander_radius * 2:
                     self.path_index += 1
-                    print(f"Enemy reached waypoint {self.path_index-1}, moving to next waypoint")
+                    #print(f"Enemy reached waypoint {self.path_index-1}, moving to next waypoint")
             else:
                 # If we're already at the target, move to next waypoint
                 self.path_index += 1
@@ -223,7 +223,7 @@ class Enemy:
         
     def take_damage(self, base_damage, damage_type="normal", bonus_multiplier=1.0, ignore_armor_amount=0, source_special=None):
         """Apply damage to the enemy, taking into account resistances, status effects, and armor."""
-        print(f" >>> ENTERING Enemy.take_damage for {self.enemy_id} (Damage: {base_damage}, Type: {damage_type}, IgnoreArmor: {ignore_armor_amount})") # <<< ADDED DEBUG & IgnoreArmor
+        #print(f" >>> ENTERING Enemy.take_damage for {self.enemy_id} (Damage: {base_damage}, Type: {damage_type}, IgnoreArmor: {ignore_armor_amount})") # <<< ADDED DEBUG & IgnoreArmor
         # 1. Apply Armor Type vs Damage Type multiplier
         type_modifier = self.damage_modifiers.get(damage_type, 1.0)
         damage_after_type = base_damage * type_modifier
@@ -234,7 +234,7 @@ class Enemy:
         # --- Apply Aura Armor Reduction ---
         if self.aura_armor_reduction > 0:
             ignore_armor_amount += self.aura_armor_reduction # Add aura reduction to any passed-in ignore
-            print(f"... Applying aura armor reduction ({self.aura_armor_reduction}). Total ignore: {ignore_armor_amount}")
+            #print(f"... Applying aura armor reduction ({self.aura_armor_reduction}). Total ignore: {ignore_armor_amount}")
         # --- End Aura Armor Reduction ---
 
         # 2. Apply Armor Value reduction/amplification
@@ -252,7 +252,7 @@ class Enemy:
         mark_multiplier = 1.0
         if "marked_for_death" in self.status_effects:
             mark_multiplier = 1.5 # Apply 1.5x damage
-            print(f"... Enemy {self.enemy_id} is marked_for_death, applying x{mark_multiplier} multiplier.")
+            #print(f"... Enemy {self.enemy_id} is marked_for_death, applying x{mark_multiplier} multiplier.")
         # --- END Marked for Death --- 
         
         # 3. Apply Bonus Multiplier (e.g., from Shatter)
@@ -265,9 +265,9 @@ class Enemy:
             log_armor_part = f"EffArmor: {effective_armor:.1f} (Base: {self.current_armor_value}, Ign: {ignore_armor_amount})"
             
         # More detailed debug print
-        print(f"Enemy {self.enemy_id}: Took {final_damage:.2f} damage." # Use final_damage
-              f" (Base: {base_damage:.1f}, Type: {damage_type}, TypeMod: {type_modifier:.2f}, {log_armor_part}, ArmorMod: {armor_multiplier:.2f}, BonusMult: {bonus_multiplier:.2f}, MarkMult: {mark_multiplier:.2f})." # Added MarkMult to log
-              f" Health: {self.health:.2f}/{self.max_health}")
+        #print(f"Enemy {self.enemy_id}: Took {final_damage:.2f} damage." # Use final_damage
+              #f" (Base: {base_damage:.1f}, Type: {damage_type}, TypeMod: {type_modifier:.2f}, {log_armor_part}, ArmorMod: {armor_multiplier:.2f}, BonusMult: {bonus_multiplier:.2f}, MarkMult: {mark_multiplier:.2f})." # Added MarkMult to log
+              #f" Health: {self.health:.2f}/{self.max_health}")
         
         was_killed = self.health <= 0
         bounty_triggered = False # Initialize bounty flag
@@ -280,7 +280,7 @@ class Enemy:
             if source_special and source_special.get("effect") == "bounty_on_kill":
                 bounty_triggered = True
                 gold_penalty = source_special.get("gold_penalty", 1) # Default penalty to 1
-                print(f"!!! Enemy {self.enemy_id} killed by Bounty Hunter! Triggering {gold_penalty} gold penalty.")
+                #print(f"!!! Enemy {self.enemy_id} killed by Bounty Hunter! Triggering {gold_penalty} gold penalty.")
                 # Store the tower that killed this enemy - THIS IS THE CRITICAL LINE
                 if hasattr(source_special, 'get') and callable(source_special.get):
                      # Assuming source_special is a dict containing tower reference
@@ -288,10 +288,10 @@ class Enemy:
                      if 'source_tower' in source_special: # Make sure key exists
                          self.killed_by = source_special.get("source_tower")
                      else:
-                         print("Warning: bounty_on_kill special missing 'source_tower' key.")
+                         #print("Warning: bounty_on_kill special missing 'source_tower' key.")
                          self.killed_by = None # Or handle error appropriately
                 else:
-                     print("Warning: source_special is not a dict or missing get method for bounty_on_kill.")
+                     #print("Warning: source_special is not a dict or missing get method for bounty_on_kill.")
                      self.killed_by = None
             # <<< END RE-ADDED BOUNTY CHECK >>>
             # Check for gold_on_kill as a separate possibility
@@ -303,7 +303,7 @@ class Enemy:
                     gold_on_kill_amount = amount
                     # <<< ADDED: Store amount on enemy object >>>
                     self.pending_gold_on_kill = amount 
-                    print(f"$$$ Gold on Kill CHANCE ({chance}%) SUCCEEDED! Granting {amount} extra gold for killing {self.enemy_id}.")
+                    #print(f"$$$ Gold on Kill CHANCE ({chance}%) SUCCEEDED! Granting {amount} extra gold for killing {self.enemy_id}.")
                 # else: # Optional log for failure
                 #    print(f"... Gold on Kill CHANCE ({chance}%) failed for killing {self.enemy_id}.")
 
@@ -345,7 +345,7 @@ class Enemy:
         # Clamp current health to the new max health
         self.health = min(self.health, self.max_health)
         
-        print(f"### MAX HP REDUCED for {self.enemy_id}: {old_max_health:.1f} -> {self.max_health:.1f} (-{reduction_amount:.1f}). Current HP: {self.health:.1f}")
+        #print(f"### MAX HP REDUCED for {self.enemy_id}: {old_max_health:.1f} -> {self.max_health:.1f} (-{reduction_amount:.1f}). Current HP: {self.health:.1f}")
 
     def draw(self, screen, enemy_assets, offset_x=0, offset_y=0):
         """Draw the enemy using its sprite and a health bar, applying grid offset."""
@@ -387,7 +387,7 @@ class Enemy:
         if is_bonechilled:
             overlay_image = enemy_assets.get_status_overlay_image('bonechill')
             # --- DEBUG: Check if overlay image was retrieved ---
-            print(f"DEBUG Draw Enemy {self.enemy_id}: Bonechilled! Overlay image found? {overlay_image is not None}")
+            #print(f"DEBUG Draw Enemy {self.enemy_id}: Bonechilled! Overlay image found? {overlay_image is not None}")
             # --- End Debug ---
             if overlay_image:
                 # Draw overlay centered on the same position as the enemy
@@ -433,7 +433,7 @@ class Enemy:
         if new_index == current_index:
             return # No change in index
 
-        print(f"REWIND: Enemy {self.enemy_id} moving from waypoint {current_index} back to {new_index} (rewound {num_waypoints} steps)")
+        #print(f"REWIND: Enemy {self.enemy_id} moving from waypoint {current_index} back to {new_index} (rewound {num_waypoints} steps)")
 
         self.path_index = new_index
 

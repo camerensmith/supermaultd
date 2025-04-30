@@ -177,7 +177,7 @@ ENEMY_DATA = {
     },
     "fire_elemental": {
         "health": 8800,
-        "speed": 0.1,
+        "speed": 0.3,
         "value": 2,
         "armor_type": "Ethereal", 
         "armor_value": 0,
@@ -193,10 +193,10 @@ ENEMY_DATA = {
     },
     "terrorizer": { #classic only, value increases 2
         "health": 2000,
-        "speed": 1.3,
+        "speed": 1.5,
         "value": 2,
         "armor_type": "Unarmored",
-        "armor_value": 9,
+        "armor_value": 15,
         "type": "ground"
     },
     "bruiser": {
@@ -217,13 +217,13 @@ ENEMY_DATA = {
     },
     "goon": {
         "health": 5000,
-        "speed": 0.4,
+        "speed": 0.5,
         "value": 3,
         "armor_type": "Fortified",
         "armor_value": 30,
         "type": "ground"
     },
-    "war_turtle": { 
+    "lumberer": { 
         "health": 33000,
         "speed": 0.3,
         "value": 3, "armor_value": 0,
@@ -295,7 +295,7 @@ ENEMY_DATA = {
     },
     "hellasaur": {
         "health": 75000,
-        "speed": 0.2,
+        "speed": 0.7,
         "value": 5,
         "armor_type": "Medium",
         "armor_value": 0,
@@ -309,7 +309,7 @@ ENEMY_DATA = {
         "armor_value": 50,
         "type": "ground"
     },
-    "crone": {
+    "crone": {#advanced only,
         "health": 7000,
         "speed": 1.6,
         "value": 5,
@@ -317,6 +317,15 @@ ENEMY_DATA = {
         "armor_value": 38,
         "type": "air"
     },
+    "vile_blob": { 
+        "health": 27500,
+        "speed": 1,
+        "value": 5,
+        "armor_type": "Unarmored",
+        "armor_value": 10,
+        "type": "ground"
+    },
+
     "scarlet_knight": {
         "health": 16000,
         "speed": 1.5,
@@ -339,7 +348,7 @@ ENEMY_DATA = {
         "value": 5,
         "armor_type": "Unarmored",
         "armor_value": 0,
-        "type": "air"
+        "type": "ground"
     },
     "orc": {
         "health": 120000,
@@ -347,7 +356,7 @@ ENEMY_DATA = {
         "value": 5,
         "armor_type": "Light",
         "armor_value": 0,
-        "type": "air"
+        "type": "ground"
     },
     "tusken_fighter": {
         "health": 73000,
@@ -399,7 +408,7 @@ ENEMY_DATA = {
     },
     "lord_supermaul": {
         "health": 255000, # Boss
-        "speed": 0.7,
+        "speed": 1.0,
         "value": 250, # Big reward
         "armor_type": "Medium",
         "armor_value": 100,
@@ -407,7 +416,7 @@ ENEMY_DATA = {
     },
 
     #additive
-"turtlesaur": {
+"war_turtle": {
     "health": 133700,
     "speed": 1,
     "value": 7,

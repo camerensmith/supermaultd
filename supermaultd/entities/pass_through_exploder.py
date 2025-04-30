@@ -146,13 +146,13 @@ class PassThroughExploder:
                     # Collision detected!
                     last_hit = self.pass_through_hit_times.get(enemy.enemy_id, -1.0)
                     if current_time - last_hit > self.pass_through_hit_cooldown:
-                        print(f"PassThroughExploder ({self.asset_id}) hit {enemy.enemy_id}")
+                        #print(f"PassThroughExploder ({self.asset_id}) hit {enemy.enemy_id}")
                         enemy.take_damage(self.pass_through_damage, self.pass_through_damage_type)
                         self.pass_through_hit_times[enemy.enemy_id] = current_time
 
         # 3. Check Max Distance Reached
         if self.distance_traveled >= self.fixed_travel_distance_pixels:
-            print(f"{self.asset_id} reached max distance.")
+            #print(f"{self.asset_id} reached max distance.")
             self.is_active = False # Stop moving/damaging
             explosion_effect = self.trigger_explosion(all_enemies) # Handle explosion effect
             if explosion_effect:
@@ -172,7 +172,7 @@ class PassThroughExploder:
         """ Handle the explosion effect at the end location. 
             Returns the created visual Effect instance, or None.
         """
-        print(f"BOOM! {self.asset_id} exploding at ({int(self.x)}, {int(self.y)})")
+        #print(f"BOOM! {self.asset_id} exploding at ({int(self.x)}, {int(self.y)})")
         explosion_radius_sq = self.explosion_radius_pixels ** 2
         enemies_hit = 0
 
@@ -182,7 +182,7 @@ class PassThroughExploder:
 
             dist_sq = (self.x - enemy.x)**2 + (self.y - enemy.y)**2
             if dist_sq < explosion_radius_sq:
-                print(f"...Explosion hitting {enemy.enemy_id}")
+                #print(f"...Explosion hitting {enemy.enemy_id}")
                 enemy.take_damage(self.explosion_damage, self.explosion_damage_type)
                 enemies_hit += 1
         
@@ -217,8 +217,8 @@ class PassThroughExploder:
         try:
             assets.draw_projectile(screen, self.asset_id, draw_x, draw_y)
         except AttributeError:
-             print(f"Warning: Could not find draw method for asset '{self.asset_id}' in provided asset manager.")
+             #print(f"Warning: Could not find draw method for asset '{self.asset_id}' in provided asset manager.")
              pygame.draw.circle(screen, (0, 0, 255), (int(draw_x), int(draw_y)), 5) # Blue fallback
         except Exception as e:
-            print(f"Error drawing {self.asset_id}: {e}")
+            #print(f"Error drawing {self.asset_id}: {e}")
             pygame.draw.circle(screen, (255, 0, 0), (int(draw_x), int(draw_y)), 5) # Red fallback

@@ -63,15 +63,15 @@ class OffsetBoomerangProjectile:
                 if self.image:
                     self.rotated_image = self.image # Start with non-rotated
                     self.rect = self.rotated_image.get_rect(center=(int(self.current_pos.x), int(self.current_pos.y)))
-                    print(f"Loaded asset {self.asset_id} for boomerang.")
+                    #print(f"Loaded asset {self.asset_id} for boomerang.")
                 else:
-                     print(f"Warning: Asset loader returned None for {self.asset_id}")
+                     #print(f"Warning: Asset loader returned None for {self.asset_id}")
                      self._create_fallback_surface()
             except Exception as e:
-                 print(f"Error loading boomerang asset '{self.asset_id}': {e}")
+                 #print(f"Error loading boomerang asset '{self.asset_id}': {e}")
                  self._create_fallback_surface()
         else:
-            print("Warning: No asset loader or asset_id provided for boomerang. Creating fallback.")
+            #print("Warning: No asset loader or asset_id provided for boomerang. Creating fallback.")
             self._create_fallback_surface()
 
     def _create_fallback_surface(self):
@@ -93,7 +93,7 @@ class OffsetBoomerangProjectile:
             
         # Add scaled perpendicular vector to tower position
         self.offset_return_target = self.start_pos + perp_vec * self.offset_distance
-        print(f"Boomerang reached max range. New target (offset): {self.offset_return_target}")
+        #print(f"Boomerang reached max range. New target (offset): {self.offset_return_target}")
 
     def _update_velocity_and_rotation(self):
         """Sets velocity towards the current target point and updates rotation."""
@@ -139,13 +139,13 @@ class OffsetBoomerangProjectile:
                 self.state = self.STATE_RETURNING_TOWER
                 self.current_target_point = self.final_return_target
                 self._update_velocity_and_rotation()
-                print("Boomerang reached offset point. Returning to tower.")
+                #print("Boomerang reached offset point. Returning to tower.")
 
         elif self.state == self.STATE_RETURNING_TOWER:
             # Check proximity to tower
             if (self.current_pos - self.final_return_target).length_squared() < (self.speed * time_delta)**2 * 1.1:
                 self.finished = True
-                print("Boomerang returned to tower.")
+                #print("Boomerang returned to tower.")
                 return # Stop further processing this frame
 
         # 3. Update rect position after moving
@@ -162,7 +162,7 @@ class OffsetBoomerangProjectile:
                         damage = random.uniform(self.damage_min, self.damage_max)
                         enemy.take_damage(damage, self.damage_type)
                         self.recently_hit[enemy.enemy_id] = current_time
-                        print(f"Boomerang hit {enemy.enemy_id} for {damage:.2f} damage.")
+                        #print(f"Boomerang hit {enemy.enemy_id} for {damage:.2f} damage.")
                         # Note: Boomerang continues, doesn't stop on hit
 
         # 5. Rotate visual asset (if image loaded)

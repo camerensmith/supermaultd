@@ -40,7 +40,7 @@ class Tower:
         # Store basic info
         self.tower_id = tower_id
         # --- DEBUG PRINT ---
-        print(f"DEBUG Tower INIT: Assigned self.tower_id = {self.tower_id}")
+        #print(f"DEBUG Tower INIT: Assigned self.tower_id = {self.tower_id}")
         # -------------------
         self.tower_data = tower_data
         
@@ -67,7 +67,7 @@ class Tower:
         self.special = tower_data.get('special', None)
         self.attack_type = tower_data.get('attack_type', 'projectile')
         self.projectile_speed = tower_data.get('projectile_speed', None) # Default to None
-        print(f"INIT Tower {self.tower_id}: Attack Type = {self.attack_type}, ProjSpeed = {self.projectile_speed}")
+        #print(f"INIT Tower {self.tower_id}: Attack Type = {self.attack_type}, ProjSpeed = {self.projectile_speed}")
         
         # Beam specific state
         self.beam_color = tower_data.get('beam_color', None) # Load optional beam color
@@ -233,12 +233,14 @@ class Tower:
             if os.path.exists(path):
                 try:
                     self.attack_sound = pygame.mixer.Sound(path)
-                    print(f"Loaded attack sound for {self.tower_id} from {path}")
+                    #print(f"Loaded attack sound for {self.tower_id} from {path}")
                     break # Sound found, stop searching
                 except pygame.error as e:
-                    print(f"Error loading sound {path}: {e}")
+                    #print(f"Error loading sound {path}: {e}")
+                    pass
         if not self.attack_sound:
-            print(f"Warning: No attack sound file found for {self.tower_id} (checked: {sound_basename}.mp3/wav)")
+            #print(f"Warning: No attack sound file found for {self.tower_id} (checked: {sound_basename}.mp3/wav)")
+            pass
 
         # --- NEW: Looping sound for Ogre War Drums ---
         self.looping_sound_channel = None # Initialize attribute
@@ -250,13 +252,16 @@ class Tower:
                     self.looping_sound_channel = pygame.mixer.find_channel() # Find an available channel
                     if self.looping_sound_channel:
                         self.looping_sound_channel.play(drum_sound, loops=-1) # Start looping indefinitely
-                        print(f"Started looping war drums sound for {self.tower_id} on channel {self.looping_sound_channel}")
+                        #print(f"Started looping war drums sound for {self.tower_id} on channel {self.looping_sound_channel}")
                     else:
-                        print(f"Warning: Could not find available channel for looping {self.tower_id} sound.")
+                        #print(f"Warning: Could not find available channel for looping {self.tower_id} sound.")
+                        pass
                 except pygame.error as e:
-                    print(f"Error loading or playing looping sound {drums_sound_path}: {e}")
+                    #print(f"Error loading or playing looping sound {drums_sound_path}: {e}")
+                    pass
             else:
-                print(f"Warning: Looping sound file not found: {drums_sound_path}")
+                #print(f"Warning: Looping sound file not found: {drums_sound_path}")
+                pass
                 
         # --- Beam Sound State ---
         self.is_beam_sound_playing = False # Flag to track if the beam sound is currently looping
@@ -269,11 +274,13 @@ class Tower:
             if os.path.exists(double_strike_sound_path):
                 try:
                     self.double_strike_sound = pygame.mixer.Sound(double_strike_sound_path)
-                    print(f"Loaded double strike sound for {self.tower_id} from {double_strike_sound_path}")
+                    #print(f"Loaded double strike sound for {self.tower_id} from {double_strike_sound_path}")
                 except pygame.error as e:
-                    print(f"Error loading double strike sound {double_strike_sound_path}: {e}")
+                    #print(f"Error loading double strike sound {double_strike_sound_path}: {e}")
+                    pass
             else:
-                print(f"Warning: Double strike sound file not found: {double_strike_sound_path}")
+                #print(f"Warning: Double strike sound file not found: {double_strike_sound_path}")
+                pass
                 
         # --- Samurai Armor Ignore Sound (Specific Loading) ---
         self.ignore_armor_sound = None
@@ -282,11 +289,13 @@ class Tower:
             if os.path.exists(ignore_armor_sound_path):
                 try:
                     self.ignore_armor_sound = pygame.mixer.Sound(ignore_armor_sound_path)
-                    print(f"Loaded ignore armor sound for {self.tower_id} from {ignore_armor_sound_path}")
+                    #print(f"Loaded ignore armor sound for {self.tower_id} from {ignore_armor_sound_path}")
                 except pygame.error as e:
-                    print(f"Error loading ignore armor sound {ignore_armor_sound_path}: {e}")
+                    #print(f"Error loading ignore armor sound {ignore_armor_sound_path}: {e}")
+                    pass
             else:
-                print(f"Warning: Ignore armor sound file not found: {ignore_armor_sound_path}")
+                #print(f"Warning: Ignore armor sound file not found: {ignore_armor_sound_path}")
+                pass
                 
         # --- Pass Through Launch Sound (Conditional Loading) ---
         self.pass_through_launch_sound = None
@@ -297,13 +306,16 @@ class Tower:
                 if os.path.exists(launch_sound_path):
                     try:
                         self.pass_through_launch_sound = pygame.mixer.Sound(launch_sound_path)
-                        print(f"Loaded pass through launch sound for {self.tower_id} from {launch_sound_path}")
+                        #print(f"Loaded pass through launch sound for {self.tower_id} from {launch_sound_path}")
                     except pygame.error as e:
-                        print(f"Error loading pass through launch sound {launch_sound_path}: {e}")
+                        #print(f"Error loading pass through launch sound {launch_sound_path}: {e}")
+                        pass
                 else:
-                    print(f"Warning: Pass through launch sound file not found: {launch_sound_path}")
+                    #print(f"Warning: Pass through launch sound file not found: {launch_sound_path}")
+                    pass
             else:
-                 print(f"Warning: Tower {self.tower_id} has fixed_distance_pass_through_explode effect but no 'pass_through_launch_sound_file' key in special.")
+                 #print(f"Warning: Tower {self.tower_id} has fixed_distance_pass_through_explode effect but no 'pass_through_launch_sound_file' key in special.")
+                 pass
 
         # --- NEW: Looping sound for Spark Storm Generator ---
         if self.tower_id == 'spark_storm_generator':
@@ -314,9 +326,10 @@ class Tower:
                     self.looping_sound_channel = pygame.mixer.find_channel()
                     if self.looping_sound_channel:
                         self.looping_sound_channel.play(storm_sound, loops=-1)
-                        print(f"Started looping sound {storm_sound_path} on channel {self.looping_sound_channel}")
+                        #print(f"Started looping sound {storm_sound_path} on channel {self.looping_sound_channel}")
                     else:
-                        print("Warning: No available sound channels for spark_storm_generator loop.")
+                        #print("Warning: No available sound channels for spark_storm_generator loop.")
+                        pass
                 except pygame.error as e:
                     print(f"Error loading or playing spark_storm_generator sound {storm_sound_path}: {e}")
             else:
@@ -332,13 +345,16 @@ class Tower:
                     self.looping_sound_channel = pygame.mixer.find_channel()
                     if self.looping_sound_channel:
                         self.looping_sound_channel.play(shredder_sound, loops=-1)
-                        print(f"Started looping sound {shredder_sound_path} on channel {self.looping_sound_channel}")
+                        #print(f"Started looping sound {shredder_sound_path} on channel {self.looping_sound_channel}")
                     else:
-                        print("Warning: No available sound channels for goblin_shredder loop.")
+                        #print("Warning: No available sound channels for goblin_shredder loop.")
+                        pass
                 except pygame.error as e:
-                    print(f"Error loading or playing goblin_shredder sound {shredder_sound_path}: {e}")
+                    #print(f"Error loading or playing goblin_shredder sound {shredder_sound_path}: {e}")
+                    pass
             else:
-                print(f"Warning: Looping sound file not found: {shredder_sound_path}")
+                #print(f"Warning: Looping sound file not found: {shredder_sound_path}")
+                pass
         # --- END Goblin Shredder Sound ---
 
         # --- NEW: Load Miss Sound for Goblin Catapult Brigade ---
@@ -347,11 +363,13 @@ class Tower:
             if os.path.exists(miss_sound_path):
                 try:
                     self.miss_sound = pygame.mixer.Sound(miss_sound_path)
-                    print(f"Loaded miss sound for {self.tower_id} from {miss_sound_path}")
+                    #print(f"Loaded miss sound for {self.tower_id} from {miss_sound_path}")
                 except pygame.error as e:
-                    print(f"Error loading miss sound {miss_sound_path}: {e}")
+                    #print(f"Error loading miss sound {miss_sound_path}: {e}")
+                    pass
             else:
-                print(f"Warning: Miss sound file not found: {miss_sound_path}")
+                #print(f"Warning: Miss sound file not found: {miss_sound_path}")
+                pass
         # --- END Miss Sound Loading ---
 
         # --- NEW: Continuous Aura Tick Timer ---
@@ -371,11 +389,13 @@ class Tower:
             if os.path.exists(vortex_image_path):
                 try:
                     self.vortex_overlay_image = pygame.image.load(vortex_image_path).convert_alpha()
-                    print(f"Loaded vortex overlay for {self.tower_id}")
+                    #print(f"Loaded vortex overlay for {self.tower_id}")
                 except pygame.error as e:
-                    print(f"Error loading vortex overlay image {vortex_image_path}: {e}")
+                    #print(f"Error loading vortex overlay image {vortex_image_path}: {e}")
+                    pass
             else:
-                print(f"Warning: Vortex overlay image not found: {vortex_image_path}")
+                #print(f"Warning: Vortex overlay image not found: {vortex_image_path}")
+                pass
         # --- END Vortex Overlay Load --- <<< ADDED
 
         # --- NEW: Execute Ability State --- 
@@ -399,12 +419,14 @@ class Tower:
                     if os.path.exists(path):
                         try:
                             self.special_ability_sound = pygame.mixer.Sound(path)
-                            print(f"Loaded special ability sound for {self.tower_id} ({ability_sound_id}) from {path}")
+                            #print(f"Loaded special ability sound for {self.tower_id} ({ability_sound_id}) from {path}")
                             break
                         except pygame.error as e:
-                            print(f"Error loading special ability sound {path}: {e}")
+                            #print(f"Error loading special ability sound {path}: {e}")
+                            pass
                 if not self.special_ability_sound:
-                    print(f"Warning: No special ability sound file found for {self.tower_id} (checked: {ability_sound_id}.mp3/wav)")
+                    #print(f"Warning: No special ability sound file found for {self.tower_id} (checked: {ability_sound_id}.mp3/wav)")
+                    pass
         # --- END Execute Ability State ---
 
         # --- Miasma Pulse Animation State ---
@@ -423,13 +445,16 @@ class Tower:
                     self.looping_sound_channel = pygame.mixer.find_channel()
                     if self.looping_sound_channel:
                         self.looping_sound_channel.play(beacon_sound, loops=-1)
-                        print(f"Started looping sound {beacon_sound_path} on channel {self.looping_sound_channel}")
+                        #print(f"Started looping sound {beacon_sound_path} on channel {self.looping_sound_channel}")
                     else:
-                        print("Warning: No available sound channels for bomb_barrage_beacon loop.")
+                        #print("Warning: No available sound channels for bomb_barrage_beacon loop.")
+                        pass
                 except pygame.error as e:
-                    print(f"Error loading or playing bomb_barrage_beacon sound {beacon_sound_path}: {e}")
+                    #print(f"Error loading or playing bomb_barrage_beacon sound {beacon_sound_path}: {e}")
+                    pass
             else:
-                print(f"Warning: Looping sound file not found: {beacon_sound_path}")
+                #print(f"Warning: Looping sound file not found: {beacon_sound_path}")
+                pass
         # --- END Bomb Barrage Beacon Sound ---
 
         # Set last_attack_time to trigger first strike immediately for bombardment
@@ -457,11 +482,13 @@ class Tower:
             if os.path.exists(rewind_sound_path):
                 try:
                     self.rewind_sound = pygame.mixer.Sound(rewind_sound_path)
-                    print(f"Loaded rewind sound for {self.tower_id} from {rewind_sound_path}")
+                    #print(f"Loaded rewind sound for {self.tower_id} from {rewind_sound_path}")
                 except pygame.error as e:
-                    print(f"Error loading rewind sound {rewind_sound_path}: {e}")
+                    #print(f"Error loading rewind sound {rewind_sound_path}: {e}")
+                    pass
             else:
-                print(f"Warning: Rewind sound file not found: {rewind_sound_path}")
+                #print(f"Warning: Rewind sound file not found: {rewind_sound_path}")
+                pass
         # --- END Time Machine Rewind Sound ---
 
         # --- NEW: Time Machine Rewind Visual --- 
@@ -474,9 +501,11 @@ class Tower:
                     self.rewind_visual_surface = pygame.image.load(visual_path).convert_alpha()
                     print(f"Loaded rewind visual for {self.tower_id} from {visual_path}")
                 except pygame.error as e:
-                    print(f"Error loading rewind visual {visual_path}: {e}")
+                    #print(f"Error loading rewind visual {visual_path}: {e}")
+                    pass
             else:
-                print(f"Warning: Rewind visual file not found: {visual_path}")
+                #print(f"Warning: Rewind visual file not found: {visual_path}")
+                pass
         # --- END Time Machine Rewind Visual ---
 
     def calculate_derived_stats(self):
@@ -547,7 +576,7 @@ class Tower:
                     multiplier = buff_tower.special.get('multiplier', 1.0)
                     if multiplier > highest_multiplier:
                         highest_multiplier = multiplier
-                        print(f"DEBUG: Tower {self.tower_id} affected by {buff_tower.tower_id}'s dot_amp_aura: {multiplier}x")
+                        #print(f"DEBUG: Tower {self.tower_id} affected by {buff_tower.tower_id}'s dot_amp_aura: {multiplier}x")
         
         return highest_multiplier
 
@@ -643,7 +672,7 @@ class Tower:
                 # Calculate and add the bonus
                 if nearby_swarmer_count > 0:
                     swarm_bonus_percent = nearby_swarmer_count * bonus_per_swarmer
-                    print(f"DEBUG: {self.tower_id} ({self.center_grid_x},{self.center_grid_y}) found {nearby_swarmer_count} nearby swarmers. Applying +{swarm_bonus_percent}% speed bonus.") # Debug
+                    #print(f"DEBUG: {self.tower_id} ({self.center_grid_x},{self.center_grid_y}) found {nearby_swarmer_count} nearby swarmers. Applying +{swarm_bonus_percent}% speed bonus.") # Debug
                     total_speed_bonus_percent += swarm_bonus_percent
         # --- End Swarm Power Check ---
 
@@ -712,7 +741,7 @@ class Tower:
         # --- Reaper Mech Bonus Damage --- # NEW
         if self.tower_id == "tac_reaper_mech" and self.kill_count > 0:
             reaper_bonus = 0.25 * self.kill_count
-            print(f"+++ Reaper Mech ({self.tower_id}) applying +{reaper_bonus:.2f} bonus damage (Kills: {self.kill_count}). Base Dmg: {damage:.2f} -> {damage + reaper_bonus:.2f}")
+            #print(f"+++ Reaper Mech ({self.tower_id}) applying +{reaper_bonus:.2f} bonus damage (Kills: {self.kill_count}). Base Dmg: {damage:.2f} -> {damage + reaper_bonus:.2f}")
             damage += reaper_bonus
         # --- End Reaper Mech Bonus ---
         
@@ -724,7 +753,7 @@ class Tower:
             air_multiplier = buffed_stats.get('air_damage_multiplier', 1.0)
             if air_multiplier != 1.0:
                 damage *= air_multiplier
-                print(f"Tower {self.tower_id} applying x{air_multiplier:.2f} damage multiplier vs Air target {enemy.enemy_id}.")
+                #print(f"Tower {self.tower_id} applying x{air_multiplier:.2f} damage multiplier vs Air target {enemy.enemy_id}.")
         # ----------------------------------
 
         # Check for critical hit using BUFFED crit stats
@@ -735,16 +764,16 @@ class Tower:
         if effective_crit_chance > 0 and random.random() < effective_crit_chance: # Level 2 (12 spaces)
             damage *= effective_crit_multiplier
             is_crit = True
-            print(f"Tower {self.tower_id} CRITICAL HIT! (Chance: {effective_crit_chance:.2f}, Mult: {effective_crit_multiplier:.2f}) Damage: {damage:.2f}")
+            #print(f"Tower {self.tower_id} CRITICAL HIT! (Chance: {effective_crit_chance:.2f}, Mult: {effective_crit_multiplier:.2f}) Damage: {damage:.2f}")
 
         # --- Apply Berserk Self-Buff --- 
         if self.is_berserk and current_time < self.berserk_end_time: # Level 1 (8 spaces)
             damage *= self.berserk_bonus_multiplier
-            print(f"Tower {self.tower_id} BERSERK active! Applying x{self.berserk_bonus_multiplier:.2f}. Damage: {damage:.2f}")
+            #print(f"Tower {self.tower_id} BERSERK active! Applying x{self.berserk_bonus_multiplier:.2f}. Damage: {damage:.2f}")
         elif self.is_berserk and current_time >= self.berserk_end_time:
             self.is_berserk = False
             self.berserk_bonus_multiplier = 1.0
-            print(f"Tower {self.tower_id} Berserk expired.")
+            #print(f"Tower {self.tower_id} Berserk expired.")
 
         # --- Check for Berserk Trigger --- 
         # Correct Level 1 indentation (8 spaces)
@@ -771,7 +800,7 @@ class Tower:
         if self.special and self.special.get("effect") == "self_destruct":
             chance = self.special.get("self_destruct_percentage_chance", 0)
             if random.uniform(0, 100) < chance:
-                print(f"Tower {self.tower_id} is self-destructing!")
+                #print(f"Tower {self.tower_id} is self-destructing!")
                 # Return dictionary indicating self-destruct action and parameters
                 return {
                     'action': 'self_destruct',
@@ -794,7 +823,7 @@ class Tower:
         # --- Adjacency Requirement Check --- 
         if self.special and self.special.get("effect") == "requires_solar_adjacency":
             if not all_towers:
-                print(f"Warning: Tower {self.tower_id} requires adjacency check but 'all_towers' list was not provided.")
+                #print(f"Warning: Tower {self.tower_id} requires adjacency check but 'all_towers' list was not provided.")
                 return None # Cannot function without the list
                 
             required_count = self.special.get("required_count", 3)
@@ -819,7 +848,7 @@ class Tower:
         
         # --- Interval Check (Moved to be universal for non-beam) ---
         # <<< ADDED DEBUG PRINT >>>
-        print(f"DEBUG Interval Check: Tower={self.tower_id}, Time={current_time:.2f}, LastAttack={self.last_attack_time:.2f}, Interval={effective_interval:.2f}, SalvoRem={self.salvo_shots_remaining}")
+        #print(f"DEBUG Interval Check: Tower={self.tower_id}, Time={current_time:.2f}, LastAttack={self.last_attack_time:.2f}, Interval={effective_interval:.2f}, SalvoRem={self.salvo_shots_remaining}")
         # Allow attack if interval ready OR if a salvo is currently active (but attack shouldn't proceed if active)
         is_salvo_tower = self.special and self.special.get("effect") == "salvo_attack"
         if current_time - self.last_attack_time < effective_interval and self.salvo_shots_remaining <= 0:
@@ -841,7 +870,7 @@ class Tower:
             is_crit = False 
             
             cannons_per_side = self.special.get("cannons_per_side", 1)
-            print(f"Tower {self.tower_id} firing timed BROADSIDE ({cannons_per_side} cannons per side)")
+            #print(f"Tower {self.tower_id} firing timed BROADSIDE ({cannons_per_side} cannons per side)")
             
             # Fire direction: Left (-1, 0) and Right (1, 0)
             left_dir_angle = 180 
@@ -888,14 +917,14 @@ class Tower:
         if self.attack_type != 'beam': # Exclude beam, broadside already handled
             # <<< MODIFIED: Added check to allow whip attack type without target >>>
             if not target and self.attack_type != 'whip': 
-                 print(f"ERROR: Tower {self.tower_id} attack called without target (and not broadside/whip).") # Updated print
+                 #print(f"ERROR: Tower {self.tower_id} attack called without target (and not broadside/whip).") # Updated print
                  return None # Should not happen if called correctly from GameScene
 
             # --- NEW: Miss Chance Check --- 
             if self.special and self.special.get("effect") == "miss_chance":
                 miss_chance = self.special.get("chance", 0)
                 if random.random() * 100 < miss_chance:
-                    print(f"Tower {self.tower_id} MISSED due to {miss_chance}% miss chance!")
+                    #print(f"Tower {self.tower_id} MISSED due to {miss_chance}% miss chance!")
                     # Play miss sound if available
                     if hasattr(self, 'miss_sound') and self.miss_sound:
                         self.miss_sound.play()
@@ -915,7 +944,8 @@ class Tower:
                                                        rise_speed=30)
                         self.game_scene_add_effect_callback(text_effect)
                     except Exception as e:
-                        print(f"Error creating miss text effect: {e}")
+                        #print(f"Error creating miss text effect: {e}")
+                        pass
                     
                     self.last_attack_time = current_time # Consume the attack cooldown
                     return None # Return None to prevent any attack effects
@@ -928,7 +958,7 @@ class Tower:
                     self.attack_sound.play()
                 # <<< END PLAY SOUND >>>
                 # Only start a new salvo if one isn't already in progress (checked above)
-                print(f"Tower {self.tower_id} initiating SALVO attack on {target.enemy_id}")
+                #print(f"Tower {self.tower_id} initiating SALVO attack on {target.enemy_id}")
                 # Calculate damage for the *first* shot
                 initial_damage, is_crit = self.calculate_damage(target, buffed_stats, current_time, damage_multiplier=damage_multiplier)
                 
@@ -979,7 +1009,7 @@ class Tower:
 
                 projectile_id = self.tower_data.get('projectile_asset_id', self.tower_id)
 
-                print(f"Tower {self.tower_id} firing SHOTGUN ({pellets} pellets, spread {spread_angle_degrees} deg) at {target.enemy_id}")
+                #print(f"Tower {self.tower_id} firing SHOTGUN ({pellets} pellets, spread {spread_angle_degrees} deg) at {target.enemy_id}")
 
                 for _ in range(pellets):
                     # Calculate random offset within the spread angle
@@ -1017,7 +1047,7 @@ class Tower:
                     self.last_attack_time = current_time # Update attack time only if target found
                     mark_status_effect = self.special.get("mark_status_effect", "marked_for_death")
                     mark_duration = self.special.get("mark_duration", 0.3) 
-                    print(f"Tower {self.tower_id} applying mark '{mark_status_effect}' to {target.enemy_id} for {mark_duration}s")
+                    #print(f"Tower {self.tower_id} applying mark '{mark_status_effect}' to {target.enemy_id} for {mark_duration}s")
                     target.apply_status_effect(mark_status_effect, mark_duration, 1.0, current_time)
                     # <<< PLAY SOUND (Mark Apply) >>>
                     if self.attack_sound:
@@ -1044,7 +1074,7 @@ class Tower:
                 # Calculate base damage ONCE for all quills in this spray
                 initial_damage, is_crit = self.calculate_damage(target, buffed_stats, current_time, damage_multiplier=damage_multiplier)
 
-                print(f"Tower {self.tower_id} firing QUILLSPRAY ({quill_count} quills, ProjID: {projectile_id})")
+                #print(f"Tower {self.tower_id} firing QUILLSPRAY ({quill_count} quills, ProjID: {projectile_id})")
 
                 angle_increment = 360.0 / quill_count # Spread evenly in 360 degrees
 
@@ -1073,7 +1103,7 @@ class Tower:
 
             # <<< --- ADDED WHIP ATTACK LOGIC --- >>>
             elif self.attack_type == 'whip':
-                print(f"DEBUG: Entered whip attack block for {self.tower_id} at time {current_time:.2f}")
+                #print(f"DEBUG: Entered whip attack block for {self.tower_id} at time {current_time:.2f}")
                 # Whip logic needs to find its own targets within range
                 whip_targets_in_range = []
                 for enemy in all_enemies:
@@ -1081,7 +1111,7 @@ class Tower:
                         whip_targets_in_range.append(enemy)
 
                 if not whip_targets_in_range:
-                    print(f"  DEBUG: Whip attack - No targets found in range.")
+                    #print(f"  DEBUG: Whip attack - No targets found in range.")
                     self.last_attack_time = current_time # Still update cooldown even if no target found?
                     return results # No targets, nothing to do
 
@@ -1103,7 +1133,7 @@ class Tower:
                 # Select actual targets up to the max count
                 actual_whip_targets = whip_targets_in_range[:max_whip_targets]
                 target_ids = [t.enemy_id for t in actual_whip_targets]
-                print(f"  DEBUG: Whip attacking targets: {target_ids}")
+                #print(f"  DEBUG: Whip attacking targets: {target_ids}")
 
                 # Create visual path (adjusting for screen offset)
                 visual_path = [(self.x + grid_offset_x, self.y + grid_offset_y)] # Start at tower center (screen coords)
@@ -1119,7 +1149,7 @@ class Tower:
                     if i < len(actual_whip_targets) - 1: # If not the last target
                         final_damage *= damage_multiplier_first
                     
-                    print(f"    DEBUG: Whipping {whip_target.enemy_id} for {final_damage:.2f} damage (Multiplier: {damage_multiplier_first if i < len(actual_whip_targets) - 1 else 1.0})")
+                    #print(f"    DEBUG: Whipping {whip_target.enemy_id} for {final_damage:.2f} damage (Multiplier: {damage_multiplier_first if i < len(actual_whip_targets) - 1 else 1.0})")
                     # Pass tower special for potential on-hit effects
                     whip_target.take_damage(final_damage, self.damage_type, source_special=self.special)
                     
@@ -1131,7 +1161,7 @@ class Tower:
                     results["type"] = "whip_visual" # Signal to GameScene
                     results["visual_path"] = visual_path
                     results["duration"] = visual_duration
-                    print(f"  DEBUG: Created whip visual effect with {len(visual_path)} points.")
+                    #   print(f"  DEBUG: Created whip visual effect with {len(visual_path)} points.")
 
                 return results # Whip attack handled
             # <<< --- END WHIP ATTACK LOGIC --- >>>
@@ -1166,11 +1196,11 @@ class Tower:
                     time_needed_per_level = self.special.get("time_per_level_sec", 1.5)
                     if self.gattling_continuous_fire_start_time == 0.0:
                         self.gattling_continuous_fire_start_time = current_time
-                        print(f"Gattling {self.tower_id} started spinning up.")
+                        #print(f"Gattling {self.tower_id} started spinning up.")
                     time_needed_for_next_level = time_needed_per_level * (self.gattling_level + 1)
                     if current_time - self.gattling_continuous_fire_start_time >= time_needed_for_next_level:
                         self.gattling_level += 1
-                        print(f"Gattling {self.tower_id} reached Level {self.gattling_level}!")
+                        #print(f"Gattling {self.tower_id} reached Level {self.gattling_level}!")
                 # --- END Gattling Level Up --- 
                 
                 # Calculate damage for the gattling attack
@@ -1240,7 +1270,7 @@ class Tower:
                         self.last_attack_time = current_time # Update attack time
                         # Calculate direction angle to the initial target
                         if not target:
-                            print(f"Warning: Boomeranger {self.tower_id} has no target for initial angle.")
+                            #print(f"Warning: Boomeranger {self.tower_id} has no target for initial angle.")
                             return results # Cannot fire without target for angle
                         dx = target.x - self.x
                         dy = target.y - self.y
@@ -1256,7 +1286,7 @@ class Tower:
                         damage_min = self.base_damage_min
                         damage_max = self.base_damage_max
                         
-                        print(f"Tower {self.tower_id} firing OFFSET BOOMERANG (ProjID: {projectile_asset_id})")
+                        #print(f"Tower {self.tower_id} firing OFFSET BOOMERANG (ProjID: {projectile_asset_id})")
 
                         boomerang = OffsetBoomerangProjectile(
                             source_tower=self,
@@ -1356,7 +1386,7 @@ class Tower:
                                               is_visual_only=False) 
                         results['projectiles'].append(projectile)
                 elif self.attack_type == 'instant':
-                    print(f"DEBUG: Executing INSTANT attack for {self.tower_id}") # <<< ADDED DEBUG PRINT
+                    #print(f"DEBUG: Executing INSTANT attack for {self.tower_id}") # <<< ADDED DEBUG PRINT
                     # <<< PLAY SOUND >>>
                     if self.attack_sound:
                         self.attack_sound.play()
@@ -1373,12 +1403,13 @@ class Tower:
                                 if hasattr(self, 'ignore_armor_sound') and self.ignore_armor_sound:
                                     self.ignore_armor_sound.play()
                                 effective_armor_ignore = self.special.get("ignore_amount", 15)
-                                print(f"Samurai Mech ({self.tower_id}) triggered CHANCE ARMOR IGNORE! (Ignoring {effective_armor_ignore} armor)")
+                                #print(f"Samurai Mech ({self.tower_id}) triggered CHANCE ARMOR IGNORE! (Ignoring {effective_armor_ignore} armor)")
                         # Handle GUARANTEED ignore armor (like Archangel)
                         elif effect_type == "ignore_armor_on_hit": 
                             effective_armor_ignore = self.special.get("amount", 0) # Use 'amount' key from JSON
                             if effective_armor_ignore > 0:
-                                print(f"Tower ({self.tower_id}) applying GUARANTEED ARMOR IGNORE! (Ignoring {effective_armor_ignore} armor)")
+                                #print(f"Tower ({self.tower_id}) applying GUARANTEED ARMOR IGNORE! (Ignoring {effective_armor_ignore} armor)")
+                                pass
                     # <<< END ARMOR IGNORE LOGIC >>>
                             
                     # <<< ADD PRIMARY INSTANT DAMAGE APPLICATION HERE >>>
@@ -1396,7 +1427,7 @@ class Tower:
                         damage_result = {'was_killed': target.health <= 0} # Simplification, assuming take_damage modified health
                         if damage_result.get("was_killed", False):
                             self.kill_count += 1
-                            print(f"+++ Kill registered for Tower {self.tower_id} (via instant attack). Total kills: {self.kill_count}")
+                            #print(f"+++ Kill registered for Tower {self.tower_id} (via instant attack). Total kills: {self.kill_count}")
                             # If target is killed by first hit, don't proceed to double strike
                             was_killed_by_first_hit = True
                         else:
@@ -1413,7 +1444,7 @@ class Tower:
                             if hasattr(self, 'double_strike_sound') and self.double_strike_sound:
                                 self.double_strike_sound.play()
                             # <<< END PLAY SOUND >>>
-                            print(f"Double Strike triggered on {target.enemy_id} with {chance:.0f}% chance! Applying second hit.")
+                            #print(f"Double Strike triggered on {target.enemy_id} with {chance:.0f}% chance! Applying second hit.")
                             # Apply the same damage again
                             if initial_damage > 0:
                                 # Pass special again in case take_damage needs it for armor ignore etc.
@@ -1427,20 +1458,8 @@ class Tower:
                                 # Check for kill on second hit
                                 if second_damage_result.get("was_killed", False):
                                     self.kill_count += 1
-                                    print(f"+++ Kill registered for Tower {self.tower_id} (via double strike). Total kills: {self.kill_count}")
-                                # TODO: Decide if double strike should also trigger splash again? For simplicity, no for now.
-                    # <<< END DOUBLE STRIKE LOGIC >>>
-                            
-                    # Apply instant damage if needed -- THIS BLOCK SEEMS REDUNDANT NOW
-                    # if initial_damage > 0:
-                    #    # Pass the tower's special dict to take_damage for instant attacks
-                    #    damage_result = target.take_damage(initial_damage, self.damage_type, source_special=self.special)
-                    #    results['damage_dealt'] = initial_damage # Track damage
-                    #    # --- Check for Kill & Increment Count --- # NEW
-                    #    if damage_result.get("was_killed", False):
-                    #        self.kill_count += 1
-                    #        print(f"+++ Kill registered for Tower {self.tower_id} (via instant attack). Total kills: {self.kill_count}")
-                    #    # --- End Check --- 
+                                    #print(f"+++ Kill registered for Tower {self.tower_id} (via double strike). Total kills: {self.kill_count}")
+
                     
                     # Apply INSTANT special effects (DoT, Max HP Reduction, etc.)
                     self.apply_instant_special_effects(target, current_time) 
@@ -1466,9 +1485,9 @@ class Tower:
                                 rotation=angle  # Rotate to point from tower to target
                             )
                             results['effects'].append(projectile_effect)
-                            print(f"Created projectile-style visual for {self.tower_id} instant attack")
+                            #print(f"Created projectile-style visual for {self.tower_id} instant attack")
                     except Exception as e:
-                        print(f"Note: Could not create projectile-style visual for {self.tower_id}: {e}")
+                        pass
                         # Fall through to normal instant attack visual handling
                     
                     # --- Fallback to Normal Instant Attack Visual Effect --- 
@@ -1476,7 +1495,7 @@ class Tower:
                     if visual_effect_name and visual_assets: # Check if name and assets exist
                         visual_img = visual_assets.get(visual_effect_name)
                         if visual_img:
-                            print(f"... creating instant visual effect '{visual_effect_name}' at target {target.enemy_id}")
+                            #print(f"... creating instant visual effect '{visual_effect_name}' at target {target.enemy_id}")
                             # Calculate screen coordinates
                             effect_x = target.x + grid_offset_x
                             effect_y = target.y + grid_offset_y
@@ -1491,7 +1510,8 @@ class Tower:
                                                 hold_duration=hold_duration)
                             results['effects'].append(vis_effect)
                         else:
-                            print(f"Warning: Could not load visual asset '{visual_effect_name}' for tower {self.tower_id}")
+                            #print(f"Warning: Could not load visual asset '{visual_effect_name}' for tower {self.tower_id}")
+                            pass
                     # --- End Instant Visual Effect ---
 
                     # --- Special Case: Storm Generator Lightning Bolt ---
@@ -1542,7 +1562,7 @@ class Tower:
                         splash_damage = initial_damage * 0.25 # 25% splash damage
                         splash_radius_sq = effective_splash_radius_pixels ** 2
                         primary_target_pos = (target.x, target.y)
-                        print(f"... Applying INSTANT splash (Radius: {effective_splash_radius_pixels:.1f}, Dmg: {splash_damage:.2f})")
+                        #print(f"... Applying INSTANT splash (Radius: {effective_splash_radius_pixels:.1f}, Dmg: {splash_damage:.2f})")
                         
                         enemies_splashed = 0
                         for enemy in all_enemies:
@@ -1552,19 +1572,20 @@ class Tower:
                                 
                             dist_sq = (enemy.x - primary_target_pos[0])**2 + (enemy.y - primary_target_pos[1])**2
                             if dist_sq <= splash_radius_sq:
-                                print(f"    ... splashing {enemy.enemy_id} for {splash_damage:.2f}")
+                                #print(f"    ... splashing {enemy.enemy_id} for {splash_damage:.2f}")
                                 # Pass the tower's special dict to take_damage for instant splash attacks
                                 splash_damage_result = enemy.take_damage(splash_damage, self.damage_type, source_special=self.special)
                                 # --- Check for Splash Kill & Increment Count --- # NEW
                                 if splash_damage_result.get("was_killed", False):
                                      self.kill_count += 1 # Attributed to the tower that caused the splash
-                                     print(f"+++ Kill registered for Tower {self.tower_id} (via instant splash). Total kills: {self.kill_count}")
+                                     #print(f"+++ Kill registered for Tower {self.tower_id} (via instant splash). Total kills: {self.kill_count}")
                                 # --- End Check --- 
                                 # Also apply instant special effects (like stun) to splashed targets?
                                 self.apply_instant_special_effects(enemy, current_time) 
                                 enemies_splashed += 1
                         if enemies_splashed > 0:
-                             print(f"... splashed {enemies_splashed} enemies.")
+                             #print(f"... splashed {enemies_splashed} enemies.")
+                             pass
                     # --- End Instant Splash ---
 
                     # --- Chain Lightning Logic (for instant attack) ---
@@ -1580,7 +1601,7 @@ class Tower:
                         # Start visual path from tower to first target
                         chain_path_visual = [(self.x, self.y), (current_chain_target.x, current_chain_target.y)] 
 
-                        print(f"... Initiating chain lightning from {current_chain_target.enemy_id} (Radius: {math.sqrt(radius_pixels_sq):.1f}px)")
+                        #print(f"... Initiating chain lightning from {current_chain_target.enemy_id} (Radius: {math.sqrt(radius_pixels_sq):.1f}px)")
 
                         for _ in range(max_jumps):
                             next_target = None
@@ -1601,13 +1622,13 @@ class Tower:
                             if next_target:
                                 # Apply falloff
                                 current_chain_damage *= (1.0 - damage_falloff)
-                                print(f"    ... chaining to {next_target.enemy_id} for {current_chain_damage:.2f} damage")
+                                #print(f"    ... chaining to {next_target.enemy_id} for {current_chain_damage:.2f} damage")
                                 # Pass the tower's special dict to take_damage for chain lightning attacks
                                 chain_damage_result = next_target.take_damage(current_chain_damage, self.damage_type, source_special=self.special)
                                 # --- Check for Chain Kill & Increment Count --- # NEW
                                 if chain_damage_result.get("was_killed", False):
                                     self.kill_count += 1 # Attributed to the tower that started the chain
-                                    print(f"+++ Kill registered for Tower {self.tower_id} (via chain lightning). Total kills: {self.kill_count}")
+                                    #print(f"+++ Kill registered for Tower {self.tower_id} (via chain lightning). Total kills: {self.kill_count}")
                                 # --- End Check --- 
                                 targets_hit.add(next_target)
                                 chain_path_visual.append((next_target.x, next_target.y)) # Add position for visual
@@ -1665,7 +1686,7 @@ class Tower:
                 double_strike = DoubleStrikeEffect(self, target, initial_damage, current_time)
                 if self.game_scene_add_effect_callback:
                     self.game_scene_add_effect_callback(double_strike)
-                print(f"Double Strike triggered on {target.enemy_id} with {chance}% chance")
+                #print(f"Double Strike triggered on {target.enemy_id} with {chance}% chance")
         # REMOVED else block that contained take_damage
 
         # Check for every_nth_strike special effect
@@ -1682,7 +1703,7 @@ class Tower:
                 nth_strike = EveryNthStrikeEffect(self, target, bonus_damage, current_time)
                 if self.game_scene_add_effect_callback:
                     self.game_scene_add_effect_callback(nth_strike)
-                print(f"Every Nth Strike triggered on {target.enemy_id} (strike {self.strike_counter})")
+                #print(f"Every Nth Strike triggered on {target.enemy_id} (strike {self.strike_counter})")
                 self.strike_counter = 0  # Reset counter
 
         return results
@@ -1721,7 +1742,7 @@ class Tower:
                     dot_name, base_dot_damage, dot_interval, 
                     dot_duration, dot_damage_type, current_time
                 )
-                print(f"... instant attack applied {dot_name} DoT ({base_dot_damage}/{dot_interval}s for {dot_duration}s) to {target.enemy_id}")
+                #print(f"... instant attack applied {dot_name} DoT ({base_dot_damage}/{dot_interval}s for {dot_duration}s) to {target.enemy_id}")
         # --- End DoT Effects ---
         
     def draw(self, screen, tower_assets, offset_x=0, offset_y=0):
@@ -1770,7 +1791,8 @@ class Tower:
                     # Blit the temporary surface to the screen
                     screen.blit(temp_surface, (center_x - self.pulse_radius, center_y - self.pulse_radius))
                 except Exception as e:
-                    print(f"Error drawing pulse effect for {self.tower_id}: {e}")
+                    pass
+                    #print(f"Error drawing pulse effect for {self.tower_id}: {e}")
 
             # --- Draw Ground Effect Zone for Nuclear Silo ---
             if self.tower_id == 'industry_nuclear_silo' and self.aura_radius_pixels > 0:
@@ -1787,7 +1809,8 @@ class Tower:
                     # Blit the zone surface to the screen
                     screen.blit(zone_surface, (center_x - radius, center_y - radius))
                 except Exception as e:
-                    print(f"Error drawing nuclear silo ground effect zone: {e}")
+                    pass
+                    #print(f"Error drawing nuclear silo ground effect zone: {e}")
         # --- End Pulse Animation and Ground Effect ---
 
         # --- Draw Creep Colony Glow --- 
@@ -1807,7 +1830,8 @@ class Tower:
                     # Blit the temporary surface onto the main screen, centered correctly
                     screen.blit(temp_surface, (center_x - radius, center_y - radius))
                 except Exception as e:
-                    print(f"Error drawing creep colony glow effect: {e}")
+                    pass
+                    #print(f"Error drawing creep colony glow effect: {e}")
         # --- End Creep Colony Glow --- 
 
         # --- NEW: Draw Heaven Radiant Tower Aura --- 
@@ -1827,7 +1851,8 @@ class Tower:
                     # Blit the temporary surface onto the main screen, centered correctly
                     screen.blit(temp_surface, (center_x - radius, center_y - radius))
                 except Exception as e:
-                    print(f"Error drawing heaven_radiant_tower aura effect: {e}")
+                    pass
+                    #print(f"Error drawing heaven_radiant_tower aura effect: {e}")
         # --- END Heaven Radiant Tower Aura --- 
 
         # --- Special Handling for Storm Generator Aura Visual Path --- 
@@ -1836,7 +1861,8 @@ class Tower:
             # Load storm effect specifically from assets/effects
             aura_visual_img = tower_assets.get_effect_image("storm_effect") 
             if not aura_visual_img:
-                print(f"WARNING: Failed to load storm_effect.png from assets/effects for {self.tower_id}")
+                #print(f"WARNING: Failed to load storm_effect.png from assets/effects for {self.tower_id}")
+                pass
         else:
             # Default path for other towers
             aura_visual_img = tower_assets.get_aura_visual(self.tower_id)
@@ -1951,7 +1977,8 @@ class Tower:
                 except ValueError: 
                     pass 
                 except Exception as e:
-                    print(f"Error drawing rotated/scaled aura visual for {self.tower_id}: {e}")
+                    pass
+                    #print(f"Error drawing rotated/scaled aura visual for {self.tower_id}: {e}")
 
         # Draw the tower image scaled to its full pixel size (drawn on top of aura/pulse)
         tower_assets.draw_tower(screen, self.tower_id, 
@@ -2057,7 +2084,8 @@ class Tower:
                 except ValueError: # Catch potential zero dimensions during scaling
                      pass 
                 except Exception as e:
-                    print(f"Error drawing overlay visual for {self.tower_id}: {e}")
+                    pass
+                    #print(f"Error drawing overlay visual for {self.tower_id}: {e}")
         # --- End Overlay Visual --- 
 
         # REMOVE Range indicator drawing from here
@@ -2164,7 +2192,7 @@ class Tower:
                         if dist_sq <= self.aura_radius_pixels * self.aura_radius_pixels:
                             # Apply slow effect
                             enemy.apply_status_effect('slow', pulse_duration, slow_multiplier, current_time)
-                            print(f"Frost Pulse from {self.tower_id} slowed {enemy.enemy_id} by {slow_percentage}% for {pulse_duration}s")
+                            #print(f"Frost Pulse from {self.tower_id} slowed {enemy.enemy_id} by {slow_percentage}% for {pulse_duration}s")
         # --- End Frost Pulse Aura Effect ---
 
         # --- Miasma Pillar DOT Pulse Effect ---
@@ -2198,7 +2226,7 @@ class Tower:
                             )
                             # Apply slow effect
                             enemy.apply_status_effect('slow', pulse_duration, slow_multiplier, current_time)
-                            print(f"Miasma Pillar from {self.tower_id} applied DOT and slow to {enemy.enemy_id}")
+                            #print(f"Miasma Pillar from {self.tower_id} applied DOT and slow to {enemy.enemy_id}")
         # --- End Miasma Pillar DOT Pulse Effect ---
 
         # --- Vortex Damage Aura Effect ---
@@ -2226,7 +2254,7 @@ class Tower:
                             
                             # Apply damage
                             enemy.take_damage(damage, damage_type)
-                            print(f"Vortex from {self.tower_id} dealt {damage:.1f} {damage_type} damage to {enemy.enemy_id}")
+                            #print(f"Vortex from {self.tower_id} dealt {damage:.1f} {damage_type} damage to {enemy.enemy_id}")
         # --- End Vortex Damage Aura Effect ---
 
         # --- Glacial Heart Bonechill Pulse Effect ---
@@ -2247,7 +2275,7 @@ class Tower:
                         if dist_sq <= self.aura_radius_pixels * self.aura_radius_pixels:
                             # Apply bonechill effect
                             enemy.apply_status_effect('bonechill', bonechill_duration, 1.0, current_time)
-                            print(f"Glacial Heart from {self.tower_id} applied bonechill to {enemy.enemy_id} for {bonechill_duration}s")
+                            #print(f"Glacial Heart from {self.tower_id} applied bonechill to {enemy.enemy_id} for {bonechill_duration}s")
         # --- End Glacial Heart Bonechill Pulse Effect ---
 
         # --- Black Hole Generator Damage Pulse Effect ---
@@ -2269,7 +2297,7 @@ class Tower:
                         if dist_sq <= self.aura_radius_pixels * self.aura_radius_pixels:
                             # Apply damage
                             enemy.take_damage(pulse_damage, pulse_damage_type)
-                            print(f"Black Hole Generator from {self.tower_id} dealt {pulse_damage} {pulse_damage_type} damage to {enemy.enemy_id}")
+                            #print(f"Black Hole Generator from {self.tower_id} dealt {pulse_damage} {pulse_damage_type} damage to {enemy.enemy_id}")
         # --- End Black Hole Generator Damage Pulse Effect ---
 
         # --- Crit Damage Pulse Aura Effect ---
@@ -2291,7 +2319,7 @@ class Tower:
                         if dist_sq <= self.aura_radius_pixels * self.aura_radius_pixels:
                             # Apply crit damage buff
                             tower.apply_status_effect('crit_damage_buff', pulse_duration, crit_multiplier_bonus, current_time)
-                            print(f"War Drums from {self.tower_id} buffed {tower.tower_id} with +{crit_multiplier_bonus} crit damage for {pulse_duration}s")
+                            #print(f"War Drums from {self.tower_id} buffed {tower.tower_id} with +{crit_multiplier_bonus} crit damage for {pulse_duration}s")
         # --- End Crit Damage Pulse Aura Effect ---
 
         # --- Rampage Stack Decay Logic ---
@@ -2300,7 +2328,7 @@ class Tower:
             time_since_last_hit = current_time - self.rampage_last_hit_time
 
             if time_since_last_hit > decay_duration:
-                print(f"### RAMPAGE RESET: Tower {self.tower_id} stacks expired after {time_since_last_hit:.2f}s. Resetting {self.rampage_stacks} stacks.")
+                #print(f"### RAMPAGE RESET: Tower {self.tower_id} stacks expired after {time_since_last_hit:.2f}s. Resetting {self.rampage_stacks} stacks.")
                 self.rampage_stacks = 0
         # --- END Rampage Decay ---
 
@@ -2308,7 +2336,7 @@ class Tower:
         if self.gattling_level > 0 and self.special and self.special.get("effect") == "gattling_spin_up":
             decay_time = self.special.get("decay_time_sec", 2.0)
             if current_time - self.gattling_last_attack_time > decay_time:
-                print(f"Gattling {self.tower_id} spun down from Level {self.gattling_level}.")
+                #print(f"Gattling {self.tower_id} spun down from Level {self.gattling_level}.")
                 self.gattling_level = 0
                 self.gattling_continuous_fire_start_time = 0.0
         # --- END Gattling Spin-Down ---
@@ -2330,7 +2358,7 @@ class Tower:
                 if valid_targets:
                     # Choose a target (e.g., the first one found)
                     target_to_execute = valid_targets[0]
-                    print(f"!!! {self.tower_id} EXECUTE triggered on {target_to_execute.enemy_id} (HP: {target_to_execute.health}/{target_to_execute.max_health}) !!!")
+                    #print(f"!!! {self.tower_id} EXECUTE triggered on {target_to_execute.enemy_id} (HP: {target_to_execute.health}/{target_to_execute.max_health}) !!!")
                     
                     # Instantly kill the target
                     target_to_execute.take_damage(999999, "execute") 
@@ -2350,7 +2378,7 @@ class Tower:
                 speed_multiplier = self.special.get("attack_speed_multiplier", 1.3)
                 required_race = self.special.get("required_race", "zork")
                 
-                print(f"DEBUG: {self.tower_id} checking attack speed aura (radius: {self.aura_radius_pixels})")
+                #print(f"DEBUG: {self.tower_id} checking attack speed aura (radius: {self.aura_radius_pixels})")
                 
                 # Find towers in range
                 for tower in all_towers:
@@ -2363,7 +2391,7 @@ class Tower:
                         
                         # Check if tower belongs to the required race
                         tower_race = tower.tower_id.split('_')[0]  # Extract race from tower_id
-                        print(f"DEBUG: Checking tower {tower.tower_id} (race: {tower_race}, distance: {dist:.1f})")
+                        #print(f"DEBUG: Checking tower {tower.tower_id} (race: {tower_race}, distance: {dist:.1f})")
                         
                         # <<< Check if the tower is the required race >>>
                         if tower_race == required_race:
@@ -2379,7 +2407,7 @@ class Tower:
         if self.special and self.special.get("effect") == "rewind_waypoints":
             # Check cooldown based on attack_interval
             if hasattr(self, 'last_attack_time') and current_time - self.last_attack_time >= self.attack_interval:
-                print(f"TIME MACHINE {self.tower_id}: Cooldown ready. Scanning for target...")
+                #print(f"TIME MACHINE {self.tower_id}: Cooldown ready. Scanning for target...")
                 # Find the valid target furthest along the path
                 best_target = None
                 max_path_index = -1
@@ -2398,7 +2426,7 @@ class Tower:
                 # If a valid target was found
                 if best_target:
                     waypoints_to_rewind = self.special.get("waypoints_to_rewind", 3)
-                    print(f"TIME MACHINE {self.tower_id}: Targeting {best_target.enemy_id} (at waypoint {best_target.path_index}). Rewinding {waypoints_to_rewind} waypoints.")
+                    #print(f"TIME MACHINE {self.tower_id}: Targeting {best_target.enemy_id} (at waypoint {best_target.path_index}). Rewinding {waypoints_to_rewind} waypoints.")
                     
                     # Call the enemy's rewind method
                     best_target.rewind_waypoints(waypoints_to_rewind)
@@ -2427,19 +2455,7 @@ class Tower:
                                 print(f"TIME MACHINE {self.tower_id}: Created rewind visual effect.")
                             except Exception as e:
                                 print(f"Error creating rewind visual effect: {e}")
-                            else:
-                             print(f"ERROR: Missing game_scene_add_effect_callback for {self.tower_id} visual effect.")
-                    # --- End Rewind Visual Effect ---
-                    
-                    # --- Placeholder for potential future visual/sound --- 
-                    # if self.rewind_sound: self.rewind_sound.play() # Sound moved earlier
-                    # effect = RewindEffect(best_target.x, best_target.y)
-                    # self.game_scene_add_effect_callback(effect)
-                    # --- End Placeholder --- 
-                        else:
-                            print(f"TIME MACHINE {self.tower_id}: No valid target in range.")
-        # --- End Time Machine Rewind Logic ---
-
+ 
         # --- Splash Radius Buff Aura Effect ---
         if self.special and self.special.get("effect") == "splash_radius_buff_aura":
             # Check if it's time for a new tick
@@ -2462,9 +2478,10 @@ class Tower:
                         if dist_sq <= self.aura_radius_pixels * self.aura_radius_pixels:
                             # Apply splash radius buff with longer duration
                             tower.apply_pulsed_buff('splash_radius_buff', splash_radius_increase, 1.5, current_time)
-                            print(f"DEBUG: Splash Radius Aura from {self.tower_id} buffed {tower.tower_id} with +{splash_radius_increase} splash radius")
+                            #print(f"DEBUG: Splash Radius Aura from {self.tower_id} buffed {tower.tower_id} with +{splash_radius_increase} splash radius")
                         else:
-                            print(f"DEBUG: Tower {tower.tower_id} is too far away ({dist:.1f} > {self.aura_radius_pixels})")
+                            #print(f"DEBUG: Tower {tower.tower_id} is too far away ({dist:.1f} > {self.aura_radius_pixels})")
+                            pass
         # --- End Splash Radius Buff Aura Effect ---
 
         # --- Adjacency Attack Speed Buff Effect ---
@@ -2476,7 +2493,7 @@ class Tower:
                 speed_multiplier = 1.0 + (speed_bonus_percent / 100.0)
                 targets = self.special.get("targets", ["towers"])
                 
-                print(f"DEBUG: {self.tower_id} checking adjacency attack speed buff")
+                #print(f"DEBUG: {self.tower_id} checking adjacency attack speed buff")
                 
                 # Find adjacent towers
                 for tower in all_towers:
@@ -2488,7 +2505,7 @@ class Tower:
                         if (dx <= 1 and dy <= 1) and (dx == 1 or dy == 1):  # Only adjacent, not diagonal
                             # Apply attack speed buff
                             tower.apply_pulsed_buff('attack_speed_buff', speed_multiplier, 0.2, current_time)
-                            print(f"DEBUG: Adjacency Attack Speed Buff from {self.tower_id} buffed {tower.tower_id} with +{speed_bonus_percent}% attack speed")
+                            #print(f"DEBUG: Adjacency Attack Speed Buff from {self.tower_id} buffed {tower.tower_id} with +{speed_bonus_percent}% attack speed")
         # --- End Adjacency Attack Speed Buff Effect ---
 
         # --- Adjacency Damage Buff Effect ---
@@ -2512,7 +2529,7 @@ class Tower:
                         if (dx <= 1 and dy <= 1) and (dx == 1 or dy == 1):  # Only adjacent, not diagonal
                             # Apply damage buff
                             tower.apply_pulsed_buff('damage_buff', damage_multiplier, 1.5, current_time)
-                            print(f"DEBUG: Adjacency Damage Buff from {self.tower_id} buffed {tower.tower_id} with +{damage_bonus_percent}% damage")
+                            #print(f"DEBUG: Adjacency Damage Buff from {self.tower_id} buffed {tower.tower_id} with +{damage_bonus_percent}% damage")
         # --- End Adjacency Damage Buff Effect ---
 
         # --- Air Damage Aura Effect ---
@@ -2523,7 +2540,7 @@ class Tower:
                 air_damage_multiplier = self.special.get("air_damage_multiplier", 1.1)
                 targets = self.special.get("targets", ["towers"])
                 
-                print(f"DEBUG: {self.tower_id} checking air damage aura (radius: {self.aura_radius_pixels})")
+                #print(f"DEBUG: {self.tower_id} checking air damage aura (radius: {self.aura_radius_pixels})")
                 
                 # Find towers in range
                 for tower in all_towers:
@@ -2539,11 +2556,13 @@ class Tower:
                             if dist_sq <= self.aura_radius_pixels * self.aura_radius_pixels:
                                 # Apply air damage buff
                                 tower.apply_pulsed_buff('air_damage_buff', air_damage_multiplier, 1.5, current_time)
-                                print(f"DEBUG: Air Damage Aura from {self.tower_id} buffed {tower.tower_id} with x{air_damage_multiplier} air damage")
+                                #print(f"DEBUG: Air Damage Aura from {self.tower_id} buffed {tower.tower_id} with x{air_damage_multiplier} air damage")
                             else:
-                                print(f"DEBUG: Tower {tower.tower_id} is too far away ({dist:.1f} > {self.aura_radius_pixels})")
+                                #print(f"DEBUG: Tower {tower.tower_id} is too far away ({dist:.1f} > {self.aura_radius_pixels})")
+                                pass
                         else:
-                            print(f"DEBUG: Tower {tower.tower_id} is not a projectile tower, skipping air damage buff")
+                            #print(f"DEBUG: Tower {tower.tower_id} is not a projectile tower, skipping air damage buff")
+                            pass
         # --- End Air Damage Aura Effect ---
 
         # --- Damage Aura Effect ---
@@ -2555,7 +2574,7 @@ class Tower:
                 damage_multiplier = 1.0 + (damage_bonus_percent / 100.0)
                 targets = self.special.get("targets", ["towers"])
                 
-                print(f"DEBUG: {self.tower_id} checking damage aura (radius: {self.aura_radius_pixels})")
+                #print(f"DEBUG: {self.tower_id} checking damage aura (radius: {self.aura_radius_pixels})")
                 
                 # Find towers in range
                 for tower in all_towers:
@@ -2569,9 +2588,10 @@ class Tower:
                         if dist_sq <= self.aura_radius_pixels * self.aura_radius_pixels:
                             # Apply damage buff
                             tower.apply_pulsed_buff('damage_buff', damage_multiplier, 1.5, current_time)
-                            print(f"DEBUG: Damage Aura from {self.tower_id} buffed {tower.tower_id} with +{damage_bonus_percent}% damage")
+                            #print(f"DEBUG: Damage Aura from {self.tower_id} buffed {tower.tower_id} with +{damage_bonus_percent}% damage")
                         else:
-                            print(f"DEBUG: Tower {tower.tower_id} is too far away ({dist:.1f} > {self.aura_radius_pixels})")
+                            pass
+                            #print(f"DEBUG: Tower {tower.tower_id} is too far away ({dist:.1f} > {self.aura_radius_pixels})")
         # --- End Damage Aura Effect ---
 
         # --- Crit Aura Effect ---
@@ -2599,9 +2619,10 @@ class Tower:
                             tower.apply_pulsed_buff('crit_chance_buff', crit_chance_bonus, 1.5, current_time)
                             # Apply crit multiplier buff
                             tower.apply_pulsed_buff('crit_multiplier_buff', crit_multiplier_bonus, 1.5, current_time)
-                            print(f"DEBUG: Crit Aura from {self.tower_id} buffed {tower.tower_id} with +{crit_chance_bonus*100}% crit chance and +{crit_multiplier_bonus} crit multiplier")
+                            #print(f"DEBUG: Crit Aura from {self.tower_id} buffed {tower.tower_id} with +{crit_chance_bonus*100}% crit chance and +{crit_multiplier_bonus} crit multiplier")
                         else:
-                            print(f"DEBUG: Tower {tower.tower_id} is too far away ({dist:.1f} > {self.aura_radius_pixels})")
+                            pass
+                            #print(f"DEBUG: Tower {tower.tower_id} is too far away ({dist:.1f} > {self.aura_radius_pixels})")
         # --- End Crit Aura Effect ---
 
         # --- DoT Amplification Aura Effect ---
@@ -2612,7 +2633,7 @@ class Tower:
                 dot_damage_multiplier = self.special.get("dot_damage_multiplier", 2.5)
                 targets = self.special.get("targets", ["ground", "air"])
                 
-                print(f"DEBUG: {self.tower_id} checking DoT amplification aura (radius: {self.aura_radius_pixels})")
+                #print(f"DEBUG: {self.tower_id} checking DoT amplification aura (radius: {self.aura_radius_pixels})")
                 
                 # Find enemies in range
                 for enemy in all_enemies:
@@ -2626,9 +2647,10 @@ class Tower:
                         if dist_sq <= self.aura_radius_pixels * self.aura_radius_pixels:
                             # Apply DoT damage multiplier to the enemy with a longer duration that matches the check interval
                             enemy.apply_status_effect('dot_amplification', 2.0, dot_damage_multiplier, current_time)
-                            print(f"DEBUG: DoT Amplification Aura from {self.tower_id} amplified DoTs on {enemy.enemy_id} by x{dot_damage_multiplier}")
+                            #print(f"DEBUG: DoT Amplification Aura from {self.tower_id} amplified DoTs on {enemy.enemy_id} by x{dot_damage_multiplier}")
                         else:
-                            print(f"DEBUG: Enemy {enemy.enemy_id} is too far away ({dist:.1f} > {self.aura_radius_pixels})")
+                            pass
+                            #print(f"DEBUG: Enemy {enemy.enemy_id} is too far away ({dist:.1f} > {self.aura_radius_pixels})")
         # --- End DoT Amplification Aura Effect ---
 
         # --- Random Bombardment Effect ---
@@ -2688,7 +2710,7 @@ class Tower:
                 if self.game_scene_add_effect_callback:
                     self.game_scene_add_effect_callback(explosion)
                 
-                print(f"Random bombardment strike at ({int(strike_x)}, {int(strike_y)})")
+                #print(f"Random bombardment strike at ({int(strike_x)}, {int(strike_y)})")
         # --- End Random Bombardment Effect ---
 
         # --- Salvo Attack Logic ---

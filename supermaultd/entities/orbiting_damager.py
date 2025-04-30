@@ -101,7 +101,7 @@ class OrbitingDamager:
                 last_hit = self.last_hit_times.get(enemy.enemy_id, -1.0) # Get last hit time, default to -1
                 
                 if current_time - last_hit > self.hit_cooldown:
-                    print(f"OrbitingDamager from {self.parent_tower.tower_id} hit {enemy.enemy_id}")
+                    #print(f"OrbitingDamager from {self.parent_tower.tower_id} hit {enemy.enemy_id}")
                     enemy.take_damage(self.damage, self.damage_type)
                     self.last_hit_times[enemy.enemy_id] = current_time # Record the hit time
 

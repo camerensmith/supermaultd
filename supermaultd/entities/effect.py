@@ -379,11 +379,7 @@ class OrbitingOrbsEffect(Effect):
         current_alpha = int(255 * alpha_multiplier)
         current_color_with_alpha = (*self.color[:3], current_alpha)
         
-        # Get target's current screen position (needs offset)
-        # TODO: How to get offset here? Assume coords are relative for now? Or get offset from game?
-        # For now, assume target coords are *relative* to grid origin (0,0) 
-        # and we need to add the grid offset passed to GameScene.draw
-        # THIS IS A GUESS - MIGHT NEED REFINEMENT
+
         try:
             grid_offset_x = pygame.display.get_surface().get_rect().width * 0.01 # Crude guess for padding
             grid_offset_y = pygame.display.get_surface().get_rect().height * 0.01 # Crude guess
@@ -543,7 +539,8 @@ class DrainParticleEffect:
                     pygame.draw.circle(particle_surf, color, (current_size, current_size), current_size)
                     screen.blit(particle_surf, (pos_x - current_size, pos_y - current_size))
                 except Exception as e:
-                    print(f"Error drawing drain particle: {e}")
+                    #print(f"Error drawing drain particle: {e}")
+                    pass
 
 class RisingFadeEffect:
     """An effect where an image scales up and fades out simultaneously."""
@@ -592,7 +589,8 @@ class RisingFadeEffect:
             except ValueError: # Handle potential zero size during scaling
                 pass 
             except Exception as e:
-                print(f"Error drawing RisingFadeEffect: {e}") 
+                #print(f"Error drawing RisingFadeEffect: {e}") 
+                pass
 
 class GroundEffectZone:
     """A persistent circular area on the ground that applies effects to enemies within it."""
@@ -611,17 +609,17 @@ class GroundEffectZone:
         self.time_since_last_dot = 0.0
         self.effect_color = (255, 165, 0, 120) # Orange with alpha for fallout
 
-        print(f"[DEBUG] GroundEffectZone created at ({x}, {y}) with:")
-        print(f"  - radius: {radius_units} units = {self.radius_pixels} pixels")
-        print(f"  - duration: {duration}s")
-        print(f"  - damage: {dot_damage} {damage_type} every {dot_interval}s")
-        print(f"  - valid targets: {valid_targets}")
+        #print(f"[DEBUG] GroundEffectZone created at ({x}, {y}) with:")
+        #print(f"  - radius: {radius_units} units = {self.radius_pixels} pixels")
+        #print(f"  - duration: {duration}s")
+        #print(f"  - damage: {dot_damage} {damage_type} every {dot_interval}s")
+        #print(f"  - valid targets: {valid_targets}")
 
     def update(self, time_delta, enemies):
         """Update zone duration and apply DoT to enemies inside."""
         self.life_remaining -= time_delta
         if self.life_remaining <= 0:
-            print("[DEBUG] GroundEffectZone expired")
+            #print("[DEBUG] GroundEffectZone expired")
             return True # Effect is finished
 
         self.time_since_last_dot += time_delta
@@ -645,9 +643,8 @@ class GroundEffectZone:
                         enemies_hit += 1
                         print(f"[DEBUG] Fallout zone hit enemy at ({enemy.x}, {enemy.y}) - distance: {math.sqrt(dist_sq):.1f}px, radius: {self.radius_pixels:.1f}px")
             if enemies_hit > 0:
-                print(f"[DEBUG] Fallout zone hit {enemies_hit} enemies for {damage_to_apply} {self.damage_type} damage")
-            else:
-                print(f"[DEBUG] Fallout zone found no valid targets in range")
+                #print(f"[DEBUG] Fallout zone hit {enemies_hit} enemies for {damage_to_apply} {self.damage_type} damage")
+                pass
             
         return False # Effect is still active
 
@@ -806,7 +803,8 @@ class FlamethrowerParticleEffect:
                     pygame.draw.circle(particle_surf, (r, g, b, current_alpha), (current_size, current_size), current_size)
                     screen.blit(particle_surf, (pos_x - current_size, pos_y - current_size))
                 except Exception as e:
-                    print(f"Error drawing flamethrower particle: {e}") 
+                    #print(f"Error drawing flamethrower particle: {e}") 
+                    pass
 
 class SuperchargedZapEffect(Effect):
     """Visual effect for the final high-damage zap from a tower chain."""
@@ -861,7 +859,8 @@ class SuperchargedZapEffect(Effect):
             # Optional: Draw a slightly thinner inner line of brighter color?
             # pygame.draw.aaline(screen, (255,255,255,current_alpha), self.start_pos, self.end_pos, max(1, self.thickness - 2))
         except Exception as e:
-            print(f"Error drawing SuperchargedZapEffect: {e}") 
+            #print(f"Error drawing SuperchargedZapEffect: {e}") 
+            pass
 
 # --- New Particle Effect for Acid Spew --- 
 class AcidSpewParticleEffect:
@@ -983,7 +982,8 @@ class AcidSpewParticleEffect:
             try:
                 pygame.draw.circle(screen, current_color, (draw_x, draw_y), current_size)
             except Exception as e:
-                 print(f"Error drawing AcidSpew particle: {e}")
+                 #print(f"Error drawing AcidSpew particle: {e}")
+                 pass
 
 # --- End Acid Spew --- 
 
@@ -1067,7 +1067,7 @@ class PulseImageEffect:
 
             screen.blit(image_copy, (draw_x, draw_y))
         except Exception as e:
-            print(f"Error drawing PulseImageEffect: {e}")
+            #print(f"Error drawing PulseImageEffect: {e}")
             # Handle potential errors, e.g., if image becomes invalid
             self.finished = True # Stop trying to draw if error occurs
 

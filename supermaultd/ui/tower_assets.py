@@ -28,7 +28,7 @@ class TowerAssets:
         """Load all tower images from the assets directory"""
         assets_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'towers')
         if not os.path.exists(assets_dir):
-            print(f"Warning: Assets directory not found: {assets_dir}")
+            #print(f"Warning: Assets directory not found: {assets_dir}")
             return
             
         for filename in os.listdir(assets_dir):
@@ -47,7 +47,7 @@ class TowerAssets:
                     
                     print(f"Loaded tower image: {tower_id}")
                 except Exception as e:
-                    print(f"Error loading tower image {filename}: {e}")
+                    #print(f"Error loading tower image {filename}: {e}")
                     self.original_images[tower_id] = self.default_image
                     # Make default preview transparent
                     default_preview = self.default_image.copy()
@@ -65,14 +65,15 @@ class TowerAssets:
         for tower_id, filename in aura_map.items():
             path = os.path.join(effects_dir, filename)
             if not os.path.isfile(path):
-                print(f"Warning: Aura visual image not found: {path}")
+                #print(f"Warning: Aura visual image not found: {path}")
                 continue
             try:
                 image = pygame.image.load(path).convert_alpha()
                 self.aura_visuals[tower_id] = image
-                print(f"Loaded aura visual for '{tower_id}': {filename}")
+                #print(f"Loaded aura visual for '{tower_id}': {filename}")
             except Exception as e:
-                print(f"Error loading aura visual image {filename}: {e}")
+                #print(f"Error loading aura visual image {filename}: {e}")
+                pass
 
     def load_overlay_visuals(self):
         """Load images used for persistent overlay visual effects."""
@@ -90,23 +91,24 @@ class TowerAssets:
         for tower_id, filename in overlay_map.items():
             path = os.path.join(effects_dir, filename)
             if not os.path.isfile(path):
-                print(f"Warning: Overlay visual image not found: {path}")
+                #print(f"Warning: Overlay visual image not found: {path}")
                 continue
             try:
                 image = pygame.image.load(path).convert_alpha()
                 self.overlay_visuals[tower_id] = image
-                print(f"Loaded overlay visual for '{tower_id}': {filename}")
+                #print(f"Loaded overlay visual for '{tower_id}': {filename}")
             except Exception as e:
-                print(f"Error loading overlay visual image {filename}: {e}")
+                #print(f"Error loading overlay visual image {filename}: {e}")
+                pass
 
     def load_effect_images(self):
         """Load general effect images from the assets/effects directory."""
         effects_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'effects')
         if not os.path.exists(effects_dir):
-            print(f"Warning: Effects directory not found: {effects_dir}")
+            #print(f"Warning: Effects directory not found: {effects_dir}")
             return
             
-        print(f"Loading general effect images from: {effects_dir}")
+        #print(f"Loading general effect images from: {effects_dir}")
         loaded_count = 0
         for filename in os.listdir(effects_dir):
             if filename.lower().endswith(('.png', '.jpg')):
@@ -120,8 +122,9 @@ class TowerAssets:
                     loaded_count += 1
                     # print(f"  Loaded effect: {effect_name}") # Optional: Verbose logging
                 except Exception as e:
-                    print(f"Error loading effect image {filename}: {e}")
-        print(f"Finished loading {loaded_count} general effect images.")
+                    #print(f"Error loading effect image {filename}: {e}")
+                    pass
+        #print(f"Finished loading {loaded_count} general effect images.")
 
     def get_tower_image(self, tower_id):
         """Get the ORIGINAL (unscaled) image for a specific tower."""

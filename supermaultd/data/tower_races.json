@@ -442,7 +442,7 @@
           "description": "A tank defender equipped with a rocket launcher that defends the tank command.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 9,
+          "cost": 15,
           "damage_min": 25,
           "damage_max": 40,
           "damage_type": "piercing",

@@ -2,14 +2,14 @@
 
   {
     "delay_before_wave": 15.0,
-    "wave_completion_bonus": 18,
+    "wave_completion_bonus": 26,
     "enemies": [
       { "type": "ratling", "count": 50, "spawn_interval": 0.8, "initial_delay": 0.0 }
     ]
   },
   {
     "delay_before_wave": 15.0,
-    "wave_completion_bonus": 22,
+    "wave_completion_bonus": 28,
     "enemies": [
       { "type": "mudrunner", "count": 50, "spawn_interval": 0.6, "initial_delay": 0.0 }
     ]
@@ -30,7 +30,7 @@
   },
   {
     "delay_before_wave": 20.0,
-    "wave_completion_bonus": 35,
+    "wave_completion_bonus": 34,
     "enemies": [
       { "type": "redrum", "count": 50, "spawn_interval": 0.8, "initial_delay": 0.0 }
     ]
@@ -57,7 +57,7 @@
 
   {
     "delay_before_wave": 20.0,
-    "wave_completion_bonus": 45,
+    "wave_completion_bonus": 44,
     "enemies": [
       { "type": "manboar", "count": 50, "spawn_interval": 0.8 }
     ]
@@ -140,7 +140,7 @@
     "delay_before_wave": 20.0,
     "wave_completion_bonus": 78,
     "enemies": [
-      { "type": "war_turtle", "count": 50, "spawn_interval": 0.8 }
+      { "type": "lumberer", "count": 50, "spawn_interval": 0.8 }
     ]
   },
 

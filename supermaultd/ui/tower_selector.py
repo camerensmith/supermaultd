@@ -113,7 +113,7 @@ class TowerSelector:
 
         for index, (tower_id, tower_data) in enumerate(self.available_towers.items()):
             # --- DEBUG PRINT --- 
-            print(f"[TowerSelector Debug] ID: {tower_id}, Data: {tower_data}") 
+            #print(f"[TowerSelector Debug] ID: {tower_id}, Data: {tower_data}") 
             # --- END DEBUG --- 
 
             # Calculate top-left position for this tower entry
@@ -309,7 +309,7 @@ class TowerSelector:
                     # Clicked the already selected tower - Deselect it
                     self.selected_tower = None
                     clicked_button.unselect() # Visually deselect
-                    print("Deselected tower by clicking active button")
+                    #print("Deselected tower by clicking active button")
                 elif can_afford:
                     # Clicked a new, affordable tower - Select it
                     self.selected_tower = clicked_tower_id
@@ -319,13 +319,13 @@ class TowerSelector:
                             btn.select()
                         else:
                             btn.unselect()
-                    print(f"Selected tower: {clicked_tower_id}")
+                    #print(f"Selected tower: {clicked_tower_id}")
                 else:
                     # Clicked an unaffordable tower - Play sound
                     if self.cannot_select_sound: 
                         self.cannot_select_sound.play()
                     # (Maybe add other visual feedback later?)
-                    print("Not enough money to select this tower!")
+                    #print("Not enough money to select this tower!")
                     # Ensure nothing is selected internally if can't afford
                     if self.selected_tower == clicked_tower_id:
                          self.selected_tower = None # Should not happen here, but safe

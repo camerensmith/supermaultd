@@ -87,9 +87,9 @@ class Projectile:
             if abs(initial_dx) > 0.001 or abs(initial_dy) > 0.001:
                 initial_angle_rad = math.atan2(-initial_dy, initial_dx) # Use -dy for Pygame coords
                 self.world_angle_degrees = math.degrees(initial_angle_rad)
-                print(f"[Projectile Init Homing] Target: {target_enemy.enemy_id}, Initial World Angle: {self.world_angle_degrees:.1f}")
+                #print(f"[Projectile Init Homing] Target: {target_enemy.enemy_id}, Initial World Angle: {self.world_angle_degrees:.1f}")
             else:
-                print(f"[Projectile Init Homing] Warning: Starting exactly on target {target_enemy.enemy_id}. Using default angle 0.")
+                #print(f"[Projectile Init Homing] Warning: Starting exactly on target {target_enemy.enemy_id}. Using default angle 0.")
                 self.world_angle_degrees = 0.0 # Default to pointing right if starting on target
         elif direction_angle is not None:
             # Straight-flying projectile based on angle
@@ -102,7 +102,7 @@ class Projectile:
             self.world_angle_degrees = self.world_angle_degrees # Store for drawing
         else:
             # Invalid state - needs either target or direction
-            print("[Projectile Init] Warning: Projectile created without target OR direction. Will not move.")
+            #print("[Projectile Init] Warning: Projectile created without target OR direction. Will not move.")
             self.collided = True # Mark as collided immediately
 
         # --- Store Special Data if Relevant --- 
@@ -110,28 +110,22 @@ class Projectile:
         self.shatter_data = None # NEW: For Shatter effect
         self.max_hp_reduction_data = None # For Max HP Reduction
         self.ignore_armor_data = None # For Chance Ignore Armor
-        # --- DEBUG SPECIAL DATA --- 
-        if source_tower:
-            print(f"DEBUG Projectile Init: Proj ID: {self.projectile_id}, Tower ID: {source_tower.tower_id}, \
-                  Tower Special: {source_tower.special}")
-        else:
-            print(f"DEBUG Projectile Init: Proj ID: {self.projectile_id}, No source_tower provided.")
-        # --- END DEBUG SPECIAL DATA --- 
+
         if source_tower and source_tower.special:
             effect = source_tower.special.get("effect")
             # print(f"DEBUG Projectile Init: Tower '{source_tower.tower_id}' has effect: '{effect}'") # Optional finer debug
             if effect == "gold_on_kill":
                  self.special_on_kill_data = source_tower.special
-                 print(f"DEBUG: Projectile {self.projectile_id} initialized with gold_on_kill data.") # Optional Debug
+                 #print(f"DEBUG: Projectile {self.projectile_id} initialized with gold_on_kill data.") # Optional Debug
             elif effect == "shatter": # NEW CHECK
                 self.shatter_data = source_tower.special
-                print(f"DEBUG: Projectile {self.projectile_id} initialized with shatter data.") # Optional Debug
+                #print(f"DEBUG: Projectile {self.projectile_id} initialized with shatter data.") # Optional Debug
             elif effect == "max_hp_reduction_on_hit": # NEW CHECK
                  self.max_hp_reduction_data = source_tower.special
-                 print(f"DEBUG: Projectile {self.projectile_id} initialized with max_hp_reduction data.")
+                 #print(f"DEBUG: Projectile {self.projectile_id} initialized with max_hp_reduction data.")
             elif effect == "chance_ignore_armor_on_hit": # NEW CHECK
                  self.ignore_armor_data = source_tower.special
-                 print(f"DEBUG: Projectile {self.projectile_id} initialized with chance_ignore_armor data.")
+                 #print(f"DEBUG: Projectile {self.projectile_id} initialized with chance_ignore_armor data.")
             # else: print(f"DEBUG Projectile Init: Effect '{effect}' not handled for special data.") # Optional else debug
         # --- End Store Special Data ---
 
@@ -142,12 +136,14 @@ class Projectile:
             effect_image_path = os.path.join("assets", "effects", f"{self.projectile_id}.png")
             # Check if the file exists before attempting to load
             if os.path.exists(effect_image_path):
-                print(f"[Projectile Init] Found potential impact effect: {effect_image_path}. Loading...")
+                #print(f"[Projectile Init] Found potential impact effect: {effect_image_path}. Loading...")
                 self.impact_effect_surface = self.asset_loader(effect_image_path)
                 if self.impact_effect_surface:
-                    print(f"[Projectile Init] Successfully loaded impact effect surface for {self.projectile_id}.")
+                    #print(f"[Projectile Init] Successfully loaded impact effect surface for {self.projectile_id}.")
+                    pass
                 else:
-                    print(f"[Projectile Init] Warning: Failed to load impact effect for {self.projectile_id} from {effect_image_path}")
+                    #print(f"[Projectile Init] Warning: Failed to load impact effect for {self.projectile_id} from {effect_image_path}")
+                    pass
             # else: # Optional: print if effect file not found
             #    print(f"[Projectile Init] No specific impact effect found for {self.projectile_id} at {effect_image_path}")
         # --------------------------------------------
@@ -260,8 +256,8 @@ class Projectile:
         print(f">>> Entering Projectile.on_collision for {self.projectile_id}") # <<< ADDED DEBUG
         # --- Visual Only Check --- 
         if self.is_visual_only:
-            print(f"DEBUG: Visual projectile {self.projectile_id} collided, ignoring.") # Optional debug
-            # Return an empty results dict for visual projectiles
+            #print(f"DEBUG: Visual projectile {self.projectile_id} collided, ignoring.") # Optional debug
+            pass # Return an empty results dict for visual projectiles
             return {
                 'damage_dealt': [], 
                 'special_effects_applied': [], 
@@ -298,9 +294,11 @@ class Projectile:
                 custom_diameter = self.special_effect.get("explosion_visual_diameter")
                 if custom_diameter and isinstance(custom_diameter, (int, float)) and custom_diameter > 0:
                     effect_diameter = custom_diameter
-                    print(f"[Projectile Collision] Using custom Nuke visual diameter: {effect_diameter}")
+                    #print(f"[Projectile Collision] Using custom Nuke visual diameter: {effect_diameter}")
+                    pass
                 else:
-                    print(f"[Projectile Collision] Warning: Nuke fallout effect missing or invalid 'explosion_visual_diameter'. Using default: {effect_diameter}")
+                    #print(f"[Projectile Collision] Warning: Nuke fallout effect missing or invalid 'explosion_visual_diameter'. Using default: {effect_diameter}")
+                    pass
             # --- End Nuke Check ---
             
             effect_duration = 0.75 # Seconds - Adjust duration as needed
@@ -310,7 +308,7 @@ class Projectile:
                                      target_size=(int(effect_diameter), int(effect_diameter))) # Use the determined diameter
             results['new_effects'].append(impact_effect)
             # Update print statement to reflect potentially custom size
-            print(f"[Projectile Collision] Created impact effect for {self.projectile_id} at ({int(impact_pos[0])}, {int(impact_pos[1])}) size {int(effect_diameter)}")
+            #print(f"[Projectile Collision] Created impact effect for {self.projectile_id} at ({int(impact_pos[0])}, {int(impact_pos[1])}) size {int(effect_diameter)}")
         # --- End Impact Visual --- 
 
         # --- Create Fallout Zone if Applicable ---
@@ -322,7 +320,7 @@ class Projectile:
             dot_damage_type = self.special_effect.get("dot_damage_type", "chaos")
             valid_targets = self.special_effect.get("fallout_targets", ["ground"])
             
-            print(f"[DEBUG] Creating fallout zone with: radius={radius_units}, duration={duration}, damage={dot_damage}/{dot_interval}s, type={dot_damage_type}")
+            #print(f"[DEBUG] Creating fallout zone with: radius={radius_units}, duration={duration}, damage={dot_damage}/{dot_interval}s, type={dot_damage_type}")
             
             # Create the fallout zone
             fallout_zone = GroundEffectZone(
@@ -336,7 +334,7 @@ class Projectile:
                 valid_targets=valid_targets
             )
             results['new_effects'].append(fallout_zone)
-            print(f"[Projectile Collision] Created fallout zone at ({int(impact_pos[0])}, {int(impact_pos[1])}) with radius {radius_units}")
+            #print(f"[Projectile Collision] Created fallout zone at ({int(impact_pos[0])}, {int(impact_pos[1])}) with radius {radius_units}")
         # --- End Fallout Zone Creation ---
 
         # --- Get Initial Target (if exists) --- 
@@ -375,12 +373,12 @@ class Projectile:
                 # Modify the local 'damage_to_apply' variable
                 original_damage = self.damage
                 self.damage *= bonus_multiplier
-                print(f"    -> Distance Bonus Applied! Dist: {distance:.1f}/{tower_range}, Ratio: {distance_ratio:.2f}, Mult: {bonus_multiplier:.2f}, Dmg: {original_damage:.2f} -> {self.damage:.2f}")
+                #print(f"    -> Distance Bonus Applied! Dist: {distance:.1f}/{tower_range}, Ratio: {distance_ratio:.2f}, Mult: {bonus_multiplier:.2f}, Dmg: {original_damage:.2f} -> {self.damage:.2f}")
         
         # --- Main Damage Application and Effects --- 
         primary_damage_dealt = 0 # Track damage dealt to primary target
         if collided_enemy:
-            print(f"Projectile collided with {collided_enemy.enemy_id} at ({int(impact_pos[0])}, {int(impact_pos[1])}).")
+            #print(f"Projectile collided with {collided_enemy.enemy_id} at ({int(impact_pos[0])}, {int(impact_pos[1])}).")
             # --- Killing Blow Check --- 
             health_before = collided_enemy.health
             # --- End Killing Blow Check ---
@@ -402,7 +400,7 @@ class Projectile:
                     # Check if the enemy has the method before calling
                     if hasattr(collided_enemy, 'reduce_armor'):
                         collided_enemy.reduce_armor(amount)
-                        print(f"... applied armor reduction ({amount}) to {collided_enemy.enemy_id}")
+                        #print(f"... applied armor reduction ({amount}) to {collided_enemy.enemy_id}")
                 # Add other on-hit tower specials here (e.g., stun on hit)
                 # elif special_effect == "stun_on_hit": ... 
             # --- End On-Hit Tower Special Effects ---
@@ -412,7 +410,7 @@ class Projectile:
                 chance = self.special_on_kill_data.get("chance_percent", 0)
                 amount = self.special_on_kill_data.get("gold_amount", 0)
                 if amount > 0 and random.random() * 100 < chance:
-                    print(f"$$$ Gold on Kill triggered for {self.source_tower.tower_id}! Adding {amount} gold.")
+                    #print(f"$$$ Gold on Kill triggered for {self.source_tower.tower_id}! Adding {amount} gold.")
                     results['gold_added'] = amount # Add gold amount to results dictionary
             # --- End Gold On Kill ---
 
@@ -420,7 +418,7 @@ class Projectile:
             if bounty_triggered and gold_penalty > 0:
                 # Add the penalty to the results dictionary (GameScene will handle deduction)
                 results['gold_penalty'] = gold_penalty
-                print(f"!!! Bounty Hunter Penalty triggered! Adding {gold_penalty} gold penalty to results.")
+                #print(f"!!! Bounty Hunter Penalty triggered! Adding {gold_penalty} gold penalty to results.")
             # --- END Bounty Gold Penalty ---
 
             # --- NEW: Generic DoT Application on Impact --- 
@@ -450,7 +448,7 @@ class Projectile:
                         dot_name, amplified_dot_damage, dot_interval, 
                         dot_duration, dot_damage_type, current_time
                     )
-                    print(f"... projectile applied {dot_name} DoT ({amplified_dot_damage:.1f}/{dot_interval}s for {dot_duration}s) to {collided_enemy.enemy_id}")
+                    #print(f"... projectile applied {dot_name} DoT ({amplified_dot_damage:.1f}/{dot_interval}s for {dot_duration}s) to {collided_enemy.enemy_id}")
                     # Record that this effect was applied in results (optional)
                     results['special_effects_applied'].append(f'{dot_name}_dot')
 
@@ -459,7 +457,7 @@ class Projectile:
                 # --- Increment Tower Kill Count --- # NEW
                 if self.source_tower:
                     self.source_tower.kill_count += 1
-                    print(f"+++ Kill registered for Tower {self.source_tower.tower_id} (via projectile). Total kills: {self.source_tower.kill_count}")
+                    #print(f"+++ Kill registered for Tower {self.source_tower.tower_id} (via projectile). Total kills: {self.source_tower.kill_count}")
                 # --- End Increment --- 
                 # Check for gold on kill (only primary target for projectile)
                 if self.special_on_kill_data:
@@ -487,7 +485,7 @@ class Projectile:
                             stun_duration = self.source_tower.special.get("stun_duration", 0.1)
                             if stun_duration > 0:
                                 collided_enemy.apply_status_effect('stun', stun_duration, True, current_time)
-                                print(f"Projectile from {self.source_tower.tower_id} BASHED {collided_enemy.enemy_id} for {stun_duration}s (Chance: {chance}%)")
+                                #print(f"Projectile from {self.source_tower.tower_id} BASHED {collided_enemy.enemy_id} for {stun_duration}s (Chance: {chance}%)")
                 # --- END Bash Chance --- 
                 
                 # --- Apply Armor Reduction on Hit (from source tower's special) ---
@@ -495,10 +493,11 @@ class Projectile:
                     amount = self.source_tower.special.get("armor_reduction_amount", 1)
                     if hasattr(collided_enemy, 'reduce_armor'):
                         collided_enemy.reduce_armor(amount)
-                        print(f"... applied armor reduction ({amount}) to {collided_enemy.enemy_id}")
+                        #print(f"... applied armor reduction ({amount}) to {collided_enemy.enemy_id}")
 
         else:
-            print(f"Projectile reached max distance or target location ({int(impact_pos[0])}, {int(impact_pos[1])}) without hitting valid enemy.")
+            #print(f"Projectile reached max distance or target location ({int(impact_pos[0])}, {int(impact_pos[1])}) without hitting valid enemy.")
+            pass
             # Even if no direct hit, splash/fallout can still occur at impact point
 
         # --- Special Effect Processing (At Impact Point) --- 
@@ -512,18 +511,19 @@ class Projectile:
                 blast_radius_pixels = radius_units * (GRID_SIZE / 200.0)
                 blast_radius_sq = blast_radius_pixels ** 2
                 
-                print(f"... applying blast zone (Radius: {blast_radius_pixels:.1f}px, Full Damage: {primary_damage_dealt:.2f})")
+                #print(f"... applying blast zone (Radius: {blast_radius_pixels:.1f}px, Full Damage: {primary_damage_dealt:.2f})")
                 enemies_blasted = 0
                 for enemy in enemies:
                     if (enemy.type in blast_targets and enemy.health > 0 and 
                         enemy != collided_enemy and 
                         (enemy.x - impact_pos[0])**2 + (enemy.y - impact_pos[1])**2 <= blast_radius_sq):
                         
-                        print(f"...... blasting {enemy.enemy_id} for {primary_damage_dealt:.2f}")
+                        #print(f"...... blasting {enemy.enemy_id} for {primary_damage_dealt:.2f}")
                         self.apply_damage(enemy, damage_override=primary_damage_dealt) # Apply the exact damage
                         enemies_blasted += 1
                 if enemies_blasted > 0:
-                    print(f"... blast zone hit {enemies_blasted} additional enemies.")
+                    #print(f"... blast zone hit {enemies_blasted} additional enemies.")
+                    pass
                         
             # Add other special effects like DoT application here if needed...
             # elif effect_type == "dot": ... 
@@ -541,11 +541,11 @@ class Projectile:
                     # Calculate new radius and square it
                     crit_radius = self.splash_radius * crit_splash_multiplier
                     effective_splash_radius_sq = crit_radius ** 2
-                    print(f"    CRITICAL LANDSLIDE! Splash Radius increased to {crit_radius:.1f} (Multiplier: x{crit_splash_multiplier})")
+                    #print(f"    CRITICAL LANDSLIDE! Splash Radius increased to {crit_radius:.1f} (Multiplier: x{crit_splash_multiplier})")
             # --- END Crit Splash Check --- 
             
             # Use pre-calculated splash_radius_sq (now potentially modified by crit)
-            print(f"... applying splash damage (Radius: {math.sqrt(effective_splash_radius_sq):.1f}, Base Damage: {splash_damage_amount:.2f})")
+            #print(f"... applying splash damage (Radius: {math.sqrt(effective_splash_radius_sq):.1f}, Base Damage: {splash_damage_amount:.2f})")
             
             enemies_splashed = 0
             for enemy in enemies:
@@ -553,11 +553,12 @@ class Projectile:
                     dist_sq = (enemy.x - impact_pos[0])**2 + (enemy.y - impact_pos[1])**2
                     # Use the EFFECTIVE splash radius squared for check
                     if dist_sq <= effective_splash_radius_sq: 
-                        print(f"...... splashing {enemy.enemy_id} for {splash_damage_amount:.2f}")
+                        #print(f"...... splashing {enemy.enemy_id} for {splash_damage_amount:.2f}")
                         self.apply_damage(enemy, damage_override=splash_damage_amount) # Override damage for splash
                         enemies_splashed += 1
             if enemies_splashed > 0:
-                 print(f"... splashed {enemies_splashed} enemies.")
+                 #print(f"... splashed {enemies_splashed} enemies.")
+                 pass
         # --- End Splash --- 
         
         # --- Bounce Logic --- 
@@ -609,7 +610,8 @@ class Projectile:
                 )
                 results['new_projectiles'].append(new_projectile)
             else:
-                 print(f"... no valid bounce targets found for {collided_enemy.enemy_id}.")
+                 #print(f"... no valid bounce targets found for {collided_enemy.enemy_id}.")
+                 pass
 
         # --- Pierce Adjacent Logic --- 
         if self.pierce_adjacent > 0 and collided_enemy and not results['new_projectiles']: # Only pierce if direct hit and didn't bounce
@@ -678,14 +680,16 @@ class Projectile:
                 impact_sound = pygame.mixer.Sound("assets/sounds/bomb_bombardier_hit.mp3")
                 impact_sound.play()
             except:
-                print("Could not play bomb bombardier impact sound")
+                #print("Could not play bomb bombardier impact sound")
+                pass
 
         if self.source_tower and self.source_tower.tower_id == "goblin_catapult_brigade":
             try:
                 impact_sound = pygame.mixer.Sound("assets/sounds/goblin_catapult_hit.mp3")
                 impact_sound.play()
             except:
-                print("Could not play bomb bombardier impact sound")
+                #print("Could not play bomb bombardier impact sound")
+                pass
                 
         # Play impact sound for tech nuclear silo
         if self.source_tower and self.source_tower.tower_id == "industry_nuclear_silo":
@@ -693,14 +697,16 @@ class Projectile:
                 impact_sound = pygame.mixer.Sound("assets/sounds/nuke.mp3")
                 impact_sound.play()
             except:
-                print("Could not play nuke impact sound")
+                #print("Could not play nuke impact sound")
+                pass
 
         if self.source_tower and self.source_tower.tower_id == "gaia_treant_boulder_thrower":
             try:
                 impact_sound = pygame.mixer.Sound("assets/sounds/boulder_crash.mp3")
                 impact_sound.play()
             except:
-                print("Could not play boulder crash sound")
+                #print("Could not play boulder crash sound")
+                pass
 
 
         if self.source_tower and self.source_tower.tower_id == "pyro_searing_tower":
@@ -708,7 +714,8 @@ class Projectile:
                 impact_sound = pygame.mixer.Sound("assets/sounds/sear.mp3")
                 impact_sound.play()
             except:
-                print("Could not play boulder crash sound")
+                #print("Could not play boulder crash sound")
+                pass
                 
         # Play impact sound for igloo snowball tosser
         if self.source_tower and self.source_tower.tower_id == "igloo_snowball_tosser":
@@ -716,7 +723,8 @@ class Projectile:
                 impact_sound = pygame.mixer.Sound("assets/sounds/snowball_hit.mp3")
                 impact_sound.play()
             except:
-                print("Could not play snowball impact sound")
+                #print("Could not play snowball impact sound")
+                pass
                 
         # Play impact sound for igloo icicle launcher
         if self.source_tower and self.source_tower.tower_id == "igloo_icicle_launcher":
@@ -724,7 +732,8 @@ class Projectile:
                 impact_sound = pygame.mixer.Sound("assets/sounds/icicle_shatter.mp3")
                 impact_sound.play()
             except:
-                print("Could not play icicle shatter sound")
+                #print("Could not play icicle shatter sound")
+                pass
                 
         # Play impact sound for igloo glacier cannon
         if self.source_tower and self.source_tower.tower_id == "igloo_glacier_cannon":
@@ -732,7 +741,8 @@ class Projectile:
                 impact_sound = pygame.mixer.Sound("assets/sounds/glacier_impact.mp3")
                 impact_sound.play()
             except:
-                print("Could not play glacier impact sound")
+                #print("Could not play glacier impact sound")
+                pass
 
         # self.collided = True # Already set at the start
         return results
@@ -756,7 +766,7 @@ class Projectile:
         ignore_armor_flag = False # Use a distinct name for the boolean flag
         if self.ignore_armor_data and random.random() < self.ignore_armor_data.get("chance", 0):
             ignore_armor_flag = True
-            print(f"DEBUG: Armor ignore CHANCE triggered for hit on {enemy.enemy_id} by {self.projectile_id}")
+            #print(f"DEBUG: Armor ignore CHANCE triggered for hit on {enemy.enemy_id} by {self.projectile_id}")
         # --- End Check Ignore Armor ---
 
         # --- Calculate ignore_armor_amount based on the flag --- 
@@ -765,9 +775,10 @@ class Projectile:
             # Check if enemy has armor value attribute before accessing
             if hasattr(enemy, 'current_armor_value'):
                  ignore_armor_amount = enemy.current_armor_value
-                 print(f"DEBUG: Armor ignore AMOUNT set to {ignore_armor_amount} for {enemy.enemy_id}")
+                 #print(f"DEBUG: Armor ignore AMOUNT set to {ignore_armor_amount} for {enemy.enemy_id}")
             else:
-                 print(f"DEBUG: Warning - Tried to ignore armor, but enemy {enemy.enemy_id} lacks 'current_armor_value' attribute.")
+                 #print(f"DEBUG: Warning - Tried to ignore armor, but enemy {enemy.enemy_id} lacks 'current_armor_value' attribute.")
+                 pass
         # --- End Calculate ignore_armor_amount ---
         
         # --- Check for Shatter Effect ---
@@ -777,7 +788,7 @@ class Projectile:
             if target_debuff in enemy.status_effects:
                 shatter_multiplier = self.shatter_data.get("shatter_damage_multiplier", 1.0)
                 bonus_multiplier = shatter_multiplier
-                print(f"DEBUG: Shatter effect triggered! Applying {shatter_multiplier}x damage to {enemy.enemy_id} with {target_debuff} debuff")
+                #print(f"DEBUG: Shatter effect triggered! Applying {shatter_multiplier}x damage to {enemy.enemy_id} with {target_debuff} debuff")
         # --- End Shatter Check ---
         
         # Call enemy.take_damage and store the returned dictionary
@@ -814,7 +825,7 @@ class Projectile:
                 duration = self.shatter_data.get("duration", 1.0)
                 if hasattr(enemy, 'apply_timed_armor_reduction'):
                     enemy.apply_timed_armor_reduction(reduction, duration, current_time)
-                    print(f"!!! Projectile {self.projectile_id} Shattered {enemy.enemy_id}'s armor by {reduction} for {duration}s! (Chance: {chance}%)")
+                    #print(f"!!! Projectile {self.projectile_id} Shattered {enemy.enemy_id}'s armor by {reduction} for {duration}s! (Chance: {chance}%)")
                     return "shatter" # Return effect name
 
         # --- Max HP Reduction --- # NEW
@@ -823,7 +834,7 @@ class Projectile:
             if percentage > 0 and hasattr(enemy, 'reduce_max_hp_percentage'):
                 original_max_hp = enemy.max_hp
                 enemy.reduce_max_hp_percentage(percentage)
-                print(f"... applied max HP reduction ({percentage}%) to {enemy.enemy_id}. HP: {original_max_hp:.1f} -> {enemy.max_hp:.1f}")
+                #print(f"... applied max HP reduction ({percentage}%) to {enemy.enemy_id}. HP: {original_max_hp:.1f} -> {enemy.max_hp:.1f}")
                 return "max_hp_reduction" # Return effect name
 
         # --- Chance Ignore Armor ---
