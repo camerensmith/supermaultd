@@ -35,6 +35,7 @@ WAVE_STATE_INTERMISSION = "INTERMISSION" # Added new state
 # --- Game State ---
 GAME_STATE_RUNNING = "RUNNING"
 GAME_STATE_GAME_OVER = "GAME_OVER"
+GAME_STATE_VICTORY = "VICTORY" # <<< ADDED NEW STATE
 
 # --- Global Constants ---
 MUSIC_END_EVENT = pygame.USEREVENT + 0 # Custom event for music track ending
@@ -125,6 +126,32 @@ class GameScene:
             #print(f"[GameScene Init] Error loading game over image: {e}")
             pass
         # --- End Game Over Image Loading ---
+
+        # --- Load Winner Image --- 
+        self.winner_image = None
+        try:
+            winner_image_path = os.path.join("assets", "images", "winner.png")
+            if os.path.exists(winner_image_path):
+                self.winner_image = pygame.image.load(winner_image_path).convert_alpha()
+                #print(f"[GameScene Init] Loaded winner image: {winner_image_path}")
+            else:
+                print(f"[GameScene Init] Warning: Winner image file not found: {winner_image_path}")
+        except pygame.error as e:
+            print(f"[GameScene Init] Error loading winner image: {e}")
+        # --- End Winner Image Loading ---
+
+        # --- Load Winner Sound --- 
+        self.winner_sound = None
+        try:
+            winner_sound_path = os.path.join("assets", "sounds", "winner.mp3") 
+            if os.path.exists(winner_sound_path):
+                self.winner_sound = pygame.mixer.Sound(winner_sound_path)
+                #print(f"[GameScene Init] Loaded winner sound: {winner_sound_path}")
+            else:
+                print(f"[GameScene Init] Warning: Winner sound file not found: {winner_sound_path}")
+        except pygame.error as e:
+            print(f"[GameScene Init] Error loading winner sound: {e}")
+        # --- End Winner Sound Loading ---
 
         # --- Load Goblin Destruct Sound --- 
         self.goblin_destruct_sound = None
@@ -870,10 +897,31 @@ class GameScene:
             
     def update(self, time_delta):
         """Update game state"""
-        # --- Game State Check ---
-        if self.game_state == GAME_STATE_GAME_OVER:
-            return # Don't update anything if game is over
+        # --- Game State Check ---        
+        # <<< MODIFIED: Check for running state >>>
+        if self.game_state != GAME_STATE_RUNNING:
+            return # Don't update anything if game is not running
         # --- End Game State Check ---
+
+        current_time = pygame.time.get_ticks() / 1000.0 # Get current time once
+
+        # --- Helper function to trigger game end state ---
+        def trigger_game_end(is_victory):
+            if self.game_state != GAME_STATE_RUNNING: return # Already ended
+
+            if is_victory:
+                self.game_state = GAME_STATE_VICTORY
+                #print("Victory!")
+                pygame.mixer.music.fadeout(500)
+                if self.winner_sound:
+                    self.winner_sound.play()
+            else:
+                self.game_state = GAME_STATE_GAME_OVER
+                #print("Game Over!")
+                pygame.mixer.music.fadeout(500)
+                if self.game_over_sound:
+                    self.game_over_sound.play()
+        # --- End Helper ---
 
         # --- Soundtrack Advancement (Manual Check) --- 
         if self.soundtrack_files and self.current_track_index != -1: # Check if music should be playing
@@ -895,8 +943,6 @@ class GameScene:
                     self.current_track_index = -1
         # --- END Soundtrack Advancement --- 
 
-        current_time = pygame.time.get_ticks() / 1000.0 # Get current time once
-        
         # --- Wave System Update --- 
         self.update_wave_system(current_time, time_delta)
         # ------------------------
@@ -2045,85 +2091,106 @@ class GameScene:
 
             # --- Objective check --- 
             if enemy.path_index >= len(enemy.grid_path):
-                self.lives -= 1
-                # --- Play Life Loss Sound ---
-                if self.loss_life_sound:
-                    self.loss_life_sound.play()
-                # --- End Play Sound ---
-                #print(f"*** OBJECTIVE REACHED by {enemy.enemy_id}. Decrementing wave counter from {self.enemies_alive_this_wave}...") # DEBUG
-                if self.enemies_alive_this_wave > 0: self.enemies_alive_this_wave -= 1
-                self.enemies.remove(enemy)
-                #print(f"Enemy reached objective. Lives remaining: {self.lives}")
-                #print(f"  Enemies left this wave NOW: {self.enemies_alive_this_wave}") # DEBUG
-                if self.lives <= 0:
-                    #print("Game Over!")
-                    # --- Play Game Over Sound ---
-                    if self.game_over_sound:
-                        # Stop music first for dramatic effect?
-                        pygame.mixer.music.fadeout(500) # Fade out music over 0.5 seconds
-                        self.game_over_sound.play()
+                
+                # --- Check for Boss Reaching Objective (Loss Condition) ---
+                instant_loss = False
+                game_mode = self.game.selected_wave_mode
+                boss_ids_for_loss = []
+                if game_mode == 'classic' or game_mode == 'plus':
+                    boss_ids_for_loss = ['lord_supermaul']
+                elif game_mode == 'advanced' or game_mode == 'wild':
+                    boss_ids_for_loss = ['lord_supermaul', 'lord_supermaul_reborn']
+                
+                if enemy.enemy_id in boss_ids_for_loss:
+                    #print(f"!!! BOSS LOSS CONDITION MET: {enemy.enemy_id} reached objective in {game_mode} mode.")
+                    trigger_game_end(is_victory=False)
+                    instant_loss = True # Game ended, stop further processing
+                # --- End Boss Check ---
+
+                if not instant_loss and self.game_state == GAME_STATE_RUNNING:
+                    # Only deduct life if game hasn't ended due to boss
+                    self.lives -= 1
+                    # --- Play Life Loss Sound ---
+                    if self.loss_life_sound:
+                        self.loss_life_sound.play()
                     # --- End Play Sound ---
-                    # --- Set Game State to Game Over ---
-                    self.game_state = GAME_STATE_GAME_OVER
-                    # --- End Set Game State ---
-                    # TODO: Handle game over state more formally (e.g., return to menu option)
-                    # We no longer need 'continue' here, the state check at the start of update handles the pause.
-                    # continue # Skip death check if already removed 
+                    #print(f"*** OBJECTIVE REACHED by {enemy.enemy_id}. Decrementing wave counter from {self.enemies_alive_this_wave}...") # DEBUG
+                    if self.enemies_alive_this_wave > 0: self.enemies_alive_this_wave -= 1
+                    self.enemies.remove(enemy)
+                    #print(f"Enemy reached objective. Lives remaining: {self.lives}")
+                    #print(f"  Enemies left this wave NOW: {self.enemies_alive_this_wave}") # DEBUG
+                    
+                    # --- Check Lives <= 0 (Loss Condition) ---
+                    if self.lives <= 0:
+                        trigger_game_end(is_victory=False)
+                    # --- End Lives Check ---
+                elif enemy in self.enemies: # Only remove if not already removed by state change
+                    # Remove enemy even if game ended, but don't process further
+                    self.enemies.remove(enemy)
+                    if self.enemies_alive_this_wave > 0: self.enemies_alive_this_wave -= 1 
+                
+                # Continue to next enemy in the loop regardless of state change this iteration
+                continue # Skip death check below if enemy reached objective 
         
-        # --- Remove dead enemies --- 
+        # --- Remove dead enemies & Check for Win Condition--- 
         # Check remaining enemies for death AFTER objective check
         for enemy in self.enemies[:]: 
-            if enemy.health <= 0: # Check health AFTER objective check
-
-                # <<< PLAY DEATH SOUND >>>
-                if self.death_sound:
-                    self.death_sound.play()
-                # <<< END PLAY DEATH SOUND >>>
-
-                # Create blood splatter effect at enemy's current position
-                # Need to adjust for grid offset to get absolute screen coords
-                grid_offset_x = config.UI_PANEL_PADDING
-                grid_offset_y = config.UI_PANEL_PADDING
-                effect_x = enemy.x + grid_offset_x 
-                effect_y = enemy.y + grid_offset_y
+            if enemy.health <= 0: 
                 
-
-                
-                # if self.blood_splatter_frames: # Only create if frames loaded (Old check)
-                if self.blood_splatter_base_image: # Check if base image loaded
-
-                    # Create a fading effect instead of frame-based
-                    splatter = Effect(effect_x, effect_y, 
-                                      self.blood_splatter_base_image, # Pass base image
-                                      config.BLOOD_SPLATTER_FADE_DURATION, # Pass fade duration
-                                      (config.GRID_SIZE * 3, config.GRID_SIZE * 3), # Pass target size (3x3 grid cells)
-                                      hold_duration=config.BLOOD_SPLATTER_HOLD_DURATION) # Pass hold duration
-                    self.effects.append(splatter)
-
+                # --- Check for Boss Defeat (Win Condition) ---
+                is_win_condition_met = False
+                game_mode = self.game.selected_wave_mode
+                win_boss_id = None
+                if game_mode == 'classic' or game_mode == 'plus':
+                    win_boss_id = 'lord_supermaul'
+                elif game_mode == 'advanced' or game_mode == 'wild':
+                    win_boss_id = 'lord_supermaul_reborn'
                     
+                if win_boss_id and enemy.enemy_id == win_boss_id:
+                   #print(f"!!! WIN CONDITION MET: {enemy.enemy_id} defeated in {game_mode} mode.")
+                   trigger_game_end(is_victory=True)
+                   is_win_condition_met = True # Game ended
+                # --- End Win Condition Check ---
 
-                if hasattr(enemy, 'killed_by') and enemy.killed_by and enemy.killed_by.special and enemy.killed_by.special.get("effect") == "bounty_on_kill":
-                    # If killed by bounty hunter, subtract 1 from the value
-                    reward = max(0, enemy.value - 1)  # Ensure we don't go below 0
-                    #print(f"!!! Bounty Hunter penalty applied! Original value: {enemy.value}, New value: {reward}")
-                else:
+                # --- Process Normal Death (If game still running) ---
+                if self.game_state == GAME_STATE_RUNNING:
+                    # <<< PLAY DEATH SOUND >>>
+                    if self.death_sound:
+                        self.death_sound.play()
+                    # <<< END PLAY DEATH SOUND >>>
+
+                    # Create blood splatter effect 
+                    grid_offset_x = config.UI_PANEL_PADDING
+                    grid_offset_y = config.UI_PANEL_PADDING
+                    effect_x = enemy.x + grid_offset_x 
+                    effect_y = enemy.y + grid_offset_y
+                    if self.blood_splatter_base_image:
+                        splatter = Effect(effect_x, effect_y, 
+                                          self.blood_splatter_base_image,
+                                          config.BLOOD_SPLATTER_FADE_DURATION, 
+                                          (config.GRID_SIZE * 3, config.GRID_SIZE * 3), 
+                                          hold_duration=config.BLOOD_SPLATTER_HOLD_DURATION)
+                        self.effects.append(splatter)
+                    
+                    # Process reward/bounty 
                     reward = enemy.value
-                
-                self.money += reward # Add adjusted value to player money
-                
-                # <<< ADD CHECK FOR GOLD_ON_KILL BONUS >>>
-                if hasattr(enemy, 'pending_gold_on_kill') and enemy.pending_gold_on_kill > 0:
-                    bonus_gold = enemy.pending_gold_on_kill
-                    self.money += bonus_gold
-                    #print(f"$$$ Awarded {bonus_gold} extra gold from Gold on Kill effect!")
-                # <<< END CHECK >>>
-                
-                self.tower_selector.update_money(self.money) # UPDATE UI DISPLAY
-                #print(f"*** ENEMY KILLED: {enemy.enemy_id}. Decrementing wave counter from {self.enemies_alive_this_wave}...")
-                if self.enemies_alive_this_wave > 0: self.enemies_alive_this_wave -= 1 
-                self.enemies.remove(enemy)
-                #print(f"Enemy {enemy.enemy_id} defeated. Gained ${reward}. Current Money: ${self.money}") # Base reward still logged here
-                #print(f"  Enemies left this wave NOW: {self.enemies_alive_this_wave}") # DEBUG
+                    if hasattr(enemy, 'killed_by') and enemy.killed_by: # Simplified bounty check
+                         reward = max(0, enemy.value - 1) 
+                    self.money += reward
+                    if hasattr(enemy, 'pending_gold_on_kill') and enemy.pending_gold_on_kill > 0:
+                        self.money += enemy.pending_gold_on_kill
+                    self.tower_selector.update_money(self.money)
+                    
+                    # Decrement wave counter and remove enemy
+                    #print(f"*** ENEMY KILLED: {enemy.enemy_id}. Decrementing wave counter from {self.enemies_alive_this_wave}...")
+                    if self.enemies_alive_this_wave > 0: self.enemies_alive_this_wave -= 1 
+                    self.enemies.remove(enemy)
+                    #print(f"Enemy {enemy.enemy_id} defeated. Gained ${reward}. Current Money: ${self.money}") 
+                    #print(f"  Enemies left this wave NOW: {self.enemies_alive_this_wave}") 
+                elif enemy in self.enemies: # Only remove if not already removed by state change
+                    # Remove enemy even if game ended due to win, but don't process reward/effects
+                    self.enemies.remove(enemy)
+                    if self.enemies_alive_this_wave > 0: self.enemies_alive_this_wave -= 1 
             
     def draw(self, screen, time_delta, current_time):
         """Draw the game scene with new layout"""
@@ -2714,6 +2781,12 @@ class GameScene:
             overlay_rect = self.game_over_image.get_rect(center=screen.get_rect().center)
             screen.blit(self.game_over_image, overlay_rect)
         # --- End Game Over Overlay ---
+
+        # --- Draw Victory Overlay (If Applicable) ---
+        elif self.game_state == GAME_STATE_VICTORY and self.winner_image: # <<< Use elif
+            overlay_rect = self.winner_image.get_rect(center=screen.get_rect().center)
+            screen.blit(self.winner_image, overlay_rect)
+        # --- End Victory Overlay ---
 
     def draw_ui(self, screen):
         """Draw UI elements"""

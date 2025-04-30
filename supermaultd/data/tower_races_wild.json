@@ -1520,7 +1520,7 @@
         }
       }
     },
-    "space_husks": {
+    "void_husks": {
       "description": "Undead remnants animated by void energy, draining the lifeforce of their foes.",
       "towers": {
         "husk_wall": {
