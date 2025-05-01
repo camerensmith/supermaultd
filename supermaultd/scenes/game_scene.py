@@ -2591,16 +2591,75 @@ class GameScene:
                 tooltip_font = pygame.font.Font(None, 22) # Small font for tooltip
                 text_color = (255, 255, 255)
                 bg_color = (30, 30, 30, 200) # Dark semi-transparent background
+                buff_color = (100, 255, 100) # Green for buffs
                 padding = 5
 
                 # Gather data
                 tower = self.hovered_tower
-                # Access data via tower.tower_data
-                name = tower.tower_data.get('name', 'Unknown') # Use .get() for safety
+                name = tower.tower_data.get('name', 'Unknown')
                 dmg_min = tower.base_damage_min
                 dmg_max = tower.base_damage_max
                 dmg_type = tower.damage_type
                 sell_price = int(tower.cost * 0.5)
+
+                # <<< MODIFIED: Safely calculate buffs >>>
+                buff_lines = []
+                try: # Add inner try block for buff calculation
+                    buffed_stats = tower.get_buffed_stats(current_time, self.tower_buff_auras, self.towers)
+
+                    # Damage Multiplier
+                    base_dmg_mult = 1.0
+                    current_dmg_mult = buffed_stats.get('damage_multiplier', base_dmg_mult)
+                    if current_dmg_mult > base_dmg_mult:
+                        buff_lines.append(f"  Damage: +{((current_dmg_mult - base_dmg_mult) * 100):.1f}%")
+
+                    # Attack Speed (Interval)
+                    # Use getattr for base_attack_interval as it might not exist on all towers (e.g., walls)
+                    base_interval = getattr(tower, 'base_attack_interval', 0) 
+                    current_interval = buffed_stats.get('attack_interval', base_interval)
+                    if base_interval is not None and current_interval is not None: # Check if intervals exist
+                        if base_interval > 0 and current_interval < base_interval:
+                            speed_increase_percent = ((base_interval / current_interval) - 1) * 100
+                            buff_lines.append(f"  Speed: +{speed_increase_percent:.1f}%")
+                        elif base_interval > 0 and current_interval > base_interval:
+                            # Avoid division by zero if current_interval is 0 (shouldn't happen, but safe)
+                            if current_interval > 0: 
+                                speed_decrease_percent = (1 - (base_interval / current_interval)) * 100
+                                buff_lines.append(f"  Speed: -{speed_decrease_percent:.1f}% (Slowed)")
+
+                    # Range (Attack Range)
+                    # Calculate base range pixels safely using getattr and default
+                    base_range_units = getattr(tower, 'range', 0) 
+                    base_range_pixels = base_range_units * (config.GRID_SIZE / 200.0) if base_range_units else 0
+                    current_range_pixels = buffed_stats.get('range_pixels', base_range_pixels)
+                    if current_range_pixels > base_range_pixels:
+                        buff_lines.append(f"  Range: +{(current_range_pixels - base_range_pixels):.0f}px")
+
+                    # Crit Chance
+                    base_crit_chance = getattr(tower, 'critical_chance', 0.0)
+                    current_crit_chance = buffed_stats.get('crit_chance', base_crit_chance)
+                    # Display if buffed OR if base is non-zero and it changed
+                    if current_crit_chance != base_crit_chance: 
+                         buff_lines.append(f"  Crit Chance: {current_crit_chance*100:.1f}%")
+
+                    # Crit Multiplier
+                    base_crit_mult = getattr(tower, 'critical_multiplier', 1.0)
+                    current_crit_mult = buffed_stats.get('crit_multiplier', base_crit_mult)
+                    if current_crit_mult != base_crit_mult:
+                         buff_lines.append(f"  Crit Damage: x{current_crit_mult:.2f}")
+                         
+                    # <<< ADDED: Splash Radius Check >>>
+                    base_splash_pixels = getattr(tower, 'splash_radius_pixels', 0) # Get base splash in pixels
+                    current_splash_pixels = buffed_stats.get('splash_radius_pixels', base_splash_pixels)
+                    if current_splash_pixels > base_splash_pixels:
+                        buff_lines.append(f"  Splash: +{(current_splash_pixels - base_splash_pixels):.0f}px")
+                    # <<< END ADDED >>>
+                         
+                except Exception as buff_error:
+                    print(f"Error calculating buffs for tooltip: {buff_error}")
+                    buff_lines.append("  Error loading buffs")
+                # <<< END MODIFIED >>>
+
 
                 # Format text lines
                 lines = [
@@ -2608,48 +2667,64 @@ class GameScene:
                     f"Damage: {dmg_min}-{dmg_max} {dmg_type}",
                     f"Sell: {sell_price} G"
                 ]
+                
+                if buff_lines:
+                    lines.append("Buffs:")
+                    lines.extend(buff_lines)
+
 
                 # Render lines and calculate size
-                rendered_lines = [tooltip_font.render(line, True, text_color) for line in lines]
-                max_width = max(line.get_width() for line in rendered_lines)
-                total_height = sum(line.get_height() for line in rendered_lines) + (padding * (len(lines) + 1))
+                rendered_lines = []
+                max_width = 0
+                total_height = 0
+                line_height = 0 
+
+                for i, line in enumerate(lines):
+                    is_buff_line = line.startswith("  ") 
+                    color = buff_color if is_buff_line else text_color
+                    line_surface = tooltip_font.render(line, True, color)
+                    rendered_lines.append(line_surface)
+                    max_width = max(max_width, line_surface.get_width())
+                    if i == 0: line_height = line_surface.get_height() 
+
+                # Ensure line_height is valid before using it
+                if line_height > 0:
+                    total_height = (line_height * len(lines)) + (padding * (len(lines) + 1))
+                else: # Fallback if font rendering failed somehow
+                    total_height = padding * (len(lines) + 1) 
+                
                 tooltip_width = max_width + (padding * 2)
                 tooltip_height = total_height
 
                 # Calculate position near mouse, with screen boundary checks
                 mouse_x, mouse_y = pygame.mouse.get_pos()
-                tooltip_x = mouse_x + 15 # Offset slightly right
-                tooltip_y = mouse_y + 15 # Offset slightly down
+                tooltip_x = mouse_x + 15 
+                tooltip_y = mouse_y + 15 
 
-                # Adjust if tooltip goes off right edge
                 if tooltip_x + tooltip_width > self.screen_width:
                     tooltip_x = mouse_x - tooltip_width - 15
-                # Adjust if tooltip goes off bottom edge
                 if tooltip_y + tooltip_height > self.screen_height:
                     tooltip_y = mouse_y - tooltip_height - 15
-                # Adjust if tooltip goes off left edge (less likely with right offset)
                 if tooltip_x < 0:
                     tooltip_x = 0
-                # Adjust if tooltip goes off top edge (less likely with down offset)
                 if tooltip_y < 0:
                     tooltip_y = 0
                     
-                # Draw background rectangle
                 tooltip_rect = pygame.Rect(tooltip_x, tooltip_y, tooltip_width, tooltip_height)
-                # Use a surface for transparency
                 tooltip_surface = pygame.Surface((tooltip_width, tooltip_height), pygame.SRCALPHA)
                 tooltip_surface.fill(bg_color)
                 screen.blit(tooltip_surface, tooltip_rect.topleft)
                 
-                # Draw text lines onto the background
                 current_y = tooltip_y + padding
                 for line_surface in rendered_lines:
                     screen.blit(line_surface, (tooltip_x + padding, current_y))
                     current_y += line_surface.get_height() + padding
 
             except Exception as e:
-                #print(f"Error drawing tooltip: {e}")
-                pass
+                # <<< Added specific error print >>>
+                print(f"Error drawing tooltip for {self.hovered_tower.tower_id if self.hovered_tower else 'None'}: {e}") 
+                import traceback
+                traceback.print_exc() # Print full traceback for debugging
             # --- END NEW Tooltip ---
 
         # --- End Hovered Range Indicator ---

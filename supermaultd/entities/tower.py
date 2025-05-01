@@ -2464,7 +2464,7 @@ class Tower:
                 splash_radius_increase = self.special.get("splash_radius_increase", 175)
                 targets = self.special.get("targets", ["towers"])
                 
-                print(f"DEBUG: {self.tower_id} checking splash radius buff aura (radius: {self.aura_radius_pixels})")
+                #print(f"DEBUG: {self.tower_id} checking splash radius buff aura (radius: {self.aura_radius_pixels})")
                 
                 # Find towers in range
                 for tower in all_towers:
