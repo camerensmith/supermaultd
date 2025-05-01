@@ -637,11 +637,11 @@ class Tower:
                     effective_air_damage_multiplier *= air_mult # Multiply for stacking
                 # --- Add Adjacency Damage Buff Check ---
                 elif effect_type == 'adjacency_damage_buff':
-                    print(f"DEBUG: Tower {self.tower_id} receiving adjacency damage buff: +{aura_special.get('damage_bonus_percentage', 0.0)}%") # Debug print
+                    #print(f"DEBUG: Tower {self.tower_id} receiving adjacency damage buff: +{aura_special.get('damage_bonus_percentage', 0.0)}%") # Debug print
                     total_damage_bonus_percent += aura_special.get('damage_bonus_percentage', 0.0)
                 # --- Add Adjacency Attack Speed Buff Check ---
                 elif effect_type == 'adjacency_attack_speed_buff':
-                    print(f"DEBUG: Tower {self.tower_id} receiving adjacency speed buff: +{aura_special.get('attack_speed_bonus_percentage', 0.0)}%") # Debug print
+                    #print(f"DEBUG: Tower {self.tower_id} receiving adjacency speed buff: +{aura_special.get('attack_speed_bonus_percentage', 0.0)}%") # Debug print
                     total_speed_bonus_percent += aura_special.get('attack_speed_bonus_percentage', 0.0)
                 # NEW: Apply Splash Radius Buff
                 elif effect_type == "splash_radius_buff_aura":
@@ -786,7 +786,7 @@ class Tower:
                     self.is_berserk = True # Level 4 (20 spaces)
                     self.berserk_end_time = current_time + duration
                     self.berserk_bonus_multiplier = 1.0 + (bonus_percent / 100.0)
-                    print(f"Tower {self.tower_id} triggered BERSERK! (Chance: {chance:.2f}, Duration: {duration:.1f}s, Bonus: x{self.berserk_bonus_multiplier:.2f})")
+                    #print(f"Tower {self.tower_id} triggered BERSERK! (Chance: {chance:.2f}, Duration: {duration:.1f}s, Bonus: x{self.berserk_bonus_multiplier:.2f})")
         
         # Apply unique ability modifications (keep commented)
         # if self.unique_ability and self.unique_ability.get('modifies_damage'):

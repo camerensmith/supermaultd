@@ -242,7 +242,7 @@ class Projectile:
             
             if not self._drawn_once and self.target:
                 # Update debug print to reflect the reverted assumption
-                print(f"[Projectile Draw FIRST (Assume Up Base)] Proj: {self.projectile_id}, Target: {self.target.enemy_id}, World Angle: {self.world_angle_degrees:.1f}, Pygame Angle Used: {angle_for_pygame:.1f}")
+                #print(f"[Projectile Draw FIRST (Assume Up Base)] Proj: {self.projectile_id}, Target: {self.target.enemy_id}, World Angle: {self.world_angle_degrees:.1f}, Pygame Angle Used: {angle_for_pygame:.1f}")
                 self._drawn_once = True
                 
             rotated_image = pygame.transform.rotate(base_image, angle_for_pygame)
@@ -253,7 +253,7 @@ class Projectile:
         """Handles what happens when the projectile collides with an enemy or reaches its target location.
            Returns a dictionary containing results like damage dealt, new effects, etc.
         """
-        print(f">>> Entering Projectile.on_collision for {self.projectile_id}") # <<< ADDED DEBUG
+        #print(f">>> Entering Projectile.on_collision for {self.projectile_id}") # <<< ADDED DEBUG
         # --- Visual Only Check --- 
         if self.is_visual_only:
             #print(f"DEBUG: Visual projectile {self.projectile_id} collided, ignoring.") # Optional debug

@@ -140,7 +140,7 @@ class ChainLightningVisual(Effect):
         self.image = None 
         self.rect = None 
         
-        print(f"ChainLightningVisual created ({self.line_type}). Path has {len(path_coords)} points.")
+        #print(f"ChainLightningVisual created ({self.line_type}). Path has {len(path_coords)} points.")
 
     def update(self, time_delta):
         """Update the effect timer. Returns True if finished."""
@@ -192,10 +192,10 @@ class WhipVisual(Effect):
         if color is None:
             if self.line_type == 'whip':
                 self.color = SADDLE_BROWN 
-                self.thickness = 1 
+                self.thickness = 3 
             else: # Fallback 
                 self.color = (255, 255, 255) 
-                self.thickness = 1
+                self.thickness = 3
         else:
             self.color = color # Use provided color
             self.thickness = thickness # Use provided thickness
@@ -204,7 +204,7 @@ class WhipVisual(Effect):
         self.image = None 
         self.rect = None 
         
-        print(f"WhipVisual created. Path has {len(path_coords)} points.")
+        #print(f"WhipVisual created. Path has {len(path_coords)} points.")
 
     def update(self, time_delta):
         """Update the effect timer. Returns True if finished."""

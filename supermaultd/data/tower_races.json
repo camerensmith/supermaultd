@@ -152,7 +152,7 @@
           "damage_min": 120,
           "damage_max": 150,
           "damage_type": "chaos",
-          "range": 500,
+          "range": 600,
           "attack_interval": 0.5,
           "projectile_speed": 300,
           "attack_type": "projectile",
@@ -160,21 +160,18 @@
           "targets": [
             "ground",
             "air"
-          ],
-          "bounce": 1,
-          "critical_chance": 0.2,
-          "critical_multiplier": 2.0
+          ]
         },
         "crystal_castle_facet_focuser": {
           "name": "Facet Focuser",
           "grid_width": 1,
           "grid_height": 1,
           "cost": 134,
-          "damage_min": 400,
-          "damage_max": 500,
+          "damage_min": 500,
+          "damage_max": 600,
           "damage_type": "chaos",
           "range": 900,
-          "attack_interval": 2.5,
+          "attack_interval": 2.2,
           "projectile_speed": null,
           "splash_radius": null,
           "attack_type": "instant",
@@ -190,17 +187,19 @@
           "description": "A powerful crystal that focuses energy onto a single target."
         },
         "crystal_blaster": {
-          "name": "Crystal Blaster",
-          "description": "A powerful cannon that blasts crystal shards at a single target.",
-          "cost": 177,
+          "name": "Gemstone Blaster",
+          "description": "A powerful cannon that blasts crystal shards at a single target. May crit.",
+          "cost": 221,
           "grid_width": 1,
           "grid_height": 1,
+          "critical_chance": 0.1,
+          "critical_multiplier": 2.0,
           "damage_min": 412,
           "damage_max": 495,
           "damage_type": "chaos",
-          "range": 420,
+          "range": 500,
           "attack_interval": 1.1,
-          "projectile_speed": 250,
+          "projectile_speed": 450,
           "attack_type": "projectile",
           "splash_radius": null,
           "targets": [
@@ -312,7 +311,7 @@
           "damage_min": 220,
           "damage_max": 305,
           "damage_type": "piercing",
-          "range": 390,
+          "range": 450,
           "attack_interval": 1.6,
           "projectile_speed": null,
           "attack_type": "instant",
@@ -687,8 +686,8 @@
           "grid_width": 2,
           "grid_height": 2,
           "cost": 206,
-          "damage_min": 674,
-          "damage_max": 783,
+          "damage_min": 374,
+          "damage_max": 483,
           "damage_type": "normal",
           "range": 520,
           "attack_interval": 1.0,
@@ -752,7 +751,7 @@
           "description": "A treant that throws boulders at the enemy, dealing damage to both ground and air units in a large area.",
           "grid_width": 2,
           "grid_height": 2,
-          "cost": 39,
+          "cost": 40,
           "damage_min": 55,
           "damage_max": 127,
           "attack_interval": 1,
@@ -794,20 +793,20 @@
         },
         "gaia_gnome": {
           "name": "Gnome",
-          "description": "Gaia's Gnomes are small but mighty. With luck on their side, they deal random damage, with a high critical multiplier.",
+          "description": "Gaia's Gnomes are small but mighty. With luck on their side, they deal random damage, with a high (250%) critical multiplier.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 139,
-          "damage_min": 50,
-          "damage_max": 650,
+          "cost": 149,
+          "damage_min": 100,
+          "damage_max": 450,
           "attack_interval": 1.55,
           "range": 700,
           "splash_radius": 100,
           "damage_type": "normal",
           "attack_type": "projectile",
           "projectile_speed": 300,
-          "critical_chance": 0.1,
-          "critical_multiplier": 1.5,
+          "critical_chance": 0.2,
+          "critical_multiplier": 2.5,
           "targets": [
             "ground",
             "air"
@@ -815,10 +814,10 @@
         },
         "gaia_ursa": {
           "name": "Ursa",
-          "description": "The ferocious ursine warriors defend the forest and their kin at all costs.",
+          "description": "The ferocious ursine warriors defend the forest and their kin at all costs. May crit.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 171,
+          "cost": 199,
           "damage_min": 282,
           "damage_max": 318,
           "attack_interval": 0.9,
@@ -830,7 +829,7 @@
             "ground"
           ],
           "critical_chance": 0.1,
-          "critical_multiplier": 1.1
+          "critical_multiplier": 1.5
         },
         "gaia_gift_of_gaia": {
           "name": "Gift of Gaia",
@@ -855,7 +854,7 @@
       }
     },
     "knights_keep": {
-      "description": "A disciplined order relying on sturdy defenses, sharp steel, and powerful siege engines.",
+      "description": "The Humans of the Knights Keep are a disciplined order relying on man and machine alike to defend their lands.",
       "towers": {
         "knights_wall": {
           "name": "Castle Wall",
@@ -1141,7 +1140,7 @@
       }
     },
     "stone_summoners": {
-      "description": "Their towers may critically strike, increasing their splash radius.",
+      "description": "Their towers critically strike for double damage, doubling their splash radius.",
       "towers": {
         "stone_wall": {
           "name": "Stone Wall",
@@ -1177,7 +1176,7 @@
             "air"
           ],
           "critical_chance": 0.2,
-          "critical_multiplier": 1.5,
+          "critical_multiplier": 2.0,
           "special": {
             "effect": "crit_splash_increase",
             "crit_splash_multiplier": 2.0,
@@ -1204,7 +1203,7 @@
             "air"
           ],
           "critical_chance": 0.2,
-          "critical_multiplier": 1.5,
+          "critical_multiplier": 2.0,
           "special": {
             "effect": "crit_splash_increase",
             "crit_splash_multiplier": 2.0,
@@ -1229,7 +1228,7 @@
             "ground"
           ],
           "critical_chance": 0.2,
-          "critical_multiplier": 1.5,
+          "critical_multiplier": 2.0,
           "special": {
             "effect": "crit_splash_increase",
             "crit_splash_multiplier": 2.0,
@@ -1449,7 +1448,7 @@
           "description": "A tower of wretched experimentation, mutating and amplifying all damage-over-time effects in a large radius.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 185,
+          "cost": 301,
           "damage_min": 0,
           "damage_max": 0,
           "damage_type": "chaos",
@@ -1610,7 +1609,7 @@
           "damage_min": 388,
           "damage_max": 505,
           "damage_type": "normal",
-          "range": 350,
+          "range": 375,
           "attack_interval": 1.3,
           "projectile_speed": null,
           "attack_type": "instant",
@@ -1732,9 +1731,9 @@
             "air"
           ]
         },
-        "alien_nether_ray": {
-          "name": "Nether Ray",
-          "description": "A tower that shoots a beam of harnessed nether energy, cutting through all enemies alike.",
+        "alien_tachyon_lance": {
+          "name": "Tachyon Lance",
+          "description": "A tower that shoots a beam of superluminal energy, cutting through all enemies alike.",
           "grid_width": 1,
           "grid_height": 1,
           "cost": 122,
@@ -1784,7 +1783,7 @@
           "description": "A generator that creates a contained singularity, obliterating everything in its vicinity.",
           "grid_width": 2,
           "grid_height": 2,
-          "cost": 321,
+          "cost": 341,
           "damage_min": 0,
           "damage_max": 0,
           "damage_type": "chaos",
@@ -1831,7 +1830,7 @@
           }
         },
         "goblin_snotlings": {
-          "name": "Snotlins",
+          "name": "Snotlinz",
           "description": "Goblin slaves with crude clubs and axes. A bit of a mess, but they're cheap... and relentless.",
           "grid_width": 1,
           "grid_height": 1,
@@ -1873,7 +1872,7 @@
           }
         },
         "goblin_ripper_mekk": {
-          "name": "Goblin Skrappaa",
+          "name": "Goblin Skrappaaa",
           "description": "These goblins are masters of junkyard engineering, and their creations are... 'uniquely' effective.",
           "grid_width": 1,
           "grid_height": 1,
@@ -1894,30 +1893,6 @@
             "chance_percent": 15, 
             "armor_reduction_amount": 1,
             "description": "Has a 15% chance on hit to permanently shred 1 armor from the target."
-          }
-        },
-        "goblin_catapult_brigade": {
-          "name": "Goblin Katapult Skwad",
-          "description": "Who needs precision when you can just launch everything? These goblins are more about chaos than accuracy, but they sure know how to make a big impact.",
-          "grid_width": 2,
-          "grid_height": 2,
-          "cost": 84,
-          "damage_min": 300,
-          "damage_max": 3000,
-          "damage_type": "normal",
-          "range_min": 2500,
-          "range": 3000,
-          "attack_interval": 5,
-          "projectile_speed": 350,
-          "attack_type": "projectile",
-          "splash_radius": 450,
-          "targets": [
-            "ground"
-          ],
-          "special": {
-              "effect": "miss_chance",
-              "chance": 50, 
-              "description": "Has a 50% chance to misfire."
           }
         },
         "goblin_skrap_tank": {
@@ -1950,13 +1925,37 @@
             "description": "Has a 5% chance to malfunction and self-destruct, dealing 1000 damage to all enemies in a 800 radius."
           }
         },
-        "goblin_shredder": {
-          "name": "Goblin Shreddaa",
+        "goblin_catapult_brigade": {
+          "name": "Goblin Katapult Skwad",
+          "description": "Who needs precision when you can just launch everything? These goblins are more about chaos than accuracy, but they sure know how to make a big impact.",
           "grid_width": 2,
           "grid_height": 2,
-          "cost": 145,
+          "cost": 111,
+          "damage_min": 100,
+          "damage_max": 3000,
+          "damage_type": "normal",
+          "range_min": 2500,
+          "range": 3000,
+          "attack_interval": 5,
+          "projectile_speed": 350,
+          "attack_type": "projectile",
+          "splash_radius": 450,
+          "targets": [
+            "ground"
+          ],
+          "special": {
+              "effect": "miss_chance",
+              "chance": 25, 
+              "description": "Has a 25% chance to misfire."
+          }
+        },
+        "goblin_shredder": {
+          "name": "Goblin Shreddaaa",
+          "grid_width": 2,
+          "grid_height": 2,
+          "cost": 185,
           "description": "Goblin savagery at its finest. A brutal cage contraption that rips enemies apart. Causes heavy hemmorhage damage over time.",
-          "damage_min": 45,
+          "damage_min": 85,
           "damage_max": 85,
           "damage_type": "chaos",
           "target_selection": "random",
@@ -2208,7 +2207,7 @@
           "description": "A pylon that discharges electricity to any foe foolish enough to come in contact.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 11,
+          "cost": 15,
           "damage_min": 30,
           "damage_max": 32,
           "damage_type": "normal",
@@ -2287,6 +2286,7 @@
           ],
           "special": {
             "effect": "chain_lightning",
+            "description": "Creates a chain lightning effect jumps to 4 nearby targets, with damage dropping off by 30% per jump.",
             "chain_targets": 4,
             "chain_radius": 250,
             "chain_damage_falloff": 0.3
@@ -2344,8 +2344,8 @@
       "description": "Undead remnants animated by void energy, draining the lifeforce of their foes.",
       "towers": {
         "husk_wall": {
-          "name": "Unstable Barrier",
-          "description": "A barrier of void energy, manipulating the field.",
+          "name": "Dead Space",
+          "description": "An untraversable void.",
           "grid_width": 1,
           "grid_height": 1,
           "cost": 1,
@@ -2578,8 +2578,8 @@
           "targets": [
             "ground"
           ],
-          "critical_chance": 0.15,
-          "critical_multiplier": 1.2,
+          "critical_chance": 0.2,
+          "critical_multiplier": 1.5,
           "special": {
             "effect": "chance_ignore_armor_on_hit",
             "chance_percent": 25,
@@ -2740,8 +2740,8 @@
           "description": "A sniper tower that can take on any threat from a distance.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 133,
-          "damage_min": 500,
+          "cost": 278,
+          "damage_min": 410,
           "damage_max": 550,
           "damage_type": "piercing",
           "range_min": 800,
@@ -2765,7 +2765,7 @@
           "description": "The Police may rally around their HQ to hold the line from illicit activity.",
           "grid_width": 4,
           "grid_height": 4,
-          "cost": 217,
+          "cost": 300,
           "damage_min": 0,
           "damage_max": 0,
           "damage_type": "normal",
@@ -2781,7 +2781,7 @@
               "towers"
             ],
             "damage_bonus_percentage": 15, 
-            "description": "Boosts the damage of immediately adjacent towers."
+            "description": "Boosts the damage of immediately adjacent towers by 15%."
           }
         }
       }
@@ -2854,8 +2854,8 @@
           "grid_width": 1,
           "grid_height": 1,
           "cost": 32,
-          "damage_min": 10,
-          "damage_max": 12,
+          "damage_min": 33,
+          "damage_max": 66,
           "damage_type": "piercing",
           "range": 1100,
           "attack_interval": 0.7,
@@ -2872,7 +2872,7 @@
           "description": "A targeting computer that allows towers to lock on to enemies.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 32,
+          "cost": 42,
           "damage_min": 0,
           "damage_max": 0,
           "damage_type": "normal",
@@ -2898,7 +2898,7 @@
           "description": "Manipulating the molecular structure of the air, this tower can slow enemies to a crawl.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 58,
+          "cost": 118,
           "damage_min": 1,
           "damage_max": 5,
           "damage_type": "normal",
@@ -2926,11 +2926,11 @@
           "description": "A supremely advanced superpowered railgun that deals high chaos damage.",
           "grid_width": 1,
           "grid_height": 2,
-          "cost": 177,
+          "cost": 237,
           "damage_min": 875,
           "damage_max": 1250,
           "damage_type": "chaos",
-          "range": 1000,
+          "range": 1800,
           "attack_interval": 5.28,
           "projectile_speed": 1200,
           "attack_type": "projectile",
@@ -2945,12 +2945,12 @@
           "description": "A marvel of engineering, capable of rewinding time to a previous point.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 300,
+          "cost": 311,
           "damage_min": 0,
           "damage_max": 0,
           "damage_type": "chaos",
           "range": 450,
-          "attack_interval": 60.0,
+          "attack_interval": 45.0,
           "projectile_speed": 0,
           "attack_type": "none",
           "splash_radius": 0,
@@ -2987,7 +2987,7 @@
             "description": "Walls block enemies from traversing the map."
           }
         },
-        "seadog_saltwater_soundrel": {
+        "seadog_saltwater_scoundrel": {
           "name": "Saltwater Scoundrel", 
           "description": "Small time cutthroats intent on stealing your valuables.",
           "grid_width": 1,
@@ -3018,10 +3018,10 @@
           "grid_height": 1,
           "cost": 17,
           "damage_min": 26,
-          "damage_max": 50,
+          "damage_max": 47,
           "damage_type": "siege",
           "range": 500,
-          "attack_interval": 2.0,
+          "attack_interval": 1.2,
           "projectile_speed": 300,
           "bounce": 2,
           "attack_type": "projectile",
@@ -3029,13 +3029,7 @@
           "targets": [
             "ground"
           ],
-          "projectile_asset_id": "grog_barrel_projectile",
-          "special": {
-            "effect": "gold_on_kill",
-            "chance_percent": 15, 
-            "gold_amount": 1,
-            "description": "Has a 15% chance to grant 1 gold on a killing blow."
-        }
+          "projectile_asset_id": "grog_barrel_projectile"
         },
         "seadog_chain_shot_cannon": {
           "name": "Chain Shot Cannon", 
@@ -3047,7 +3041,7 @@
           "damage_max": 85,
           "damage_type": "siege",
           "range": 900,
-          "attack_interval": 1.2,
+          "attack_interval": 2.0,
           "projectile_speed": 350,
           "bounce": 5,
           "attack_type": "projectile",
@@ -3058,7 +3052,7 @@
           ],
           "special": {
             "effect": "slow",
-            "slow_percentage": 22,
+            "slow_percentage": 20,
             "duration": 1.0
           }
         },
@@ -3067,7 +3061,7 @@
           "description": "Ruthless slavers that use whips to attack enemies.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 96,
+          "cost": 85,
           "damage_min": 91,
           "damage_max": 156,
           "damage_type": "piercing",
@@ -3091,15 +3085,15 @@
           "description": "A large ship that fires 3 cannons from each side.",
           "grid_width": 2,
           "grid_height": 3,
-          "cost": 133,
+          "cost": 171,
           "damage_min": 180,
-          "damage_max": 200,
+          "damage_max": 300,
           "damage_type": "siege",
           "range": 750,
           "attack_interval": 1.5,
           "projectile_speed": 400,
           "attack_type": "projectile",
-          "splash_radius": 200,
+          "splash_radius": 300,
           "targets": [
             "ground"
           ],
@@ -3114,9 +3108,9 @@
           "description": "Fires a massive cannonball, but takes a long time to reload.",
           "grid_width": 2,
           "grid_height": 2,
-          "cost": 142,
+          "cost": 222,
           "damage_min": 795,
-          "damage_max": 861,
+          "damage_max": 961,
           "damage_type": "piercing",
           "range": 1050,
           "attack_interval": 11,
@@ -3133,9 +3127,9 @@
           "description": "A tower that uses harpoons to pull enemies towards it.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 200,
-          "damage_min": 100,
-          "damage_max": 100,
+          "cost": 312,
+          "damage_min": 130,
+          "damage_max": 130,
           "damage_type": "normal",
           "range": 900,
           "attack_interval": 9.0,
@@ -3147,9 +3141,10 @@
           ],
           "special": {
             "effect": "harpoon",
+            "description": "Multiple harpoon towers may shear enemies",
             "pull_distance": 900,
-            "pull_duration": 1,
-            "shear_multiplier": 1.2,
+            "pull_duration": 1.2,
+            "shear_multiplier": 2.5,
             "excluded_enemy_ids": [
               "lord_supermaul"
             ]
@@ -3305,7 +3300,7 @@
           "description": "Defilers are condemed to death by the seraphim.",
           "grid_width": 2,
           "grid_height": 2,
-          "cost": 408,
+          "cost": 388,
           "damage_min": 1000,
           "damage_max": 1000,
           "damage_type": "piercing",
@@ -3330,8 +3325,8 @@
       "description": "Cosmic faction that melts foes with celestial energy.",
       "towers": {
         "solar_wall": {
-          "name": "Solar Wall",
-          "description": "Cosmic energy manifests into upwellings of light.",
+          "name": "Universe Edge",
+          "description": "A barrier at the edge of light itself.",
           "grid_width": 1,
           "grid_height": 1,
           "cost": 1,
@@ -3513,15 +3508,15 @@
         },
         "solar_star_forge": {
           "name": "Star Forge", 
-          "description": "Harnessing the power of nearby solar emissions, one can wield the power of the sun itself.",
+          "description": "Harnessing the power of nearby solar emissions, one can wield the power of creation itself.",
           "grid_width": 3,
           "grid_height": 3,
           "cost": 506,
           "damage_min": 2000,
-          "damage_max": 2300,
+          "damage_max": 2250,
           "damage_type": "chaos",
           "target_selection": "random",
-          "range": 1200,
+          "range": 1500,
           "attack_interval": 0.5,
           "projectile_speed": null,
           "attack_type": "beam",
@@ -3537,9 +3532,9 @@
           ],
           "special": {
             "effect": "requires_solar_adjacency",
-            "required_count": 3,
+            "required_count": 12,
             "race_to_check": "solar",
-            "description": "Requires at least 3 immediately adjacent Solar towers to operate."
+            "description": "Requires at least 12 immediately adjacent Solar towers to operate."
           }
         }
       }
@@ -3636,13 +3631,13 @@
           "grid_width": 1,
           "grid_height": 1,
           "cost": 52,
-          "damage_min": 999,
+          "damage_min": 750,
           "damage_max": 999,
           "damage_type": "arcane",
           "range": 600,
           "attack_interval": 0.3,
-          "projectile_speed": null,
-          "attack_type": "instant",
+          "projectile_speed": 1000,
+          "attack_type": "projectile",
           "splash_radius": null,
           "targets": [
             "ground",
@@ -3652,8 +3647,7 @@
             "Ethereal"
           ],
           "special": {
-            "effect": "reveal",
-            "duration": 5.0
+                "description": "Only targets Ethereal enemies."
           }
         },
         "nomad_caravan_guard": {
@@ -3764,7 +3758,7 @@
       }
     },
     "ogre_stronghold": {
-      "description": "Brutish ogres wielding massive clubs and fists. They hit hard but slowly, striking only adjacent foes.",
+      "description": "Brutish ogres wielding massive clubs and fists. They hit from melee range only, but have high crit and crit multipliers.",
       "towers": {
         "ogre_wall": {
           "name": "Spike Wall",
@@ -3790,20 +3784,20 @@
           "description": "Even the smallest ogres can overpower tough adversaries.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 12,
-          "damage_min": 8,
-          "damage_max": 13,
+          "cost": 11,
+          "damage_min": 25,
+          "damage_max": 33,
           "damage_type": "normal",
-          "range": 235,
-          "attack_interval": 1.3,
+          "range": 300,
+          "attack_interval": 1.0,
           "projectile_speed": null,
           "attack_type": "instant",
-          "splash_radius": null,
+          "splash_radius": 225,
           "targets": [
             "ground"
           ],
-          "critical_chance": 0.2,
-          "critical_multiplier": 2.0
+          "critical_chance": 0.25,
+          "critical_multiplier": 2.5
         },
         "ogre_mage": {
           "name": "Ogre Mage",
@@ -3812,46 +3806,46 @@
           "grid_height": 1,
           "cost": 29,
           "damage_min": 32,
-          "damage_max": 55,
+          "damage_max": 65,
           "damage_type": "arcane",
           "range": 400,
-          "attack_interval": 1.5,
+          "attack_interval": 1.0,
           "projectile_speed": 250,
           "attack_type": "projectile",
-          "splash_radius": 50,
+          "splash_radius": 250,
           "targets": [
             "ground",
             "air"
           ],
-          "critical_chance": 0.3,
-          "critical_multiplier": 2.0
+          "critical_chance": 0.25,
+          "critical_multiplier": 2.5
         },
         "ogre_brute": {
           "name": "Ogre Brute",
           "description": "Brutes often lead the charge, their massive clubs a formidable sight.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 40,
-          "damage_min": 95,
-          "damage_max": 135,
+          "cost": 31,
+          "damage_min": 115,
+          "damage_max": 185,
           "damage_type": "normal",
-          "range": 235,
-          "attack_interval": 1.5,
+          "range": 300,
+          "attack_interval": 1.2,
           "projectile_speed": null,
           "attack_type": "instant",
           "splash_radius": null,
           "targets": [
             "ground"
           ],
-          "critical_chance": 0.3,
-          "critical_multiplier": 2.0
+          "critical_chance": 0.25,
+          "critical_multiplier": 2.5
         },
         "ogre_war_drums": {
           "name": "War Drums",
           "description": "The drums of war inspire the ogres to fight with greater ferocity.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 36,
+          "cost": 32,
           "damage_min": 0,
           "damage_max": 0,
           "damage_type": "normal",
@@ -3868,11 +3862,11 @@
             "targets": [
               "towers"
             ],
-            "aura_radius": 450,         
+            "aura_radius": 500,         
+            "description": "Periodically pulses, granting nearby friendly towers +0.5 critical damage multiplier for 1 second.",
             "interval": 5,             
             "duration": 5,             
-            "crit_multiplier_bonus": 0.5, 
-            "description": "Periodically pulses, granting nearby friendly towers +0.5 critical damage multiplier for 1 second."
+            "crit_multiplier_bonus": 0.5
           }
         },
         "ogre_stomping_grounds": {
@@ -3880,7 +3874,7 @@
           "description": "Ogres often gather to prove their strength... or obliterate captured slaves.",
           "grid_width": 3,
           "grid_height": 3,
-          "cost": 72,
+          "cost": 55,
           "damage_min": 0,
           "damage_max": 0,
           "damage_type": "normal",
@@ -3892,10 +3886,11 @@
           "targets": [],
           "special": {
             "effect": "crit_aura",
+            "description": "Grants nearby towers +0.5 critical chance and +0.5 critical damage multiplier.",
             "targets": "towers",
             "crit_chance_bonus": 0.5,
             "crit_multiplier_bonus": 0.5,
-            "aura_radius": 500
+            "aura_radius": 800
           }
         },
         "ogre_smasher": {
@@ -3903,17 +3898,17 @@
           "description": "Smashers strike with such ferocity that can rattle even the mighitest warrior.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 130,
+          "cost": 110,
           "damage_min": 320,
-          "damage_max": 350,
+          "damage_max": 370,
           "damage_type": "siege",
-          "range": 400,
-          "attack_interval": 2.5,
+          "range": 375,
+          "attack_interval": 2.0,
           "projectile_speed": null,
           "attack_type": "instant",
-          "splash_radius": 50,
-          "critical_chance": 0.2,
-          "critical_multiplier": 2.0,
+          "splash_radius": 250,
+          "critical_chance": 0.25,
+          "critical_multiplier": 2.5,
           "targets": [
             "ground"
           ],
@@ -3928,16 +3923,16 @@
           "grid_width": 2,
           "grid_height": 2,
           "cost": 255,
-          "damage_min": 611,
+          "damage_min": 621,
           "damage_max": 685,
-          "attack_speed": 0.9,
-          "range": 400,
+          "attack_speed": 1,
+          "range": 415,
           "attack_type": "instant",
           "damage_type": "normal",
           "targets": [
             "ground"
           ],
-          "splash_radius": 0,
+          "splash_radius": 300,
           "critical_chance": 0.2,
           "critical_multiplier": 4.0,
           "special": {

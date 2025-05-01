@@ -91,9 +91,9 @@
     },
     {
       "races": ["igloo", "seadogs"],
-      "combined_name": "Frost Pirates",
+      "combined_name": "Frozen Corsairss",
       "combined_description": "Pirates of the frozen seas, their ships cutting through ice as they plunder the frozen world.",
-      "combined_image": "frost_pirates.png"
+      "combined_image": "frozen_corsairs.png"
     },
     {
       "races": ["igloo", "heaven"],
