@@ -21,6 +21,7 @@ from entities.cluster_projectile import ClusterProjectile # <<< ADDED IMPORT
 from entities.effect import Effect, FloatingTextEffect, ChainLightningVisual, RisingFadeEffect, GroundEffectZone, FlamethrowerParticleEffect, SuperchargedZapEffect, AcidSpewParticleEffect, PulseImageEffect, ExpandingCircleEffect, DrainParticleEffect, WhipVisual # Added AcidSpewParticleEffect, PulseImageEffect, ExpandingCircleEffect, DrainParticleEffect, WhipVisual
 from entities.orbiting_damager import OrbitingDamager # NEW IMPORT
 from entities.pass_through_exploder import PassThroughExploder # NEW IMPORT
+from entities.status_effect_visualizer import StatusEffectVisualizer # <<< ADD IMPORT
 import json # Import json for loading armor data
 import pymunk
 
@@ -294,6 +295,7 @@ class GameScene:
         self.effects = [] # List to hold active visual effects
         self.orbiting_damagers = [] # List for orbiting damagers (We added this earlier, maybe manually?)
         self.pass_through_exploders = [] # NEW: List for pass-through exploders
+        self.status_visualizers = [] # <<< ADDED: List for tower status visuals
         
         # --- Wave System State --- 
         self.all_wave_data = [] # Will be loaded from waves.json
@@ -833,6 +835,17 @@ class GameScene:
         # print(f"DEBUG Handle Placement: id='{selected_tower_id}', data_used={tower_data}")
         tower = Tower(grid_x, grid_y, selected_tower_id, tower_data)
         self.towers.append(tower)
+        
+        # --- Create Status Visualizers --- <<< ADDED BLOCK
+        if tower.special and tower.special.get("effect") == "berserk_trigger":
+            #print(f"Creating StatusEffectVisualizer for berserk on {tower.tower_id}")
+            berserk_viz = StatusEffectVisualizer(tower, effect_type='berserk', color=(255, 0, 0, 80)) # Semi-transparent red
+            self.status_visualizers.append(berserk_viz)
+        # Add checks for other effects here if needed
+        # elif tower.special and tower.special.get("effect") == "some_other_trigger":
+        #     other_viz = StatusEffectVisualizer(tower, effect_type='some_other', color=(...))
+        #     self.status_visualizers.append(other_viz)
+        # --- End Status Visualizers --- 
         
         # Play placement sound
         if self.placement_sound:
@@ -1873,6 +1886,14 @@ class GameScene:
                     pass  # Already removed
         # --- End Update Visual Effects ---
 
+        # --- Update Status Visualizers --- <<< ADDED BLOCK
+        for viz in self.status_visualizers[:]: # Iterate copy for potential removal if tower is gone
+            if viz.tower in self.towers: # Check if the tower still exists
+                viz.update(current_time)
+            else: # Tower was likely sold or removed
+                self.status_visualizers.remove(viz)
+        # --- End Update Status Visualizers --- 
+
         # --- Update Orbiting Damagers --- 
         # Need to get current time again or pass it down
         current_time_seconds = pygame.time.get_ticks() / 1000.0
@@ -2862,6 +2883,11 @@ class GameScene:
             overlay_rect = self.winner_image.get_rect(center=screen.get_rect().center)
             screen.blit(self.winner_image, overlay_rect)
         # --- End Victory Overlay ---
+
+        # --- Draw Status Visualizers (After Towers, Before Other Effects/UI?) --- <<< ADDED
+        for viz in self.status_visualizers:
+            viz.draw(screen, grid_offset_x, grid_offset_y)
+        # --- End Draw Status Visualizers ---
 
     def draw_ui(self, screen):
         """Draw UI elements"""
