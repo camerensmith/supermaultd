@@ -618,7 +618,7 @@ class Projectile:
                 
                 # Select the closest valid target
                 bounce_target = potential_targets[0][1]
-                print(f"... bouncing from {collided_enemy.enemy_id} to {bounce_target.enemy_id} ({self.bounces_remaining} bounces left)")
+                #print(f"... bouncing from {collided_enemy.enemy_id} to {bounce_target.enemy_id} ({self.bounces_remaining} bounces left)")
 
                 # Calculate bounced projectile damage
                 bounced_damage = self.damage * self.bounce_damage_falloff

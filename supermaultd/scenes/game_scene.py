@@ -2676,6 +2676,35 @@ class GameScene:
                         buff_lines.append(f"  Splash: +{(current_splash_pixels - base_splash_pixels):.0f}px")
                     # <<< END ADDED >>>
                          
+                    # --- ADDED: Specific State/Stacking Effect Checks ---
+                    # Reaper Mech Bonus
+                    if tower.tower_id == 'tac_reaper_mech' and hasattr(tower, 'kill_count') and tower.kill_count > 0:
+                        # Assuming reaper bonus is 0.25 per kill (could read from tower.special if needed)
+                        reaper_bonus = 0.25 * tower.kill_count
+                        # Optional: Add max cap display if defined
+                        # max_reaper_bonus = tower.special.get('total_damage', float('inf')) if tower.special else float('inf')
+                        # display_bonus = min(reaper_bonus, max_reaper_bonus)
+                        buff_lines.append(f"  Reaper Bonus: +{reaper_bonus:.2f} dmg")
+
+                    # Berserk Status
+                    if getattr(tower, 'is_berserk', False):
+                        # Optionally show remaining duration if available?
+                        # remaining_berserk = tower.berserk_end_time - current_time if hasattr(tower, 'berserk_end_time') else 0
+                        # buff_lines.append(f"  Berserk Active! ({remaining_berserk:.1f}s)") 
+                        buff_lines.append("  Berserk Active!")
+                        
+                    # Rampage Stacks (using handler)
+                    if hasattr(tower, 'rampage_handler') and tower.rampage_handler:
+                        current_stacks = tower.rampage_handler.get_current_stacks()
+                        if current_stacks > 0:
+                            bonus_damage = tower.rampage_handler.get_bonus_damage()
+                            max_stacks = getattr(tower.rampage_handler, 'max_stacks', '?') # Get max stacks from handler
+                            buff_lines.append(f"  Rampage: +{bonus_damage:.0f} dmg ({current_stacks}/{max_stacks} stacks)")
+                            
+                    # Add checks for other specific effects here...
+                    # e.g., if getattr(tower, 'some_other_flag', False): buff_lines.append("  Some Other Effect Active")
+                    # --- END Specific Checks ---
+                         
                 except Exception as buff_error:
                     print(f"Error calculating buffs for tooltip: {buff_error}")
                     buff_lines.append("  Error loading buffs")

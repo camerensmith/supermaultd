@@ -232,7 +232,7 @@ ENEMY_DATA = {
     },
     "gremlin": { #gold increase
         "health": 5000,
-        "speed": 1.5,
+        "speed": 1.3,
         "value": 3,
         "armor_type": "Medium",
         "armor_value": 22,
@@ -256,7 +256,7 @@ ENEMY_DATA = {
     },
     "polywog": {
         "health": 9000,
-        "speed": 1.4, 
+        "speed": 1.3, 
         "value": 4,
         "armor_type": "Medium",
         "armor_value": 11,
@@ -287,7 +287,7 @@ ENEMY_DATA = {
     },
     "satyr": {
         "health": 12000,
-        "speed": 1.8,
+        "speed": 1.2,
         "value": 5,
         "armor_type": "Unarmored",
         "armor_value": 35,
@@ -303,7 +303,7 @@ ENEMY_DATA = {
     },
     "hill_troll": {
         "health": 14000,
-        "speed": 1.6,
+        "speed": 1.0,
         "value": 5,
         "armor_type": "Heavy",
         "armor_value": 50,
@@ -311,7 +311,7 @@ ENEMY_DATA = {
     },
     "crone": {#advanced only,
         "health": 7000,
-        "speed": 1.6,
+        "speed": 1.2,
         "value": 5,
         "armor_type": "Unarmored",
         "armor_value": 38,
@@ -328,7 +328,7 @@ ENEMY_DATA = {
 
     "scarlet_knight": {
         "health": 16000,
-        "speed": 1.5,
+        "speed": 1.1,
         "value": 5,
         "armor_type": "Fortified",
         "armor_value": 50,
@@ -336,7 +336,7 @@ ENEMY_DATA = {
     },
     "ice_demon": {
         "health": 37000,
-        "speed": 1.5,
+        "speed": 0.8,
         "value": 5, "armor_value": 9,
         "armor_type": "Magic_Resistant",
         "armor_value": 13,
@@ -344,7 +344,7 @@ ENEMY_DATA = {
     },
     "black_bear": {
         "health": 23300,
-        "speed": 2,
+        "speed": 0.8,
         "value": 5,
         "armor_type": "Unarmored",
         "armor_value": 0,
@@ -360,7 +360,7 @@ ENEMY_DATA = {
     },
     "tusken_fighter": {
         "health": 73000,
-        "speed": 1.3,
+        "speed": 1.0,
         "value": 6,
         "armor_type": "Unarmored",
         "armor_value": 0,
@@ -368,7 +368,7 @@ ENEMY_DATA = {
     },
     "spike_lizard": {
         "health": 67875,
-        "speed": 1.5,
+        "speed": 0.6,
         "value": 6,
         "armor_type": "Heavy",
         "armor_value": 23,

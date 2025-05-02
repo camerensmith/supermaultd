@@ -641,7 +641,7 @@ class GroundEffectZone:
                     if dist_sq <= self.radius_pixels_sq:
                         enemy.take_damage(damage_to_apply, self.damage_type)
                         enemies_hit += 1
-                        print(f"[DEBUG] Fallout zone hit enemy at ({enemy.x}, {enemy.y}) - distance: {math.sqrt(dist_sq):.1f}px, radius: {self.radius_pixels:.1f}px")
+                        #print(f"[DEBUG] Fallout zone hit enemy at ({enemy.x}, {enemy.y}) - distance: {math.sqrt(dist_sq):.1f}px, radius: {self.radius_pixels:.1f}px")
             if enemies_hit > 0:
                 #print(f"[DEBUG] Fallout zone hit {enemies_hit} enemies for {damage_to_apply} {self.damage_type} damage")
                 pass
@@ -669,13 +669,14 @@ class GroundEffectZone:
                 # Blit the temporary surface to the screen
                 screen.blit(temp_surface, (draw_x - radius - 2, draw_y - radius - 2))
                 
-                if self.life_remaining % 1.0 < 0.1:  # Print debug once per second
-                    print(f"[DEBUG] Drawing fallout zone at ({draw_x}, {draw_y}) with radius {radius}px, life: {self.life_remaining:.1f}s")
+                if self.life_remaining % 1.0 < 0.1: pass # Print debug once per second
+                    #print(f"[DEBUG] Drawing fallout zone at ({draw_x}, {draw_y}) with radius {radius}px, life: {self.life_remaining:.1f}s")
             except Exception as e:
-                print(f"Error drawing fallout zone: {e}")
-                print(f"  - draw_x: {draw_x}, draw_y: {draw_y}")
-                print(f"  - radius: {radius}")
-                print(f"  - grid_offset: ({grid_offset_x}, {grid_offset_y})")
+                pass
+                #print(f"Error drawing fallout zone: {e}")
+                #print(f"  - draw_x: {draw_x}, draw_y: {draw_y}")
+                #print(f"  - radius: {radius}")
+                #print(f"  - grid_offset: ({grid_offset_x}, {grid_offset_y})")
 
 class FlamethrowerParticleEffect:
     """Continuous stream of particles from a source tower to a target enemy."""

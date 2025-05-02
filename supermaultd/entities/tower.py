@@ -19,6 +19,7 @@ from entities.cluster_projectile import ClusterProjectile
 from .double_strike_effect import DoubleStrikeEffect
 from .every_nth_strike_effect import EveryNthStrikeEffect
 from .strategic_strike_effect import StrategicStrikeEffect
+from entities.effects.rampage_effect import RampageEffect # <<< ADD IMPORT
 
 class Tower:
     def __init__(self, x, y, tower_id, tower_data):
@@ -508,6 +509,22 @@ class Tower:
                 pass
         # --- END Time Machine Rewind Visual ---
 
+        # --- Effect Handlers --- <<< ADDED SECTION
+        self.rampage_handler = None
+        # Initialize other potential effect handlers here (e.g., self.reaper_handler = None)
+        
+        if self.special:
+            effect_type = self.special.get("effect")
+            if effect_type == "rampage_damage_stack":
+                self.rampage_handler = RampageEffect(self, self.special)
+            # Example for future expansion:
+            # elif effect_type == "some_other_complex_effect":
+            #    from .effects.some_other_effect import SomeOtherEffectHandler # Import locally if needed
+            #    self.some_other_handler = SomeOtherEffectHandler(self, self.special)
+        # --- End Effect Handlers ---
+
+        # --- Initialization based on tower_data ---
+
     def calculate_derived_stats(self):
         """Calculates pixel dimensions and ranges based on grid size and tower data."""
         # Pixel dimensions based on grid size
@@ -747,6 +764,14 @@ class Tower:
         
         # Apply damage buffs (from auras)
         damage *= damage_multiplier
+        
+        # --- ADD RAMPAGE BONUS (Using Handler) --- <<< ADDED
+        if self.rampage_handler: # Check if the handler exists
+            rampage_bonus = self.rampage_handler.get_bonus_damage()
+            if rampage_bonus > 0:
+                damage += rampage_bonus
+                # print(f"+++ Rampage Bonus: +{rampage_bonus} (Stacks: {self.rampage_handler.get_current_stacks()})") # Optional Debug
+        # --- END RAMPAGE BONUS ---
         
         # --- Apply Air Damage Multiplier --- 
         if enemy.type == "air":
@@ -1413,27 +1438,31 @@ class Tower:
                     # <<< END ARMOR IGNORE LOGIC >>>
                             
                     # <<< ADD PRIMARY INSTANT DAMAGE APPLICATION HERE >>>
+                    damage_dealt_this_hit = 0 # Track damage for logging/checks
+                    was_killed_by_first_hit = False
                     if initial_damage > 0:
                         # Apply only base damage and type here.
                         # Special effects like stun/DoT are handled later or by source_special in take_damage.
                         # <<< PASS source_special AND ignore amount HERE >>>
-                        target.take_damage(
+                        damage_result = target.take_damage(
                             initial_damage, 
                             self.damage_type, 
                             source_special=self.special, 
                             ignore_armor_amount=effective_armor_ignore # Pass the calculated ignore amount
                         )
+                        damage_dealt_this_hit = damage_result.get('damage_dealt', 0)
+                        was_killed_by_first_hit = damage_result.get("was_killed", False)
+                        
+                        # --- Record Rampage Attack (AFTER applying primary damage) --- <<< ADDED
+                        if self.rampage_handler and damage_dealt_this_hit > 0: # Only record if damage was dealt
+                            self.rampage_handler.record_attack(current_time)
+                        # --- End Record Rampage Attack ---
+                        
                         # Keep the kill count check associated with this primary damage application.
-                        damage_result = {'was_killed': target.health <= 0} # Simplification, assuming take_damage modified health
-                        if damage_result.get("was_killed", False):
+                        if was_killed_by_first_hit:
                             self.kill_count += 1
                             #print(f"+++ Kill registered for Tower {self.tower_id} (via instant attack). Total kills: {self.kill_count}")
                             # If target is killed by first hit, don't proceed to double strike
-                            was_killed_by_first_hit = True
-                        else:
-                            was_killed_by_first_hit = False
-                    else:
-                        was_killed_by_first_hit = False
                     # <<< END PRIMARY INSTANT DAMAGE >>>
 
                     # <<< ADD DOUBLE STRIKE LOGIC HERE (for Instant Attacks) >>>
@@ -2172,6 +2201,13 @@ class Tower:
         self.game_scene_deduct_money_callback = game_scene_deduct_money_callback
         self.game_scene_add_projectile_callback = game_scene_add_projectile_callback
 
+        # --- Call Update on Effect Handlers --- <<< ADDED
+        if self.rampage_handler:
+            self.rampage_handler.update(current_time)
+        # Add calls for other handlers here if needed
+        # if self.reaper_handler: self.reaper_handler.update(current_time)
+        # --- End Effect Handler Update ---
+
         # --- Frost Pulse Aura Effect ---
         if self.special and self.special.get("effect") == "slow_pulse_aura":
             # Check if it's time for a new pulse
@@ -2322,15 +2358,7 @@ class Tower:
                             #print(f"War Drums from {self.tower_id} buffed {tower.tower_id} with +{crit_multiplier_bonus} crit damage for {pulse_duration}s")
         # --- End Crit Damage Pulse Aura Effect ---
 
-        # --- Rampage Stack Decay Logic ---
-        if self.rampage_stacks > 0 and self.special and self.special.get("effect") == "rampage_damage_stack":
-            decay_duration = self.special.get("decay_duration", 3.0)
-            time_since_last_hit = current_time - self.rampage_last_hit_time
-
-            if time_since_last_hit > decay_duration:
-                #print(f"### RAMPAGE RESET: Tower {self.tower_id} stacks expired after {time_since_last_hit:.2f}s. Resetting {self.rampage_stacks} stacks.")
-                self.rampage_stacks = 0
-        # --- END Rampage Decay ---
+        # Old rampage decay logic removed, handled by RampageEffect class now.
 
         # --- Gattling Spin-Down Logic --- 
         if self.gattling_level > 0 and self.special and self.special.get("effect") == "gattling_spin_up":
