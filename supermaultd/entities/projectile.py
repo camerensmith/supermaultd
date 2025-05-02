@@ -79,6 +79,11 @@ class Projectile:
         self.world_angle_degrees = 0.0 # Store the world angle (0=right, 90=up)
         self._drawn_once = False # Debug flag for initial draw
 
+        # <<< ADDED: Store destination coordinates >>>
+        self.destination_x = self.x
+        self.destination_y = self.y
+        # <<< END ADDED >>>
+
         # Determine movement type and initial angle
         if target_enemy is not None:
             # Homing projectile: Calculate initial world angle towards target
@@ -87,7 +92,10 @@ class Projectile:
             if abs(initial_dx) > 0.001 or abs(initial_dy) > 0.001:
                 initial_angle_rad = math.atan2(-initial_dy, initial_dx) # Use -dy for Pygame coords
                 self.world_angle_degrees = math.degrees(initial_angle_rad)
-                #print(f"[Projectile Init Homing] Target: {target_enemy.enemy_id}, Initial World Angle: {self.world_angle_degrees:.1f}")
+                # <<< ADDED: Set initial destination >>>
+                self.destination_x = target_enemy.x
+                self.destination_y = target_enemy.y
+                # <<< END ADDED >>>
             else:
                 #print(f"[Projectile Init Homing] Warning: Starting exactly on target {target_enemy.enemy_id}. Using default angle 0.")
                 self.world_angle_degrees = 0.0 # Default to pointing right if starting on target
@@ -191,39 +199,67 @@ class Projectile:
             return # <<< RETURN HERE (end of non-homing block)
 
         # --- Homing Logic ---
-        # Check if target is still valid
-        if not self.target or self.target.health <= 0:
-            self.collided = True
-            return
+        target_is_valid = self.target and self.target.health > 0 
+        # Optionally: Add check if self.target is still in GameScene.enemies if needed
 
-        # Calculate direction to target
-        dx = self.target.x - self.x
-        dy = self.target.y - self.y
-        dist_sq = dx**2 + dy**2
-        
-        # Check for collision with target
-        collision_radius_sq = (GRID_SIZE * 0.4)**2
-        if dist_sq <= collision_radius_sq:
-            self.collided = True
-            self.hit_enemy = self.target
-            # Snap to target position
-            self.x = self.target.x
-            self.y = self.target.y
-            return
+        if target_is_valid:
+            # Update destination to current target position for homing
+            self.destination_x = self.target.x
+            self.destination_y = self.target.y
+        # else: Destination remains the last known valid position
 
-        # Update velocity towards target
-        dist = math.sqrt(dist_sq)
-        if dist > 0:  # Avoid division by zero
-            self.vx = (dx / dist) * self.speed
-            self.vy = (dy / dist) * self.speed
-            
-            # Update position
+        # Calculate direction to destination (last known or current target pos)
+        dx = self.destination_x - self.x
+        dy = self.destination_y - self.y
+        distance_to_destination = math.sqrt(dx**2 + dy**2)
+
+        # Normalize direction vector
+        if distance_to_destination > 0:
+            norm_x = dx / distance_to_destination
+            norm_y = dy / distance_to_destination
+            # Update world angle for drawing based on current direction of travel
+            self.world_angle_degrees = math.degrees(math.atan2(-norm_y, norm_x)) # Use -norm_y
+        else: # Avoid division by zero if already at destination
+            norm_x = 0
+            norm_y = 0
+            # Projectile is at the destination, mark as collided
+            self.collided = True 
+            #print(f"Homing projectile {self.projectile_id} reached destination ({self.x:.1f}, {self.y:.1f}).")
+            return # Stop processing
+
+        # Update velocity
+        self.vx = norm_x * self.speed
+        self.vy = norm_y * self.speed
+
+        # Move the projectile
+        move_dist = self.speed * time_delta
+        if move_dist >= distance_to_destination:
+            # Reached destination this frame
+            self.x = self.destination_x
+            self.y = self.destination_y
+            self.collided = True
+            #print(f"Homing projectile {self.projectile_id} collided upon reaching destination ({self.x:.1f}, {self.y:.1f}).")
+        else:
             self.x += self.vx * time_delta
             self.y += self.vy * time_delta
-            
-            # Update world angle towards target
-            angle_rad = math.atan2(-dy, dx) # Use -dy for Pygame coords
-            self.world_angle_degrees = math.degrees(angle_rad)
+            # Check for collision with LIVE enemies near current position (Standard Collision Logic)
+            collision_radius_sq = (GRID_SIZE * 0.4)**2 
+            for enemy in enemies:
+                # Only check collision with the original target if it's still valid
+                if target_is_valid and enemy == self.target:
+                    if distance_to_destination <= move_dist: # Already handled by reaching destination check
+                        continue
+                    # Check proximity to actual target for collision
+                    dist_sq_to_target = (enemy.x - self.x)**2 + (enemy.y - self.y)**2
+                    if dist_sq_to_target <= collision_radius_sq:
+                        #print(f"Homing projectile {self.projectile_id} collided with LIVE target {enemy.enemy_id}.")
+                        self.collided = True
+                        self.hit_enemy = enemy # Store the live target hit
+                        self.x = enemy.x # Snap to target
+                        self.y = enemy.y
+                        return # Stop processing after hitting live target
+                # Consider if homing projectiles should collide with OTHER live enemies they pass over
+                # If so, add a similar check here for `enemy != self.target`
 
     def draw(self, screen, projectile_assets, offset_x=0, offset_y=0):
         """Draw the projectile using its asset image, rotated to face its direction."""
