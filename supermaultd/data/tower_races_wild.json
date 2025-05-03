@@ -291,7 +291,7 @@
           "projectile_speed": null,
           "attack_type": "instant",
           "splash_radius": 300,
-          "target_selection": "random",
+          "target_priority": "random",
           "targets": ["ground", "air"],
           "attack_visual_effect": "fire_burst",
           "special": {
@@ -734,7 +734,7 @@
             "description": "Armed with archers at the ready, the arrow tower prepares to defend the kingdom.",
             "grid_width": 2, "grid_height": 2, "cost": 109,
             "damage_min": 35, "damage_max": 65, "damage_type": "order", "pierce_adjacent": 1,
-            "range": 750, "attack_interval": 0.3, "projectile_speed": 650, "target_selection": "random",
+            "range": 750, "attack_interval": 0.3, "projectile_speed": 650, "target_priority": "random",
             "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"]
         },
         "knights_ballista": {
@@ -896,7 +896,7 @@
           "name": "Tremor Totem", 
           "description": "A totem that causes tremors to shake the ground, damaging units randomly in a small area.",
           "grid_width": 1, "grid_height": 1, "cost": 220,
-          "damage_min": 50, "damage_max": 150, "damage_type": "earthen", "target_selection": "random",
+          "damage_min": 50, "damage_max": 150, "damage_type": "earthen", "target_priority": "random",
           "range": 400, "attack_interval": 0.2, "projectile_speed": null,
           "attack_type": "instant", "splash_radius": 200, "targets": ["ground"],
           "special": {
@@ -980,7 +980,7 @@
           "description": "Toxic substances must be handled with care.",
           "grid_width": 2, "grid_height": 2, "cost": 98,
           "damage_min": 5, "damage_max": 26, "damage_type": "toxic",
-          "range": 700, "attack_interval": 0.8, "projectile_speed": 180, "target_selection": "random",
+          "range": 700, "attack_interval": 0.8, "projectile_speed": 180, "target_priority": "random",
           "attack_type": "projectile", "splash_radius": 120, "targets": ["ground", "air"],
           "special": {"effect": "toxin", "dot_damage": 87, "dot_interval": 0.5, 
           "duration": 5.0, "dot_damage_type": "toxic"}
@@ -997,7 +997,7 @@
           "name": "Chemical Plant", 
           "description": "A tower that spits a particularly vile chemical developed as a byproduct of transmutation.",
           "grid_width": 3, "grid_height": 3, "cost": 177,
-          "damage_min": 80, "damage_max": 120, "damage_type": "toxic", "target_selection": "random",
+          "damage_min": 80, "damage_max": 120, "damage_type": "toxic", "target_priority": "random",
           "range": 800, "attack_interval": 0.2, "projectile_speed": 200,
           "attack_type": "projectile", "splash_radius": null, "targets": ["ground", "air"],
           "special": {"effect": "vile_chemical", "dot_damage": 388, "dot_interval": 0.5, 
@@ -1512,7 +1512,7 @@
           "name": "Storm Generator", 
           "description": "Unleashes a turbulent, violent storm across the battlefield.",
           "grid_width": 2, "grid_height": 2, "cost": 224,
-          "damage_min": 400, "damage_max": 800, "damage_type": "electrical", "target_selection": "random",
+          "damage_min": 400, "damage_max": 800, "damage_type": "electrical", "target_priority": "random",
           "range": 3000, "attack_interval": 2, "projectile_speed": null, "traversable": true,
           "attack_type": "instant", "instant_hold": 0.5, "splash_radius": 500, "targets": ["ground", "air"],
           "stats_air": {
@@ -1818,7 +1818,7 @@
           "name": "Freeze Ray", 
           "description": "Manipulating the molecular structure of the air, this tower can slow enemies to a crawl.",
           "grid_width": 1, "grid_height": 1, "cost": 80,
-          "damage_min": 1, "damage_max": 5, "damage_type": "plasma", "target_selection": "random",
+          "damage_min": 1, "damage_max": 5, "damage_type": "plasma", "target_priority": "random",
           "range": 500, "attack_interval": 0.1, "projectile_speed": null,
           "attack_type": "beam", "beam_color": "CYAN",
            "splash_radius": null, "targets": ["ground", "air"],
@@ -2178,7 +2178,7 @@
           "name": "Star Forge", 
           "description": "Harnessing the power of nearby solar emissions, one can wield the power of the sun itself.",
           "grid_width": 3, "grid_height": 3, "cost": 700,
-          "damage_min": 2000, "damage_max": 2200, "damage_type": "cosmic", "target_selection": "random",
+          "damage_min": 2000, "damage_max": 2200, "damage_type": "cosmic", "target_priority": "random",
           "range": 1200, "attack_interval": 0.7, "projectile_speed": null,
           "attack_type": "beam", "beam_color": [255, 100, 0], "splash_radius": 100, "targets": ["ground", "air"],
           "special": {
