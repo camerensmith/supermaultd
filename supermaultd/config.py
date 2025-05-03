@@ -47,7 +47,7 @@ SKY_BLUE = (135, 206, 235)
 
 # Game settings
 GRID_SIZE = 32  # Size of each grid cell in pixels
-STARTING_MONEY = 1000
+STARTING_MONEY = 100
 STARTING_LIVES = 20
 STARTING_MONEY_ADVANCED = 100
 STARTING_LIVES_ADVANCED = 10
@@ -146,7 +146,7 @@ ENEMY_DATA = {
     },
     "manboar": {
         "health": 1000,
-        "speed": 1.1,
+        "speed": 1.0,
         "value": 2,
         "armor_type": "Heavy", 
         "armor_value": 10,
@@ -155,7 +155,7 @@ ENEMY_DATA = {
     "groundhogger": {
         "health": 1340,
         "speed": 0.4,
-        "value": 2, "armor_value": 24,
+        "value": 2, "armor_value": 22,
         "armor_type": "Fortified",
         "type": "ground"
     },
@@ -169,7 +169,7 @@ ENEMY_DATA = {
     },
     "gnoll_berserker": {
         "health": 1980,
-        "speed": 1.4,
+        "speed": 1.3,
         "value": 2,
         "armor_type": "Medium",
         "armor_value": 8,

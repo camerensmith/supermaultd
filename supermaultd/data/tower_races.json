@@ -171,7 +171,7 @@
           "damage_max": 600,
           "damage_type": "chaos",
           "range": 900,
-          "attack_interval": 2.2,
+          "attack_interval": 2.0,
           "projectile_speed": null,
           "splash_radius": null,
           "attack_type": "instant",
@@ -475,7 +475,12 @@
           "splash_radius": 100,
           "targets": [
             "ground"
-          ]
+          ],
+          "special": {
+            "effect": "distance_damage_bonus",
+            "max_bonus_percentage": 0.5,
+            "description": "Deals more damage the further the target is upon impact."
+          }
         },
         "tank_blasto_mortar": {
           "name": "Blasto Mortar Tank", 
@@ -522,7 +527,12 @@
           "splash_radius": 325,
           "targets": [
             "ground"
-          ]
+          ],
+          "special": {
+            "effect": "distance_damage_bonus",
+            "max_bonus_percentage": 0.5,
+            "description": "Deals more damage the further the target is upon impact."
+          }
         },
         "tank_cauldron_juggernaut": {
           "name": "Cauldron Juggernaut",
@@ -540,7 +550,12 @@
           "splash_radius": 250,
           "targets": [
             "ground"
-          ]
+          ],
+          "special": {
+            "effect": "distance_damage_bonus",
+            "max_bonus_percentage": 0.5,
+            "description": "Deals more damage the further the target is upon impact."
+          }
         }
       }
     },
@@ -1220,7 +1235,7 @@
           "damage_max": 490,
           "damage_type": "normal",
           "range": 600,
-          "attack_interval": 1.3,
+          "attack_interval": 1.2,
           "projectile_speed": null,
           "attack_type": "instant",
           "splash_radius": 350,
@@ -1246,7 +1261,7 @@
           "damage_type": "normal",
           "target_selection": "random",
           "range": 400,
-          "attack_interval": 0.2,
+          "attack_interval": 0.25,
           "projectile_speed": null,
           "attack_type": "instant",
           "splash_radius": 200,
@@ -1403,8 +1418,8 @@
           "grid_width": 1,
           "grid_height": 1,
           "cost": 81,
-          "damage_min": 452,
-          "damage_max": 790,
+          "damage_min": 299,
+          "damage_max": 351,
           "damage_type": "chaos",
           "range": 650,
           "attack_interval": 1.5,
@@ -1463,6 +1478,7 @@
           ],
           "special": {
             "effect": "dot_amplification_aura",
+            "description": "Amplifies the damage of all DoT effects by 250% in a large radius.",
             "aura_radius": 3000,
             "dot_damage_multiplier": 2.5,
             "targets": [
@@ -2386,11 +2402,11 @@
           "description": "A drone whose soul has been ripped away by the void.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 36,
-          "damage_min": 88,
-          "damage_max": 260,
+          "cost": 39,
+          "damage_min": 48,
+          "damage_max": 66,
           "damage_type": "normal",
-          "range": 435,
+          "range": 535,
           "attack_interval": 1,
           "projectile_speed": 400,
           "attack_type": "projectile",
@@ -2428,7 +2444,7 @@
           "damage_max": 173,
           "damage_type": "normal",
           "range": 435,
-          "attack_interval": 1.5,
+          "attack_interval": 1.0,
           "projectile_speed": null,
           "attack_type": "instant",
           "splash_radius": null,
@@ -2488,8 +2504,8 @@
             "effect": "rampage_damage_stack",
             "damage_per_stack": 75, 
             "max_stacks": 15,
-            "decay_duration": 1.0, 
-            "description": "Gains +75 damage per consecutive hit (max 15 stacks). Stacks reset after 1.0 seconds without attacking."
+            "decay_duration": 0.5, 
+            "description": "Gains +75 damage per consecutive hit (max 15 stacks). Stacks reset after 0.5 seconds without attacking."
           }
         }
       }
@@ -2740,14 +2756,14 @@
           "description": "A sniper tower that can take on any threat from a distance.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 278,
+          "cost": 204,
           "damage_min": 410,
           "damage_max": 550,
-          "damage_type": "piercing",
+          "damage_type": "chaos",
           "range_min": 800,
           "range": 2800,
           "attack_interval": 5.3,
-          "projectile_speed": 1000,
+          "projectile_speed": 1300,
           "attack_type": "projectile",
           "splash_radius": null,
           "targets": [

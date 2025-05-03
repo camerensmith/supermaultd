@@ -627,6 +627,10 @@ class Tower:
         effective_air_damage_multiplier = 1.0
         # Initialize splash radius increase
         total_splash_radius_increase = 0.0 
+        # >>> ADDED: Initialize attack speed multiplier <<< 
+        total_attack_speed_multiplier = 1.0
+        # >>> ADDED: Initialize set for active aura names <<< 
+        active_aura_names = set()
         # Add other potential buffs here (e.g., range)
 
         for aura_data in tower_buff_auras:
@@ -642,9 +646,15 @@ class Tower:
             if dist_sq <= aura_radius_sq or is_adjacent_buff:
                 # Apply relevant buff percentages/bonuses
                 if effect_type == 'attack_speed_aura':
-                    total_speed_bonus_percent += aura_special.get('speed_increase_percentage', 0.0)
+                    # <<< MODIFIED: Use multiplier <<< 
+                    # total_speed_bonus_percent += aura_special.get('speed_increase_percentage', 0.0)
+                    aura_mult = aura_special.get('attack_speed_multiplier', 1.0)
+                    if aura_mult != 1.0: # Only multiply if it's not the default
+                         total_attack_speed_multiplier *= aura_mult
+                         active_aura_names.add("Attack Speed Aura") # <<< ADD NAME
                 elif effect_type == 'damage_aura': 
                     total_damage_bonus_percent += aura_special.get('damage_bonus_percentage', 0.0)
+                    active_aura_names.add("Damage Aura") # <<< ADD NAME (Example)
                 elif effect_type == 'crit_aura':
                     total_crit_chance_bonus += aura_special.get('crit_chance_bonus', 0.0)
                     total_crit_multiplier_bonus += aura_special.get('crit_multiplier_bonus', 0.0)
@@ -691,6 +701,7 @@ class Tower:
                     swarm_bonus_percent = nearby_swarmer_count * bonus_per_swarmer
                     #print(f"DEBUG: {self.tower_id} ({self.center_grid_x},{self.center_grid_y}) found {nearby_swarmer_count} nearby swarmers. Applying +{swarm_bonus_percent}% speed bonus.") # Debug
                     total_speed_bonus_percent += swarm_bonus_percent
+                    active_aura_names.add("Swarm Power") # <<< ADD NAME
         # --- End Swarm Power Check ---
 
         # Check for expired pulsed buffs and remove them
@@ -710,9 +721,14 @@ class Tower:
         #    total_speed_bonus_percent += pulsed_speed_bonus
 
         # Calculate final multipliers and effective stats
-        speed_multiplier = 1.0 + (total_speed_bonus_percent / 100.0)
-        if speed_multiplier <= 0: speed_multiplier = 0.01 
-        effective_attack_interval = self.attack_interval / speed_multiplier
+        # <<< MODIFIED: Combine percentage and multiplier speed buffs >>>
+        # speed_multiplier = 1.0 + (total_speed_bonus_percent / 100.0)
+        percentage_speed_multiplier = 1.0 + (total_speed_bonus_percent / 100.0)
+        combined_speed_multiplier = percentage_speed_multiplier * total_attack_speed_multiplier
+        
+        if combined_speed_multiplier <= 0: combined_speed_multiplier = 0.01 # Prevent division by zero/negative
+        effective_attack_interval = self.attack_interval / combined_speed_multiplier
+        # <<< END MODIFICATION >>>
         
         damage_multiplier = 1.0 + (total_damage_bonus_percent / 100.0)
         
@@ -745,7 +761,8 @@ class Tower:
             'crit_chance': effective_crit_chance,
             'crit_multiplier': effective_crit_multiplier,
             'air_damage_multiplier': effective_air_damage_multiplier,
-            'splash_radius_pixels': effective_splash_radius_pixels # Return the buffed value
+            'splash_radius_pixels': effective_splash_radius_pixels, # Return the buffed value
+            'active_aura_names': active_aura_names # <<< ADDED: Return the set of names
         }
 
     def calculate_damage(self, enemy, buffed_stats, current_time, damage_multiplier=1.0):
@@ -818,6 +835,43 @@ class Tower:
         #     damage = self.unique_ability['apply'](self, enemy, damage)
             
         return damage, is_crit # Level 1 (8 spaces)
+
+    def get_current_dps(self, buffed_stats):
+        """Calculate the theoretical single-target DPS based on current stats and buffs."""
+        try:
+            # 1. Get base average damage for the default target type (or specify ground/air if needed)
+            dmg_min, dmg_max, _ = self.get_stats_for_target("ground") # Assuming ground is primary target type for DPS calc
+            avg_base_dmg = (dmg_min + dmg_max) / 2.0
+
+            # 2. Add specific static bonuses
+            if self.tower_id == "tac_reaper_mech" and hasattr(self, 'kill_count') and self.kill_count > 0:
+                reaper_bonus = 0.25 * self.kill_count
+                avg_base_dmg += reaper_bonus
+            elif self.rampage_handler:
+                rampage_bonus = self.rampage_handler.get_bonus_damage()
+                avg_base_dmg += rampage_bonus
+            
+            # 3. Apply general damage multiplier from buffs
+            avg_dmg_after_mult = avg_base_dmg * buffed_stats.get('damage_multiplier', 1.0)
+            
+            # 4. Factor in critical hits
+            crit_chance = buffed_stats.get('crit_chance', 0.0)
+            crit_multiplier = buffed_stats.get('crit_multiplier', 1.0)
+            avg_dmg_with_crit = avg_dmg_after_mult * (1 + crit_chance * (crit_multiplier - 1.0))
+            
+            # 5. Get effective attack interval
+            interval = buffed_stats.get('attack_interval', 1.0)
+            
+            # 6. Calculate DPS
+            if interval > 0:
+                dps = avg_dmg_with_crit / interval
+            else:
+                dps = 0.0 # No attacks per second if interval is 0 or less
+                
+            return dps
+        except Exception as e:
+            print(f"Error calculating DPS for {self.tower_id}: {e}")
+            return 0.0 # Return 0 on error
 
     def attack(self, target, current_time, all_enemies, tower_buff_auras, grid_offset_x, grid_offset_y, visual_assets=None, all_towers=None):
         """Perform an attack. Return a list of projectiles, effects, or None."""

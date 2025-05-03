@@ -987,9 +987,11 @@ class GameScene:
                 effect_type = tower.special.get('effect')
                 is_standard_aura = (tower.attack_type == 'aura' or tower.attack_type == 'hybrid')
                 is_dot_amp_aura = effect_type == 'dot_amplification_aura'
+                is_attack_speed_aura = effect_type == 'attack_speed_aura' # <<< ADDED CHECK
                 
-                # Process if it's a standard buff aura OR the new DoT amp aura
-                if is_standard_aura or is_dot_amp_aura:
+                # Process if it's a standard buff aura OR the DoT amp aura OR the attack speed aura
+                if is_standard_aura or is_dot_amp_aura or is_attack_speed_aura: # <<< MODIFIED CONDITION
+                # --- END MODIFICATION ---
                     aura_radius_units = tower.special.get('aura_radius', 0)
                     if aura_radius_units > 0:
                         aura_radius_pixels = aura_radius_units * (config.GRID_SIZE / 200.0)
@@ -2618,15 +2620,19 @@ class GameScene:
                 # Gather data
                 tower = self.hovered_tower
                 name = tower.tower_data.get('name', 'Unknown')
-                dmg_min = tower.base_damage_min
-                dmg_max = tower.base_damage_max
+                # <<< Get base stats - might need adjustment if using type-specific DPS >>>
+                dmg_min, dmg_max, _ = tower.get_stats_for_target("ground") 
+                # dmg_min = tower.base_damage_min # Old way
+                # dmg_max = tower.base_damage_max # Old way
                 dmg_type = tower.damage_type
                 sell_price = int(tower.cost * 0.5)
 
-                # <<< MODIFIED: Safely calculate buffs >>>
+                # <<< MODIFIED: Safely calculate buffs and DPS >>>
                 buff_lines = []
-                try: # Add inner try block for buff calculation
+                calculated_dps = 0.0 # Initialize DPS
+                try: # Add inner try block for buff/DPS calculation
                     buffed_stats = tower.get_buffed_stats(current_time, self.tower_buff_auras, self.towers)
+                    calculated_dps = tower.get_current_dps(buffed_stats) # <<< CALL NEW DPS METHOD
 
                     # Damage Multiplier
                     base_dmg_mult = 1.0
@@ -2638,6 +2644,16 @@ class GameScene:
                     # Use getattr for base_attack_interval as it might not exist on all towers (e.g., walls)
                     base_interval = getattr(tower, 'base_attack_interval', 0) 
                     current_interval = buffed_stats.get('attack_interval', base_interval)
+                    
+                    # <<< ADDED: Display Aura Name if Active >>>
+                    active_auras = buffed_stats.get('active_aura_names', set()) # Get the set, default empty
+                    if "Attack Speed Aura" in active_auras:
+                        buff_lines.append("  Attack Speed Aura")
+                    # <<< ADDED: Swarm Power Check >>>
+                    if "Swarm Power" in active_auras:
+                        buff_lines.append("  Swarm Power")
+                    # <<< END ADDED >>>
+                    
                     if base_interval is not None and current_interval is not None: # Check if intervals exist
                         if base_interval > 0 and current_interval < base_interval:
                             speed_increase_percent = ((base_interval / current_interval) - 1) * 100
@@ -2715,8 +2731,14 @@ class GameScene:
                 lines = [
                     f"Name: {name}",
                     f"Damage: {dmg_min}-{dmg_max} {dmg_type}",
+                    f"DPS: {calculated_dps:.1f}", # <<< ADD DPS LINE
                     f"Sell: {sell_price} G"
                 ]
+                
+                # <<< ADDED: Kill Count Display >>>
+                if hasattr(tower, 'kill_count') and tower.kill_count > 0:
+                    lines.append(f"Kills: {tower.kill_count}")
+                # <<< END ADDED >>>
                 
                 if buff_lines:
                     lines.append("Buffs:")
