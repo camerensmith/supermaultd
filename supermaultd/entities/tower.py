@@ -1544,15 +1544,28 @@ class Tower:
                                     self.kill_count += 1
                                     #print(f"+++ Kill registered for Tower {self.tower_id} (via double strike). Total kills: {self.kill_count}")
 
-                    
-                    # Apply INSTANT special effects (DoT, Max HP Reduction, etc.)
+                    # <<< --- CORRECT PLACEMENT FOR BASH --- >>>
+                    if not was_killed_by_first_hit and self.special: # Check if target survived AND tower has special
+                        effect_type = self.special.get("effect") 
+                        if effect_type == "bash_chance": # Indented under the check above
+                            chance = self.special.get("chance_percent", 0)
+                            if random.random() * 100 < chance:
+                                stun_duration = self.special.get("stun_duration", 0.1)
+                                if stun_duration > 0:
+                                    target.apply_status_effect('stun', stun_duration, True, current_time)
+                                    #print(f"Tower {self.tower_id} BASHED {target.enemy_id} for {stun_duration}s (Chance: {chance}%)")
+                    # <<< --- END BASH BLOCK --- >>>
+                            
+                    # Apply OTHER INSTANT special effects (DoT, Max HP Reduction, etc.)
                     self.apply_instant_special_effects(target, current_time) 
                     
-
-                    # --- Try to Create Projectile-Style Visual First ---
+                    # --- Visual effects logic ---                    
+                    # --- Try to Create Projectile-Style Visual First --- # Line ~1597 (adjust based on exact final lines)
                     try:
-                        # Try to get projectile image using tower_id like projectiles do
-                        projectile_img = self.asset_loader.get_projectile_image(self.tower_id)
+                        # NOTE: self.asset_loader is likely incorrect here. Should probably be self.load_single_image or similar.
+                        # Temporarily commenting out to avoid the AttributeError while debugging bash.
+                        # projectile_img = self.asset_loader.get_projectile_image(self.tower_id) 
+                        projectile_img = None # Force fallback for now
                         if projectile_img:
                             # Calculate angle from tower to target
                             dx = target.x - self.x
@@ -1572,16 +1585,8 @@ class Tower:
                             results['effects'].append(projectile_effect)
                             #print(f"Created projectile-style visual for {self.tower_id} instant attack")
                     except Exception as e:
-                        pass
-                        # Fall through to normal instant attack visual handling
-                        if not was_killed_by_first_hit and self.special: # Check if target survived initial hit(s)
-                            effect_type = self.special.get("effect")
-                        if effect_type == "bash_chance":
-                            chance = self.special.get("chance_percent", 0)
-                            if random.random() * 100 < chance:
-                                stun_duration = self.special.get("stun_duration", 0.1)
-                                if stun_duration > 0:
-                                    target.apply_status_effect('stun', stun_duration, True, current_time) 
+                        #print(f"DEBUG: Exception in projectile visual try block: {e}") # Added print
+                        pass # Fall through if visual fails
                     # --- Fallback to Normal Instant Attack Visual Effect --- 
                     visual_effect_name = self.tower_data.get("attack_visual_effect")
                     if visual_effect_name and visual_assets: # Check if name and assets exist
