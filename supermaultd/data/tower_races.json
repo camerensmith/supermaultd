@@ -2039,7 +2039,7 @@
           "special": {
               "effect": "bash_chance",
               "chance_percent": 25,
-              "stun_duration": 0.1,
+              "stun_duration": 0.5,
               "description": "Has a chance on hit to briefly stun the target."
           }
         },
@@ -2064,7 +2064,7 @@
           "special": {
             "effect": "bash_chance",
             "chance_percent": 25,
-            "stun_duration": 0.1,
+            "stun_duration": 0.5,
             "description": "Has a chance on hit to briefly stun the target."
         }
       },
@@ -2085,7 +2085,7 @@
         "targets": [],              
         "special": {
           "effect": "splash_radius_buff_aura",
-          "aura_radius": 500,          
+          "aura_radius": 1000,          
           "splash_radius_increase": 175, 
             "targets": [
               "towers"
@@ -2113,7 +2113,7 @@
           "special": {
             "effect": "bash_chance",
             "chance_percent": 25,
-            "stun_duration": 0.1,
+            "stun_duration": 0.5,
             "description": "Has a chance on hit to briefly stun the target."
         }
         },
@@ -2138,7 +2138,7 @@
           "special": {
             "effect": "bash_chance",
             "chance_percent": 25,
-            "stun_duration": 0.1,
+            "stun_duration": 0.5,
             "description": "Has a chance on hit to briefly stun the target."
         }
         },
@@ -2165,7 +2165,7 @@
             "aura_radius": 2000,
             "tick_interval": 0.1,
             "min_damage_at_edge": 1.0,
-            "max_damage_at_center": 25.0,
+            "max_damage_at_center": 20.0,
             "damage_type": "arcane",
             "targets": [
               "ground",
@@ -2439,7 +2439,7 @@
           "description": "The entropy trooper injects the void into every unfortunate soul they come across.",
           "grid_width": 1,
           "grid_height": 1,
-          "cost": 111,
+          "cost": 108,
           "damage_min": 128,
           "damage_max": 173,
           "damage_type": "normal",
@@ -2478,8 +2478,8 @@
           ],
           "special": {
             "effect": "max_hp_reduction_on_hit",
-            "reduction_percentage": 1, 
-            "description": "Each hit permanently reduces the target's maximum HP by 1%."
+            "reduction_percentage": 2, 
+            "description": "Each hit permanently reduces the target's maximum HP by 2%."
           }
         },
         "husk_void_horror": {
@@ -2671,7 +2671,7 @@
       }
     },
     "police_station": {
-      "description": "The Police.",
+      "description": "The Police. Their high powered semi automatic weapons pierce adjacent enemies.",
       "towers": {
         "police_wall": {
           "name": "Police Blockade",
@@ -2763,7 +2763,7 @@
           "damage_min": 410,
           "damage_max": 550,
           "damage_type": "chaos",
-          "range_min": 800,
+          "range_min": 100,
           "range": 2800,
           "attack_interval": 5.3,
           "pierce_adjacent": 2,
@@ -2786,7 +2786,7 @@
           "description": "The Police may rally around their HQ to hold the line from illicit activity.",
           "grid_width": 4,
           "grid_height": 4,
-          "cost": 300,
+          "cost": 255,
           "damage_min": 0,
           "damage_max": 0,
           "damage_type": "normal",
@@ -2878,7 +2878,7 @@
           "damage_min": 33,
           "damage_max": 66,
           "damage_type": "piercing",
-          "range": 1100,
+          "range": 1400,
           "attack_interval": 0.7,
           "projectile_speed": 1500,
           "attack_type": "projectile",
@@ -2948,7 +2948,7 @@
           "grid_width": 1,
           "grid_height": 2,
           "cost": 237,
-          "damage_min": 875,
+          "damage_min": 1250,
           "damage_max": 1250,
           "damage_type": "chaos",
           "range": 1800,

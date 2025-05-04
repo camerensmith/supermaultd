@@ -1006,7 +1006,7 @@ class GameScene:
                             pass
 
         # --- BEGIN Adjacency Buff Calculation --- 
-        hq_towers = [t for t in self.towers if t.tower_id == 'police_police_hq']
+        hq_towers = [t for t in self.towers if t.tower_id == 'police_hq']
         if hq_towers: # Only do checks if there's at least one HQ
             towers_already_buffed_by_hq = set() # Prevent double-buffing from multiple HQs
             
@@ -2554,9 +2554,111 @@ class GameScene:
                     buffed_stats = tower.get_buffed_stats(current_time, self.tower_buff_auras, self.towers)
                     calculated_dps = tower.get_current_dps(buffed_stats) # <<< CALL NEW DPS METHOD
 
-                    # Damage Multiplier
+                    # --- Damage Display --- 
+                    # <<< ADDED: Display Aura Name if Active >>>
+                    active_auras = buffed_stats.get('active_aura_names', set()) # Get the set, default empty
+                    if "Adjacency Damage Buff" in active_auras:
+                        buff_lines.append("  Adjacency Damage Buff")
+                    elif "Damage Aura" in active_auras: # Example if we add regular damage aura later
+                        buff_lines.append("  Damage Aura") 
+                    # <<< END ADDED >>>
+                    
+                    # Calculate and display Damage Multiplier Percentage
                     base_dmg_mult = 1.0
                     current_dmg_mult = buffed_stats.get('damage_multiplier', base_dmg_mult)
+                    if current_dmg_mult > base_dmg_mult:
+                        buff_lines.append(f"  Damage: +{((current_dmg_mult - base_dmg_mult) * 100):.1f}%")
+                    # --- End Damage Display --- 
+
+                    # --- Attack Speed Display --- 
+                    # Use getattr for base_attack_interval as it might not exist on all towers (e.g., walls)
+                    base_interval = getattr(tower, 'base_attack_interval', 0) 
+                    current_interval = buffed_stats.get('attack_interval', base_interval)
+                    
+                    # <<< ADDED: Display Aura Name if Active >>>
+                    active_auras = buffed_stats.get('active_aura_names', set()) # Get the set, default empty
+                    if "Attack Speed Aura" in active_auras:
+                        buff_lines.append("  Attack Speed Aura")
+                    # <<< ADDED: Swarm Power Check >>>
+                    if "Swarm Power" in active_auras:
+                        buff_lines.append("  Swarm Power")
+                    # <<< END ADDED >>>
+                    
+                    if base_interval is not None and current_interval is not None: # Check if intervals exist
+                        if base_interval > 0 and current_interval < base_interval:
+                            speed_increase_percent = ((base_interval / current_interval) - 1) * 100
+                            buff_lines.append(f"  Speed: +{speed_increase_percent:.1f}%")
+                        elif base_interval > 0 and current_interval > base_interval:
+                            # Avoid division by zero if current_interval is 0 (shouldn't happen, but safe)
+                            if current_interval > 0: 
+                                speed_decrease_percent = (1 - (base_interval / current_interval)) * 100
+                                buff_lines.append(f"  Speed: -{speed_decrease_percent:.1f}% (Slowed)")
+
+                    # Range (Attack Range)
+                    # Calculate base range pixels safely using getattr and default
+                    base_range_units = getattr(tower, 'range', 0) 
+                    base_range_pixels = base_range_units * (config.GRID_SIZE / 200.0) if base_range_units else 0
+                    current_range_pixels = buffed_stats.get('range_pixels', base_range_pixels)
+                    if current_range_pixels > base_range_pixels:
+                        buff_lines.append(f"  Range: +{(current_range_pixels - base_range_pixels):.0f}px")
+
+                    # Crit Chance
+                    base_crit_chance = getattr(tower, 'critical_chance', 0.0)
+                    current_crit_chance = buffed_stats.get('crit_chance', base_crit_chance)
+                    # Display if buffed OR if base is non-zero and it changed
+                    if current_crit_chance != base_crit_chance: 
+                         buff_lines.append(f"  Crit Chance: {current_crit_chance*100:.1f}%")
+
+                    # Crit Multiplier
+                    base_crit_mult = getattr(tower, 'critical_multiplier', 1.0)
+                    current_crit_mult = buffed_stats.get('crit_multiplier', base_crit_mult)
+                    if current_crit_mult != base_crit_mult:
+                         buff_lines.append(f"  Crit Damage: x{current_crit_mult:.2f}")
+                         
+                    # <<< ADDED: Splash Radius Check >>>
+                    base_splash_pixels = getattr(tower, 'splash_radius_pixels', 0) # Get base splash in pixels
+                    current_splash_pixels = buffed_stats.get('splash_radius_pixels', base_splash_pixels)
+                    if current_splash_pixels > base_splash_pixels:
+                        buff_lines.append(f"  Splash: +{(current_splash_pixels - base_splash_pixels):.0f}px")
+                    # <<< END ADDED >>>
+                         
+                    # --- ADDED: Specific State/Stacking Effect Checks ---
+                    # Reaper Mech Bonus
+                    if tower.tower_id == 'tac_reaper_mech' and hasattr(tower, 'kill_count') and tower.kill_count > 0:
+                        # Assuming reaper bonus is 0.25 per kill (could read from tower.special if needed)
+                        reaper_bonus = 0.25 * tower.kill_count
+                        # Optional: Add max cap display if defined
+                        # max_reaper_bonus = tower.special.get('total_damage', float('inf')) if tower.special else float('inf')
+                        # display_bonus = min(reaper_bonus, max_reaper_bonus)
+                        buff_lines.append(f"  Reaper Bonus: +{reaper_bonus:.2f} dmg")
+
+                    # Berserk Status
+                    if getattr(tower, 'is_berserk', False):
+                        # Optionally show remaining duration if available?
+                        # remaining_berserk = tower.berserk_end_time - current_time if hasattr(tower, 'berserk_end_time') else 0
+                        # buff_lines.append(f"  Berserk Active! ({remaining_berserk:.1f}s)") 
+                        buff_lines.append("  Berserk Active!")
+                        
+                    # Rampage Stacks (using handler)
+                    if hasattr(tower, 'rampage_handler') and tower.rampage_handler:
+                        current_stacks = tower.rampage_handler.get_current_stacks()
+                        if current_stacks > 0:
+                            bonus_damage = tower.rampage_handler.get_bonus_damage()
+                            max_stacks = getattr(tower.rampage_handler, 'max_stacks', '?') # Get max stacks from handler
+                            buff_lines.append(f"  Rampage: +{bonus_damage:.0f} dmg ({current_stacks}/{max_stacks} stacks)")
+                            
+                    # Add checks for other specific effects here...
+                    # e.g., if getattr(tower, 'some_other_flag', False): buff_lines.append("  Some Other Effect Active")
+                    # --- END Specific Checks ---
+                         
+                    # <<< ADDED: Display Aura Name if Active >>>
+                    active_auras = buffed_stats.get('active_aura_names', set()) # Get the set, default empty
+                    if "Adjacency Damage Buff" in active_auras:
+                        buff_lines.append("  Adjacency Damage Buff")
+                    elif "Damage Aura" in active_auras: # Example if we add regular damage aura later
+                        buff_lines.append("  Damage Aura") 
+                    # <<< END ADDED >>>
+                        
                     if current_dmg_mult > base_dmg_mult:
                         buff_lines.append(f"  Damage: +{((current_dmg_mult - base_dmg_mult) * 100):.1f}%")
 

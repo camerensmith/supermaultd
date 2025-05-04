@@ -335,7 +335,7 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "ice_demon": {
-        "health": 37000,
+        "health": 31000,
         "speed": 0.8,
         "value": 5, "armor_value": 9,
         "armor_type": "Magic_Resistant",
@@ -343,7 +343,7 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "black_bear": {
-        "health": 23300,
+        "health": 18300,
         "speed": 0.8,
         "value": 5,
         "armor_type": "Unarmored",
@@ -351,7 +351,7 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "orc": {
-        "health": 120000,
+        "health": 80000,
         "speed": 0.6,
         "value": 5,
         "armor_type": "Light",
@@ -359,7 +359,7 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "tusken_fighter": {
-        "health": 73000,
+        "health": 53000,
         "speed": 1.0,
         "value": 6,
         "armor_type": "Unarmored",
@@ -367,7 +367,7 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "spike_lizard": {
-        "health": 67875,
+        "health": 47875,
         "speed": 0.6,
         "value": 6,
         "armor_type": "Heavy",
@@ -375,7 +375,7 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "swamp_monster": {
-        "health": 95575,
+        "health": 75575,
         "speed": 1,
         "value": 6,
         "armor_type": "Medium",
@@ -383,7 +383,7 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "cave_troll": {
-        "health": 145000,
+        "health": 125000,
         "speed": 1,
         "value": 6,
         "armor_type": "Magic_Resistant",
@@ -391,7 +391,7 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "wendigo": {
-        "health": 200000,
+        "health": 155000,
         "speed": 0.6,
         "value": 6,
         "armor_type": "Unarmored",
@@ -399,16 +399,16 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "captain": {
-        "health": 88000,
-        "speed": 1,
+        "health": 81000,
+        "speed": 0.8,
         "value": 6,
         "armor_type": "Heavy",
         "armor_value": 50,
         "type": "ground"
     },
     "lord_supermaul": {
-        "health": 255000, # Boss
-        "speed": 1.0,
+        "health": 200000, # Boss
+        "speed": 0.7,
         "value": 250, # Big reward
         "armor_type": "Medium",
         "armor_value": 100,

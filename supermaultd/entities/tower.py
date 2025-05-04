@@ -666,6 +666,7 @@ class Tower:
                 elif effect_type == 'adjacency_damage_buff':
                     #print(f"DEBUG: Tower {self.tower_id} receiving adjacency damage buff: +{aura_special.get('damage_bonus_percentage', 0.0)}%") # Debug print
                     total_damage_bonus_percent += aura_special.get('damage_bonus_percentage', 0.0)
+                    active_aura_names.add("Adjacency Damage Buff") # <<< ADD NAME
                 # --- Add Adjacency Attack Speed Buff Check ---
                 elif effect_type == 'adjacency_attack_speed_buff':
                     #print(f"DEBUG: Tower {self.tower_id} receiving adjacency speed buff: +{aura_special.get('attack_speed_bonus_percentage', 0.0)}%") # Debug print
@@ -1547,6 +1548,7 @@ class Tower:
                     # Apply INSTANT special effects (DoT, Max HP Reduction, etc.)
                     self.apply_instant_special_effects(target, current_time) 
                     
+
                     # --- Try to Create Projectile-Style Visual First ---
                     try:
                         # Try to get projectile image using tower_id like projectiles do
@@ -1572,7 +1574,14 @@ class Tower:
                     except Exception as e:
                         pass
                         # Fall through to normal instant attack visual handling
-                    
+                        if not was_killed_by_first_hit and self.special: # Check if target survived initial hit(s)
+                            effect_type = self.special.get("effect")
+                        if effect_type == "bash_chance":
+                            chance = self.special.get("chance_percent", 0)
+                            if random.random() * 100 < chance:
+                                stun_duration = self.special.get("stun_duration", 0.1)
+                                if stun_duration > 0:
+                                    target.apply_status_effect('stun', stun_duration, True, current_time) 
                     # --- Fallback to Normal Instant Attack Visual Effect --- 
                     visual_effect_name = self.tower_data.get("attack_visual_effect")
                     if visual_effect_name and visual_assets: # Check if name and assets exist
@@ -2599,7 +2608,7 @@ class Tower:
                 damage_multiplier = 1.0 + (damage_bonus_percent / 100.0)
                 targets = self.special.get("targets", ["towers"])
                 
-                print(f"DEBUG: {self.tower_id} checking adjacency damage buff")
+                #print(f"DEBUG: {self.tower_id} checking adjacency damage buff")
                 
                 # Find adjacent towers
                 for tower in all_towers:
