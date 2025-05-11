@@ -317,6 +317,11 @@ class GameScene:
         self.tower_preview = None
         self.hovered_tower = None # Track which tower mouse is over
         
+        # Drag state tracking
+        self.is_dragging = False
+        self.drag_start_pos = None
+        self.drag_preview_positions = []
+        
         # --- Layout Calculations (Use screen_width, screen_height) --- 
         # Panel dimensions based on percentage
         self.panel_pixel_width = int(self.screen_width * config.UI_PANEL_WIDTH_PERCENT)
@@ -553,169 +558,175 @@ class GameScene:
         """Handle pygame events"""
         # --- Check Game State First ---
         if self.game_state == GAME_STATE_GAME_OVER:
-            # Only allow specific events in game over state (e.g., quitting)
             if event.type == pygame.QUIT:
-                self.game.running = False # Or call a quit method
+                self.game.running = False
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE: # Example: ESC to go back to menu
+                if event.key == pygame.K_ESCAPE:
                     print("Game Over - ESC pressed. Returning to menu (TODO)")
-                    # self.game.change_scene('main_menu') # Placeholder for scene change
-            # Ignore other events during game over
             return
-        # --- End Game State Check ---
 
-        # --- DEBUG: Print all events --- 
-        # print(f"Event received: {event}") 
-        # Uncomment the above line temporarily if needed to see ALL events
-        # --- END DEBUG --- 
-        
         # Handle UI events first
         self.tower_selector.handle_event(event)
         
-        # --- Handle Toggle Button Click --- 
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if event.button == 1: # Left click
-                # Check if the click was on the toggle button
-                if self.toggle_button_rect and self.toggle_button_rect.collidepoint(event.pos):
-                    self.debug_toggle_state = not self.debug_toggle_state
-                    # <<< MODIFIED LINE >>>
-                    self.debug_menu_open = self.debug_toggle_state # Link menu visibility to toggle state
-                    #print(f"[DEBUG] Toggle button clicked! New state: {self.debug_toggle_state}, Menu Open: {self.debug_menu_open}")
-                    # Prevent other MOUSEBUTTONDOWN handlers from processing this click
-                    return # Early exit after handling the toggle click
-        # --- End Handle Toggle Button Click ---
-
+        # Handle Toggle Button Click
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # Left click
-                # Convert mouse position to grid coordinates
-                mouse_x, mouse_y = event.pos
-                # Need to account for the grid's offset from screen origin
-                grid_offset_x = config.UI_PANEL_PADDING
-                grid_offset_y = config.UI_PANEL_PADDING
-                if (grid_offset_x <= mouse_x < grid_offset_x + self.usable_grid_pixel_width and
-                    grid_offset_y <= mouse_y < grid_offset_y + self.usable_grid_pixel_height):
-                    # Calculate grid coordinates relative to the grid's top-left
-                    grid_x = (mouse_x - grid_offset_x) // config.GRID_SIZE
-                    grid_y = (mouse_y - grid_offset_y) // config.GRID_SIZE
-                    #print(f"Left-clicked grid position: ({grid_x}, {grid_y})")
-                    # self.handle_tower_placement(grid_x, grid_y) # REMOVED from MOUSEBUTTONDOWN
+                if self.toggle_button_rect and self.toggle_button_rect.collidepoint(event.pos):
+                    self.debug_toggle_state = not self.debug_toggle_state
+                    self.debug_menu_open = self.debug_toggle_state
+                    return
                 
-            elif event.button == 3: # Right click
+                # Start drag if a tower is selected
+                selected_tower_id = self.tower_selector.get_selected_tower()
+                if selected_tower_id:
+                    mouse_x, mouse_y = event.pos
+                    grid_offset_x = config.UI_PANEL_PADDING
+                    grid_offset_y = config.UI_PANEL_PADDING
+                    if (grid_offset_x <= mouse_x < grid_offset_x + self.usable_grid_pixel_width and
+                        grid_offset_y <= mouse_y < grid_offset_y + self.usable_grid_pixel_height):
+                        grid_x = (mouse_x - grid_offset_x) // config.GRID_SIZE
+                        grid_y = (mouse_y - grid_offset_y) // config.GRID_SIZE
+                        self.is_dragging = True
+                        self.drag_start_pos = (grid_x, grid_y)
+                        self.drag_preview_positions = [(grid_x, grid_y)]
+                
+            elif event.button == 3:  # Right click
                 mouse_x, mouse_y = event.pos
-                # Account for grid offset
                 grid_offset_x = config.UI_PANEL_PADDING
                 grid_offset_y = config.UI_PANEL_PADDING
                 if (grid_offset_x <= mouse_x < grid_offset_x + self.usable_grid_pixel_width and
                     grid_offset_y <= mouse_y < grid_offset_y + self.usable_grid_pixel_height):
-                    # Calculate grid coordinates relative to the grid's top-left
                     grid_x = (mouse_x - grid_offset_x) // config.GRID_SIZE
                     grid_y = (mouse_y - grid_offset_y) // config.GRID_SIZE
                     
-                    # --- Check if a tower exists at the clicked location ---
                     tower_at_location = None
                     for tower in self.towers:
                         if (tower.top_left_grid_x <= grid_x < tower.top_left_grid_x + tower.grid_width and
                             tower.top_left_grid_y <= grid_y < tower.top_left_grid_y + tower.grid_height):
                             tower_at_location = tower
-                            break # Found the tower
+                            break
 
-                    # --- Check if currently previewing a tower ---
                     is_previewing = self.tower_selector.get_selected_tower() is not None
                     
-                    # --- Decide action based on findings ---
                     if tower_at_location:
-                        # Existing behavior: Tower exists, try to sell it
-                        #print(f"Right-clicked grid position: ({grid_x}, {grid_y}) - Found Tower {tower_at_location.tower_id}. Attempting sell.")
                         self.sell_tower_at(grid_x, grid_y)
                     elif is_previewing:
-                        # New behavior: No tower here, but we are previewing, so cancel preview
-                        #print(f"Right-clicked empty grid position: ({grid_x}, {grid_y}) while previewing. Cancelling placement.")
-                        self.tower_selector.clear_selection() # <<< CALL CLEAR SELECTION
+                        self.tower_selector.clear_selection()
                         self.selected_tower = None 
                         self.tower_preview = None
-                        # Play cancel sound
                         if self.cancel_sound:
                             self.cancel_sound.play()
-                    else:
-                        pass
-                        # No tower here, and not previewing anything. Do nothing.
-                        #print(f"Right-clicked empty grid position: ({grid_x}, {grid_y}) - Not previewing. Doing nothing.")
+                
+        elif event.type == pygame.MOUSEMOTION:
+            if self.is_dragging and self.drag_start_pos:
+                mouse_x, mouse_y = event.pos
+                grid_offset_x = config.UI_PANEL_PADDING
+                grid_offset_y = config.UI_PANEL_PADDING
+                if (grid_offset_x <= mouse_x < grid_offset_x + self.usable_grid_pixel_width and
+                    grid_offset_y <= mouse_y < grid_offset_y + self.usable_grid_pixel_height):
+                    current_grid_x = (mouse_x - grid_offset_x) // config.GRID_SIZE
+                    current_grid_y = (mouse_y - grid_offset_y) // config.GRID_SIZE
+                    
+                    start_x, start_y = self.drag_start_pos
+                    positions = []
+                    
+                    # Determine direction of drag
+                    dx = current_grid_x - start_x
+                    dy = current_grid_y - start_y
+                    
+                    # Calculate step direction (ensure non-zero)
+                    step_x = 1 if dx > 0 else -1 if dx < 0 else 1
+                    step_y = 1 if dy > 0 else -1 if dy < 0 else 1
+                    
+                    # Generate positions along the drag path
+                    if abs(dx) > abs(dy):  # Horizontal drag
+                        for x in range(start_x, current_grid_x + step_x, step_x):
+                            positions.append((x, start_y))
+                    else:  # Vertical drag
+                        for y in range(start_y, current_grid_y + step_y, step_y):
+                            positions.append((start_x, y))
+                    
+                    selected_tower_id = self.tower_selector.get_selected_tower()
+                    if selected_tower_id:
+                        tower_data = self.available_towers.get(selected_tower_id)
+                        if tower_data:
+                            cost = tower_data.get('cost', 0)
+                            grid_width = tower_data.get('grid_width', 1)
+                            grid_height = tower_data.get('grid_height', 1)
+                            
+                            max_towers = self.money // cost
+                            
+                            valid_positions = []
+                            for pos in positions:
+                                if len(valid_positions) >= max_towers:
+                                    break
+                                if self.is_valid_tower_placement(pos[0], pos[1], grid_width, grid_height):
+                                    valid_positions.append(pos)
+                            
+                            self.drag_preview_positions = valid_positions
                 
         elif event.type == pygame.MOUSEBUTTONUP:
-            if event.button == 1: # Left mouse button release
-                # Check if a tower was selected when the button was released
-                selected_tower_id = self.tower_selector.get_selected_tower()
-                if selected_tower_id:
-                    mouse_x, mouse_y = event.pos
-                    # Account for grid offset
-                    grid_offset_x = config.UI_PANEL_PADDING
-                    grid_offset_y = config.UI_PANEL_PADDING
-                    if (grid_offset_x <= mouse_x < grid_offset_x + self.usable_grid_pixel_width and
-                        grid_offset_y <= mouse_y < grid_offset_y + self.usable_grid_pixel_height):
-                        # Calculate grid coordinates relative to the grid's top-left
-                        grid_x = (mouse_x - grid_offset_x) // config.GRID_SIZE
-                        grid_y = (mouse_y - grid_offset_y) // config.GRID_SIZE
-                        #print(f"Left-button released at grid position: ({grid_x}, {grid_y})")
-                        self.handle_tower_placement(grid_x, grid_y) # Place tower on release
-                    # else: # Optional: If released outside grid, cancel placement
-                        # self.tower_selector.clear_selection()
-                        # self.selected_tower = None
-                        # self.tower_preview = None
+            if event.button == 1:  # Left mouse button release
+                if self.is_dragging:
+                    selected_tower_id = self.tower_selector.get_selected_tower()
+                    if selected_tower_id and self.drag_preview_positions:
+                        tower_data = self.available_towers.get(selected_tower_id)
+                        if tower_data:
+                            cost = tower_data.get('cost', 0)
+                            total_cost = cost * len(self.drag_preview_positions)
+                            
+                            if self.money >= total_cost:
+                                for pos in self.drag_preview_positions:
+                                    self.handle_tower_placement(pos[0], pos[1], is_drag_placement=True)
+                                if self.placement_sound:
+                                    self.placement_sound.play()
+                            else:
+                                if self.invalid_placement_sound:
+                                    self.invalid_placement_sound.play()
+                    
+                    # Reset drag state
+                    self.is_dragging = False
+                    self.drag_start_pos = None
+                    self.drag_preview_positions = []
+                    
+                    # Clear selection after all towers are placed
+                    self.tower_selector.clear_selection()
+                    self.selected_tower = None
+                    self.tower_preview = None
                 
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                self.tower_selector.clear_selection() # <<< CALL CLEAR SELECTION
+                self.tower_selector.clear_selection()
                 self.selected_tower = None
                 self.tower_preview = None
-            elif event.key == pygame.K_g: # G for Gnoll
+            elif event.key == pygame.K_g:
                 self.spawn_test_enemy("gnoll")
-                #print("Spawned Gnoll (press 'G')")
-            elif event.key == pygame.K_s: # S for Spectre
+            elif event.key == pygame.K_s:
                 self.spawn_test_enemy("quillpig")
-                #print("Spawned Quillpig (press 'S')")
-            elif event.key == pygame.K_t: # T for Soldier (replacing generic test)
+            elif event.key == pygame.K_t:
                 self.spawn_test_enemy("soldier")
-                #print("Spawned Soldier (press 'T')")
-            elif event.key == pygame.K_1: # 1 for Dust Mite
+            elif event.key == pygame.K_1:
                 self.spawn_test_enemy("lord_supermaul")
-                #print("Spawned Lord Supermaul (press '1')")
-            elif event.key == pygame.K_2: # 2 for Doom Lord
+            elif event.key == pygame.K_2:
                 self.spawn_test_enemy("doomlord")
-                #print("Spawned Doom Lord (press '2')")
-            elif event.key == pygame.K_3: # 3 for pixie
+            elif event.key == pygame.K_3:
                 self.spawn_test_enemy("dragon_whelp")
-                #print("Spawned Dragon Whelp (press '3')")
-            elif event.key == pygame.K_4: # 4 for bloodfist ogre
+            elif event.key == pygame.K_4:
                 self.spawn_test_enemy("bloodfist_ogre")
-                #print("Spawned Bloodfist Ogre (press '4')")
-            elif event.key == pygame.K_5: # 5 for cyborg
+            elif event.key == pygame.K_5:
                 self.spawn_test_enemy("village_peasant")
-                #print("Spawned Village Peasant (press '5')")
-            elif event.key == pygame.K_RETURN: # ENTER key press
-                #print("DEBUG: ENTER key pressed.")
+            elif event.key == pygame.K_RETURN:
                 if self.wave_state == WAVE_STATE_IDLE and not self.wave_started:
-                    #print("Starting Wave System...")
-                    self.wave_started = True # Set flag
-                    # Find the first wave (index 0)
-                    if self.all_wave_data: # Check if waves are loaded
+                    self.wave_started = True
+                    if self.all_wave_data:
                         self.current_wave_index = 0
                         first_wave_data = self.all_wave_data[0]
-                        self.wave_timer = first_wave_data.get('delay_before_wave', 5.0) # Use delay from JSON
+                        self.wave_timer = first_wave_data.get('delay_before_wave', 5.0)
                         self.wave_state = WAVE_STATE_WAITING
-                        #print(f"Transitioning to WAITING_DELAY. Timer set to: {self.wave_timer}")
                     else:
-                        #print("ERROR: No wave data loaded. Cannot start waves.")
-                        self.wave_state = WAVE_STATE_IDLE # Remain idle
-                else:
-                    #print(f"Cannot start wave. Current state: {self.wave_state}, Started: {self.wave_started}")
-                    pass
-                
-        # --- Handle Music End Event --- 
-        # REMOVED Block: elif event.type == MUSIC_END_EVENT:
-        # ... (all logic inside removed)
-        # --- END Music End Event --- 
-                    
-        # --- Tower Hover Detection --- 
+                        self.wave_state = WAVE_STATE_IDLE
+
+        # Tower Hover Detection
         mouse_x, mouse_y = pygame.mouse.get_pos()
         grid_offset_x = config.UI_PANEL_PADDING
         grid_offset_y = config.UI_PANEL_PADDING
@@ -723,28 +734,22 @@ class GameScene:
         relative_mouse_y = mouse_y - grid_offset_y
         
         found_hover = None
-        # Check only if mouse is within the grid area pixels
         if (grid_offset_x <= mouse_x < grid_offset_x + self.usable_grid_pixel_width and
             grid_offset_y <= mouse_y < grid_offset_y + self.usable_grid_pixel_height):
-            # Convert relative mouse pixel coords to grid coords for rough check
             hover_grid_x = relative_mouse_x // config.GRID_SIZE
             hover_grid_y = relative_mouse_y // config.GRID_SIZE
             
-            # Check against placed towers
             for tower in self.towers:
-                # Check if the hover grid coord falls within the tower's footprint
                 if (tower.top_left_grid_x <= hover_grid_x < tower.top_left_grid_x + tower.grid_width and
                     tower.top_left_grid_y <= hover_grid_y < tower.top_left_grid_y + tower.grid_height):
                     found_hover = tower
-                    break # Found the tower under the cursor
+                    break
                     
-        self.hovered_tower = found_hover # Update the hovered tower (or set to None)
-        # --- End Tower Hover Detection --- 
+        self.hovered_tower = found_hover
 
-        # Update tower preview position (snap to grid based on mouse)
-        if self.tower_selector.get_selected_tower():
+        # Update tower preview position
+        if not self.is_dragging and self.tower_selector.get_selected_tower():
             mouse_x, mouse_y = pygame.mouse.get_pos()
-            # Account for grid offset when calculating snapped position
             grid_offset_x = config.UI_PANEL_PADDING
             grid_offset_y = config.UI_PANEL_PADDING
             relative_mouse_x = mouse_x - grid_offset_x
@@ -753,15 +758,14 @@ class GameScene:
             grid_x = relative_mouse_x // config.GRID_SIZE
             grid_y = relative_mouse_y // config.GRID_SIZE
             
-            # Check if the calculated grid coordinates are within the grid bounds
             if 0 <= grid_x < self.grid_width and 0 <= grid_y < self.grid_height:
                 self.tower_preview = (grid_x, grid_y)
             else:
                 self.tower_preview = None
-        else:
-             self.tower_preview = None # Ensure preview is cleared if no tower selected
-                
-    def handle_tower_placement(self, grid_x, grid_y):
+        elif not self.is_dragging:
+            self.tower_preview = None
+
+    def handle_tower_placement(self, grid_x, grid_y, is_drag_placement=False):
         """Handle tower placement on the grid, considering tower size."""
         selected_tower_id = self.tower_selector.get_selected_tower()
         if not selected_tower_id:
@@ -779,38 +783,31 @@ class GameScene:
         # Use the comprehensive validation method which includes pathfinding
         is_valid = self.is_valid_tower_placement(grid_x, grid_y, grid_width, grid_height)
         if not is_valid:
-            #print("Invalid tower placement location.") # is_valid prints specific reason
-            pass
             if self.invalid_placement_sound:
                 self.invalid_placement_sound.play()
             return
 
         # Check if player has enough money (separate from positional validation)
         if self.money < tower_data['cost']:
-            #print("Not enough money!")
-            pass
+            return
 
         # --- Placement ---
         # Calculate footprint again (needed for marking the grid)
         offset_x = (grid_width - 1) // 2
         offset_y = (grid_height - 1) // 2
         new_start_x = grid_x - offset_x
-        new_end_x = new_start_x + grid_width - 1 # Corrected calculation
+        new_end_x = new_start_x + grid_width - 1
         new_start_y = grid_y - offset_y
-        new_end_y = new_start_y + grid_height - 1 # Corrected calculation
+        new_end_y = new_start_y + grid_height - 1
 
         # Check if tower is traversable
         is_traversable = tower_data.get('traversable', False)
-        #print(f"DEBUG PLACEMENT: Tower {selected_tower_id} is_traversable = {is_traversable}") # DEBUG
 
         # Mark occupied grid cells ONLY if not traversable
         if not is_traversable:
-            # --- CORRECTED FOOTPRINT CALCULATION for grid marking ---
             # Calculate the true top-left corner based on center and dimensions
             actual_top_left_x = grid_x - (grid_width - 1) // 2
             actual_top_left_y = grid_y - (grid_height - 1) // 2
-            #print(f"  DEBUG PLACEMENT: Calculated Top-Left ({actual_top_left_x},{actual_top_left_y}). Width={grid_width}, Height={grid_height}") # DEBUG
-            # --------------------------------------------------------
             
             # Loop from the calculated top-left for the full width/height
             for y_offset in range(grid_height):
@@ -819,61 +816,18 @@ class GameScene:
                     mark_y = actual_top_left_y + y_offset
                     # Check bounds within loop for safety
                     if 0 <= mark_y < self.grid_height and 0 <= mark_x < self.grid_width:
-                        #print(f"    DEBUG PLACEMENT: Marking grid cell ({mark_x},{mark_y}) = 1") # DEBUG
                         self.grid[mark_y][mark_x] = 1 # Mark as obstacle
-                    else:
-                        #print(f"    DEBUG PLACEMENT: SKIPPING grid cell ({mark_x},{mark_y}) - out of bounds") # DEBUG
-                        pass
-            # print(f"Marked grid for non-traversable tower at ({grid_x}, {grid_y})") # Old Print
-        else:
-            #print(f"Skipping grid mark for traversable tower at ({grid_x}, {grid_y})")
-            pass
 
         # Create and place the tower (using center grid coordinates)
         from entities.tower import Tower
-        # Log data just before creating the tower
-        # print(f"DEBUG Handle Placement: id='{selected_tower_id}', data_used={tower_data}")
         tower = Tower(grid_x, grid_y, selected_tower_id, tower_data)
         self.towers.append(tower)
         
-        # --- Create Status Visualizers --- <<< ADDED BLOCK
-        if tower.special and tower.special.get("effect") == "berserk_trigger":
-            #print(f"Creating StatusEffectVisualizer for berserk on {tower.tower_id}")
-            berserk_viz = StatusEffectVisualizer(tower, effect_type='berserk', color=(255, 0, 0, 80)) # Semi-transparent red
-            self.status_visualizers.append(berserk_viz)
-        # Add checks for other effects here if needed
-        # elif tower.special and tower.special.get("effect") == "some_other_trigger":
-        #     other_viz = StatusEffectVisualizer(tower, effect_type='some_other', color=(...))
-        #     self.status_visualizers.append(other_viz)
-        # --- End Status Visualizers --- 
-        
-        # Play placement sound
-        if self.placement_sound:
-            self.placement_sound.play()
-            
-        # --- Spawn Orbiting Damagers if applicable --- 
-        if tower.special and tower.special.get("effect") == "orbiting_damager":
-            orb_count = tower.special.get("orb_count", 1)
-            orb_data = tower.special # Pass the whole special dict as orb_data
-            angle_step = 360.0 / orb_count if orb_count > 0 else 0
-            
-            print(f"Spawning {orb_count} orbiting damagers for {tower.tower_id}")
-            for i in range(orb_count):
-                start_angle = i * angle_step
-                # Create orbiter and associate it with the tower
-                new_orbiter = OrbitingDamager(tower, orb_data, start_angle_offset=start_angle)
-                tower.orbiters.append(new_orbiter) # Add to the tower's list
-        # --- End Orbiter Spawning ---
-        
-        self.money -= tower_data['cost']
-        print(f"Placed tower {selected_tower_id} (size {grid_width}x{grid_height}) at center ({grid_x}, {grid_y})")
-
-        # Update money display
-        self.tower_selector.update_money(self.money)
+        # Deduct money
+        self.deduct_money(tower_data['cost'])
 
         # Recalculate paths for all existing enemies ONLY if the placed tower is NOT traversable
         if not is_traversable:
-            print(f"  DEBUG PLACEMENT: Recalculating enemy paths because {selected_tower_id} is not traversable.") # DEBUG
             for enemy in self.enemies[:]:  # Use slice copy
                 # Get enemy's current grid position
                 current_grid_x = int(enemy.x // config.GRID_SIZE)
@@ -882,32 +836,25 @@ class GameScene:
                 # Find new path from current position to objective
                 new_path = find_path(current_grid_x, current_grid_y, 
                                    self.path_end_x, self.path_end_y, 
-                                   self.grid) # Use updated grid
+                                   self.grid)
                 
                 if new_path:
                     # Update enemy's path
                     enemy.grid_path = new_path
                     enemy.path_index = 0  # Reset path index
-                    #print(f"Updated path for enemy after non-traversable tower placement.")
-                    pass
                 else:
                     # If no path found, remove the enemy (it's trapped)
-                    #print(f"Warning: No path found for enemy after non-traversable tower placement. Removing enemy.")
                     self.enemies.remove(enemy)
-        else:
-            #print("Skipping path recalculation for traversable tower placement.")
-            #print(f"  DEBUG PLACEMENT: Skipping enemy path recalculation because {selected_tower_id} is traversable.") # DEBUG
-            pass
 
-        # Clear selection
-        self.tower_selector.clear_selection()
-        self.selected_tower = None
-        self.tower_preview = None
+        # Only clear selection if this is not part of a drag placement
+        if not is_drag_placement:
+            self.tower_selector.clear_selection()
+            self.selected_tower = None
+            self.tower_preview = None
         
-        # --- Update Tower Links After Placement --- 
+        # Update Tower Links After Placement
         self.update_tower_links()
-        # --- End Link Update --- 
-            
+
     def update(self, time_delta):
         """Update game state"""
         # --- Game State Check ---        
@@ -2136,7 +2083,7 @@ class GameScene:
                     if self.enemies_alive_this_wave > 0: self.enemies_alive_this_wave -= 1 
             
     def draw(self, screen, time_delta, current_time):
-        """Draw the game scene with new layout"""
+        """Draw the game scene"""
         # Fill background - Cover the whole screen first
         screen.fill((0, 0, 0)) # Black background
         
@@ -2395,7 +2342,73 @@ class GameScene:
                 # --- End Apply Damage & Effects --- 
 
         # Draw Tower Previews (Hover and Placement)
-        if self.tower_preview:
+        if self.is_dragging and self.drag_preview_positions:
+            selected_tower_id = self.tower_selector.get_selected_tower()
+            if selected_tower_id:
+                tower_data = self.available_towers.get(selected_tower_id)
+                if tower_data:
+                    grid_width = tower_data.get('grid_width', 1)
+                    grid_height = tower_data.get('grid_height', 1)
+                    
+                    # Draw preview for each valid position
+                    for grid_x, grid_y in self.drag_preview_positions:
+                        is_valid_placement = self.is_valid_tower_placement(grid_x, grid_y, grid_width, grid_height)
+                        
+                        # Calculate preview position
+                        offset_x = (grid_width - 1) // 2
+                        offset_y = (grid_height - 1) // 2
+                        start_x = grid_x - offset_x
+                        start_y = grid_y - offset_y
+                        
+                        # Convert to pixel coordinates
+                        tower_left = (start_x * config.GRID_SIZE) + config.UI_PANEL_PADDING
+                        tower_top = (start_y * config.GRID_SIZE) + config.UI_PANEL_PADDING
+                        
+                        # Calculate the absolute center point in pixels
+                        tower_pixel_width = grid_width * config.GRID_SIZE
+                        tower_pixel_height = grid_height * config.GRID_SIZE
+                        center_pixel_x = tower_left + (tower_pixel_width // 2)
+                        center_pixel_y = tower_top + (tower_pixel_height // 2)
+                        
+                        # Calculate preview position so cursor is at true center
+                        preview_pixel_x = center_pixel_x - (tower_pixel_width // 2)
+                        preview_pixel_y = center_pixel_y - (tower_pixel_height // 2)
+                        
+                        # Draw tower preview
+                        self.tower_assets.draw_tower(screen, selected_tower_id,
+                                                  preview_pixel_x, preview_pixel_y,
+                                                  is_preview=True)
+                        
+                        # Draw cell outlines
+                        indicator_color = config.GREEN if is_valid_placement else config.RED
+                        for y_offset in range(grid_height):
+                            for x_offset in range(grid_width):
+                                cell_x = start_x + x_offset
+                                cell_y = start_y + y_offset
+                                if 0 <= cell_x < self.grid_width and 0 <= cell_y < self.grid_height:
+                                    cell_rect = pygame.Rect(
+                                        (cell_x * config.GRID_SIZE) + config.UI_PANEL_PADDING, 
+                                        (cell_y * config.GRID_SIZE) + config.UI_PANEL_PADDING, 
+                                        config.GRID_SIZE, 
+                                        config.GRID_SIZE
+                                    )
+                                    pygame.draw.rect(screen, indicator_color, cell_rect, 2)
+                        
+                        # Draw range preview if applicable
+                        if tower_data.get('attack_type') != 'aura':
+                            range_units = tower_data.get('range', 0)
+                            if range_units > 0:
+                                range_pixels = int(range_units * (config.GRID_SIZE / 200.0))
+                                range_color = (0, 255, 0, 100)  # Green, semi-transparent
+                                pygame.draw.circle(screen, range_color, (int(center_pixel_x), int(center_pixel_y)), range_pixels, 2)
+                                
+                                # Draw min range if applicable
+                                min_range_units = tower_data.get('range_min', 0)
+                                if min_range_units > 0:
+                                    min_range_pixels = int(min_range_units * (config.GRID_SIZE / 200.0))
+                                    min_range_color = (255, 100, 0, 100)  # Orange, semi-transparent
+                                    pygame.draw.circle(screen, min_range_color, (int(center_pixel_x), int(center_pixel_y)), min_range_pixels, 2)
+        elif self.tower_preview:
             grid_x, grid_y = self.tower_preview
             selected_tower_id = self.tower_selector.get_selected_tower()
             if selected_tower_id:

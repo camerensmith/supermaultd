@@ -160,7 +160,7 @@ class Tower:
         if self.special and 'aura_radius' in self.special:
             aura_units = self.special.get('aura_radius', 0)
         self.aura_radius_pixels = aura_units * (GRID_SIZE / 200.0)
-        print(f"DEBUG: {self.tower_id} aura radius set to {self.aura_radius_pixels} pixels")
+        #print(f"DEBUG: {self.tower_id} aura radius set to {self.aura_radius_pixels} pixels")
         
         # Initialize unique ability if tower has one
         self.unique_ability = None
