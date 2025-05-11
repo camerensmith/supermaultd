@@ -306,6 +306,7 @@ class GameScene:
         self.enemies_alive_this_wave = 0 # Track enemies spawned in current wave
         self.wave_started = False # Flag to prevent restarting wave 0
         self.game_state = GAME_STATE_RUNNING # Initial game state
+        self.is_paused = False
         # -------------------------
         
         # Tower Chain Link Update Timer -- REMOVED
@@ -565,6 +566,24 @@ class GameScene:
                     print("Game Over - ESC pressed. Returning to menu (TODO)")
             return
 
+        # Handle pause toggle
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                self.is_paused = not self.is_paused
+                # Clear any ongoing interactions when pausing
+                if self.is_paused:
+                    self.is_dragging = False
+                    self.drag_start_pos = None
+                    self.drag_preview_positions = []
+                    self.tower_selector.clear_selection()
+                    self.selected_tower = None
+                    self.tower_preview = None
+                return
+
+        # Block all game interactions if paused
+        if self.is_paused:
+            return
+
         # Handle UI events first
         self.tower_selector.handle_event(event)
         
@@ -630,15 +649,12 @@ class GameScene:
                     start_x, start_y = self.drag_start_pos
                     positions = []
                     
-                    # Determine direction of drag
                     dx = current_grid_x - start_x
                     dy = current_grid_y - start_y
                     
-                    # Calculate step direction (ensure non-zero)
                     step_x = 1 if dx > 0 else -1 if dx < 0 else 1
                     step_y = 1 if dy > 0 else -1 if dy < 0 else 1
                     
-                    # Generate positions along the drag path
                     if abs(dx) > abs(dy):  # Horizontal drag
                         for x in range(start_x, current_grid_x + step_x, step_x):
                             positions.append((x, start_y))
@@ -684,12 +700,10 @@ class GameScene:
                                 if self.invalid_placement_sound:
                                     self.invalid_placement_sound.play()
                     
-                    # Reset drag state
                     self.is_dragging = False
                     self.drag_start_pos = None
                     self.drag_preview_positions = []
                     
-                    # Clear selection after all towers are placed
                     self.tower_selector.clear_selection()
                     self.selected_tower = None
                     self.tower_preview = None
@@ -857,6 +871,10 @@ class GameScene:
 
     def update(self, time_delta):
         """Update game state"""
+        # Skip updates if paused
+        if self.is_paused:
+            return
+
         # --- Game State Check ---        
         # <<< MODIFIED: Check for running state >>>
         if self.game_state != GAME_STATE_RUNNING:
@@ -2974,6 +2992,19 @@ class GameScene:
         for viz in self.status_visualizers:
             viz.draw(screen, grid_offset_x, grid_offset_y)
         # --- End Draw Status Visualizers ---
+
+        # Draw pause overlay if paused
+        if self.is_paused:
+            # Create semi-transparent overlay
+            overlay = pygame.Surface((self.screen_width, self.screen_height), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 128))  # Black with 50% opacity
+            screen.blit(overlay, (0, 0))
+
+            # Draw "PAUSED" text
+            font = pygame.font.Font(None, 72)  # Use default font, size 72
+            text = font.render("PAUSED", True, (255, 255, 255))  # White text
+            text_rect = text.get_rect(center=(self.screen_width // 2, self.screen_height // 2))
+            screen.blit(text, text_rect)
 
     def draw_ui(self, screen):
         """Draw UI elements"""
