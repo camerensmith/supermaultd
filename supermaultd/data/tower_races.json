@@ -2039,7 +2039,7 @@
           "special": {
               "effect": "bash_chance",
               "chance_percent": 25,
-              "stun_duration": 0.5,
+              "stun_duration": 0.25,
               "description": "Has a chance on hit to briefly stun the target."
           }
         },
@@ -2064,7 +2064,7 @@
           "special": {
             "effect": "bash_chance",
             "chance_percent": 25,
-            "stun_duration": 0.5,
+            "stun_duration": 0.25,
             "description": "Has a chance on hit to briefly stun the target."
         }
       },
@@ -2113,7 +2113,7 @@
           "special": {
             "effect": "bash_chance",
             "chance_percent": 25,
-            "stun_duration": 0.5,
+            "stun_duration": 0.25,
             "description": "Has a chance on hit to briefly stun the target."
         }
         },
@@ -2138,7 +2138,7 @@
           "special": {
             "effect": "bash_chance",
             "chance_percent": 25,
-            "stun_duration": 0.5,
+            "stun_duration": 0.25,
             "description": "Has a chance on hit to briefly stun the target."
         }
         },
@@ -3174,7 +3174,7 @@
       }
     },
     "heaven": {
-      "description": "Angelic defenders whose attacks always ignore a percentage ofenemy armor.",
+      "description": "Angelic defenders whose attacks always ignore a percentage of enemy armor.",
       "towers": {
         "heaven_wall": {
           "name": "Angelic Wall",

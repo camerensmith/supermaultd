@@ -649,26 +649,26 @@ class GameScene:
                     start_x, start_y = self.drag_start_pos
                     positions = []
                     
-                    dx = current_grid_x - start_x
-                    dy = current_grid_y - start_y
-                    
-                    step_x = 1 if dx > 0 else -1 if dx < 0 else 1
-                    step_y = 1 if dy > 0 else -1 if dy < 0 else 1
-                    
-                    if abs(dx) > abs(dy):  # Horizontal drag
-                        for x in range(start_x, current_grid_x + step_x, step_x):
-                            positions.append((x, start_y))
-                    else:  # Vertical drag
-                        for y in range(start_y, current_grid_y + step_y, step_y):
-                            positions.append((start_x, y))
-                    
                     selected_tower_id = self.tower_selector.get_selected_tower()
                     if selected_tower_id:
                         tower_data = self.available_towers.get(selected_tower_id)
                         if tower_data:
-                            cost = tower_data.get('cost', 0)
                             grid_width = tower_data.get('grid_width', 1)
                             grid_height = tower_data.get('grid_height', 1)
+                            cost = tower_data.get('cost', 0)
+                            
+                            dx = current_grid_x - start_x
+                            dy = current_grid_y - start_y
+                            
+                            # Adjust spacing based on tower size
+                            if abs(dx) > abs(dy):  # Horizontal drag
+                                step_x = grid_width if dx > 0 else -grid_width
+                                for x in range(start_x, current_grid_x + (1 if dx > 0 else -1), step_x):
+                                    positions.append((x, start_y))
+                            else:  # Vertical drag
+                                step_y = grid_height if dy > 0 else -grid_height
+                                for y in range(start_y, current_grid_y + (1 if dy > 0 else -1), step_y):
+                                    positions.append((start_x, y))
                             
                             max_towers = self.money // cost
                             
