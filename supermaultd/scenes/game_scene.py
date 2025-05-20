@@ -3329,6 +3329,51 @@ class GameScene:
     def process_attack_results(self, attack_results, grid_offset_x, grid_offset_y):
         """Helper function to process the results dictionary from standard tower attacks."""
         if isinstance(attack_results, dict):
+            # Handle self-destruct action
+            if attack_results.get('action') == 'self_destruct':
+                tower = attack_results.get('tower_instance')
+                if tower:
+                    # Play destruct sound if available
+                    if hasattr(self, 'goblin_destruct_sound') and self.goblin_destruct_sound:
+                        self.goblin_destruct_sound.play()
+                    
+                    # Create explosion effect
+                    if self.explosion_effect_image:
+                        effect = Effect(
+                            tower.x + grid_offset_x,
+                            tower.y + grid_offset_y,
+                            self.explosion_effect_image,
+                            duration=0.5,
+                            target_size=(config.GRID_SIZE * 4, config.GRID_SIZE * 4)
+                        )
+                        self.effects.append(effect)
+                    
+                    # Apply damage to enemies in range
+                    radius = attack_results.get('radius', 0)
+                    damage = attack_results.get('damage', 0)
+                    damage_type = attack_results.get('damage_type', 'normal')
+                    targets = attack_results.get('targets', ['ground', 'air'])
+                    
+                    for enemy in self.enemies:
+                        if enemy.health > 0 and enemy.type in targets:
+                            dx = enemy.x - tower.x
+                            dy = enemy.y - tower.y
+                            dist_sq = dx*dx + dy*dy
+                            if dist_sq <= radius * radius:
+                                enemy.take_damage(damage, damage_type)
+                    
+                    # Clear grid cells before removing tower
+                    if not tower.tower_data.get('traversable', False):
+                        for y in range(tower.top_left_grid_y, tower.top_left_grid_y + tower.grid_height):
+                            for x in range(tower.top_left_grid_x, tower.top_left_grid_x + tower.grid_width):
+                                if 0 <= y < self.grid_height and 0 <= x < self.grid_width:
+                                    if self.grid[y][x] == 1:  # Only clear if it was marked as tower
+                                        self.grid[y][x] = 0
+                    
+                    # Remove the tower
+                    self.towers.remove(tower)
+                    return
+            
             # Add any projectiles created
             new_projectiles = attack_results.get('projectiles', [])
             if new_projectiles:

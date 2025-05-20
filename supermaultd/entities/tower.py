@@ -878,9 +878,13 @@ class Tower:
         """Perform an attack. Return a list of projectiles, effects, or None."""
         # --- BEGIN ADDED CODE: Self-Destruct Check ---
         if self.special and self.special.get("effect") == "self_destruct":
+            print(f"Tower {self.tower_id} has self-destruct effect.")
             chance = self.special.get("self_destruct_percentage_chance", 0)
-            if random.uniform(0, 100) < chance:
-                #print(f"Tower {self.tower_id} is self-destructing!")
+            print(f"Self-destruct chance: {chance}%")
+            roll = random.uniform(0, 100)
+            print(f"Random roll: {roll}")
+            if roll < chance:
+                print(f"Tower {self.tower_id} is self-destructing!")
                 # Return dictionary indicating self-destruct action and parameters
                 return {
                     'action': 'self_destruct',
@@ -890,6 +894,8 @@ class Tower:
                     'targets': self.special.get("self_destruct_targets", ["ground", "air"]),
                     'tower_instance': self # Pass self for position/removal in GameScene
                 }
+            else:
+                print(f"Self-destruct chance failed for tower {self.tower_id}.")
             # Else: Chance failed, proceed to normal attack logic (if applicable)
         # --- END ADDED CODE: Self-Destruct Check ---
 
