@@ -660,15 +660,29 @@ class GameScene:
                             dx = current_grid_x - start_x
                             dy = current_grid_y - start_y
                             
-                            # Adjust spacing based on tower size
-                            if abs(dx) > abs(dy):  # Horizontal drag
-                                step_x = grid_width if dx > 0 else -grid_width
+                            # Calculate step sizes based on tower dimensions
+                            step_x = grid_width if dx > 0 else -grid_width
+                            step_y = grid_height if dy > 0 else -grid_height
+                            
+                            # Determine if we're moving more horizontally or vertically
+                            abs_dx = abs(dx)
+                            abs_dy = abs(dy)
+                            
+                            if abs_dx > abs_dy:  # More horizontal movement
+                                # Place towers horizontally
                                 for x in range(start_x, current_grid_x + (1 if dx > 0 else -1), step_x):
                                     positions.append((x, start_y))
-                            else:  # Vertical drag
-                                step_y = grid_height if dy > 0 else -grid_height
+                            elif abs_dy > abs_dx:  # More vertical movement
+                                # Place towers vertically
                                 for y in range(start_y, current_grid_y + (1 if dy > 0 else -1), step_y):
                                     positions.append((start_x, y))
+                            else:  # Equal movement (diagonal)
+                                # Place towers diagonally
+                                steps = min(abs_dx // abs(step_x), abs_dy // abs(step_y))
+                                for i in range(steps + 1):
+                                    x = start_x + (i * step_x)
+                                    y = start_y + (i * step_y)
+                                    positions.append((x, y))
                             
                             max_towers = self.money // cost
                             

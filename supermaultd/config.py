@@ -47,7 +47,7 @@ SKY_BLUE = (135, 206, 235)
 
 # Game settings
 GRID_SIZE = 32  # Size of each grid cell in pixels
-STARTING_MONEY = 1000
+STARTING_MONEY = 100
 STARTING_LIVES = 20
 STARTING_MONEY_ADVANCED = 100
 STARTING_LIVES_ADVANCED = 10
@@ -176,7 +176,7 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "fire_elemental": {
-        "health": 8800,
+        "health": 8100,
         "speed": 0.3,
         "value": 2,
         "armor_type": "Ethereal", 
@@ -278,15 +278,15 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "hexer": {
-        "health": 13600,
-        "speed": 0.4,
+        "health": 11250,
+        "speed": 0.6,
         "value": 5,
         "armor_type": "Light",
         "armor_value": 35,
         "type": "ground"
     },
     "satyr": {
-        "health": 12000,
+        "health": 4275,
         "speed": 1.2,
         "value": 5,
         "armor_type": "Unarmored",
@@ -294,7 +294,7 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "hellasaur": {
-        "health": 75000,
+        "health": 28000,
         "speed": 0.7,
         "value": 5,
         "armor_type": "Medium",
@@ -319,7 +319,7 @@ ENEMY_DATA = {
     },
     "vile_blob": { 
         "health": 27500,
-        "speed": 1,
+        "speed": 0.8,
         "value": 5,
         "armor_type": "Unarmored",
         "armor_value": 10,
@@ -327,7 +327,7 @@ ENEMY_DATA = {
     },
 
     "scarlet_knight": {
-        "health": 16000,
+        "health": 10000,
         "speed": 1.1,
         "value": 5,
         "armor_type": "Fortified",
@@ -335,7 +335,7 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "ice_demon": {
-        "health": 31000,
+        "health": 23430,
         "speed": 0.8,
         "value": 5, "armor_value": 9,
         "armor_type": "Magic_Resistant",
@@ -343,7 +343,7 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "black_bear": {
-        "health": 18300,
+        "health": 15300,
         "speed": 0.8,
         "value": 5,
         "armor_type": "Unarmored",
@@ -351,7 +351,7 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "orc": {
-        "health": 80000,
+        "health": 40000,
         "speed": 0.6,
         "value": 5,
         "armor_type": "Light",
@@ -359,7 +359,7 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "tusken_fighter": {
-        "health": 53000,
+        "health": 36250,
         "speed": 1.0,
         "value": 6,
         "armor_type": "Unarmored",
@@ -375,7 +375,7 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "swamp_monster": {
-        "health": 75575,
+        "health": 35575,
         "speed": 1,
         "value": 6,
         "armor_type": "Medium",
@@ -383,15 +383,15 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "cave_troll": {
-        "health": 125000,
-        "speed": 1,
+        "health": 43000,
+        "speed": 0.9,
         "value": 6,
         "armor_type": "Magic_Resistant",
         "armor_value": 28,
         "type": "ground"
     },
     "wendigo": {
-        "health": 155000,
+        "health": 75000,
         "speed": 0.6,
         "value": 6,
         "armor_type": "Unarmored",

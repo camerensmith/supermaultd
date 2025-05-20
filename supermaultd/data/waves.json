@@ -230,7 +230,7 @@
     "delay_before_wave": 20.0,
     "wave_completion_bonus": 120,
     "enemies": [
-      { "type": "crone", "count": 50, "spawn_interval": 0.5 }
+      { "type": "vile_blob", "count": 50, "spawn_interval": 0.5 }
     ]
   },
 
@@ -284,7 +284,7 @@
     "delay_before_wave": 20.0,
     "wave_completion_bonus": 150,
     "enemies": [
-      { "type": "spike_lizard", "count": 50, "spawn_interval": 0.8 }
+      { "type": "spike_lizard", "count": 25, "spawn_interval": 0.8 }
     ]
   },
 
@@ -293,7 +293,7 @@
     "delay_before_wave": 20.0,
     "wave_completion_bonus": 155,
     "enemies": [
-      { "type": "tusken_fighter", "count": 50, "spawn_interval": 0.8 }
+      { "type": "tusken_fighter", "count": 25, "spawn_interval": 0.8 }
     ]
   },
 
@@ -302,7 +302,7 @@
     "delay_before_wave": 20.0,
     "wave_completion_bonus": 160,
     "enemies": [
-      { "type": "cave_troll", "count": 50, "spawn_interval": 0.8 }
+      { "type": "cave_troll", "count": 25, "spawn_interval": 0.8 }
     ]
   },
 
@@ -311,7 +311,7 @@
     "delay_before_wave": 20.0,
     "wave_completion_bonus": 170,
     "enemies": [
-      { "type": "wendigo", "count": 50, "spawn_interval": 0.8 }
+      { "type": "wendigo", "count": 25, "spawn_interval": 0.8 }
     ]
   },
 
@@ -319,7 +319,7 @@
     "delay_before_wave": 20.0,
     "wave_completion_bonus": 180,
     "enemies": [
-      { "type": "captain", "count": 15, "spawn_interval": 0.8 }
+      { "type": "captain", "count": 25, "spawn_interval": 0.8 }
     ]
   },
 

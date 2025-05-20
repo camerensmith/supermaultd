@@ -691,7 +691,7 @@ class Projectile:
                             # --- Increment Tower Kill Count (Pierce) --- # NEW
                             if self.source_tower:
                                 self.source_tower.kill_count += 1
-                                print(f"+++ Kill registered for Tower {self.source_tower.tower_id} (via pierce). Total kills: {self.source_tower.kill_count}")
+                                #print(f"+++ Kill registered for Tower {self.source_tower.tower_id} (via pierce). Total kills: {self.source_tower.kill_count}")
                             # --- End Increment --- 
                             # Gold on kill for pierced?
                             if self.special_on_kill_data:

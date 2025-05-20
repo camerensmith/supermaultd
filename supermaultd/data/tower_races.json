@@ -2180,8 +2180,8 @@
       "description": "Harnessing raw electrical energy to shock, stun, and overload enemies.",
       "towers": {
         "spark_wall": {
-          "name": "Electric Fence",
-          "description": "An electrified barrier that enemies don't dare to cross.",
+          "name": "Spark Wall",
+          "description": "A barrier to keep the electricity in, presumably.",
           "grid_width": 1,
           "grid_height": 1,
           "cost": 1,
@@ -2219,8 +2219,8 @@
           ]
         },
         "spark_shock_node": {
-          "name": "Shock Pylon",
-          "description": "A pylon that discharges electricity to any foe foolish enough to come in contact.",
+          "name": "Electric Fence",
+          "description": "A fence that discharges electricity to any foe foolish enough to come in contact.",
           "grid_width": 1,
           "grid_height": 1,
           "cost": 15,
