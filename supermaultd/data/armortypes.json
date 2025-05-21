@@ -75,7 +75,7 @@
           "siege": 1.0,
           "arcane": 0.35
         },
-        "description": "Reduces damage from arcane and chaos attacks."
+        "description": "Reduces damage from arcane attacks."
       }
     ]
   }

@@ -437,6 +437,15 @@ class Projectile:
                     if hasattr(collided_enemy, 'reduce_armor'):
                         collided_enemy.reduce_armor(amount)
                         #print(f"... applied armor reduction ({amount}) to {collided_enemy.enemy_id}")
+                elif special_effect == "slow":
+                    slow_percentage = self.source_tower.special.get("slow_percentage", 0)
+                    if slow_percentage > 0:
+                        # Calculate slow multiplier (e.g., 50% slow means 0.5x speed)
+                        slow_multiplier = 1.0 - (slow_percentage / 100.0)
+                        # Use the duration from the tower's special effect
+                        slow_duration = self.source_tower.special.get("duration", 1.0)
+                        collided_enemy.apply_status_effect('slow', slow_duration, slow_multiplier, current_time)
+                        #print(f"DEBUG: Projectile slow effect applied - {slow_percentage}% slow (multiplier: {slow_multiplier}) to {collided_enemy.enemy_id}")
                 # Add other on-hit tower specials here (e.g., stun on hit)
                 # elif special_effect == "stun_on_hit": ... 
             # --- End On-Hit Tower Special Effects ---

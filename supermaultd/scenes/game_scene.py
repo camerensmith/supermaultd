@@ -1443,13 +1443,14 @@ class GameScene:
                                     if tower.special and tower.special.get('effect') == 'slow':
                                         slow_percentage = tower.special.get('slow_percentage', 0)
                                         if slow_percentage > 0:
+                                            # Calculate slow multiplier (e.g., 50% slow means 0.5x speed)
                                             slow_multiplier = 1.0 - (slow_percentage / 100.0)
-                                            # <<< FIX: Use a small fixed duration instead of time_delta >>>
-                                            fixed_slow_duration = 0.2 # Apply slow for 0.2 seconds each frame beam hits
+                                            # Use a small fixed duration for beam attacks
+                                            fixed_slow_duration = 0.2
                                             target_enemy.apply_status_effect('slow', fixed_slow_duration, slow_multiplier, current_time)
-                                            # print(f"DEBUG: Freeze ray applying slow {slow_percentage}% to {target_enemy.enemy_id}") # Optional Debug
+                                            print(f"DEBUG: Slow effect applied - {slow_percentage}% slow (multiplier: {slow_multiplier}) to {target_enemy.enemy_id}")
                                             effects_applied_this_tick = True
-                                    # --- End Apply Slow --- 
+                                    # --- End Apply Slow ---
                                     
                                     # Add other beam effects here (e.g., DoTs if beams can apply them per tick)
                             
