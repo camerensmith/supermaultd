@@ -306,6 +306,10 @@ Future updates will include:
 
 Feel free to submit issues and pull requests.
 
+## Building 
+
+pyinstaller --add-data 'assets:assets' --add-data 'data:data' --collect-all entities --collect-all scenes --collect-all ui --collect-all utils --onedir --contents-directory '.' main.py
+
 ## License
 
 [License information remains unchanged...] 
