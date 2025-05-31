@@ -121,7 +121,7 @@ class ClusterProjectile(Projectile):
         explosion = Effect(
             self.x,
             self.y,
-            self.source_tower.asset_loader("assets/effects/fire_burst.png"),
+            self.asset_loader("assets/effects/fire_burst.png") if self.asset_loader else None,
             duration=0.1,
             target_size=(80, 80)
         )
