@@ -3182,6 +3182,15 @@ class GameScene:
 
     def sell_tower_at(self, grid_x, grid_y):
         """Finds and sells a tower located at the given grid coordinates."""
+
+        # --- NEW: Prevent selling during active wave ---
+        if self.wave_state in [WAVE_STATE_SPAWNING, WAVE_STATE_INTERMISSION]:
+            #print("Cannot sell towers during a wave.") # Optional debug
+            if self.invalid_placement_sound:
+                self.invalid_placement_sound.play()
+            return # Stop the sell action
+        # --- END Prevent selling during active wave ---
+
         tower_to_sell = None
         for tower in self.towers:
             # Check if the click coordinates fall within the tower's footprint
