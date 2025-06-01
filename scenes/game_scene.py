@@ -1278,11 +1278,28 @@ class GameScene:
 
                 if tower.attack_type == 'beam': # Indentation Level 2 (16 spaces)
                     # Beam logic remains the same: target closest up to max_targets
-                    potential_targets.sort(key=lambda e: (e.x - tower.x)**2 + (e.y - tower.y)**2)
-                    actual_targets = potential_targets[:tower.beam_max_targets]
-                    tower.beam_targets = actual_targets
-                    current_primary_target = actual_targets[0] if actual_targets else None
-                    
+                    if tower.tower_data.get("target_priority") == "current" and tower.beam_targets:
+                        # Keep current targets if they're still valid
+                        valid_current_targets = []
+                        for target in tower.beam_targets:
+                            if target.health > 0 and tower.is_in_range(target.x, target.y):
+                                valid_current_targets.append(target)
+                        if valid_current_targets:
+                            tower.beam_targets = valid_current_targets
+                            current_primary_target = valid_current_targets[0]
+                        else:
+                            # If no valid current targets, fall back to closest targeting
+                            potential_targets.sort(key=lambda e: (e.x - tower.x)**2 + (e.y - tower.y)**2)
+                            actual_targets = potential_targets[:tower.beam_max_targets]
+                            tower.beam_targets = actual_targets
+                            current_primary_target = actual_targets[0] if actual_targets else None
+                    else:
+                        # Default beam targeting behavior
+                        potential_targets.sort(key=lambda e: (e.x - tower.x)**2 + (e.y - tower.y)**2)
+                        actual_targets = potential_targets[:tower.beam_max_targets]
+                        tower.beam_targets = actual_targets
+                        current_primary_target = actual_targets[0] if actual_targets else None
+
                     # --- START Beam Sound Management ---
                     if tower.attack_sound: # Only manage if sound exists
                         if tower.beam_targets: # Beam is active (has targets)

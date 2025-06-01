@@ -1,6 +1,5 @@
 import pygame
 import math
-import random
 import pymunk
 from config import *
 from entities.projectile import Projectile
