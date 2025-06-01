@@ -952,24 +952,25 @@ class GameScene:
         
         # --- Pre-calculate Tower Buff Auras (Affecting Towers) --- 
         # Store as instance variable for use in draw method
-        self.tower_buff_auras = [] 
-        processed_tower_ids = set() # Track which tower IDs we've already processed
-        
+        self.tower_buff_auras = []
+        # processed_tower_ids = set() # Track which tower IDs we've already processed # REMOVE THIS LINE
+
         for tower in self.towers:
-            # Skip if we've already processed this tower
-            if tower.tower_id in processed_tower_ids:
-                continue
-            processed_tower_ids.add(tower.tower_id)
+            # Skip if we've already processed this tower # REMOVE THIS BLOCK
+            # if tower.tower_id in processed_tower_ids:
+            #     continue
+            # processed_tower_ids.add(tower.tower_id)
             
             # Check if the tower has a special block
             if tower.special:
                 effect_type = tower.special.get('effect')
                 is_standard_aura = (tower.attack_type == 'aura' or tower.attack_type == 'hybrid')
                 is_dot_amp_aura = effect_type == 'dot_amplification_aura'
-                is_attack_speed_aura = effect_type == 'attack_speed_aura' # <<< ADDED CHECK
+                is_attack_speed_aura = effect_type == 'adjacency_attack_speed_buff' # <<< ADDED CHECK FOR ADJACENCY BUFF
                 
                 # Process if it's a standard buff aura OR the DoT amp aura OR the attack speed aura
-                if is_standard_aura or is_dot_amp_aura or is_attack_speed_aura: # <<< MODIFIED CONDITION
+                # MODIFIED CONDITION: Include 'adjacency_attack_speed_buff' here
+                if is_standard_aura or is_dot_amp_aura or is_attack_speed_aura:
                 # --- END MODIFICATION ---
                     aura_radius_units = tower.special.get('aura_radius', 0)
                     if aura_radius_units > 0:
@@ -984,10 +985,12 @@ class GameScene:
                             #print(f"DEBUG: Added {tower.tower_id} (dot_amp_aura) to tower_buff_auras with radius {aura_radius_pixels:.1f}px")
                             pass
 
-        # --- BEGIN Adjacency Buff Calculation --- 
+        # --- BEGIN Adjacency Buff Calculation ---
+        # This section already correctly processes individual towers (Police HQ)
+        # No change needed here, it adds entries for each HQ affecting neighbors
         hq_towers = [t for t in self.towers if t.tower_id == 'police_hq']
         if hq_towers: # Only do checks if there's at least one HQ
-            towers_already_buffed_by_hq = set() # Prevent double-buffing from multiple HQs
+            # towers_already_buffed_by_hq = set() # Prevent double-buffing from multiple HQs # REMOVE THIS LINE
             
             for hq in hq_towers:
                 # Define the HQ's bounding box in grid coordinates
@@ -1004,8 +1007,9 @@ class GameScene:
                 
                 # Check every other tower
                 for other_tower in self.towers:
-                    if other_tower == hq or other_tower in towers_already_buffed_by_hq:
-                        continue # Skip self or already buffed
+                    # if other_tower == hq or other_tower in towers_already_buffed_by_hq: # REMOVE THIS CHECK
+                    if other_tower == hq:
+                        continue # Skip self
                         
                     # Define the other tower's bounding box
                     other_start_x = other_tower.top_left_grid_x
@@ -1031,13 +1035,15 @@ class GameScene:
                                 'radius_sq': 0, # Radius doesn't apply here
                                 'special': hq.special
                             })
-                            towers_already_buffed_by_hq.add(other_tower)
+                            # towers_already_buffed_by_hq.add(other_tower) # REMOVE THIS LINE
         # --- END Adjacency Buff Calculation --- 
 
         # --- BEGIN Spark Power Plant Adjacency Buff Calculation ---
+        # This section also processes individual towers correctly
+        # No change needed here.
         plant_towers = [t for t in self.towers if t.tower_id == 'spark_power_plant']
         if plant_towers:
-            towers_already_buffed_by_plant = set() # Prevent double-buffing from multiple plants
+            # towers_already_buffed_by_plant = set() # Prevent double-buffing from multiple plants # REMOVE THIS LINE
 
             for plant in plant_towers:
                 # Define the plant's bounding box
@@ -1054,7 +1060,8 @@ class GameScene:
 
                 # Check every other tower
                 for other_tower in self.towers:
-                    if other_tower == plant or other_tower in towers_already_buffed_by_plant:
+                    # if other_tower == plant or other_tower in towers_already_buffed_by_plant: # REMOVE THIS CHECK
+                    if other_tower == plant:
                         continue
 
                     # Define the other tower's bounding box
@@ -1076,11 +1083,11 @@ class GameScene:
                             pass
                             # Add the plant's buff data to the list
                             self.tower_buff_auras.append({
-                                'tower': plant, 
-                                'radius_sq': 0, 
+                                'tower': plant,
+                                'radius_sq': 0,
                                 'special': plant.special
                             })
-                            towers_already_buffed_by_plant.add(other_tower)
+                            # towers_already_buffed_by_plant.add(other_tower) # REMOVE THIS LINE
         # --- END Spark Power Plant Adjacency Buff Calculation ---
 
         # --- Pre-calculate Enemy Aura Towers (Affecting Enemies) --- 
