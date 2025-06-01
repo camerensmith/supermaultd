@@ -189,6 +189,17 @@ class Tower:
         self.orbiters = []
         # --- End Orbiter List ---
 
+        # --- NEW: Initialize Orbiting Damagers if applicable ---
+        if self.special and self.special.get('effect') == 'orbiting_damager':
+            orb_count = self.special.get('orb_count', 3) # Default to 3 orbs
+            base_angle_offset = 360.0 / orb_count
+            for i in range(orb_count):
+                start_angle = i * base_angle_offset
+                orb = OrbitingDamager(self, self.special, start_angle)
+                self.orbiters.append(orb)
+            #print(f"DEBUG: Initialized {orb_count} orbiting damagers for {self.tower_id}") # Optional debug print
+        # --- End Initialize Orbiting Damagers ---
+
         # --- NEW: Rampage State ---
         self.rampage_stacks = 0
         self.rampage_last_hit_time = 0.0
