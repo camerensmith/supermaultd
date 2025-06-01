@@ -3070,6 +3070,31 @@ class GameScene:
         new_start_y = grid_y - offset_y
         new_end_y = new_start_y + grid_height - 1 # Corrected calculation
 
+        # --- NEW: Prevent placement in spawn area and tiles below ---
+        spawn_area_start_x = self.spawn_area_x
+        spawn_area_end_x = self.spawn_area_x + config.SPAWN_AREA_WIDTH - 1
+        spawn_area_start_y = self.spawn_area_y
+        spawn_area_end_y = self.spawn_area_y + config.SPAWN_AREA_HEIGHT - 1
+
+        below_spawn_start_x = self.spawn_area_x
+        below_spawn_end_x = self.spawn_area_x + config.SPAWN_AREA_WIDTH - 1
+        below_spawn_start_y = self.spawn_area_y + config.SPAWN_AREA_HEIGHT
+        below_spawn_end_y = below_spawn_start_y # Only one row
+
+        # Check overlap with spawn area
+        if not (new_end_x < spawn_area_start_x or new_start_x > spawn_area_end_x or
+                new_end_y < spawn_area_start_y or new_start_y > spawn_area_end_y):
+            #print("Validation failed: Cannot place in spawn area.")
+            return False # Overlaps with spawn area
+
+        # Check overlap with tiles below spawn area
+        if not (new_end_x < below_spawn_start_x or new_start_x > below_spawn_end_x or
+                new_end_y < below_spawn_start_y or new_start_y > below_spawn_end_y):
+            #print("Validation failed: Cannot place in area below spawn.")
+            return False # Overlaps with area below spawn
+        # --- END NEW: Prevent placement ---
+
+
         # 1. Check Grid Bounds
         if not (0 <= new_start_x < self.grid_width and 0 <= new_end_x < self.grid_width and
                 0 <= new_start_y < self.grid_height and 0 <= new_end_y < self.grid_height):
@@ -3101,13 +3126,13 @@ class GameScene:
                 if self.grid[y][x] == 1:
                     #print("Validation failed: Cannot place on existing non-traversable tower footprint.")
                     return False
-                    
-        # --- 4. Pathfinding Check --- 
+
+        # --- 4. Pathfinding Check ---
         # Get the tower data to check if it's traversable
         selected_tower_id = self.tower_selector.get_selected_tower() # Assumes tower is selected
         if not selected_tower_id: # Should not happen if called from placement, but safety check
             #print("Validation Error: No tower selected for pathfinding check.")
-            return False 
+            return False
         tower_data = self.available_towers.get(selected_tower_id)
         if not tower_data:
             #print(f"Validation Error: Tower data not found for {selected_tower_id}")
@@ -3127,14 +3152,14 @@ class GameScene:
 
             # Check if a path still exists on the modified temp grid
             path = find_path(self.path_start_x, self.path_start_y, self.path_end_x, self.path_end_y, temp_grid)
-            if not path: 
+            if not path:
                 #print(f"Pathfinding failed: Placing non-traversable tower at ({grid_x},{grid_y}) would block the path.")
                 return False
         # If traversable, skip the temp_grid modification and path check above
         # else: # Implicitly uses self.grid for path check if traversable
             # path = find_path(self.path_start_x, self.path_start_y, self.path_end_x, self.path_end_y, self.grid)
             # if not path: ... # Path check for traversable is likely redundant if placement rules are correct
-            
+
         # All checks passed
         return True
 
@@ -3164,7 +3189,7 @@ class GameScene:
         # Find path first, passing the unit type
         grid_path = find_path(self.path_start_x, self.path_start_y, 
                               self.path_end_x, self.path_end_y, self.grid,
-                              is_air_unit=is_air)
+                              is_air_unit=is_air) # Pass the flag
 
         if not grid_path:
             #print(f"Warning: Could not find path to spawn enemy '{enemy_id}'.")
