@@ -654,6 +654,34 @@ class Tower:
             dist_sq = (self.x - aura_tower.x)**2 + (self.y - aura_tower.y)**2
             # Updated condition to include both adjacency buffs
             is_adjacent_buff = effect_type in ('adjacency_damage_buff', 'adjacency_attack_speed_buff') 
+            
+            # For adjacency buffs, check if towers share an edge
+            if is_adjacent_buff:
+                # Get grid coordinates
+                hq_start_x = aura_tower.top_left_grid_x
+                hq_end_x = hq_start_x + aura_tower.grid_width - 1
+                hq_start_y = aura_tower.top_left_grid_y
+                hq_end_y = hq_start_y + aura_tower.grid_height - 1
+                
+                other_start_x = self.top_left_grid_x
+                other_end_x = other_start_x + self.grid_width - 1
+                other_start_y = self.top_left_grid_y
+                other_end_y = other_start_y + self.grid_height - 1
+                
+                # Check if towers share an edge
+                shares_edge = (
+                    # Tower is directly to the left or right of HQ
+                    (other_end_x == hq_start_x - 1 or other_start_x == hq_end_x + 1) and
+                    (other_end_y >= hq_start_y and other_start_y <= hq_end_y)
+                ) or (
+                    # Tower is directly above or below HQ
+                    (other_end_y == hq_start_y - 1 or other_start_y == hq_end_y + 1) and
+                    (other_end_x >= hq_start_x and other_start_x <= hq_end_x)
+                )
+                
+                if not shares_edge:
+                    continue  # Skip this buff if towers don't share an edge
+            
             if dist_sq <= aura_radius_sq or is_adjacent_buff:
                 # Apply relevant buff percentages/bonuses
                 if effect_type == 'attack_speed_aura':

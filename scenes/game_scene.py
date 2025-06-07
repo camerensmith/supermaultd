@@ -557,6 +557,9 @@ class GameScene:
             self.current_track_index = -1 # Ensure playback doesn't start if error
         # --- End Soundtrack Initialization ---
 
+        # Add tower limit tracking
+        self.tower_counts = {}  # Track number of each tower type built
+
     def handle_event(self, event):
         """Handle pygame events"""
         # --- Check Game State First ---
@@ -730,7 +733,7 @@ class GameScene:
                 self.selected_tower = None
                 self.tower_preview = None
             elif event.key == pygame.K_g:
-                self.spawn_test_enemy("gnoll")
+                self.spawn_test_enemy("crone")
             elif event.key == pygame.K_s:
                 self.spawn_test_enemy("quillpig")
             elif event.key == pygame.K_t:
@@ -805,6 +808,15 @@ class GameScene:
         if not tower_data:
             return
 
+        # Check tower limit
+        tower_limit = tower_data.get('limit')
+        if tower_limit is not None:
+            current_count = self.tower_counts.get(selected_tower_id, 0)
+            if current_count >= tower_limit:
+                if self.invalid_placement_sound:
+                    self.invalid_placement_sound.play()
+                return
+
         # Get tower dimensions (assuming 1x1 if not specified)
         grid_width = tower_data.get('grid_width', 1)
         grid_height = tower_data.get('grid_height', 1)
@@ -853,6 +865,12 @@ class GameScene:
         tower = Tower(grid_x, grid_y, selected_tower_id, tower_data)
         self.towers.append(tower)
         
+        # Update tower count
+        self.tower_counts[selected_tower_id] = self.tower_counts.get(selected_tower_id, 0) + 1
+        
+        # Update tower selector UI
+        self.tower_selector.update_tower_counts(self.tower_counts)
+        
         # Deduct money
         self.deduct_money(tower_data['cost'])
 
@@ -862,6 +880,10 @@ class GameScene:
                 # Get enemy's current grid position
                 current_grid_x = int(enemy.x // config.GRID_SIZE)
                 current_grid_y = int(enemy.y // config.GRID_SIZE)
+                
+                # Skip path recalculation for air units
+                if enemy.type == 'air':
+                    continue
                 
                 # Find new path from current position to objective
                 new_path = find_path(current_grid_x, current_grid_y, 
@@ -1027,17 +1049,34 @@ class GameScene:
                                        other_start_y > adj_max_y)
                                        
                     if is_adjacent:
-                        # Ensure the HQ special targets towers
-                        if hq.special and hq.special.get('effect') == 'adjacency_damage_buff' and "towers" in hq.special.get('targets', []):
-                            # Add the HQ's buff data to the list
-                            #print(f"DEBUG: Police HQ at ({hq.center_grid_x},{hq.center_grid_y}) applying adjacency buff to {other_tower.tower_id} at ({other_tower.center_grid_x},{other_tower.center_grid_y})")
-                            pass
-                            self.tower_buff_auras.append({
-                                'tower': hq, # The tower providing the buff
-                                'radius_sq': 0, # Radius doesn't apply here
-                                'special': hq.special
-                            })
-                            # towers_already_buffed_by_hq.add(other_tower) # REMOVE THIS LINE
+                        # Additional check to ensure towers only share an edge, not just a corner
+                        shares_edge = (
+                            # Tower is directly to the left or right of HQ
+                            (other_end_x == adj_min_x or other_start_x == adj_max_x) and
+                            (other_end_y >= hq_start_y and other_start_y <= hq_end_y)
+                        ) or (
+                            # Tower is directly above or below HQ
+                            (other_end_y == adj_min_y or other_start_y == adj_max_y) and
+                            (other_end_x >= hq_start_x and other_start_x <= hq_end_x)
+                        )
+                        
+                        print(f"DEBUG: Checking tower {other_tower.tower_id} at ({other_tower.center_grid_x},{other_tower.center_grid_y})")
+                        print(f"  HQ bounds: ({hq_start_x},{hq_start_y}) to ({hq_end_x},{hq_end_y})")
+                        print(f"  Tower bounds: ({other_start_x},{other_start_y}) to ({other_end_x},{other_end_y})")
+                        print(f"  Adjacency area: ({adj_min_x},{adj_min_y}) to ({adj_max_x},{adj_max_y})")
+                        print(f"  Is adjacent: {is_adjacent}")
+                        print(f"  Shares edge: {shares_edge}")
+                        
+                        if shares_edge:
+                            # Ensure the HQ special targets towers
+                            if hq.special and hq.special.get('effect') == 'adjacency_damage_buff' and "towers" in hq.special.get('targets', []):
+                                print(f"  Applying buff to {other_tower.tower_id}")
+                                # Add the HQ's buff data to the list
+                                self.tower_buff_auras.append({
+                                    'tower': hq, # The tower providing the buff
+                                    'radius_sq': 0, # Radius doesn't apply here
+                                    'special': hq.special
+                                })
         # --- END Adjacency Buff Calculation --- 
 
         # --- BEGIN Spark Power Plant Adjacency Buff Calculation ---
@@ -3301,6 +3340,12 @@ class GameScene:
             
             # Potentially force enemy path recalculation if needed
             # self.recalculate_all_enemy_paths() # Add this if pathing doesn't auto-update
+            
+            # Update tower count
+            self.tower_counts[tower_to_sell.tower_id] = max(0, self.tower_counts.get(tower_to_sell.tower_id, 0) - 1)
+            
+            # Update tower selector UI
+            self.tower_selector.update_tower_counts(self.tower_counts)
             
         else:
             #print("No tower found at that location to sell.")

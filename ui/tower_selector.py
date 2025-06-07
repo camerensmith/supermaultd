@@ -26,6 +26,7 @@ class TowerSelector:
         self.money = initial_money
         self.damage_type_data = damage_type_data # Store damage type data
         self.click_sound = click_sound # Store sound effect
+        self.tower_counts = {}  # Track number of each tower type built
         
         # --- Load Cannot Select Sound ---
         self.cannot_select_sound = None
@@ -358,3 +359,27 @@ class TowerSelector:
         """Update the money display"""
         self.money = new_amount
         self.money_label.set_text(f'Money: ${self.money}') 
+
+    def update_tower_counts(self, tower_counts):
+        """Update the tower counts and refresh button states."""
+        self.tower_counts = tower_counts
+        self.update_button_states()
+        
+    def update_button_states(self):
+        """Update button states based on money and tower limits."""
+        for tower_id, button in self.tower_buttons.items():
+            tower_data = self.available_towers.get(tower_id)
+            if tower_data:
+                can_afford = self.money >= tower_data['cost']
+                tower_limit = tower_data.get('limit')
+                current_count = self.tower_counts.get(tower_id, 0)
+                at_limit = tower_limit is not None and current_count >= tower_limit
+                
+                # Update button state
+                button.enable() if can_afford and not at_limit else button.disable()
+                
+                # Update button text to show limit if applicable
+                if tower_limit is not None:
+                    button.set_text(f"{tower_data['name']} ({current_count}/{tower_limit})")
+                else:
+                    button.set_text(tower_data['name']) 
