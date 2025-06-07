@@ -340,6 +340,8 @@ class GameScene:
         
         self.grid_width = self.usable_grid_pixel_width // config.GRID_SIZE
         self.grid_width = max(1, self.grid_width) # Ensure at least 1x1 grid
+        # Recalculate usable_grid_pixel_width to ensure it's an exact multiple of GRID_SIZE
+        self.usable_grid_pixel_width = self.grid_width * config.GRID_SIZE
         self.grid = [[0 for _ in range(self.grid_width)] for _ in range(self.grid_height)]
 
         # Mark ALL restricted areas with value 2
