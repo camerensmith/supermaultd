@@ -3870,9 +3870,12 @@ class GameScene:
 
     # --- NEW: Callback Method for Adding Standard Effects ---
     def add_visual_effect(self, effect):
-        """Simple callback to add a visual effect to the main effects list."""
-        if effect:
-            self.effects.append(effect)
+        """Add a visual effect to the scene, respecting low effects mode if enabled."""
+        # Check for low effects mode
+        if hasattr(self.game, 'low_effects_mode') and getattr(self.game, 'low_effects_mode', False):
+            if len(self.effects) >= 10:
+                return  # Do not add more effects
+        self.effects.append(effect)
     # --- END NEW CALLBACK ---
 
     # --- NEW: Money Callback Methods ---

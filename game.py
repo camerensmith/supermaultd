@@ -402,11 +402,41 @@ class Game:
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
                     return
-                    
-            # Pass events to UI Manager FIRST - essential for pygame_gui
-            # The manager will dispatch events to the RaceSelector and other UI elements
+            
             processed_by_manager = self.ui_manager.process_events(event)
             
+            # Store pending selection from listbox
+            if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION and hasattr(self, 'low_effects_listbox') and event.ui_element == self.low_effects_listbox:
+                self.pending_low_effects_selection = self.low_effects_listbox.get_single_selection()
+            
+            # Apply button applies the pending selection
+            if event.type == pygame_gui.UI_BUTTON_PRESSED and hasattr(self, 'apply_options_button') and event.ui_element == self.apply_options_button:
+                self.low_effects_mode = self.pending_low_effects_selection == "Low Effects Mode"
+            
+            # Handle options listbox
+            if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION and hasattr(self, 'low_effects_listbox') and event.ui_element == self.low_effects_listbox:
+                self.low_effects_mode = self.low_effects_listbox.get_single_selection() == "Low Effects Mode"
+            
+            # Radio button logic for effects mode
+            if event.type == pygame_gui.UI_BUTTON_PRESSED:
+                if hasattr(self, 'default_mode_button') and event.ui_element == self.default_mode_button:
+                    self.pending_low_effects_selection = 'Default'
+                    self.default_mode_button.select()
+                    self.low_effects_mode_button.unselect()
+                if hasattr(self, 'low_effects_mode_button') and event.ui_element == self.low_effects_mode_button:
+                    self.pending_low_effects_selection = 'Low Effects Mode'
+                    self.low_effects_mode_button.select()
+                    self.default_mode_button.unselect()
+                if hasattr(self, 'apply_options_button') and event.ui_element == self.apply_options_button:
+                    self.low_effects_mode = self.pending_low_effects_selection == 'Low Effects Mode'
+                    print(f"[Options] Apply pressed. low_effects_mode is now: {self.low_effects_mode}")
+                    # Update the visual state to match the new mode
+                    if self.low_effects_mode:
+                        self.low_effects_mode_button.select()
+                        self.default_mode_button.unselect()
+                    else:
+                        self.default_mode_button.select()
+                        self.low_effects_mode_button.unselect()
             # Then handle game state specific logic based on events
             if self.game_state == "race_selection":
                 # Allow RaceSelector to handle its internal button clicks
@@ -673,29 +703,25 @@ class Game:
             pygame.mixer.music.stop() # Stop any potentially playing music
 
     def toggle_options_modal(self):
+        if not hasattr(self, 'low_effects_mode'):
+            self.low_effects_mode = False
         """Toggle the options modal overlay"""
         if not self.options_modal_visible:
-            # Create modal if it doesn't exist
+            # Create modal and widgets only if they don't exist
             if not self.options_modal:
                 modal_width = 400
-                modal_height = 300
+                modal_height = 400
                 modal_x = (self.screen_width - modal_width) // 2
                 modal_y = (self.screen_height - modal_height) // 2
-                
-                # Create the modal window
                 self.options_modal = pygame_gui.elements.UIWindow(
                     pygame.Rect(modal_x, modal_y, modal_width, modal_height),
                     window_display_title='Options',
                     manager=self.ui_manager,
                     object_id='#options_modal'
                 )
-                
-                # Add some example options (we can expand these later)
                 button_width = 200
                 button_height = 40
                 button_x = (modal_width - button_width) // 2
-                
-                # Volume Slider
                 self.volume_slider = pygame_gui.elements.UIHorizontalSlider(
                     relative_rect=pygame.Rect(button_x, 50, button_width, button_height),
                     start_value=100,
@@ -704,9 +730,7 @@ class Game:
                     container=self.options_modal,
                     object_id='#volume_slider'
                 )
-                self.last_volume_value = 100  # Track the last volume value
-                
-                # Volume Label
+                self.last_volume_value = 100
                 self.volume_label = pygame_gui.elements.UILabel(
                     relative_rect=pygame.Rect(button_x, 20, button_width, 20),
                     text='Volume',
@@ -714,8 +738,28 @@ class Game:
                     container=self.options_modal,
                     object_id='#volume_label'
                 )
-                
-                # Close Button
+                # Radio-style buttons for effects mode
+                self.default_mode_button = pygame_gui.elements.UIButton(
+                    relative_rect=pygame.Rect(button_x, 110, button_width, button_height),
+                    text='Default',
+                    manager=self.ui_manager,
+                    container=self.options_modal,
+                    object_id='#default_mode_button'
+                )
+                self.low_effects_mode_button = pygame_gui.elements.UIButton(
+                    relative_rect=pygame.Rect(button_x, 160, button_width, button_height),
+                    text='Low Effects Mode',
+                    manager=self.ui_manager,
+                    container=self.options_modal,
+                    object_id='#low_effects_mode_button'
+                )
+                self.apply_options_button = pygame_gui.elements.UIButton(
+                    relative_rect=pygame.Rect(button_x, 220, button_width, button_height),
+                    text='Apply',
+                    manager=self.ui_manager,
+                    container=self.options_modal,
+                    object_id='#apply_options_button'
+                )
                 self.close_options_button = pygame_gui.elements.UIButton(
                     relative_rect=pygame.Rect(button_x, modal_height - 60, button_width, button_height),
                     text='Close',
@@ -723,7 +767,14 @@ class Game:
                     container=self.options_modal,
                     object_id='#close_options_button'
                 )
-            
+            # Set the visual state of the buttons
+            self.pending_low_effects_selection = 'Low Effects Mode' if self.low_effects_mode else 'Default'
+            if self.pending_low_effects_selection == 'Low Effects Mode':
+                self.low_effects_mode_button.select()
+                self.default_mode_button.unselect()
+            else:
+                self.default_mode_button.select()
+                self.low_effects_mode_button.unselect()
             self.options_modal_visible = True
             self.options_modal.show()
         else:
