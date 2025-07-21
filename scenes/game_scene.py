@@ -815,7 +815,7 @@ class GameScene:
             if current_count >= tower_limit:
                 if self.invalid_placement_sound:
                     self.invalid_placement_sound.play()
-                return
+            return
 
         # Get tower dimensions (assuming 1x1 if not specified)
         grid_width = tower_data.get('grid_width', 1)

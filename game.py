@@ -754,4 +754,3 @@ class Game:
                                          self.invalid_placement_sound)
         self.game_state = "playing"
 
-            
