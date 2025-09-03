@@ -286,6 +286,8 @@ class TowerSelector:
         total_content_height = current_y
         # Set the virtual size of the scrollable area
         self.button_scroll_container.set_scrollable_area_dimensions((content_width, total_content_height))
+        # Ensure the container is properly refreshed
+        self.button_scroll_container.rebuild()
         # --- End Set Size --- 
 
     def handle_event(self, event):
@@ -356,13 +358,28 @@ class TowerSelector:
         print("Cleared tower selection")
         
     def update_money(self, new_amount):
-        """Update the money display"""
+        """Update the money display and refresh button states"""
         self.money = new_amount
-        self.money_label.set_text(f'Money: ${self.money}') 
+        self.money_label.set_text(f'Money: ${self.money}')
+        self.update_button_states()  # Refresh button states based on new money amount 
 
     def update_tower_counts(self, tower_counts):
         """Update the tower counts and refresh button states."""
         self.tower_counts = tower_counts
+        self.update_button_states()
+        
+    def refresh_selector(self):
+        """Refresh the entire tower selector - useful for debugging or when issues occur."""
+        # Recreate all buttons to ensure they're properly positioned and functional
+        # Clear existing buttons
+        for button in self.tower_buttons.values():
+            button.kill()
+        self.tower_buttons.clear()
+        
+        # Recreate buttons
+        self.create_tower_buttons()
+        
+        # Update button states
         self.update_button_states()
         
     def update_button_states(self):
@@ -375,8 +392,12 @@ class TowerSelector:
                 current_count = self.tower_counts.get(tower_id, 0)
                 at_limit = tower_limit is not None and current_count >= tower_limit
                 
-                # Update button state
-                button.enable() if can_afford and not at_limit else button.disable()
+                # Update button state - ensure buttons are always enabled for hover/selection
+                # Only disable if at tower limit, but keep enabled for money issues (sound will play)
+                if at_limit:
+                    button.disable()
+                else:
+                    button.enable()  # Always enable for hover/interaction, even if can't afford
                 
                 # Update button text to show limit if applicable
                 if tower_limit is not None:
