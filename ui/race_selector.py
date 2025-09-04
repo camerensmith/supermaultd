@@ -48,19 +48,32 @@ class RaceSelector:
         max_img_height = 300
         images_base_path = os.path.join("assets", "images") 
         
-        # Try to create a simple placeholder surface
+        # Try to load supermaul.png as placeholder image
         try:
+            supermaul_path = os.path.join("assets", "images", "supermaul.png")
+            if os.path.exists(supermaul_path):
+                placeholder_img = pygame.image.load(supermaul_path).convert_alpha()
+                # Scale the image to fit the display area
+                self.placeholder_image = pygame.transform.smoothscale(placeholder_img, (max_img_width, max_img_height))
+                print(f"[RaceSelector] Loaded supermaul.png as placeholder image")
+            else:
+                # Fallback: create a simple placeholder surface if supermaul.png doesn't exist
+                self.placeholder_image = pygame.Surface((max_img_width, max_img_height))
+                self.placeholder_image.fill((50, 50, 50)) # Dark gray
+                font = pygame.font.Font(None, 24)
+                text_surf = font.render("No Image", True, (200, 200, 200))
+                text_rect = text_surf.get_rect(center=self.placeholder_image.get_rect().center)
+                self.placeholder_image.blit(text_surf, text_rect)
+                print(f"[RaceSelector] Warning: supermaul.png not found, using text placeholder")
+        except Exception as e:
+            print(f"[RaceSelector] Error loading placeholder image: {e}")
+            # Fallback: create a simple placeholder surface
             self.placeholder_image = pygame.Surface((max_img_width, max_img_height))
             self.placeholder_image.fill((50, 50, 50)) # Dark gray
-            # Optional: Draw text on placeholder
             font = pygame.font.Font(None, 24)
             text_surf = font.render("No Image", True, (200, 200, 200))
             text_rect = text_surf.get_rect(center=self.placeholder_image.get_rect().center)
             self.placeholder_image.blit(text_surf, text_rect)
-        except Exception as e:
-            pass
-            #print(f"Error creating placeholder image: {e}")
-            # self.placeholder_image remains None
             
         for race_id in self.races:
             race_info = self.game_data.get("races", {}).get(race_id, {})
@@ -301,20 +314,13 @@ class RaceSelector:
 
     def set_selection_mode(self, new_mode):
         if new_mode in ['classic', 'advanced', 'wild'] and self.wave_mode != new_mode:
-            #print(f"[RaceSelector] Mode changed to: {new_mode}")
+            print(f"[RaceSelector] Mode changed from {self.wave_mode} to: {new_mode}")
             self.wave_mode = new_mode
             # Clear current selection when mode changes
             self.selected_races = []
             # Unselect all buttons visually
             for _, btn in self.race_buttons:
                 btn.unselect()
-            # Update description/image to default/placeholder
-            self.description_text_box.set_text("Select a race...")
-            display_image = self.placeholder_image
-            if display_image:
-                self.race_image_display.set_image(display_image)
-            else:
-                self.race_image_display.set_image(pygame.Surface((1,1)))
             
             # Update the title label based on the new mode
             if self.title_label: # Check if label exists
@@ -322,6 +328,14 @@ class RaceSelector:
                     self.title_label.set_text('Select Two Races')
                 else:
                     self.title_label.set_text('Select Your Race')
+            
+            # Update description/image to default/placeholder
+            self.description_text_box.set_text("Select a race...")
+            display_image = self.placeholder_image
+            if display_image:
+                self.race_image_display.set_image(display_image)
+            else:
+                self.race_image_display.set_image(pygame.Surface((1,1)))
 
     def handle_event(self, event):
         """Handle pygame_gui events, considering wave_mode"""

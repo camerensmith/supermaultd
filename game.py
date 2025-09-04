@@ -1,8 +1,9 @@
 import pygame
 import os
-from config import WIDTH, HEIGHT, FPS, WINDOWED_FULLSCREEN
+from config import WIDTH, HEIGHT, FPS, WINDOWED_FULLSCREEN, FORCE_RESOLUTION, FIXED_WIDTH, FIXED_HEIGHT
 from scenes.game_scene import GameScene
 from ui.race_selector import RaceSelector
+from background_effects import BackgroundManager
 import pygame_gui
 
 # Define colors if not in config
@@ -22,18 +23,36 @@ class Game:
         pygame.display.set_caption("SuperMauL TD")
         
         # Determine screen dimensions
-        if WINDOWED_FULLSCREEN:
+        if FORCE_RESOLUTION:
+            # Use the auto-detected screen size as the fixed resolution
+            self.screen_width = FIXED_WIDTH  # Auto-detected screen width
+            self.screen_height = FIXED_HEIGHT  # Auto-detected screen height
+            
+            # Create fullscreen window at the detected resolution
+            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), pygame.NOFRAME)
+            self.game_surface = None  # Draw directly to screen (no borders needed)
+            self.offset_x = 0
+            self.offset_y = 0
+            
+            print(f"[Game Init] Fixed Resolution Mode - Auto-Detected:")
+            print(f"  Screen: {self.screen_width}x{self.screen_height}")
+            print(f"  No borders needed - perfect fit!")
+            
+        elif WINDOWED_FULLSCREEN:
             info = pygame.display.Info()
             self.screen_width = info.current_w # Store actual width
             self.screen_height = info.current_h # Store actual height
             flags = pygame.NOFRAME
+            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flags)
+            self.game_surface = None  # No separate game surface needed
+            print(f"[Game Init] Windowed Fullscreen: {self.screen_width}x{self.screen_height}")
         else:
             self.screen_width = WIDTH # Use config width
             self.screen_height = HEIGHT # Use config height
             flags = 0
-        
-        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flags)
-        print(f"[Game Init] Screen Initialized: {self.screen_width}x{self.screen_height}")
+            self.screen = pygame.display.set_mode((self.screen_width, self.screen_height), flags)
+            self.game_surface = None  # No separate game surface needed
+            print(f"[Game Init] Windowed: {self.screen_width}x{self.screen_height}")
         
         self.clock = pygame.time.Clock()
         
@@ -45,6 +64,15 @@ class Game:
         
         # Initialize UI manager with correct size and theme
         self.ui_manager = pygame_gui.UIManager((self.screen_width, self.screen_height), 'theme.json') # Use actual dimensions
+        
+        # --- Initialize Background Effects ---
+        try:
+            self.background_manager = BackgroundManager(self.screen_width, self.screen_height)
+            self.background_manager.set_effect("tessellation")  # Start with tessellation effect
+            print(f"[Game Init] Background effects initialized successfully")
+        except Exception as e:
+            print(f"[Game Init] ERROR initializing background effects: {e}")
+            self.background_manager = None
         
         # --- Game State and Scene Management ---
         # self.scene = None # We manage state directly first
@@ -402,8 +430,41 @@ class Game:
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
                     return
+                # Handle background effect switching
+                elif event.key == pygame.K_1:
+                    if self.background_manager:
+                        self.background_manager.set_effect("tessellation")
+                        print("[Game] Switched to tessellation background")
+                elif event.key == pygame.K_2:
+                    if self.background_manager:
+                        self.background_manager.set_effect("hexagon")
+                        print("[Game] Switched to hexagon background")
+                elif event.key == pygame.K_3:
+                    if self.background_manager:
+                        self.background_manager.set_effect("particles")
+                        print("[Game] Switched to particles background")
             
-            processed_by_manager = self.ui_manager.process_events(event)
+            # Convert mouse position for fixed resolution mode with borders
+            if FORCE_RESOLUTION and hasattr(self, 'game_surface') and self.game_surface and event.type in [pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEMOTION]:
+                # Convert display mouse position to game surface position
+                if hasattr(event, 'pos'):
+                    game_mouse_x = event.pos[0] - self.offset_x
+                    game_mouse_y = event.pos[1] - self.offset_y
+                    # Only process if mouse is within game area
+                    if 0 <= game_mouse_x < self.screen_width and 0 <= game_mouse_y < self.screen_height:
+                        # Create a new event with converted position
+                        new_event = pygame.event.Event(event.type, {
+                            'pos': (game_mouse_x, game_mouse_y),
+                            'button': getattr(event, 'button', None),
+                            'rel': getattr(event, 'rel', None)
+                        })
+                        processed_by_manager = self.ui_manager.process_events(new_event)
+                    else:
+                        processed_by_manager = False  # Mouse outside game area
+                else:
+                    processed_by_manager = self.ui_manager.process_events(event)
+            else:
+                processed_by_manager = self.ui_manager.process_events(event)
             
             # Store pending selection from listbox
             if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION and hasattr(self, 'low_effects_listbox') and event.ui_element == self.low_effects_listbox:
@@ -461,6 +522,13 @@ class Game:
                             self.wave_mode_buttons['classic'].select()
                             self.wave_mode_buttons['advanced'].unselect()
                             self.wave_mode_buttons['wild'].unselect()
+                            # <<< ADD CALL TO set_selection_mode for classic >>>
+                            if hasattr(self.race_selector, 'set_selection_mode'):
+                                self.race_selector.set_selection_mode('classic')
+                            # <<< END ADD CALL >>>
+                            # Update background color scheme
+                            if self.background_manager:
+                                self.background_manager.set_color_scheme('classic')
                             # Update active image
                             self.active_title_img = self.title_classic_img if self.title_classic_img else self.placeholder_surface
                             if self.active_title_img:
@@ -486,6 +554,9 @@ class Game:
                             if hasattr(self.race_selector, 'set_selection_mode'):
                                 self.race_selector.set_selection_mode('advanced')
                             # <<< END ADD CALL >>>
+                            # Update background color scheme
+                            if self.background_manager:
+                                self.background_manager.set_color_scheme('advanced')
                             # Update active image
                             self.active_title_img = self.title_advanced_img if self.title_advanced_img else self.placeholder_surface
                             if self.active_title_img:
@@ -511,6 +582,9 @@ class Game:
                             if hasattr(self.race_selector, 'set_selection_mode'):
                                 self.race_selector.set_selection_mode('wild')
                             # <<< END ADD CALL >>>
+                            # Update background color scheme
+                            if self.background_manager:
+                                self.background_manager.set_color_scheme('wild')
                             # Update active image
                             self.active_title_img = self.title_wild_img if self.title_wild_img else self.placeholder_surface
                             if self.active_title_img:
@@ -593,6 +667,10 @@ class Game:
         self.time_delta = self.clock.tick(FPS) / 1000.0
         self.current_game_time = pygame.time.get_ticks() / 1000.0
         
+        # Update background effects
+        if self.background_manager:
+            self.background_manager.update()
+        
         # Update UI manager first - crucial for button states, etc.
         self.ui_manager.update(self.time_delta)
         
@@ -628,25 +706,37 @@ class Game:
 
     def draw(self):
         """Draw the game state to the screen"""
-        self.screen.fill(self.BACKGROUND_COLOR)
+        # Determine which surface to draw to
+        if FORCE_RESOLUTION and hasattr(self, 'game_surface') and self.game_surface:
+            # Draw to game surface at fixed resolution (with borders)
+            target_surface = self.game_surface
+        else:
+            # Draw directly to screen (no borders needed)
+            target_surface = self.screen
+        
+        # Draw the animated background first
+        if self.background_manager:
+            self.background_manager.draw(target_surface)
+        else:
+            target_surface.fill(self.BACKGROUND_COLOR)  # Fallback to solid color
         
         # Draw based on game state
         if self.game_state == "race_selection":
             # --- Draw Title Image or Placeholder FIRST --- 
             if self.active_title_img and self.title_rect:
-                self.screen.blit(self.active_title_img, self.title_rect)
+                target_surface.blit(self.active_title_img, self.title_rect)
             else:
                  print("[Draw] No active title image or rect available.")
             # --- End Title Image Draw --- 
             
             # UI Manager draws the RaceSelector UI elements AND our new buttons
-            self.ui_manager.draw_ui(self.screen)
+            self.ui_manager.draw_ui(target_surface)
             
         elif self.game_state == "playing" and self.active_game_scene:
             # Draw the active game scene
-            self.active_game_scene.draw(self.screen, self.time_delta, self.current_game_time)
+            self.active_game_scene.draw(target_surface, self.time_delta, self.current_game_time)
             # UI Manager still needs to be drawn for in-game UI (if any)
-            self.ui_manager.draw_ui(self.screen) 
+            self.ui_manager.draw_ui(target_surface) 
             
         elif self.game_state == "error":
              # Example: Draw an error message
@@ -654,22 +744,29 @@ class Game:
                  font = pygame.font.Font(None, 48)
                  error_text = font.render("Error Initializing Game Scene!", True, RED)
                  text_rect = error_text.get_rect(center=(self.screen_width // 2, self.screen_height // 2))
-                 self.screen.blit(error_text, text_rect)
+                 target_surface.blit(error_text, text_rect)
              except Exception as font_e:
                  print(f"[Draw] Error rendering error text: {font_e}")
              # Draw UI manager even in error state if needed
-             self.ui_manager.draw_ui(self.screen)
+             self.ui_manager.draw_ui(target_surface)
              
         else: # Fallback if state is unknown or GameScene not ready
              # Draw UI manager which might contain some default state or message
-             self.ui_manager.draw_ui(self.screen)
+             self.ui_manager.draw_ui(target_surface)
 
         # --- Draw Custom Cursor (if loaded) LAST --- 
         if self.custom_cursor_image:
             cursor_pos = pygame.mouse.get_pos()
-            # Draw the cursor image with its top-left corner at the mouse position
+            # Always draw cursor at the actual mouse position on the display
             self.screen.blit(self.custom_cursor_image, cursor_pos)
         # --- End Custom Cursor --- 
+
+        # For fixed resolution mode with borders, blit the game surface to the display
+        if FORCE_RESOLUTION and hasattr(self, 'game_surface') and self.game_surface:
+            # Fill screen with black
+            self.screen.fill((0, 0, 0))
+            # Blit the game surface centered on the display
+            self.screen.blit(self.game_surface, (self.offset_x, self.offset_y))
 
         # Flip the display AFTER all drawing is done
         pygame.display.flip()

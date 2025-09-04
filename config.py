@@ -1,9 +1,19 @@
 import os
 
 # Window settings
-WINDOWED_FULLSCREEN = True # Set to True for borderless fullscreen
-WIDTH = 1280  # Used if WINDOWED_FULLSCREEN is False
-HEIGHT = 720 # Used if WINDOWED_FULLSCREEN is False
+WINDOWED_FULLSCREEN = False # Set to False to force fixed resolution with black borders
+FORCE_RESOLUTION = True # Force game to always render at FIXED_WIDTH x FIXED_HEIGHT
+
+# Auto-detect screen size and use it as the standard resolution
+import pygame
+pygame.init()
+display_info = pygame.display.Info()
+FIXED_WIDTH = display_info.current_w  # Use your actual screen width
+FIXED_HEIGHT = display_info.current_h  # Use your actual screen height
+pygame.quit()
+
+WIDTH = FIXED_WIDTH  # Used if WINDOWED_FULLSCREEN is False
+HEIGHT = FIXED_HEIGHT # Used if WINDOWED_FULLSCREEN is False
 FPS = 60
 
 # Layout settings

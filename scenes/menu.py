@@ -2,6 +2,7 @@ import pygame
 import pygame_gui
 from config import *
 from scenes.game_scene import GameScene
+from background_effects import BackgroundManager
 import json
 import os
 
@@ -22,6 +23,16 @@ class MenuScene:
         self.font = pygame.font.Font(None, 36)
         self.title_font = pygame.font.Font(None, 64)
         self.desc_font = pygame.font.Font(None, 28)
+        
+        # --- Initialize Background Effects ---
+        try:
+            self.background_manager = BackgroundManager(self.screen_width, self.screen_height)
+            self.background_manager.set_effect("tessellation")  # Start with tessellation effect
+            print(f"[MenuScene Init] Background effects initialized successfully")
+            print(f"[MenuScene Init] Screen size: {self.screen_width}x{self.screen_height}")
+        except Exception as e:
+            print(f"[MenuScene Init] ERROR initializing background effects: {e}")
+            self.background_manager = None
         
         # --- Load Title Image ---
         self.title_image = None # Initialize as None
@@ -171,6 +182,27 @@ class MenuScene:
                 if self.selected_race_option != prev_selected:
                     self.update_race_preview()
                     self.update_selected_race_highlight()
+        
+        # Handle background effect switching (works in any state)
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_1:
+                if self.background_manager:
+                    self.background_manager.set_effect("tessellation")
+                    print("[MenuScene] Switched to tessellation background")
+                else:
+                    print("[MenuScene] ERROR: background_manager is None, cannot switch effects")
+            elif event.key == pygame.K_2:
+                if self.background_manager:
+                    self.background_manager.set_effect("hexagon")
+                    print("[MenuScene] Switched to hexagon background")
+                else:
+                    print("[MenuScene] ERROR: background_manager is None, cannot switch effects")
+            elif event.key == pygame.K_3:
+                if self.background_manager:
+                    self.background_manager.set_effect("particles")
+                    print("[MenuScene] Switched to particles background")
+                else:
+                    print("[MenuScene] ERROR: background_manager is None, cannot switch effects")
 
     def handle_selection(self):
         selected_text = self.main_options[self.selected_main_option]
@@ -195,13 +227,23 @@ class MenuScene:
             self.game.running = False
             
     def update(self):
+        # Update background effects
+        if self.background_manager:
+            self.background_manager.update()
+        else:
+            print("[MenuScene Update] WARNING: background_manager is None")
+        
         if self.manager:
             time_delta = self.game.clock.tick(60)/1000.0
             self.manager.update(time_delta)
 
     def draw(self, screen):
-        # Clear the screen first
-        screen.fill((0, 0, 0))  # Black background
+        # Draw the animated background first
+        if self.background_manager:
+            self.background_manager.draw(screen)
+        else:
+            print("[MenuScene Draw] WARNING: background_manager is None, using black background")
+            screen.fill((0, 0, 0))  # Fallback to black background
         
         # Draw state-specific content (like panels, backgrounds, non-pygame_gui elements)
         if self.state == "main":
@@ -233,9 +275,9 @@ class MenuScene:
         # --- End Draw Title Image ---
 
     def draw_main_menu(self, screen):
-        # Draw semi-transparent background for menu
+        # Draw very light overlay for menu (much more transparent to show tessellation)
         menu_surface = pygame.Surface((self.screen_width, self.screen_height), pygame.SRCALPHA)
-        menu_surface.fill((0, 0, 0, 128))  # Semi-transparent black
+        menu_surface.fill((0, 0, 0, 30))  # Very light overlay to show tessellation background
         
         # Draw menu options
         for i, option in enumerate(self.main_options):
@@ -244,10 +286,25 @@ class MenuScene:
             text_rect = text.get_rect(center=(self.screen_width // 2, self.screen_height // 2 + i * 50))
             menu_surface.blit(text, text_rect)
         
+        # Draw background effect instructions
+        instructions = [
+            "Press 1, 2, 3 to change background effect",
+            "1=Tessellation, 2=Hexagon, 3=Particles"
+        ]
+        for i, instruction in enumerate(instructions):
+            text = self.desc_font.render(instruction, True, GRAY)
+            text_rect = text.get_rect(center=(self.screen_width // 2, self.screen_height - 80 + i * 25))
+            menu_surface.blit(text, text_rect)
+        
         # Blit the menu surface onto the screen
         screen.blit(menu_surface, (0, 0))
 
     def draw_race_select(self, screen):
+        # Draw very light overlay for better text readability (show tessellation background)
+        overlay_surface = pygame.Surface((self.screen_width, self.screen_height), pygame.SRCALPHA)
+        overlay_surface.fill((0, 0, 0, 40))  # Very light overlay to show tessellation background
+        screen.blit(overlay_surface, (0, 0))
+        
         # Draw the Description Panel Outline (right side)
         pygame.draw.rect(screen, GRAY, self.preview_panel_rect, 2)
         
