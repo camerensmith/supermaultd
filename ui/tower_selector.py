@@ -23,6 +23,9 @@ class TowerSelector:
         self.manager = manager
         self.selected_tower = None
         self.tower_buttons = {} 
+        self.tower_info_boxes = {}
+        self.tower_images = {}
+        self.expanded_tower_id = None
         self.money = initial_money
         self.damage_type_data = damage_type_data # Store damage type data
         self.click_sound = click_sound # Store sound effect
@@ -271,15 +274,37 @@ class TowerSelector:
                 image_rel_y = (button_height - image_size) // 2 # Center vertically within button area
                 # Image position is relative to the scroll container
                 image_rect = pygame.Rect(image_rel_x, button_rect.top + image_rel_y, image_size, image_size)
-                pygame_gui.elements.UIImage(
+                img_elem = pygame_gui.elements.UIImage(
                     relative_rect=image_rect, 
                     image_surface=preview_image, 
                     manager=self.manager, 
                     container=self.button_scroll_container.get_container() # Add to scroll container
                 )
+                # Track image element for cleanup on rebuilds
+                self.tower_images[tower_id] = img_elem
 
-            # Update Y for next button (relative to scroll container)
-            current_y += button_height + padding
+            # --- Expanded Info Box (accordion style) ---
+            if self.expanded_tower_id == tower_id:
+                inline_html = tooltip_text
+                # Estimate height by line count with caps
+                approx_lines = inline_html.count('<br>') + 1
+                line_px = 18
+                padding_px = 12
+                max_height = 420
+                info_height_local = min(max_height, padding_px + approx_lines * line_px)
+
+                info_rect = pygame.Rect(0, button_rect.bottom + 4, content_width, info_height_local)
+                info_box = pygame_gui.elements.UITextBox(
+                    html_text=inline_html,
+                    relative_rect=info_rect,
+                    manager=self.manager,
+                    container=self.button_scroll_container.get_container(),
+                    object_id='#tower_info_inline'
+                )
+                self.tower_info_boxes[tower_id] = info_box
+                current_y += button_height + padding + info_height_local + padding
+            else:
+                current_y += button_height + padding
             
         # --- Set Scrollable Area Size --- 
         # After loop, current_y holds the total height needed + final padding
@@ -308,11 +333,37 @@ class TowerSelector:
                 tower_data = self.available_towers.get(clicked_tower_id)
                 can_afford = tower_data and self.money >= tower_data['cost']
 
+                # Toggle accordion expansion independent of affordability
+                if self.expanded_tower_id == clicked_tower_id:
+                    self.expanded_tower_id = None
+                else:
+                    self.expanded_tower_id = clicked_tower_id
+
+                # Rebuild buttons and info boxes to reflect new layout
+                for button in list(self.tower_buttons.values()):
+                    try:
+                        button.kill()
+                    except Exception:
+                        pass
+                self.tower_buttons.clear()
+                for info in list(self.tower_info_boxes.values()):
+                    try:
+                        info.kill()
+                    except Exception:
+                        pass
+                self.tower_info_boxes.clear()
+                for img in list(self.tower_images.values()):
+                    try:
+                        img.kill()
+                    except Exception:
+                        pass
+                self.tower_images.clear()
+                self.create_tower_buttons()
+
                 if clicked_tower_id == self.selected_tower:
                     # Clicked the already selected tower - Deselect it
                     self.selected_tower = None
                     clicked_button.unselect() # Visually deselect
-                    #print("Deselected tower by clicking active button")
                 elif can_afford:
                     # Clicked a new, affordable tower - Select it
                     self.selected_tower = clicked_tower_id
@@ -322,16 +373,13 @@ class TowerSelector:
                             btn.select()
                         else:
                             btn.unselect()
-                    #print(f"Selected tower: {clicked_tower_id}")
                 else:
                     # Clicked an unaffordable tower - Play sound
                     if self.cannot_select_sound: 
                         self.cannot_select_sound.play()
-                    # (Maybe add other visual feedback later?)
-                    #print("Not enough money to select this tower!")
                     # Ensure nothing is selected internally if can't afford
                     if self.selected_tower == clicked_tower_id:
-                         self.selected_tower = None # Should not happen here, but safe
+                         self.selected_tower = None
                          clicked_button.unselect()
         
         # Let the manager process the event regardless of our handling
@@ -375,7 +423,19 @@ class TowerSelector:
         for button in self.tower_buttons.values():
             button.kill()
         self.tower_buttons.clear()
-        
+        for info in self.tower_info_boxes.values():
+            try:
+                info.kill()
+            except Exception:
+                pass
+        self.tower_info_boxes.clear()
+        for img in self.tower_images.values():
+            try:
+                img.kill()
+            except Exception:
+                pass
+        self.tower_images.clear()
+
         # Recreate buttons
         self.create_tower_buttons()
         
