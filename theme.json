@@ -35,6 +35,119 @@
         }
     },
 
+    "button": {
+        "misc": {
+            "shape": "rounded_rectangle",
+            "shape_corner_radius": "8",
+            "border_width": "2",
+            "padding": "10,8"
+        },
+        "colours": {
+            "normal_bg": "#2B2F33",
+            "hovered_bg": "#353B40",
+            "disabled_bg": "#202428",
+            "selected_bg": "#3E6CAE",
+            "active_bg": "#3E6CAE",
+            "normal_text": "#E6E6E6",
+            "hovered_text": "#FFFFFF",
+            "disabled_text": "#808080",
+            "selected_text": "#FFFFFF",
+            "active_text": "#FFFFFF",
+            "normal_border": "#495057",
+            "hovered_border": "#5A6268",
+            "disabled_border": "#343A40",
+            "selected_border": "#4F82C6",
+            "active_border": "#4F82C6"
+        }
+    },
+
+    "button.#confirm_button": {
+        "misc": {
+            "shape": "rounded_rectangle",
+            "shape_corner_radius": "10",
+            "border_width": "0",
+            "padding": "12,10"
+        },
+        "colours": {
+            "normal_bg": "#3E8E41",
+            "hovered_bg": "#46A149",
+            "active_bg": "#2E6E31",
+            "normal_text": "#FFFFFF",
+            "hovered_text": "#FFFFFF",
+            "active_text": "#FFFFFF"
+        }
+    },
+
+    "button.#menu_button": {
+        "misc": {
+            "shape": "rounded_rectangle",
+            "shape_corner_radius": "12",
+            "border_width": "2",
+            "padding": "14,12"
+        },
+        "colours": {
+            "normal_bg": "#2C2F36",
+            "hovered_bg": "#343943",
+            "active_bg": "#3E6CAE",
+            "normal_text": "#FFFFFF",
+            "hovered_text": "#FFFFFF",
+            "active_text": "#FFFFFF",
+            "normal_border": "#50545B",
+            "hovered_border": "#6B717A",
+            "active_border": "#4F82C6"
+        }
+    },
+
+    "panel": {
+        "misc": {
+            "shape": "rounded_rectangle",
+            "shape_corner_radius": "14",
+            "border_width": "1",
+            "padding": "12,12"
+        },
+        "colours": {
+            "dark_bg": "#14171AEE",
+            "normal_border": "#3A3F44"
+        }
+    },
+
+    "panel.#race_selector_panel": {
+        "misc": {
+            "shape": "rounded_rectangle",
+            "shape_corner_radius": "14",
+            "border_width": "1",
+            "padding": "12,12"
+        },
+        "colours": {
+            "dark_bg": "#0E1114EE",
+            "normal_border": "#3A3F44"
+        }
+    },
+
+    "label": {
+        "colours": {
+            "normal_text": "#F0F3F6",
+            "selected_text": "#FFFFFF"
+        }
+    },
+
+    "label.#money_label": {
+        "colours": {
+            "normal_text": "#FFD166"
+        }
+    },
+
+    "text_box.#description_box": {
+        "misc": {
+            "padding": "8,8"
+        },
+        "colours": {
+            "normal_text": "#E6E6E6",
+            "dark_bg": "#111418CC",
+            "normal_border": "#2E3439"
+        }
+    },
+
     "tool_tip":
     {
         "misc": {

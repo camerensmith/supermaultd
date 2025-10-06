@@ -121,6 +121,11 @@ class MenuScene:
         # Need access to the UIManager
         self.manager = self.game.manager # Assuming game instance has a manager
 
+        # --- Main Menu UI (pygame_gui) ---
+        self.main_menu_panel = None
+        self.main_menu_buttons = {}
+        self.create_main_menu_ui()
+
     def load_race_data(self, file_path):
         """Loads race names and descriptions from the JSON file."""
         races = {}
@@ -204,6 +209,18 @@ class MenuScene:
                 else:
                     print("[MenuScene] ERROR: background_manager is None, cannot switch effects")
 
+        # Handle pygame_gui button presses
+        if event.type == pygame_gui.UI_BUTTON_PRESSED and self.state == "main":
+            if event.ui_element in self.main_menu_buttons.values():
+                # Map the pressed button back to the option text
+                for label, btn in self.main_menu_buttons.items():
+                    if event.ui_element == btn:
+                        # Update selected and handle selection
+                        if label in self.main_options:
+                            self.selected_main_option = self.main_options.index(label)
+                        self.handle_selection()
+                        break
+
     def handle_selection(self):
         selected_text = self.main_options[self.selected_main_option]
         if selected_text == "Start Game":
@@ -220,6 +237,7 @@ class MenuScene:
                 print("Error: No race selected!")
         elif selected_text == "Select Race":
             self.state = "race_select"
+            self.toggle_main_menu_ui(visible=False)
             self.create_race_list_ui()
         elif selected_text == "Options":
             pass
@@ -275,28 +293,9 @@ class MenuScene:
         # --- End Draw Title Image ---
 
     def draw_main_menu(self, screen):
-        # Draw very light overlay for menu (much more transparent to show tessellation)
+        # Keep a subtle overlay for readability
         menu_surface = pygame.Surface((self.screen_width, self.screen_height), pygame.SRCALPHA)
-        menu_surface.fill((0, 0, 0, 30))  # Very light overlay to show tessellation background
-        
-        # Draw menu options
-        for i, option in enumerate(self.main_options):
-            color = WHITE if i == self.selected_main_option else GRAY
-            text = self.font.render(option, True, color)
-            text_rect = text.get_rect(center=(self.screen_width // 2, self.screen_height // 2 + i * 50))
-            menu_surface.blit(text, text_rect)
-        
-        # Draw background effect instructions
-        instructions = [
-            "Press 1, 2, 3 to change background effect",
-            "1=Tessellation, 2=Hexagon, 3=Particles"
-        ]
-        for i, instruction in enumerate(instructions):
-            text = self.desc_font.render(instruction, True, GRAY)
-            text_rect = text.get_rect(center=(self.screen_width // 2, self.screen_height - 80 + i * 25))
-            menu_surface.blit(text, text_rect)
-        
-        # Blit the menu surface onto the screen
+        menu_surface.fill((0, 0, 0, 30))
         screen.blit(menu_surface, (0, 0))
 
     def draw_race_select(self, screen):
@@ -367,6 +366,9 @@ class MenuScene:
             self.race_list_labels.append(label)
         self.update_selected_race_highlight()
 
+        # Ensure main menu UI stays hidden while in race_select
+        self.toggle_main_menu_ui(visible=False)
+
     def clear_race_list_ui(self):
         for label in self.race_list_labels:
             label.kill()
@@ -379,6 +381,10 @@ class MenuScene:
             else:
                 label.set_object_id("#race_label")
             label.rebuild()
+
+        # If we returned to main state elsewhere, ensure visibility toggles back
+        if self.state == "main":
+            self.toggle_main_menu_ui(visible=True)
         
     def draw_text_wrapped(self, surface, text, font, color, rect):
         words = text.split(' ')
@@ -401,3 +407,65 @@ class MenuScene:
             img = font.render(line, True, color)
             surface.blit(img, (rect.left, y))
             y += line_height
+
+    def create_main_menu_ui(self):
+        if not self.manager:
+            return
+        # Clear existing in case of re-entry
+        self.clear_main_menu_ui()
+
+        panel_width = int(self.screen_width * 0.4)
+        panel_height = 280
+        panel_x = (self.screen_width - panel_width) // 2
+        panel_y = int(self.screen_height * 0.35)
+
+        import pygame as _pg  # local alias to avoid shadowing
+        self.main_menu_panel = pygame_gui.elements.UIPanel(
+            relative_rect=_pg.Rect(panel_x, panel_y, panel_width, panel_height),
+            manager=self.manager,
+            object_id='#main_menu_panel'
+        )
+
+        # Create vertically stacked buttons
+        button_height = 48
+        button_width = panel_width - 40
+        current_y = 20
+        spacing = 12
+
+        for option in self.main_options:
+            btn_rect = _pg.Rect(20, current_y, button_width, button_height)
+            btn = pygame_gui.elements.UIButton(
+                relative_rect=btn_rect,
+                text=option,
+                manager=self.manager,
+                container=self.main_menu_panel,
+                object_id='#menu_button'
+            )
+            self.main_menu_buttons[option] = btn
+            current_y += button_height + spacing
+
+    def clear_main_menu_ui(self):
+        for btn in list(self.main_menu_buttons.values()):
+            try:
+                btn.kill()
+            except Exception:
+                pass
+        self.main_menu_buttons.clear()
+        if self.main_menu_panel is not None:
+            try:
+                self.main_menu_panel.kill()
+            except Exception:
+                pass
+            self.main_menu_panel = None
+
+    def toggle_main_menu_ui(self, visible=True):
+        if not self.main_menu_panel:
+            return
+        if visible:
+            self.main_menu_panel.show()
+            for btn in self.main_menu_buttons.values():
+                btn.show()
+        else:
+            self.main_menu_panel.hide()
+            for btn in self.main_menu_buttons.values():
+                btn.hide()
