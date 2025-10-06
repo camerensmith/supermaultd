@@ -187,6 +187,8 @@ SuperMaulTD features a wide array of races (factions), each with a unique theme,
 - See [Damage & Effects](#damage--effects) for a summary of all implemented and planned effects.
 - For full technical details, see `data/tower_races.json` and in-game encyclopedia.
 
+https://lucid.app/lucidchart/0958e48e-ec1e-4be5-88b3-c9a945190759/edit?viewport_loc=-785%2C-736%2C4246%2C2161%2C0_0&invitationId=inv_cb3c4bc4-da41-4435-aaa8-964046aee371
+
 ---
 
 Feel free to submit issues and pull requests! 
