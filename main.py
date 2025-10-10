@@ -2,7 +2,8 @@ import pygame
 import json
 import os
 # Keep the Game import from the original structure
-from game import Game 
+from game import Game
+from version import get_version 
 
 def load_game_data(file_path):
     """
@@ -16,13 +17,17 @@ def load_game_data(file_path):
     return data
 
 def main():
+    # Display version information
+    print(f"SupermaulTD v{get_version()}")
+    print("=" * 50)
+    
     # Initialize Pygame
     pygame.init()
     pygame.mixer.init()
     
     game_data = {} # Default to empty data
     try:
-        # Define paths
+        # Define paths - use relative paths for browser compatibility
         current_dir = os.path.dirname(os.path.abspath(__file__))
         data_dir = os.path.join(current_dir, 'data')
         os.makedirs(data_dir, exist_ok=True) # Ensure data directory exists
@@ -93,7 +98,6 @@ def main():
         # traceback.print_exc()
     
     # Create and run the Game object, passing the consolidated data
-    # Note: The Game class in game.py needs to be updated
     game = Game(game_data) 
     game.run()
 
@@ -101,5 +105,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-# Clean up old comments

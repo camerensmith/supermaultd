@@ -9,7 +9,11 @@ import sys
 import subprocess
 import shutil
 import platform
+import json
+import zipfile
 from pathlib import Path
+from datetime import datetime
+from version import get_version, get_version_info, update_version_file
 
 def run_command(command, description):
     """Run a command and handle errors."""
@@ -241,6 +245,183 @@ def get_folder_size(folder_path):
                 total_size += os.path.getsize(filepath)
     return total_size / (1024 * 1024)  # Convert to MB
 
+def update_version_info():
+    """Update version information and create version files."""
+    print("\n📝 Updating version information...")
+    
+    version_info = get_version_info()
+    print(f"  Current version: {version_info['version']}")
+    print(f"  Build date: {version_info['build_date']}")
+    
+    # Create version.json for GitHub releases
+    version_data = {
+        "version": version_info['version'],
+        "build_date": version_info['build_date'],
+        "build_timestamp": version_info['build_timestamp'],
+        "platform": platform.system(),
+        "python_version": sys.version.split()[0],
+        "changelog": {
+            "v0.3.2-experimental": [
+                "Fixed Vortex Monument placement bug",
+                "Fixed limited tower placement issues", 
+                "Added visual feedback for tower limits",
+                "Updated tower selector UI with count display",
+                "Enhanced placement validation system"
+            ]
+        }
+    }
+    
+    with open('version.json', 'w') as f:
+        json.dump(version_data, f, indent=2)
+    
+    print("  ✅ Created version.json")
+    
+    # Update version in main.py if it exists
+    if os.path.exists('main.py'):
+        with open('main.py', 'r') as f:
+            content = f.read()
+        
+        # Add version display if not already present
+        if 'version' not in content.lower():
+            version_import = "from version import get_version\n"
+            version_display = f'    print(f"SupermaulTD v{get_version()}")\n'
+            
+            # Add import at the top
+            if 'from version import' not in content:
+                lines = content.split('\n')
+                import_line = 0
+                for i, line in enumerate(lines):
+                    if line.startswith('import ') or line.startswith('from '):
+                        import_line = i + 1
+                    elif line.strip() == '':
+                        continue
+                    else:
+                        break
+                lines.insert(import_line, version_import)
+                content = '\n'.join(lines)
+            
+            # Add version display in main function
+            if 'def main():' in content and 'print(f"SupermaulTD v' not in content:
+                content = content.replace(
+                    'def main():',
+                    f'def main():\n    print(f"SupermaulTD v{get_version()}")\n    print("=" * 50)'
+                )
+        
+        with open('main.py', 'w') as f:
+            f.write(content)
+    
+    return version_info
+
+def create_github_release_notes():
+    """Create release notes for GitHub."""
+    version_info = get_version_info()
+    version = version_info['version']
+    
+    release_notes = f"""# SupermaulTD {version}
+
+## 🎮 Game Updates
+
+### 🐛 Bug Fixes
+- **Fixed Vortex Monument placement bug** - Limited towers now place correctly
+- **Fixed tower limit enforcement** - Proper validation prevents placement when limit reached
+- **Fixed missing return statement** - Tower placement logic now works as intended
+
+### ✨ New Features  
+- **Visual feedback for tower limits** - Red floating text when limit reached
+- **Enhanced tower selector UI** - Shows current count vs limit (e.g., "Vortex Monument (2/5)")
+- **Success placement feedback** - Green floating text confirms successful placement
+- **Improved placement validation** - Better error handling and user feedback
+
+### 🎨 UI Improvements
+- Tower selector buttons now display limit counts
+- Floating text effects for placement feedback
+- Better visual indicators for limited towers
+
+## 🔧 Technical Changes
+- Enhanced tower placement validation system
+- Improved error handling in placement logic
+- Added comprehensive debug system (removed in final build)
+- Updated build pipeline with versioning
+
+## 📋 System Requirements
+- Windows 10 or later
+- No additional software required (all dependencies included)
+
+## 🚀 How to Play
+1. Double-click `SupermaulTD.exe` to start
+2. Select your race(s) in the main menu
+3. Place towers to defend against enemy waves
+4. Limited towers (like Vortex Monument) have a maximum count of 5
+
+---
+**Build Date:** {version_info['build_date']}  
+**Platform:** {platform.system()}  
+**Python Version:** {sys.version.split()[0]}
+
+Enjoy the game! 🎯
+"""
+    
+    with open('RELEASE_NOTES.md', 'w') as f:
+        f.write(release_notes)
+    
+    print("  ✅ Created RELEASE_NOTES.md")
+    return release_notes
+
+def create_release_package(version_info):
+    """Create a release package for GitHub."""
+    print("\n📦 Creating release package...")
+    
+    version = version_info['version']
+    package_name = f"SupermaulTD_{version.replace('-', '_')}"
+    
+    # Create release directory
+    release_dir = Path('releases')
+    release_dir.mkdir(exist_ok=True)
+    
+    package_dir = release_dir / package_name
+    if package_dir.exists():
+        shutil.rmtree(package_dir)
+    
+    package_dir.mkdir()
+    
+    # Copy distribution files
+    dist_dir = Path('SupermaulTD_Dist')
+    if dist_dir.exists():
+        for item in dist_dir.iterdir():
+            if item.is_file():
+                shutil.copy2(item, package_dir / item.name)
+            else:
+                shutil.copytree(item, package_dir / item.name)
+        print(f"  ✅ Copied distribution files")
+    
+    # Copy additional files
+    additional_files = [
+        'README.md',
+        'RELEASE_NOTES.md', 
+        'version.json',
+        'requirements.txt'
+    ]
+    
+    for file_name in additional_files:
+        if os.path.exists(file_name):
+            shutil.copy2(file_name, package_dir / file_name)
+            print(f"  ✅ Copied {file_name}")
+    
+    # Create zip file
+    zip_path = release_dir / f"{package_name}.zip"
+    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(package_dir):
+            for file in files:
+                file_path = os.path.join(root, file)
+                arc_path = os.path.relpath(file_path, package_dir)
+                zipf.write(file_path, arc_path)
+    
+    print(f"  ✅ Created {zip_path.name}")
+    print(f"  📁 Release package: {package_dir}")
+    print(f"  📦 Zip file: {zip_path}")
+    
+    return zip_path
+
 def main():
     """Main build process."""
     print("🚀 SupermaulTD Build Script")
@@ -251,37 +432,52 @@ def main():
         print("⚠️  Warning: This script is optimized for Windows builds.")
         print("   Building on other platforms may require adjustments.")
     
-    # Step 1: Clean previous builds
+    # Step 1: Update version information
+    version_info = update_version_info()
+    
+    # Step 2: Clean previous builds
     clean_build_dirs()
     
-    # Step 2: Check dependencies
+    # Step 3: Check dependencies
     if not check_dependencies():
         print("❌ Dependency check failed. Exiting.")
         return False
     
-    # Step 3: Create spec file
+    # Step 4: Create spec file
     create_spec_file()
     
-    # Step 4: Build executable
+    # Step 5: Build executable
     if not build_executable():
         print("❌ Build failed. Exiting.")
         return False
     
-    # Step 5: Create distribution package
+    # Step 6: Create distribution package
     if not create_distribution_package():
         print("❌ Distribution package creation failed.")
         return False
     
+    # Step 7: Create GitHub release notes
+    create_github_release_notes()
+    
+    # Step 8: Create release package
+    zip_path = create_release_package(version_info)
+    
     print("\n" + "=" * 50)
     print("🎉 BUILD COMPLETE!")
     print("=" * 50)
-    print("Your game is ready for distribution!")
-    print("📁 Distribution folder: SupermaulTD_Distribution/")
-    print("🎮 Executable: SupermaulTD_Distribution/SupermaulTD.exe")
-    print("\nYou can now:")
-    print("  • Test the executable")
-    print("  • Zip the distribution folder")
-    print("  • Share with others!")
+    print(f"Version: {version_info['version']}")
+    print(f"Build Date: {version_info['build_date']}")
+    print("\n📁 Files created:")
+    print(f"  • Distribution folder: SupermaulTD_Dist/")
+    print(f"  • Release package: {zip_path}")
+    print(f"  • Release notes: RELEASE_NOTES.md")
+    print(f"  • Version info: version.json")
+    print("\n🚀 Ready for GitHub release!")
+    print("\nNext steps:")
+    print("  1. Test the executable")
+    print("  2. Commit changes to git")
+    print("  3. Create GitHub release with the zip file")
+    print("  4. Upload RELEASE_NOTES.md as release description")
     
     return True
 

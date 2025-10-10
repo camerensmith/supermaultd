@@ -815,7 +815,21 @@ class GameScene:
             if current_count >= tower_limit:
                 if self.invalid_placement_sound:
                     self.invalid_placement_sound.play()
-            return
+                
+                # Show floating text feedback for limit reached
+                try:
+                    # Calculate screen position for the floating text
+                    screen_x = grid_x * config.GRID_SIZE + config.UI_PANEL_PADDING
+                    screen_y = grid_y * config.GRID_SIZE + config.UI_PANEL_PADDING
+                    
+                    limit_text = f"Limit Reached ({current_count}/{tower_limit})"
+                    limit_color = (255, 100, 100)  # Red color for limit reached
+                    text_effect = FloatingTextEffect(screen_x, screen_y, limit_text, color=limit_color, duration=2.0, font_size=20)
+                    self.effects.append(text_effect)
+                except Exception as e:
+                    print(f"Error creating limit text effect: {e}")
+                
+                return
 
         # Get tower dimensions (assuming 1x1 if not specified)
         grid_width = tower_data.get('grid_width', 1)
@@ -870,6 +884,26 @@ class GameScene:
         
         # Update tower selector UI
         self.tower_selector.update_tower_counts(self.tower_counts)
+        
+        # Show floating text feedback for successful placement
+        try:
+            # Calculate screen position for the floating text
+            screen_x = grid_x * config.GRID_SIZE + config.UI_PANEL_PADDING
+            screen_y = grid_y * config.GRID_SIZE + config.UI_PANEL_PADDING
+            
+            # Show count if tower has a limit
+            tower_limit = tower_data.get('limit')
+            if tower_limit is not None:
+                current_count = self.tower_counts[selected_tower_id]
+                success_text = f"{tower_data['name']} ({current_count}/{tower_limit})"
+            else:
+                success_text = tower_data['name']
+            
+            success_color = (100, 255, 100)  # Green color for successful placement
+            text_effect = FloatingTextEffect(screen_x, screen_y, success_text, color=success_color, duration=1.5, font_size=18)
+            self.effects.append(text_effect)
+        except Exception as e:
+            print(f"Error creating success text effect: {e}")
         
         # Deduct money
         self.deduct_money(tower_data['cost'])

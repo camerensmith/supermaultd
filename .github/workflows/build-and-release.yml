@@ -1,0 +1,77 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version increment type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+        - patch
+        - minor
+        - major
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+    
+    - name: Update version
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        python -c "
+        from version import increment_patch, increment_minor, increment_major, update_version_file
+        if '${{ github.event.inputs.version_type }}' == 'patch':
+            increment_patch()
+        elif '${{ github.event.inputs.version_type }}' == 'minor':
+            increment_minor()
+        elif '${{ github.event.inputs.version_type }}' == 'major':
+            increment_major()
+        update_version_file()
+        "
+    
+    - name: Build executable
+      run: python build.py
+    
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: SupermaulTD-${{ github.ref_name }}
+        path: |
+          releases/
+          SupermaulTD_Dist/
+          RELEASE_NOTES.md
+          version.json
+    
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          releases/*.zip
+        body_path: RELEASE_NOTES.md
+        draft: false
+        prerelease: ${{ contains(github.ref_name, 'experimental') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
