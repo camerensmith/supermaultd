@@ -6,13 +6,13 @@ import re
 from datetime import datetime
 
 # Current version - update this when releasing
-VERSION = "0.3.2-experimental"
+VERSION = "0.3.3-experimental"
 BUILD_DATE = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 # Version components
 VERSION_MAJOR = 0
 VERSION_MINOR = 3
-VERSION_PATCH = 2
+VERSION_PATCH = 3
 VERSION_SUFFIX = "experimental"
 
 def get_version():
@@ -42,7 +42,7 @@ def increment_minor():
     """Increment minor version (0.3.2 -> 0.4.0)"""
     global VERSION, VERSION_MINOR, VERSION_PATCH
     VERSION_MINOR += 1
-    VERSION_PATCH = 0
+    VERSION_PATCH = 3
     VERSION = f"{VERSION_MAJOR}.{VERSION_MINOR}.{VERSION_PATCH}-{VERSION_SUFFIX}"
     return VERSION
 
@@ -50,8 +50,8 @@ def increment_major():
     """Increment major version (0.3.2 -> 1.0.0)"""
     global VERSION, VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH
     VERSION_MAJOR += 1
-    VERSION_MINOR = 0
-    VERSION_PATCH = 0
+    VERSION_MINOR = 3
+    VERSION_PATCH = 3
     VERSION = f"{VERSION_MAJOR}.{VERSION_MINOR}.{VERSION_PATCH}-{VERSION_SUFFIX}"
     return VERSION
 
@@ -72,8 +72,8 @@ def update_version_file():
     
     # Update version line
     content = re.sub(
-        r'VERSION = "[^"]*"',
-        f'VERSION = "{VERSION}"',
+        r'VERSION = "0.3.3-experimental"]*"',
+        f'VERSION = "0.3.3-experimental"',
         content
     )
     
@@ -94,8 +94,8 @@ def update_version_file():
         content
     )
     content = re.sub(
-        r'VERSION_SUFFIX = "[^"]*"',
-        f'VERSION_SUFFIX = "{VERSION_SUFFIX}"',
+        r'VERSION_SUFFIX = "experimental"]*"',
+        f'VERSION_SUFFIX = "experimental"',
         content
     )
     
