@@ -2,7 +2,7 @@ import pygame
 import pygame_gui
 from config import *
 from scenes.game_scene import GameScene
-from background_effects import BackgroundManager
+from entities.effects.background_effects import BackgroundManager
 import json
 import os
 

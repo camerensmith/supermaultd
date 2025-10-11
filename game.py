@@ -3,7 +3,7 @@ import os
 from config import WIDTH, HEIGHT, FPS, WINDOWED_FULLSCREEN, FORCE_RESOLUTION, FIXED_WIDTH, FIXED_HEIGHT
 from scenes.game_scene import GameScene
 from ui.race_selector import RaceSelector
-from background_effects import BackgroundManager
+from entities.effects.background_effects import BackgroundManager
 import pygame_gui
 
 # Define colors if not in config
