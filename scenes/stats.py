@@ -4,8 +4,9 @@ from config import *
 class StatsScene:
     def __init__(self, game):
         self.game = game
-        self.font = pygame.font.Font(None, 48)
-        self.title_font = pygame.font.Font(None, 64)
+        from utils.fonts import get_font
+        self.font = get_font(48)
+        self.title_font = get_font(64)
         
         # Stats to display
         self.stats = {

@@ -5,6 +5,7 @@ from scenes.game_scene import GameScene
 from ui.race_selector import RaceSelector
 from entities.effects.background_effects import BackgroundManager
 import pygame_gui
+from pygame_gui.core.ui_font_dictionary import UIFontDictionary
 
 # Define colors if not in config
 WHITE = (255, 255, 255)
@@ -62,8 +63,22 @@ class Game:
         # Set up wave file path
         self.wave_file_path = os.path.join("data", "waves.json")
         
+        # Register Friz font globally BEFORE creating UI manager so theme resolves it
+        try:
+            from config import FONT_PATH
+            if os.path.exists(FONT_PATH):
+                UIFontDictionary.get_default().add_font_path('friz_quadrata', FONT_PATH)
+        except Exception as e:
+            print(f"[Game Init] Warning: Could not register Friz font path pre-init: {e}")
+
         # Initialize UI manager with correct size and theme
         self.ui_manager = pygame_gui.UIManager((self.screen_width, self.screen_height), 'theme.json') # Use actual dimensions
+        # Preload commonly used sizes (post-init) to ensure immediate availability
+        try:
+            for sz in (14, 16, 18, 20, 24):
+                self.ui_manager.preload_fonts([{'name': 'friz_quadrata', 'point_size': sz, 'style': 'regular'}])
+        except Exception as e:
+            print(f"[Game Init] Warning: Could not preload Friz font sizes: {e}")
         
         # --- Initialize Background Effects ---
         try:
@@ -244,7 +259,8 @@ class Game:
             self.placeholder_surface = pygame.Surface((placeholder_width, placeholder_height))
             self.placeholder_surface.fill(BLUE)
             try:
-                font = pygame.font.Font(None, 36)
+                from utils.fonts import get_font
+                font = get_font(36)
                 placeholder_text = font.render("TITLE IMG MISSING", True, WHITE)
                 text_rect = placeholder_text.get_rect(center=self.placeholder_surface.get_rect().center)
                 self.placeholder_surface.blit(placeholder_text, text_rect)

@@ -1,6 +1,10 @@
 {
     "defaults":
     {
+        "font": {
+            "name": "friz_quadrata",
+            "size": "16"
+        },
         "colours":
         {
             "normal_bg": "#4c5052",
@@ -42,6 +46,7 @@
             "border_width": "2",
             "padding": "10,8"
         },
+        "font": { "name": "friz_quadrata", "size": "16" },
         "colours": {
             "normal_bg": "#2B2F33",
             "hovered_bg": "#353B40",
@@ -125,6 +130,7 @@
     },
 
     "label": {
+        "font": { "name": "friz_quadrata", "size": "16" },
         "colours": {
             "normal_text": "#F0F3F6",
             "selected_text": "#FFFFFF"

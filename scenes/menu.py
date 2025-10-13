@@ -20,9 +20,10 @@ class MenuScene:
         
         print(f"[MenuScene Init] Screen size: {self.screen_width}x{self.screen_height}")
         
-        self.font = pygame.font.Font(None, 36)
-        self.title_font = pygame.font.Font(None, 64)
-        self.desc_font = pygame.font.Font(None, 28)
+        from utils.fonts import get_font
+        self.font = get_font(36)
+        self.title_font = get_font(64)
+        self.desc_font = get_font(28)
         
         # --- Initialize Background Effects ---
         try:

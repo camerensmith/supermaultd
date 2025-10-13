@@ -184,7 +184,8 @@ class GameScene:
         self.toggle_button_rect = None # Rect for clicking
         self.toggle_padding = 10 # Pixels from corner
         try:
-            self.toggle_font = pygame.font.Font(None, 24) # Default font, size 24
+            from utils.fonts import get_font
+            self.toggle_font = get_font(18)
             off_text = "Wave Menu OFF"
             on_text = "Wave Menu ON"
             text_color = (255, 255, 255) # White text
@@ -212,8 +213,9 @@ class GameScene:
         self.debug_menu_rect = None # Rect for positioning
         self.debug_menu_font = None
         try:
-            # Use a slightly smaller font for the menu content
-            self.debug_menu_font = pygame.font.Font(None, 20)
+            # Use a smaller font for the menu content to fit container
+            from utils.fonts import get_font
+            self.debug_menu_font = get_font(16)
             # <<< REMOVED SURFACE CREATION FROM INIT >>>
             # self.debug_menu_surface = pygame.Surface((self.debug_menu_width, self.debug_menu_height))
             # self.debug_menu_surface.fill((30, 30, 30)) # Dark gray background
@@ -480,7 +482,8 @@ class GameScene:
 
         # --- Font for Countdown Timer ---
         try:
-            self.timer_font = pygame.font.Font(None, 48) # Use default font, size 48
+            from utils.fonts import get_font
+            self.timer_font = get_font(42)
         except Exception as e:
             #print(f"Error loading default font: {e}")
             pass

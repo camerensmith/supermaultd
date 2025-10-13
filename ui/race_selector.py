@@ -60,7 +60,8 @@ class RaceSelector:
                 # Fallback: create a simple placeholder surface if supermaul.png doesn't exist
                 self.placeholder_image = pygame.Surface((max_img_width, max_img_height))
                 self.placeholder_image.fill((50, 50, 50)) # Dark gray
-                font = pygame.font.Font(None, 24)
+                from utils.fonts import get_font
+                font = get_font(24)
                 text_surf = font.render("No Image", True, (200, 200, 200))
                 text_rect = text_surf.get_rect(center=self.placeholder_image.get_rect().center)
                 self.placeholder_image.blit(text_surf, text_rect)
@@ -70,7 +71,8 @@ class RaceSelector:
             # Fallback: create a simple placeholder surface
             self.placeholder_image = pygame.Surface((max_img_width, max_img_height))
             self.placeholder_image.fill((50, 50, 50)) # Dark gray
-            font = pygame.font.Font(None, 24)
+            from utils.fonts import get_font
+            font = get_font(24)
             text_surf = font.render("No Image", True, (200, 200, 200))
             text_rect = text_surf.get_rect(center=self.placeholder_image.get_rect().center)
             self.placeholder_image.blit(text_surf, text_rect)

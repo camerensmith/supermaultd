@@ -87,6 +87,8 @@ IMAGES_DIR = os.path.join(ASSETS_DIR, "images")
 SOUNDS_DIR = os.path.join(ASSETS_DIR, "sounds")
 ENEMY_IMAGES_DIR = os.path.join(ASSETS_DIR, "enemies") # Add path for enemy sprites
 TOWER_IMAGES_DIR = os.path.join(IMAGES_DIR, "towers") # Specify tower image path
+FONTS_DIR = os.path.join(ASSETS_DIR, "fonts")
+FONT_PATH = os.path.join(FONTS_DIR, "Friz Quadrata TT Regular.ttf")
 
 # Animation Constants
 BLOOD_SPLATTER_FADE_DURATION = 0.75 # Seconds for the splatter to fade out

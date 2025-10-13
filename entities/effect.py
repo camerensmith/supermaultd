@@ -261,7 +261,8 @@ class FloatingTextEffect(Effect):
 
         # Load font (Consider loading fonts centrally in GameScene/main later)
         try:
-            self.font = pygame.font.Font(None, font_size)
+            from utils.fonts import get_font
+            self.font = get_font(font_size)
         except Exception as e:
             print(f"Error loading font for FloatingTextEffect: {e}")
             self.font = pygame.font.Font(pygame.font.get_default_font(), font_size)
@@ -1127,7 +1128,8 @@ class FloatingTextEffect:
 
         # Load font (Consider loading fonts centrally in GameScene/main later)
         try:
-            self.font = pygame.font.Font(None, font_size)
+            from utils.fonts import get_font
+            self.font = get_font(font_size)
         except Exception as e:
             print(f"Error loading font for FloatingTextEffect: {e}")
             self.font = pygame.font.Font(pygame.font.get_default_font(), font_size)

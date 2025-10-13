@@ -19,7 +19,8 @@ class Button:
         self.color = color
         self.hover_color = hover_color
         self.current_color = color
-        self.font = pygame.font.Font(None, 36)
+        from utils.fonts import get_font
+        self.font = get_font(36)
         self.is_hovered = False
         
     def handle_event(self, event):
@@ -56,7 +57,8 @@ class TextBox:
         """
         self.rect = pygame.Rect(x, y, width, height)
         self.text = text
-        self.font = pygame.font.Font(None, font_size)
+        from utils.fonts import get_font
+        self.font = get_font(font_size)
         
     def set_text(self, text):
         """Update the text content"""
