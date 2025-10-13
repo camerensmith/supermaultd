@@ -64,6 +64,13 @@ STARTING_LIVES_ADVANCED = 10
 RESTRICTED_TOWER_AREA_HEIGHT = 1  # Number of rows at top and bottom where towers cannot be placed
 RESTRICTED_TOWER_AREA_WIDTH = 1   # Number of columns at left and right where towers cannot be placed
 
+# Fixed grid sizing (lock placeable area to 26w x 24h regardless of screen)
+# Placeable area excludes the restricted border rows/columns defined above
+FIXED_PLACEABLE_WIDTH_TILES = 26
+FIXED_PLACEABLE_HEIGHT_TILES = 24
+FIXED_TOTAL_GRID_WIDTH_TILES = FIXED_PLACEABLE_WIDTH_TILES + (RESTRICTED_TOWER_AREA_WIDTH * 2)  # 28
+FIXED_TOTAL_GRID_HEIGHT_TILES = FIXED_PLACEABLE_HEIGHT_TILES + (RESTRICTED_TOWER_AREA_HEIGHT * 2)  # 26
+
 # Spawn area settings
 SPAWN_AREA_WIDTH = 2  # Width of spawn area in grid cells
 SPAWN_AREA_HEIGHT = 1  # Height of spawn area in grid cells

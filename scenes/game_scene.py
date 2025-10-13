@@ -330,18 +330,15 @@ class GameScene:
         self.panel_x = self.screen_width - self.panel_pixel_width - config.UI_PANEL_PADDING
         self.panel_y = config.UI_PANEL_PADDING
 
-        # Grid dimensions based on remaining space
-        self.usable_grid_pixel_width = self.screen_width - self.panel_pixel_width - (config.UI_PANEL_PADDING * 2)
-        # Calculate grid height based on available space first
-        _available_height = self.screen_height - (config.UI_PANEL_PADDING * 2) # Use space between top/bottom padding
-        self.grid_height = max(1, _available_height // config.GRID_SIZE) # Ensure at least 1 row
-        # Set the usable pixel height to be an exact multiple of grid size
-        self.usable_grid_pixel_height = self.grid_height * config.GRID_SIZE
-        
-        self.grid_width = self.usable_grid_pixel_width // config.GRID_SIZE
-        self.grid_width = max(1, self.grid_width) # Ensure at least 1x1 grid
-        # Recalculate usable_grid_pixel_width to ensure it's an exact multiple of GRID_SIZE
+        # Grid dimensions: lock to fixed tile counts regardless of screen size
+        self.grid_width = config.FIXED_TOTAL_GRID_WIDTH_TILES
+        self.grid_height = config.FIXED_TOTAL_GRID_HEIGHT_TILES
+        # Compute pixel dimensions for drawing the grid area
         self.usable_grid_pixel_width = self.grid_width * config.GRID_SIZE
+        self.usable_grid_pixel_height = self.grid_height * config.GRID_SIZE
+
+        # Align grid area with left padding and leave remaining space to the right for panel
+        # Ensure panel position remains where it was computed above
         self.grid = [[0 for _ in range(self.grid_width)] for _ in range(self.grid_height)]
 
         # Mark ALL restricted areas with value 2
