@@ -1083,7 +1083,7 @@
           "name": "Grenade Launcher", 
           "description": "A bouncing grenade dealing damage to both ground and air units in a large area.",
           "grid_width": 1,
-          "grid_height": 1,
+          "grid_height": 2,
           "cost": 116,
           "damage_min": 150,
           "damage_max": 355,

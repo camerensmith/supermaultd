@@ -6,7 +6,7 @@ from pygame_gui.elements import UIScrollingContainer # Import the scrolling cont
 import os
 
 class TowerSelector:
-    def __init__(self, available_towers, tower_assets, manager, initial_money, panel_rect, damage_type_data, click_sound):
+    def __init__(self, available_towers, tower_assets, manager, initial_money, initial_lives, panel_rect, damage_type_data, click_sound):
         """
         Initialize the tower selection UI panel within the provided rect.
         
@@ -14,6 +14,7 @@ class TowerSelector:
         :param tower_assets: Instance of TowerAssets
         :param manager: pygame_gui UIManager instance
         :param initial_money: The starting money amount from the game scene
+        :param initial_lives: The starting lives amount from the game scene
         :param panel_rect: The pygame.Rect defining the panel's position and size
         :param damage_type_data: Dictionary containing descriptions for damage types
         :param click_sound: Loaded pygame.mixer.Sound object for clicks
@@ -27,6 +28,7 @@ class TowerSelector:
         self.tower_images = {}
         self.expanded_tower_id = None
         self.money = initial_money
+        self.lives = initial_lives
         self.damage_type_data = damage_type_data # Store damage type data
         self.click_sound = click_sound # Store sound effect
         self.tower_counts = {}  # Track number of each tower type built
@@ -60,19 +62,22 @@ class TowerSelector:
         # --- Internal Layout (relative to panel) ---
         current_y = 10 # Start Y for internal elements
 
-        # Add title 
-        title_height = 30
-        title_rect = pygame.Rect(10, current_y, self.panel_width - 20, title_height)
-        self.title_label = pygame_gui.elements.UILabel(
-            relative_rect=title_rect,
-            text='Select Tower',
+        # Remove previous title label ("Select Tower") to reclaim space
+
+        # Add lives display (top of panel)
+        lives_height = 28
+        lives_rect = pygame.Rect(10, current_y, self.panel_width - 20, lives_height)
+        self.lives_label = pygame_gui.elements.UILabel(
+            relative_rect=lives_rect,
+            text=f'Lives: {self.lives}',
             manager=self.manager,
-            container=self.panel
+            container=self.panel,
+            object_id="#lives_label"
         )
-        current_y += title_height + 5
+        current_y += lives_height + 4
         
         # Add money display 
-        money_height = 30
+        money_height = 28
         money_rect = pygame.Rect(10, current_y, self.panel_width - 20, money_height)
         self.money_label = pygame_gui.elements.UILabel(
             relative_rect=money_rect,
@@ -81,7 +86,7 @@ class TowerSelector:
             container=self.panel,
             object_id="#money_label"
         )
-        current_y += money_height + 15
+        current_y += money_height + 12
         
         # --- Create Scrolling Container for Buttons ---
         # Calculate remaining height for the scroll container
@@ -149,7 +154,7 @@ class TowerSelector:
                 manager=self.manager,
                 container=self.button_scroll_container.get_container(), # Get the actual container surface
                 tool_tip_text=tooltip_text,
-                object_id=f"#tower_button_{tower_id}"
+                object_id="#tower_button"
             )
             self.tower_buttons[tower_id] = button
 
@@ -299,6 +304,15 @@ class TowerSelector:
         self.money = new_amount
         self.money_label.set_text(f'Money: ${self.money}')
         self.update_button_states()  # Refresh button states based on new money amount 
+
+    def update_lives(self, new_lives):
+        """Update the lives display label at the top of the panel."""
+        self.lives = new_lives
+        if hasattr(self, 'lives_label'):
+            try:
+                self.lives_label.set_text(f'Lives: {self.lives}')
+            except Exception:
+                pass
 
     def update_tower_counts(self, tower_counts):
         """Update the tower counts and refresh button states."""

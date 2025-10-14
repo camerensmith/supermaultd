@@ -176,6 +176,20 @@ class GameScene:
             #print("Warning: Failed to load assets/effects/explosion.png for self-destruct effect.")
         # --- End Explosion Effect Image Loading ---
 
+        # --- Load Play Area Frame Overlay (single PNG with transparent center) ---
+        self.play_area_frame_image = None
+        try:
+            frame_path = os.path.join("assets", "images", "play_area_frame.png")
+            if os.path.exists(frame_path):
+                self.play_area_frame_image = pygame.image.load(frame_path).convert_alpha()
+            else:
+                # Optional: log a warning once
+                pass
+        except pygame.error:
+            # If image fails to load, continue without overlay
+            self.play_area_frame_image = None
+        # --- End Play Area Frame Overlay Loading ---
+
         # --- Placeholder Toggle Button ---
         self.debug_toggle_state = False # State of the toggle
         self.toggle_font = None
@@ -512,7 +526,8 @@ class GameScene:
             available_towers=self.available_towers, 
             tower_assets=self.tower_assets, 
             manager=self.ui_manager, 
-            initial_money=self.money, 
+            initial_money=self.money,
+            initial_lives=self.lives,
             panel_rect=pygame.Rect(self.panel_x, self.panel_y, self.panel_pixel_width, self.panel_pixel_height),
             damage_type_data=self.damage_type_data,
             click_sound=self.click_sound # Pass sound here
@@ -2098,6 +2113,12 @@ class GameScene:
                 if not instant_loss and self.game_state == GAME_STATE_RUNNING:
                     # Only deduct life if game hasn't ended due to boss
                     self.lives -= 1
+                    # Update tower selector lives display if present
+                    if hasattr(self, 'tower_selector') and self.tower_selector:
+                        try:
+                            self.tower_selector.update_lives(self.lives)
+                        except Exception:
+                            pass
                     # --- Play Life Loss Sound ---
                     if self.loss_life_sound:
                         self.loss_life_sound.play()
@@ -2194,45 +2215,54 @@ class GameScene:
         else:
             grid_bg_surface.fill((20, 20, 20)) # Fallback dark background
         
-        # Draw restricted side columns overlay
-        restricted_col_color = (40, 40, 40, 200) # Darker gray, more opaque
-        restricted_outline_color = (180, 180, 180) # Light gray outline
+        # Draw restricted side columns overlay (fills only; outlines removed to let frame art show)
+        # Icy blue tint for restricted areas
+        restricted_col_color = (120, 180, 255, 200)
         restricted_surface = pygame.Surface((self.usable_grid_pixel_width, self.usable_grid_pixel_height), pygame.SRCALPHA)
         
-        # Top restricted area fill and outline
+        # Top restricted area fill
         top_rect = pygame.Rect(0, 0, self.usable_grid_pixel_width, config.RESTRICTED_TOWER_AREA_HEIGHT * config.GRID_SIZE)
         pygame.draw.rect(restricted_surface, restricted_col_color, top_rect)
-        pygame.draw.rect(restricted_surface, restricted_outline_color, top_rect, 2) # Add outline
 
-        # Bottom restricted area fill and outline
-        # Calculate starting Y based on grid index to ensure alignment
+        # Bottom restricted area fill (aligned to grid)
         bottom_restricted_start_y_grid = self.grid_height - config.RESTRICTED_TOWER_AREA_HEIGHT
         bottom_restricted_start_y_pixel = bottom_restricted_start_y_grid * config.GRID_SIZE
         bottom_rect = pygame.Rect(0, bottom_restricted_start_y_pixel, 
                                 self.usable_grid_pixel_width, config.RESTRICTED_TOWER_AREA_HEIGHT * config.GRID_SIZE)
         pygame.draw.rect(restricted_surface, restricted_col_color, bottom_rect)
-        pygame.draw.rect(restricted_surface, restricted_outline_color, bottom_rect, 2) # Add outline
         
-        # Left restricted area fill and outline
+        # Left restricted area fill
         left_rect = pygame.Rect(0, 0, config.RESTRICTED_TOWER_AREA_WIDTH * config.GRID_SIZE, self.usable_grid_pixel_height)
         pygame.draw.rect(restricted_surface, restricted_col_color, left_rect)
-        pygame.draw.rect(restricted_surface, restricted_outline_color, left_rect, 2) # Add outline
         
-        # Right restricted area fill and outline
+        # Right restricted area fill
         right_rect = pygame.Rect(self.usable_grid_pixel_width - config.RESTRICTED_TOWER_AREA_WIDTH * config.GRID_SIZE, 0, config.RESTRICTED_TOWER_AREA_WIDTH * config.GRID_SIZE, self.usable_grid_pixel_height)
         pygame.draw.rect(restricted_surface, restricted_col_color, right_rect)
-        pygame.draw.rect(restricted_surface, restricted_outline_color, right_rect, 2) # Add outline
         
         grid_bg_surface.blit(restricted_surface, (0, 0))
 
         # Draw grid lines (on grid_bg_surface)
+        # Icy blue grid lines
+        icy_grid_color = (120, 180, 255)
         for x_line in range(0, self.usable_grid_pixel_width + 1, config.GRID_SIZE):
-            pygame.draw.line(grid_bg_surface, (80, 80, 80), (x_line, 0), (x_line, self.usable_grid_pixel_height))
+            pygame.draw.line(grid_bg_surface, icy_grid_color, (x_line, 0), (x_line, self.usable_grid_pixel_height))
         for y_line in range(0, self.usable_grid_pixel_height + 1, config.GRID_SIZE):
-            pygame.draw.line(grid_bg_surface, (80, 80, 80), (0, y_line), (self.usable_grid_pixel_width, y_line))
+            pygame.draw.line(grid_bg_surface, icy_grid_color, (0, y_line), (self.usable_grid_pixel_width, y_line))
             
         # Blit the completed grid surface onto the main screen at top-left
-        screen.blit(grid_bg_surface, (config.UI_PANEL_PADDING, config.UI_PANEL_PADDING)) # Add top/left padding
+        grid_topleft = (config.UI_PANEL_PADDING, config.UI_PANEL_PADDING)
+        screen.blit(grid_bg_surface, grid_topleft) # Add top/left padding
+
+        # Draw play area frame overlay if available (scaled to usable grid area)
+        if self.play_area_frame_image:
+            try:
+                frame_scaled = pygame.transform.scale(
+                    self.play_area_frame_image,
+                    (self.usable_grid_pixel_width, self.usable_grid_pixel_height)
+                )
+                screen.blit(frame_scaled, grid_topleft)
+            except Exception:
+                pass
 
         # --- Draw Spawn and Objective Areas (AFTER grid background is blitted) ---
         # Draw spawn area
@@ -3088,23 +3118,8 @@ class GameScene:
 
     def draw_ui(self, screen):
         """Draw UI elements"""
-        # Draw money and lives
-        font = pygame.font.Font(None, 36)
-        # money_text = font.render(f"Money: ${self.money}", True, (255, 255, 255)) # Commented out money rendering
-        lives_text_surface = font.render(f"Lives: {self.lives}", True, (255, 255, 255))
-        # screen.blit(money_text, (10, 10)) # Commented out money drawing
-        lives_text_rect = lives_text_surface.get_rect()
-        
-        # Center horizontally
-        lives_text_rect.centerx = self.screen_width // 2
-        
-        # Position vertically near the bottom (using bottom padding as reference)
-        lives_text_rect.bottom = self.screen_height - config.UI_PANEL_PADDING
-        
-        # NEW: Center the text rect within the objective area rect
-        lives_text_rect.center = self.objective_area_rect.center
-        
-        screen.blit(lives_text_surface, lives_text_rect)
+        # Lives now display in tower selector panel; nothing to draw here
+        return
         
 
 
