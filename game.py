@@ -341,7 +341,7 @@ class Game:
         advanced_rect = pygame.Rect(button_x_pos, button_y_start + button_height + 10, button_width, button_height)
         self.wave_mode_buttons['advanced'] = pygame_gui.elements.UIButton(
             relative_rect=advanced_rect,
-            text='Advanced',
+            text='Advanced (WIP)',
             manager=self.ui_manager,
             object_id='#advanced_wave_button'
         )
@@ -350,7 +350,7 @@ class Game:
         wild_rect = pygame.Rect(button_x_pos, button_y_start + 2 * (button_height + 10), button_width, button_height)
         self.wave_mode_buttons['wild'] = pygame_gui.elements.UIButton(
             relative_rect=wild_rect,
-            text='Wild',
+            text='Wild (WIP)',
             manager=self.ui_manager,
             object_id='#wild_wave_button'
         )
@@ -594,19 +594,24 @@ class Game:
 
                         # <<< VALIDATE number of races based on mode >>>
                         valid_selection = False
-                        if self.selected_wave_mode == 'classic' and len(selected_races) == 1:
-                            valid_selection = True
-                        # <<< ADD WILD TO 2-RACE CHECK >>>
-                        elif (self.selected_wave_mode == 'advanced' or self.selected_wave_mode == 'wild') and len(selected_races) == 2:
+                        if self.selected_wave_mode == 'classic':
+                            # Check if second race is available for classic mode
+                            second_race_available = hasattr(self.race_selector, 'is_second_race_available') and self.race_selector.is_second_race_available()
+                            if len(selected_races) == 1:
+                                valid_selection = True  # Always allow 1 race
+                            elif len(selected_races) == 2 and second_race_available:
+                                valid_selection = True  # Allow 2 races if unlocked
+                            elif len(selected_races) == 2 and not second_race_available:
+                                print("[Game Event] Invalid Selection: Second race unlocks at wave 10!")
+                            else:
+                                print("[Game Event] Invalid Selection: Classic mode requires 1-2 races.")
+                        # <<< ADD WILD TO 1-RACE CHECK >>>
+                        elif (self.selected_wave_mode == 'advanced' or self.selected_wave_mode == 'wild') and len(selected_races) == 1:
                             valid_selection = True
                         else:
                             # Provide feedback if invalid
-                            if self.selected_wave_mode == 'classic':
-                                print("[Game Event] Invalid Selection: Classic mode requires exactly 1 race.")
-                                # TODO: Show visual feedback to user?
-                            # <<< UPDATE ADVANCED/WILD MESSAGE >>>
-                            elif self.selected_wave_mode == 'advanced' or self.selected_wave_mode == 'wild':
-                                print(f"[Game Event] Invalid Selection: {self.selected_wave_mode.capitalize()} mode requires exactly 2 races.")
+                            if self.selected_wave_mode == 'advanced' or self.selected_wave_mode == 'wild':
+                                print(f"[Game Event] Invalid Selection: {self.selected_wave_mode.capitalize()} mode requires exactly 1 race.")
                                 # TODO: Show visual feedback to user?
                             # Play an error sound?
 
@@ -622,11 +627,11 @@ class Game:
                             current_dir = os.path.dirname(os.path.abspath(__file__))
                             data_dir = os.path.join(current_dir, 'data')
                             # <<< UPDATE WAVE FILENAME LOGIC >>>
-                            if self.selected_wave_mode == 'advanced':
+                            if self.selected_wave_mode == 'classic':
                                 wave_filename = 'waves_advanced.json'
                             elif self.selected_wave_mode == 'wild':
                                 wave_filename = 'waves_wild.json'
-                            else: # Default to classic
+                            else: # Default to advanced
                                 wave_filename = 'waves.json'
                             # <<< END WAVE FILENAME LOGIC >>>
                             wave_file_path = os.path.join(data_dir, wave_filename)

@@ -21,10 +21,10 @@ class TessellationEffect:
         # Define color schemes for different game modes
         self.color_schemes = {
             "classic": [
-                (60, 60, 100),   # Blue
-                (80, 60, 120),   # Purple
-                (70, 70, 130),   # Blue
-                (100, 80, 150),  # Purple
+                (100, 150, 200),  # Icy light blue
+                (80, 130, 180),   # Medium icy blue
+                (60, 110, 160),   # Darker icy blue
+                (40, 90, 140),    # Dark blue
             ],
             "advanced": [
                 (120, 40, 40),   # Dark red

@@ -24,6 +24,9 @@ class RaceSelector:
         self.screen_height = screen_height # Store dimensions
         self.click_sound = click_sound     # Store sound effect
         self.wave_mode = initial_wave_mode  # Store wave mode
+        self.current_wave = 0  # Track current wave for unlock system
+        # On main menu, allow second race selection by default for classic mode
+        self.second_race_unlocked = (initial_wave_mode == 'classic')
         
         # Load and scale title image
         title_image_path = os.path.join("assets", "images", "supermaultd.png")
@@ -219,10 +222,10 @@ class RaceSelector:
             container=self.panel
         )
         # Set initial title based on the mode
-        if self.wave_mode == 'advanced':
-            self.title_label.set_text('Select Two Races')
+        if self.wave_mode == 'classic':
+            self.title_label.set_text('Select up to 2 Races (the second will unlock at wave 10)')
         else:
-            self.title_label.set_text('Select Your Race') # Default for classic or other modes
+            self.title_label.set_text('Seal your fate...') # Default for advanced or other modes
         
         # Calculate space for scrolling container and confirm button on the left
         confirm_button_height = 40
@@ -326,10 +329,10 @@ class RaceSelector:
             
             # Update the title label based on the new mode
             if self.title_label: # Check if label exists
-                if self.wave_mode == 'advanced' or self.wave_mode == 'wild':
-                    self.title_label.set_text('Select Two Races')
+                if self.wave_mode == 'classic':
+                    self.title_label.set_text('Select up to 2 Races (the second will unlock at wave 10)')
                 else:
-                    self.title_label.set_text('Select Your Race')
+                    self.title_label.set_text('Seal your fate...')
             
             # Update description/image to default/placeholder
             self.description_text_box.set_text("Select a race...")
@@ -338,6 +341,28 @@ class RaceSelector:
                 self.race_image_display.set_image(display_image)
             else:
                 self.race_image_display.set_image(pygame.Surface((1,1)))
+    
+    def update_wave(self, wave_number):
+        """Update the current wave and check for unlocks."""
+        self.current_wave = wave_number
+        
+        # Only update unlock status during actual gameplay (not main menu)
+        if wave_number > 0:
+            if self.wave_mode == 'classic' and wave_number >= 10 and not self.second_race_unlocked:
+                self.second_race_unlocked = True
+                print(f"[RaceSelector] Second race unlocked at wave {wave_number}!")
+                # Update title to reflect unlock
+                if self.title_label:
+                    self.title_label.set_text('Select up to 2 Races (Unlocked!)')
+            elif self.wave_mode == 'classic' and wave_number < 10:
+                # During gameplay, lock second race if we're below wave 10
+                self.second_race_unlocked = False
+    
+    def is_second_race_available(self):
+        """Check if second race selection is available."""
+        if self.wave_mode == 'classic':
+            return self.second_race_unlocked
+        return False
 
     def handle_event(self, event):
         """Handle pygame_gui events, considering wave_mode"""
@@ -357,7 +382,28 @@ class RaceSelector:
 
                 # --- Mode-Dependent Selection Logic ---
                 if self.wave_mode == 'classic':
-                    # Classic mode: Select only one
+                    # Classic mode: Select up to two (with unlock system)
+                    if clicked_race_id in self.selected_races:
+                        # Deselect if already selected
+                        self.selected_races.remove(clicked_race_id)
+                        button_pressed.unselect() # Unselect the clicked button
+                    elif len(self.selected_races) < 1:
+                        # Always allow first race selection
+                        self.selected_races.append(clicked_race_id)
+                        button_pressed.select() # Select the clicked button
+                    elif len(self.selected_races) == 1 and self.is_second_race_available():
+                        # Allow second race selection only if unlocked
+                        self.selected_races.append(clicked_race_id)
+                        button_pressed.select() # Select the clicked button
+                    elif len(self.selected_races) == 1 and not self.is_second_race_available():
+                        # Second race not unlocked yet (only during gameplay, not on main menu)
+                        if self.current_wave > 0:  # Only show message during gameplay, not on main menu
+                            print(f"[RaceSelector] Second race unlocks at wave 10! (Current: {self.current_wave})")
+                    else:
+                        # Limit reached, maybe provide feedback (e.g., sound)
+                        print("[RaceSelector] Cannot select more than 2 races in Classic mode.")
+                elif self.wave_mode == 'advanced' or self.wave_mode == 'wild':
+                    # Advanced/Wild mode: Select only one
                     if clicked_race_id not in self.selected_races:
                         self.selected_races = [clicked_race_id]
                         # Update visuals
@@ -366,20 +412,7 @@ class RaceSelector:
                                 btn.select()
                             else:
                                 btn.unselect()
-                    # If already selected, do nothing (classic mode doesn't deselect)
-                elif self.wave_mode == 'advanced' or self.wave_mode == 'wild':
-                    # Advanced/Wild mode: Select up to two
-                    if clicked_race_id in self.selected_races:
-                        # Deselect if already selected
-                        self.selected_races.remove(clicked_race_id)
-                        button_pressed.unselect() # Unselect the clicked button
-                    elif len(self.selected_races) < 2:
-                        # Select if less than 2 are already selected
-                        self.selected_races.append(clicked_race_id)
-                        button_pressed.select() # Select the clicked button
-                    else:
-                        # Limit reached, maybe provide feedback (e.g., sound)
-                        print("[RaceSelector] Cannot select more than 2 races in Advanced mode.")
+                    # If already selected, do nothing (advanced mode doesn't deselect)
                 # --- End Mode-Dependent Logic ---
 
                 # --- Update Description & Image (Check for Combination) ---
@@ -387,7 +420,7 @@ class RaceSelector:
                 image_to_show = self.placeholder_image
                 combination_found = False
 
-                if (self.wave_mode == 'advanced' or self.wave_mode == 'wild') and len(self.selected_races) == 2:
+                if (self.wave_mode == 'classic') and len(self.selected_races) == 2:
                     # Try to find a combined entry
                     combo_key = tuple(sorted(self.selected_races))
                     combo_data = self.combined_race_lookup.get(combo_key)

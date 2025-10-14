@@ -93,10 +93,7 @@ class OrbitingDamager:
 
             # Check if distance is less than combined radius
             if dist_sq < combined_radius_sq:
-                # --- DEBUG PRINT --- 
-                print(f"DEBUG: Orb collision detected! Orb @ ({int(self.x)},{int(self.y)}) - Enemy {enemy.enemy_id} @ ({int(enemy.x)},{int(enemy.y)}) DistSq: {dist_sq:.1f}, CombinedRadSq: {combined_radius_sq:.1f}")
-                # -----------------
-                
+
                 # Check hit cooldown for this specific enemy
                 last_hit = self.last_hit_times.get(enemy.enemy_id, -1.0) # Get last hit time, default to -1
                 
@@ -121,18 +118,8 @@ class OrbitingDamager:
         draw_x = self.x + offset_x
         draw_y = self.y + offset_y
         
-        # Assuming projectile_assets has a generic way to draw based on asset_id
-        # If not, this might need adjustment or a dedicated OrbiterAssets manager
-        try:
-            # Use the correct asset manager method if draw_projectile is specific
-            # For now, assuming a generic draw method exists based on ID
-            # If using ProjectileAssets, ensure 'alien_orb' is loaded like other projectiles
-            assets.draw_projectile(screen, self.asset_id, draw_x, draw_y) 
-        except AttributeError:
-             # Fallback if draw_projectile doesn't exist or fails
-             print(f"Warning: Could not find draw method for orb asset '{self.asset_id}' in provided asset manager.")
-             # Draw a simple circle as a fallback
-             pygame.draw.circle(screen, (128, 0, 128), (int(draw_x), int(draw_y)), self.collision_radius)
-        except Exception as e:
-            print(f"Error drawing orb {self.asset_id}: {e}")
-            pygame.draw.circle(screen, (128, 0, 128), (int(draw_x), int(draw_y)), self.collision_radius) # Draw red circle on error
+        # Draw a simple orb instead of trying to load a projectile asset
+        # Use a purple/magenta color for the orb
+        pygame.draw.circle(screen, (128, 0, 128), (int(draw_x), int(draw_y)), self.collision_radius)
+        # Add a subtle glow effect with a slightly larger, more transparent circle
+        pygame.draw.circle(screen, (200, 0, 200, 50), (int(draw_x), int(draw_y)), self.collision_radius + 2)

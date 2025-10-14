@@ -341,12 +341,35 @@ class TowerSelector:
         tooltip_lines.append("")
         tooltip_lines.append("<b>Stats:</b>")
 
-        damage_min = tower_data.get('damage_min', 0)
-        damage_max = tower_data.get('damage_max', damage_min)
-        damage_str = f"{damage_min}-{damage_max}" if damage_min != damage_max else f"{damage_min}"
+        # Check for special effect damage first
+        special_damage = None
+        special_damage_type = None
+        special = tower_data.get('special', {})
+        
+        if special:
+            effect = special.get('effect', '')
+            if effect == 'orbiting_damager':
+                special_damage = special.get('orb_damage', 0)
+                special_damage_type = special.get('orb_damage_type', 'normal')
+            elif effect == 'damage_pulse_aura':
+                special_damage = special.get('pulse_damage', 0)
+                special_damage_type = special.get('damage_type', tower_data.get('damage_type', 'normal'))
+            elif effect == 'black_hole':
+                special_damage = special.get('black_hole_damage', 0)
+                special_damage_type = special.get('damage_type', tower_data.get('damage_type', 'normal'))
+
+        # Use special damage if available, otherwise use regular damage
+        if special_damage and special_damage > 0:
+            damage_str = f"{special_damage}"
+            damage_type = special_damage_type or tower_data.get('damage_type', 'normal')
+        else:
+            damage_min = tower_data.get('damage_min', 0)
+            damage_max = tower_data.get('damage_max', damage_min)
+            damage_str = f"{damage_min}-{damage_max}" if damage_min != damage_max else f"{damage_min}"
+            damage_type = tower_data.get('damage_type', 'normal')
+        
         tooltip_lines.append(f"- Damage: {damage_str}")
 
-        damage_type = tower_data.get('damage_type', 'normal')
         damage_type_info = self.damage_type_data.get(damage_type, {})
         damage_desc = damage_type_info.get("description", "")
         tooltip_lines.append(f"- Type: {damage_type.capitalize()} ({damage_desc})")

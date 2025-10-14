@@ -97,6 +97,19 @@ class GameScene:
             pass
         # --- End Life Loss Sound Loading ---
 
+        # --- Load Start Game Sound ---
+        self.start_game_sound = None
+        try:
+            start_game_sound_path = os.path.join("assets", "sounds", "start_game.mp3")
+            if os.path.exists(start_game_sound_path):
+                self.start_game_sound = pygame.mixer.Sound(start_game_sound_path)
+                #print(f"[GameScene Init] Loaded start game sound: {start_game_sound_path}")
+            else:
+                pass
+        except pygame.error as e:
+            pass
+        # --- End Start Game Sound Loading ---
+
         # --- Load Game Over Sound --- 
         self.game_over_sound = None
         try:
@@ -251,15 +264,27 @@ class GameScene:
 
         # --- MERGE Tower Data from Selected Races --- 
         self.available_towers = {}
-        for race_id in self.selected_races:
-            race_info = self.game.get_race_info(race_id) # Use game helper method
+        self.locked_race_towers = {}  # Store second race towers for later unlock
+        
+        # Load only the first race's towers initially
+        if len(self.selected_races) > 0:
+            first_race_id = self.selected_races[0]
+            race_info = self.game.get_race_info(first_race_id)
             if race_info:
                 race_towers = race_info.get("towers", {})
-                self.available_towers.update(race_towers) # Merge dictionaries
-            else:
-                #print(f"Warning: Could not find race info for {race_id} when merging towers.")
-                pass
-        #print(f"Initialized with {len(self.available_towers)} available towers from races: {self.selected_races}")
+                self.available_towers.update(race_towers)
+                print(f"[GameScene] Loaded {len(race_towers)} towers from first race: {first_race_id}")
+        
+        # Store second race towers for unlock at wave 10
+        if len(self.selected_races) > 1:
+            second_race_id = self.selected_races[1]
+            race_info = self.game.get_race_info(second_race_id)
+            if race_info:
+                race_towers = race_info.get("towers", {})
+                self.locked_race_towers = race_towers
+                print(f"[GameScene] Stored {len(race_towers)} towers from second race: {second_race_id} (unlocks at wave 10)")
+        
+        print(f"[GameScene] Initialized with {len(self.available_towers)} available towers from races: {self.selected_races}")
         # --- End Merging Tower Data --- 
 
         # --- Get Base Directory for Path Construction ---
@@ -271,7 +296,7 @@ class GameScene:
         
         # --- Load Armor Data Based on Game Mode ---
         armor_filename = 'armortypes.json' # Default
-        if self.game.selected_wave_mode == 'advanced':
+        if self.game.selected_wave_mode == 'classic':
             armor_filename = 'armortypes_advanced.json'
         elif self.game.selected_wave_mode == 'wild':
             armor_filename = 'armortypes_wild.json'
@@ -295,7 +320,7 @@ class GameScene:
         self.towers = []
         self.enemies = []
         # --- Load Money/Lives Based on Difficulty (Inferred from wave file path) ---
-        if "advanced" in self.wave_file_path.lower(): # Check if it's advanced waves
+        if "advanced" in self.wave_file_path.lower(): # Check if it's advanced waves (now used by classic mode)
             #print(f"[GameScene Init] Loading ADVANCED settings (money/lives) due to wave file: {self.wave_file_path}")
             self.money = getattr(config, 'STARTING_MONEY_ADVANCED', config.STARTING_MONEY) # Fallback to default if advanced not found
             self.lives = getattr(config, 'STARTING_LIVES_ADVANCED', config.STARTING_LIVES) # Fallback to default if advanced not found
@@ -323,6 +348,23 @@ class GameScene:
         self.wave_started = False # Flag to prevent restarting wave 0
         self.game_state = GAME_STATE_RUNNING # Initial game state
         self.is_paused = False
+        
+        # --- Story Overlay Text ---
+        self.story_overlay_active = True
+        self.story_overlay_timer = 0.0
+        self.story_overlay_duration = 40.0  
+        self.story_text = "After a bunch of really powerful wizards imprisoned him in an icy tomb for eons, Lord Supermaul has somehow awakened and opened a demonic portal at his gravesite! Don't let these monstrosities escape the mountain, or else they'll destroy the world. Gather your defenses, slay these beasts and defeat Lord Supermaul for good!"
+        self.story_font = None
+        self.story_font_large = None
+        # --- End Story Overlay Text ---
+        
+        # --- Hint Message System ---
+        self.hint_message_active = False
+        self.hint_message_start_time = 0.0
+        self.hint_message_duration = 10.0  # Show for 10 seconds
+        self.hint_triggered = False  # Track if hint has been shown for wave 2
+        # --- End Hint Message System ---
+        
         # -------------------------
         
         # Tower Chain Link Update Timer -- REMOVED
@@ -504,6 +546,19 @@ class GameScene:
             self.timer_font = None # Fallback
         # -------------------------------
         
+        # --- Fonts for Story Overlay ---
+        try:
+            from utils.fonts import get_font
+            self.story_font = get_font(24)  # Regular size for body text
+            self.story_font_large = get_font(32)  # Larger size for title
+            self.pulse_font = get_font(48)  # Large font for pulsing text
+        except Exception as e:
+            #print(f"Error loading story fonts: {e}")
+            self.story_font = pygame.font.Font(None, 24)  # Fallback
+            self.story_font_large = pygame.font.Font(None, 32)  # Fallback
+            self.pulse_font = pygame.font.Font(None, 48)  # Fallback
+        # -------------------------------
+        
         # --- Load Attack Visual Assets --- 
         self.attack_visuals = {}
         fire_burst_img = self.load_single_image("assets/effects/fire_burst.png")
@@ -577,6 +632,12 @@ class GameScene:
 
     def handle_event(self, event):
         """Handle pygame events"""
+        # --- Handle Story Overlay Dismissal ---
+        if self.story_overlay_active and event.type == pygame.KEYDOWN:
+            self.story_overlay_active = False
+            return  # Don't process other events while overlay is active
+        # --- End Story Overlay Dismissal ---
+        
         # --- Check Game State First ---
         if self.game_state == GAME_STATE_GAME_OVER:
             if event.type == pygame.QUIT:
@@ -771,6 +832,13 @@ class GameScene:
                         first_wave_data = self.all_wave_data[0]
                         self.wave_timer = first_wave_data.get('delay_before_wave', 5.0)
                         self.wave_state = WAVE_STATE_WAITING
+                        
+                        # Play start game sound for first wave
+                        if self.start_game_sound:
+                            self.start_game_sound.play()
+                        
+                        # Notify race selector about first wave start
+                        self.notify_wave_change()
                     else:
                         self.wave_state = WAVE_STATE_IDLE
 
@@ -927,6 +995,21 @@ class GameScene:
         # Skip updates if paused
         if self.is_paused:
             return
+
+        # --- Story Overlay Timer Update ---
+        if self.story_overlay_active:
+            self.story_overlay_timer += time_delta
+            if self.story_overlay_timer >= self.story_overlay_duration:
+                self.story_overlay_active = False
+        # --- End Story Overlay Timer Update ---
+
+        # --- Hint Message Timer Update ---
+        current_time = pygame.time.get_ticks() / 1000.0
+        if self.hint_message_active and current_time >= self.hint_message_start_time:
+            # Check if hint message should be hidden (after 10 seconds)
+            if current_time >= self.hint_message_start_time + self.hint_message_duration:
+                self.hint_message_active = False
+        # --- End Hint Message Timer Update ---
 
         # --- Game State Check ---        
         # <<< MODIFIED: Check for running state >>>
@@ -2265,21 +2348,7 @@ class GameScene:
                 pass
 
         # --- Draw Spawn and Objective Areas (AFTER grid background is blitted) ---
-        # Draw spawn area
-        spawn_outline_color = (100, 255, 100) # Light green outline
-        spawn_surface = pygame.Surface((self.spawn_area_rect.width, self.spawn_area_rect.height))
-        spawn_surface.fill(config.SPAWN_AREA_COLOR) 
-        spawn_surface.set_alpha(200)  # Increased opacity
-        screen.blit(spawn_surface, self.spawn_area_rect)
-        pygame.draw.rect(screen, spawn_outline_color, self.spawn_area_rect, 2) # Add outline
-        
-        # Draw objective area
-        objective_outline_color = (255, 100, 100) # Light red outline
-        objective_surface = pygame.Surface((self.objective_area_rect.width, self.objective_area_rect.height))
-        objective_surface.fill(config.OBJECTIVE_AREA_COLOR)
-        objective_surface.set_alpha(200)  # Increased opacity
-        screen.blit(objective_surface, self.objective_area_rect)
-        pygame.draw.rect(screen, objective_outline_color, self.objective_area_rect, 2) # Add outline
+        # Spawn and objective area overlays removed as requested
         # --- End Spawn/Objective Drawing ---
 
         # Draw towers (coordinates are relative to grid, need offset)
@@ -2608,7 +2677,7 @@ class GameScene:
                                 pygame.draw.circle(screen, min_range_color, (int(center_pixel_x), int(center_pixel_y)), min_range_pixels, 2)
 
         # --- Draw Enemy Preview Area Placeholder ---
-        pygame.draw.rect(screen, (40, 40, 40), self.objective_area_rect) # Dark gray placeholder
+        # Dark gray placeholder removed as requested
         # TODO: Draw actual enemy previews here later
 
         # --- Draw Countdown Timer ---
@@ -2618,10 +2687,9 @@ class GameScene:
             gold_color = (255, 215, 0) # Define gold color
             text_surface = self.timer_font.render(timer_text, True, gold_color)
 
-            # Calculate position: Centered horizontally, vertically centered in top restricted area
+            # Calculate position: Further top left of the game area
             text_rect = text_surface.get_rect(
-                centerx=(config.UI_PANEL_PADDING + self.usable_grid_pixel_width // 2),
-                centery=(config.UI_PANEL_PADDING + (config.RESTRICTED_TOWER_AREA_HEIGHT * config.GRID_SIZE) // 2)
+                topleft=(config.UI_PANEL_PADDING, config.UI_PANEL_PADDING)
             )
             screen.blit(text_surface, text_rect)
         # -------------------------
@@ -3086,6 +3154,100 @@ class GameScene:
         # Update the display
         # pygame.display.flip() # REMOVED - Main game loop should handle flip
 
+        # --- Draw Story Overlay (If Active) ---
+        if self.story_overlay_active and self.story_font and self.story_font_large:
+            # Create semi-transparent grey overlay
+            overlay_surface = pygame.Surface((self.screen_width, self.screen_height))
+            overlay_surface.fill((50, 50, 50))  # Dark grey background
+            overlay_surface.set_alpha(200)  # Semi-transparent
+            screen.blit(overlay_surface, (0, 0))
+            
+            # Draw title
+            title_text = "LORD SUPERMAUL AWAKENS!"
+            title_surface = self.story_font_large.render(title_text, True, (255, 255, 150))  # Light yellow
+            title_rect = title_surface.get_rect(center=(self.screen_width // 2, self.screen_height // 2 - 100))
+            screen.blit(title_surface, title_rect)
+            
+            # Draw story text (wrapped)
+            words = self.story_text.split()
+            lines = []
+            current_line = []
+            max_width = self.screen_width - 100  # Leave margins
+            
+            for word in words:
+                test_line = ' '.join(current_line + [word])
+                test_surface = self.story_font.render(test_line, True, (255, 255, 150))  # Light yellow
+                if test_surface.get_width() <= max_width:
+                    current_line.append(word)
+                else:
+                    if current_line:
+                        lines.append(' '.join(current_line))
+                        current_line = [word]
+                    else:
+                        lines.append(word)  # Single word too long
+            
+            if current_line:
+                lines.append(' '.join(current_line))
+            
+            # Draw each line
+            line_height = 30
+            start_y = self.screen_height // 2 - 50
+            for i, line in enumerate(lines):
+                line_surface = self.story_font.render(line, True, (255, 255, 150))  # Light yellow
+                line_rect = line_surface.get_rect(center=(self.screen_width // 2, start_y + i * line_height))
+                screen.blit(line_surface, line_rect)
+            
+            # Draw "Press any key to continue" text
+            continue_text = "Press any key to continue..."
+            continue_surface = self.story_font.render(continue_text, True, (200, 200, 100))  # Slightly dimmer yellow
+            continue_rect = continue_surface.get_rect(center=(self.screen_width // 2, self.screen_height // 2 + 150))
+            screen.blit(continue_surface, continue_rect)
+        # --- End Story Overlay ---
+
+        # --- Draw Pulsing "Press Enter to begin..." Text ---
+        if not self.story_overlay_active and not self.wave_started and self.pulse_font:
+            # Calculate pulsing alpha based on time
+            pulse_time = pygame.time.get_ticks() / 1000.0  # Convert to seconds
+            pulse_alpha = int(128 + 127 * math.sin(pulse_time * 3))  # Pulsing between 128-255
+            
+            # Create text surface with pulsing alpha
+            pulse_text = "Press Enter to begin..."
+            text_surface = self.pulse_font.render(pulse_text, True, (255, 255, 150))  # Light yellow text
+            
+            # Center the text on screen
+            text_rect = text_surface.get_rect(center=(self.screen_width // 2, self.screen_height // 2))
+            
+            # Create a surface with alpha for the pulsing effect
+            alpha_surface = pygame.Surface(text_surface.get_size(), pygame.SRCALPHA)
+            alpha_surface.blit(text_surface, (0, 0))
+            alpha_surface.set_alpha(pulse_alpha)
+            
+            screen.blit(alpha_surface, text_rect)
+        # --- End Pulsing Text ---
+
+        # --- Draw Hint Message ---
+        if self.hint_message_active and self.pulse_font:
+            current_time = pygame.time.get_ticks() / 1000.0
+            if current_time >= self.hint_message_start_time:
+                # Calculate pulsing alpha for hint message
+                hint_pulse_time = current_time - self.hint_message_start_time
+                hint_alpha = int(128 + 127 * math.sin(hint_pulse_time * 4))  # Faster pulsing
+                
+                # Create hint text surface
+                hint_text = "(Hint: You can press Spacebar to Pause...)"
+                hint_surface = self.pulse_font.render(hint_text, True, (255, 255, 150))  # Light yellow
+                
+                # Center the text on screen
+                hint_rect = hint_surface.get_rect(center=(self.screen_width // 2, self.screen_height // 2 + 100))
+                
+                # Create a surface with alpha for the pulsing effect
+                hint_alpha_surface = pygame.Surface(hint_surface.get_size(), pygame.SRCALPHA)
+                hint_alpha_surface.blit(hint_surface, (0, 0))
+                hint_alpha_surface.set_alpha(hint_alpha)
+                
+                screen.blit(hint_alpha_surface, hint_rect)
+        # --- End Hint Message ---
+
         # --- Draw Game Over Overlay (If Applicable) ---
         if self.game_state == GAME_STATE_GAME_OVER and self.game_over_image:
             overlay_rect = self.game_over_image.get_rect(center=screen.get_rect().center)
@@ -3156,6 +3318,30 @@ class GameScene:
             #print("Validation failed: Cannot place in area below spawn.")
             return False # Overlaps with area below spawn
         # --- END NEW: Prevent placement ---
+
+        # --- NEW: Prevent placement in objective area and tiles above ---
+        objective_area_start_x = self.objective_area_x
+        objective_area_end_x = self.objective_area_x + config.OBJECTIVE_AREA_WIDTH - 1
+        objective_area_start_y = self.objective_area_y
+        objective_area_end_y = self.objective_area_y + config.OBJECTIVE_AREA_HEIGHT - 1
+
+        above_objective_start_x = self.objective_area_x
+        above_objective_end_x = self.objective_area_x + config.OBJECTIVE_AREA_WIDTH - 1
+        above_objective_start_y = self.objective_area_y - 1  # One row above
+        above_objective_end_y = above_objective_start_y  # Only one row
+
+        # Check overlap with objective area
+        if not (new_end_x < objective_area_start_x or new_start_x > objective_area_end_x or
+                new_end_y < objective_area_start_y or new_start_y > objective_area_end_y):
+            #print("Validation failed: Cannot place in objective area.")
+            return False # Overlaps with objective area
+
+        # Check overlap with tiles above objective area
+        if not (new_end_x < above_objective_start_x or new_start_x > above_objective_end_x or
+                new_end_y < above_objective_start_y or new_start_y > above_objective_end_y):
+            #print("Validation failed: Cannot place in area above objective.")
+            return False # Overlaps with area above objective
+        # --- END NEW: Prevent objective placement ---
 
 
         # 1. Check Grid Bounds
@@ -3749,6 +3935,13 @@ class GameScene:
                     self.spawning_groups = []
                     self.enemies_alive_this_wave = 0 # Reset counter for the new wave
                     #print(f"--- Starting Wave {self.current_wave_index + 1} ---")
+                    
+                    # Trigger hint message for wave 2 (index 1) after 15 seconds
+                    if self.current_wave_index == 1 and not self.hint_triggered:
+                        self.hint_triggered = True
+                        self.hint_message_active = True
+                        self.hint_message_start_time = current_time + 15.0  # Show after 15 seconds
+                    
                     for group_data in current_wave.get('enemies', []):
                         # Prepare group state for spawning logic
                         self.spawning_groups.append({
@@ -3814,6 +4007,10 @@ class GameScene:
                 # Current wave is fully cleared, prepare for the next one
                 self.wave_state = WAVE_STATE_IDLE # Transition back to IDLE
                 self.current_wave_index += 1
+                
+                # Notify race selector about wave change (for unlock system)
+                self.notify_wave_change()
+                
                 if self.current_wave_index < len(self.all_wave_data):
                     next_wave_data = self.all_wave_data[self.current_wave_index]
                     self.wave_timer = next_wave_data.get('delay_before_wave', 10.0)
@@ -3824,6 +4021,35 @@ class GameScene:
                     self.wave_state = WAVE_STATE_ALL_DONE # Or potentially WAVE_COMPLETE to wait for kills
                 return # Stop processing spawns for this frame
 
+    def notify_wave_change(self):
+        """Notify the race selector about wave changes for unlock system."""
+        if hasattr(self.game, 'race_selector') and self.game.race_selector:
+            wave_number = self.current_wave_index + 1  # Convert 0-based index to 1-based wave number
+            self.game.race_selector.update_wave(wave_number)
+            
+        # Check if second race towers should be unlocked
+        if wave_number == 10 and self.locked_race_towers:
+            self.unlock_second_race_towers()
+    
+    def unlock_second_race_towers(self):
+        """Unlock the second race's towers and update the tower selector."""
+        if not self.locked_race_towers:
+            return
+            
+        # Add locked towers to available towers
+        self.available_towers.update(self.locked_race_towers)
+        print(f"[GameScene] Unlocked {len(self.locked_race_towers)} towers from second race at wave 10!")
+        
+        # Clear the locked towers
+        self.locked_race_towers = {}
+        
+        # Update the tower selector with new towers
+        if hasattr(self, 'tower_selector') and self.tower_selector:
+            self.tower_selector.available_towers = self.available_towers
+            # Rebuild the tower selector UI
+            self.tower_selector.create_tower_buttons()
+            print("[GameScene] Tower selector updated with unlocked towers!")
+    
     # --- Spawn Enemy Helper --- 
     def spawn_enemy(self, enemy_id):
         """Spawns a single enemy of the specified type at the visual spawn point."""
