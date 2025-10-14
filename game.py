@@ -372,25 +372,6 @@ class Game:
         else:
             print(f"Running in windowed mode ({self.screen_width}x{self.screen_height})")
 
-    def get_range_value(self, range_type):
-        """
-        Get the min and max range values for a given range type.
-        
-        :param range_type: The type of range (melee, short, medium, long)
-        :return: Tuple of (min_range, max_range)
-        """
-        # Use the ranges data stored in self
-        range_data = self.ranges.get(range_type.lower())
-        if range_data:
-            return range_data["min"], range_data["max"]
-        return None, None # Or maybe raise an error for unknown range type?
-
-    # Add similar helper methods for other data if needed:
-    def get_damage_type_info(self, damage_type):
-        return self.damage_types.get(damage_type.lower())
-        
-    def get_tower_size_info(self, size_type):
-        return self.tower_sizes.get(size_type.lower())
         
     def get_race_info(self, race_name):
         """
@@ -412,11 +393,7 @@ class Game:
         # return self.races.get(race_name) # Old way - using potentially stale self.races
         return current_races.get(race_name) # New way - using freshly extracted data
         
-    def get_tower_definition(self, race_name, tower_id):
-        race_info = self.get_race_info(race_name)
-        if race_info:
-            return race_info.get("towers", {}).get(tower_id.lower())
-        return None
+        
 
     def load_assets(self):
         """Load game assets (images, sounds, etc.)"""
