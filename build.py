@@ -78,7 +78,15 @@ def check_dependencies():
 
 def create_spec_file():
     """Create a PyInstaller spec file for better control."""
+    # Ensure hooks directory exists and write a runtime hook that imports numpy first
+    hooks_dir = Path('hooks')
+    hooks_dir.mkdir(exist_ok=True)
+    runtime_hook_path = hooks_dir / 'runtime_numpy_first.py'
+    runtime_hook_path.write_text('''# PyInstaller runtime hook: import numpy before pygame to avoid dispatcher tracer issues\nimport os\n# Prefer bundled OpenBLAS/MKL and avoid stray site packages\nos.environ.pop("PYTHONPATH", None)\ntry:\n    import numpy  # noqa: F401\nexcept Exception as _e:\n    pass\n''')
+
     spec_content = '''# -*- mode: python ; coding: utf-8 -*-
+
+from PyInstaller.utils.hooks import collect_submodules, collect_data_files, copy_metadata
 
 block_cipher = None
 
@@ -90,18 +98,21 @@ a = Analysis(
         ('assets', 'assets'),
         ('data', 'data'),
         ('theme.json', '.'),
-    ],
-    hiddenimports=[
-        'pygame_gui',
-        'pymunk',
-        'entities',
-        'scenes', 
-        'ui',
-        'utils',
-    ],
+    ] + collect_data_files('numpy', include_py_files=True) + copy_metadata('numpy'),
+    hiddenimports=(
+        collect_submodules('numpy')
+        + [
+            'pygame_gui',
+            'pymunk',
+            'entities',
+            'scenes',
+            'ui',
+            'utils',
+        ]
+    ),
     hookspath=[],
     hooksconfig={},
-    runtime_hooks=[],
+    runtime_hooks=['hooks/runtime_numpy_first.py'],
     excludes=[],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
@@ -122,7 +133,7 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=True,
+    upx=False,
     upx_exclude=[],
     runtime_tmpdir=None,
     console=False,  # Set to True for debugging
