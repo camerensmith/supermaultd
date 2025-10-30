@@ -630,6 +630,10 @@ class GameScene:
         # Add tower limit tracking
         self.tower_counts = {}  # Track number of each tower type built
 
+        # --- In-game Console State (backtick ` to toggle) ---
+        self.console_active = False
+        self.console_text = ""
+
     def handle_event(self, event):
         """Handle pygame events"""
         # --- Handle Story Overlay Dismissal ---
@@ -637,6 +641,39 @@ class GameScene:
             self.story_overlay_active = False
             return  # Don't process other events while overlay is active
         # --- End Story Overlay Dismissal ---
+
+        # --- Toggle Console with Backtick (`) ---
+        if event.type == pygame.KEYDOWN:
+            try:
+                is_backtick = (event.key == pygame.K_BACKQUOTE) or (hasattr(event, 'unicode') and event.unicode == '`')
+            except Exception:
+                is_backtick = False
+            if is_backtick:
+                self.console_active = not self.console_active
+                if self.console_active:
+                    self.console_text = ""
+                return
+
+        # --- Handle Console Input When Active ---
+        if self.console_active:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    self.console_active = False
+                    return
+                if event.key == pygame.K_RETURN:
+                    self.execute_console_command(self.console_text.strip())
+                    self.console_active = False
+                    return
+                if event.key == pygame.K_BACKSPACE:
+                    if self.console_text:
+                        self.console_text = self.console_text[:-1]
+                    return
+                # Append printable characters
+                if hasattr(event, 'unicode') and event.unicode and event.unicode.isprintable():
+                    self.console_text += event.unicode
+                    return
+            # While console is active, consume all events
+            return
         
         # --- Check Game State First ---
         if self.game_state == GAME_STATE_GAME_OVER:
@@ -2657,24 +2694,22 @@ class GameScene:
                                     config.GRID_SIZE
                                 )
                                 pygame.draw.rect(screen, indicator_color, cell_rect, 2)
+        
+        # --- Draw Console Overlay ---
+        if self.console_active:
+            overlay_height = 40
+            overlay_surface = pygame.Surface((self.screen_width, overlay_height), pygame.SRCALPHA)
+            overlay_surface.fill((0, 0, 0, 180))
+            screen.blit(overlay_surface, (0, 0))
+            # Render input text
+            try:
+                font = pygame.font.Font(None, 28)
+            except Exception:
+                font = pygame.font.SysFont(None, 28)
+            display_text = "> " + self.console_text
+            text_surf = font.render(display_text, True, (255, 255, 255))
+            screen.blit(text_surf, (10, 8))
 
-                    # --- Draw Range Preview ---
-                    tower_data = self.available_towers.get(selected_tower_id)
-                    if tower_data and tower_data.get('attack_type') != 'aura':
-                        range_units = tower_data.get('range', 0)
-                        if range_units > 0:
-                            range_pixels = int(range_units * (config.GRID_SIZE / 200.0))
-                            range_color = (0, 255, 0, 100)  # Green, semi-transparent
-                            
-                            # Use the exact same center point as the tower preview
-                            pygame.draw.circle(screen, range_color, (int(center_pixel_x), int(center_pixel_y)), range_pixels, 2)
-                            
-                            # Draw min range if applicable
-                            min_range_units = tower_data.get('range_min', 0)
-                            if min_range_units > 0:
-                                min_range_pixels = int(min_range_units * (config.GRID_SIZE / 200.0))
-                                min_range_color = (255, 100, 0, 100)  # Orange, semi-transparent
-                                pygame.draw.circle(screen, min_range_color, (int(center_pixel_x), int(center_pixel_y)), min_range_pixels, 2)
 
         # --- Draw Enemy Preview Area Placeholder ---
         # Dark gray placeholder removed as requested
@@ -4134,6 +4169,51 @@ class GameScene:
         else:
             #print(f"Warning: Attempted to deduct {cost} but only have {self.money}.")
             return False
+    
+    # --- In-game Console Commands ---
+    def execute_console_command(self, command_line):
+        """Parse and execute a simple console command string."""
+        if not command_line:
+            return
+        parts = command_line.strip().split()
+        if not parts:
+            return
+        cmd = parts[0].lower()
+        args = parts[1:]
+
+        if cmd in ("addmoney", "add_money", "money"):
+            if not args:
+                print("Usage: addmoney <amount>")
+                return
+            try:
+                amount = int(float(args[0]))
+            except ValueError:
+                print("addmoney: amount must be a number")
+                return
+            if amount != 0:
+                self.money += amount
+                if self.tower_selector:
+                    self.tower_selector.update_money(self.money)
+                print(f"Added ${amount}. Current Money: ${self.money}")
+            return
+
+        if cmd in ("addlives", "add_lives", "lives"):
+            if not args:
+                print("Usage: addlives <amount>")
+                return
+            try:
+                amount = int(float(args[0]))
+            except ValueError:
+                print("addlives: amount must be a number")
+                return
+            if amount != 0:
+                self.lives += amount
+                if self.tower_selector:
+                    self.tower_selector.update_lives(self.lives)
+                print(f"Adjusted lives by {amount}. Current Lives: {self.lives}")
+            return
+
+        print(f"Unknown command: {cmd}")
     # --- END Money Callbacks ---
 
     # --- NEW: Callback to add projectiles (used by Tower.update) ---

@@ -56,7 +56,8 @@ SILVER = (192, 192, 192)
 SKY_BLUE = (135, 206, 235)
 
 # Game settings
-GRID_SIZE = 32  # Size of each grid cell in pixels
+# GRID_SIZE is computed dynamically below to preserve a fixed tile grid across resolutions
+GRID_SIZE = 32  # Placeholder default; will be recalculated after constants below
 STARTING_MONEY = 100
 STARTING_LIVES = 20
 STARTING_MONEY_ADVANCED = 100
@@ -70,6 +71,30 @@ FIXED_PLACEABLE_WIDTH_TILES = 26
 FIXED_PLACEABLE_HEIGHT_TILES = 24
 FIXED_TOTAL_GRID_WIDTH_TILES = FIXED_PLACEABLE_WIDTH_TILES + (RESTRICTED_TOWER_AREA_WIDTH * 2)  # 28
 FIXED_TOTAL_GRID_HEIGHT_TILES = FIXED_PLACEABLE_HEIGHT_TILES + (RESTRICTED_TOWER_AREA_HEIGHT * 2)  # 26
+
+# Dynamically compute GRID_SIZE so the fixed tile grid scales to any screen
+# Calculation accounts for the right UI panel and bottom enemy preview area
+def _compute_dynamic_grid_size(screen_width, screen_height):
+    # Available drawing area for the grid (exclude right UI panel and padding)
+    available_width = int(screen_width * (1.0 - UI_PANEL_WIDTH_PERCENT)) - (UI_PANEL_PADDING * 2)
+    # Exclude bottom enemy preview area and padding
+    available_height = int(screen_height - ENEMY_PREVIEW_HEIGHT) - (UI_PANEL_PADDING * 2)
+
+    # Protect against edge cases
+    if available_width <= 0 or available_height <= 0:
+        return 32  # fallback
+
+    tiles_x = FIXED_TOTAL_GRID_WIDTH_TILES
+    tiles_y = FIXED_TOTAL_GRID_HEIGHT_TILES
+
+    # Size per tile that fits both width and height
+    size_by_width = available_width // tiles_x
+    size_by_height = available_height // tiles_y
+    dynamic_size = max(16, min(size_by_width, size_by_height))  # enforce a reasonable minimum
+    return int(dynamic_size)
+
+# Apply dynamic GRID_SIZE now that dependencies are defined
+GRID_SIZE = _compute_dynamic_grid_size(WIDTH, HEIGHT)
 
 # Spawn area settings
 SPAWN_AREA_WIDTH = 2  # Width of spawn area in grid cells

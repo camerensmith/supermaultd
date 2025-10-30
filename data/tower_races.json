@@ -288,6 +288,7 @@
           "traversable": true,
           "trigger_on_walkover": true, 
           "attack_interval": 999, 
+          "attack_type": "none",
           "projectile_speed": null,
           "splash_radius": null,
           "targets": [
