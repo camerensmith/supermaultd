@@ -1000,6 +1000,89 @@ class Game:
             self.active_game_scene.edge_scroll_speed = self.edge_scroll_speed
         self.game_state = "playing"
     
+    def return_to_menu(self):
+        """Return to the main menu / race selection screen from the game."""
+        # Stop any game music
+        pygame.mixer.music.stop()
+        
+        # Clean up the active game scene
+        if self.active_game_scene:
+            self.active_game_scene = None
+        
+        # Recreate race selector if it was killed
+        if not hasattr(self, 'race_selector') or self.race_selector is None:
+            self.race_selector = RaceSelector(self.game_data, self.ui_manager,
+                                              self.screen_width, self.screen_height,
+                                              self.click_sound,
+                                              self.selected_wave_mode)
+        elif hasattr(self.race_selector, 'kill'):
+            # If it exists but was killed, recreate it
+            try:
+                self.race_selector.kill()
+            except:
+                pass
+            self.race_selector = RaceSelector(self.game_data, self.ui_manager,
+                                              self.screen_width, self.screen_height,
+                                              self.click_sound,
+                                              self.selected_wave_mode)
+        
+        # Recreate wave mode buttons if they were killed
+        if not self.wave_mode_buttons or not any(hasattr(btn, 'alive') and btn.alive() for btn in self.wave_mode_buttons.values() if btn):
+            button_width = 200
+            button_height = 50
+            button_x_pos = 50
+            button_y_start = self.title_rect.bottom + 20 if self.title_rect else 100
+            
+            classic_rect = pygame.Rect(button_x_pos, button_y_start, button_width, button_height)
+            self.wave_mode_buttons['classic'] = pygame_gui.elements.UIButton(
+                relative_rect=classic_rect,
+                text='Classic',
+                manager=self.ui_manager,
+                object_id='#classic_wave_button'
+            )
+            
+            advanced_rect = pygame.Rect(button_x_pos, button_y_start + button_height + 10, button_width, button_height)
+            self.wave_mode_buttons['advanced'] = pygame_gui.elements.UIButton(
+                relative_rect=advanced_rect,
+                text='Advanced (WIP)',
+                manager=self.ui_manager,
+                object_id='#advanced_wave_button'
+            )
+            
+            wild_rect = pygame.Rect(button_x_pos, button_y_start + 2 * (button_height + 10), button_width, button_height)
+            self.wave_mode_buttons['wild'] = pygame_gui.elements.UIButton(
+                relative_rect=wild_rect,
+                text='Wild (WIP)',
+                manager=self.ui_manager,
+                object_id='#wild_wave_button'
+            )
+            
+            # Set selected state based on current wave mode
+            if self.selected_wave_mode == 'classic':
+                self.wave_mode_buttons['classic'].select()
+                self.wave_mode_buttons['advanced'].unselect()
+                self.wave_mode_buttons['wild'].unselect()
+            elif self.selected_wave_mode == 'advanced':
+                self.wave_mode_buttons['classic'].unselect()
+                self.wave_mode_buttons['advanced'].select()
+                self.wave_mode_buttons['wild'].unselect()
+            elif self.selected_wave_mode == 'wild':
+                self.wave_mode_buttons['classic'].unselect()
+                self.wave_mode_buttons['advanced'].unselect()
+                self.wave_mode_buttons['wild'].select()
+        
+        # Restart menu music based on selected wave mode
+        if self.selected_wave_mode == 'classic':
+            self._play_menu_music(self.classic_music_path)
+        elif self.selected_wave_mode == 'advanced':
+            self._play_menu_music(self.advanced_music_path)
+        elif self.selected_wave_mode == 'wild':
+            self._play_menu_music(self.wild_music_path)
+        
+        # Set game state back to race selection
+        self.game_state = "race_selection"
+        print("[Game] Returned to main menu / race selection screen")
+    
     def toggle_controls_modal(self):
         """Toggle the controls modal overlay"""
         if not self.controls_modal_visible:

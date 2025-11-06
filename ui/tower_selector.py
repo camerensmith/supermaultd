@@ -473,7 +473,6 @@ class TowerSelector:
         # Loop through buttons and call unselect()
         for button in self.tower_buttons.values():
             button.unselect()
-        print("Cleared tower selection")
         
     def update_money(self, new_amount):
         """Update the money display and refresh button states"""

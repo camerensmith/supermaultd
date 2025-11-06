@@ -70,6 +70,11 @@ class Projectile:
         self.collided = False
         self.hit_enemy = None # Stores the enemy hit by a non-homing projectile
 
+        # Lingering effect attributes (for projectiles that stay on target after hit)
+        self.is_lingering = False
+        self.linger_duration = 0.0
+        self.linger_timer = 0.0
+
         # Movement attributes
         self.target = target_enemy # Store target if homing
         self.vx = 0.0 # Velocity x
@@ -155,6 +160,16 @@ class Projectile:
             # else: # Optional: print if effect file not found
             #    print(f"[Projectile Init] No specific impact effect found for {self.projectile_id} at {effect_image_path}")
         # --------------------------------------------
+
+    def update_linger(self, time_delta):
+        """Update the linger timer for lingering projectiles. Returns True if still lingering, False if expired."""
+        if self.is_lingering:
+            self.linger_timer += time_delta
+            if self.linger_timer >= self.linger_duration:
+                self.is_lingering = False
+                return False  # Expired
+            return True  # Still lingering
+        return False  # Not lingering
 
     def move(self, time_delta, enemies):
         """Move the projectile towards its target (if homing) or in a straight line."""
@@ -261,15 +276,16 @@ class Projectile:
                 # Consider if homing projectiles should collide with OTHER live enemies they pass over
                 # If so, add a similar check here for `enemy != self.target`
 
-    def draw(self, screen, projectile_assets, offset_x=0, offset_y=0):
+    def draw(self, screen, projectile_assets, grid_offset_x=0, grid_offset_y=0):
         """Draw the projectile using its asset image, rotated to face its direction."""
-        if not self.collided:
+        # Draw if not collided OR if lingering (collided but still visible)
+        if not self.collided or self.is_lingering:
             base_image = projectile_assets.get_projectile_image(self.projectile_id)
             if not base_image:
                 return 
             
-            draw_center_x = self.x + offset_x
-            draw_center_y = self.y + offset_y
+            draw_center_x = self.x + grid_offset_x
+            draw_center_y = self.y + grid_offset_y
             
             # Calculate rotation needed for Pygame (counter-clockwise)
             # *** REVERTING ASSUMPTION: Base image points UP (world 90) ***
@@ -317,6 +333,13 @@ class Projectile:
         # Mark as collided first
         self.collided = True
         impact_pos = (self.x, self.y) # Use current position as impact point
+        
+        # --- Check for alien_prober lingering effect ---
+        if self.projectile_id == "alien_prober":
+            self.is_lingering = True
+            self.linger_duration = 0.5  # 0.5 seconds
+            self.linger_timer = 0.0
+        # --- End alien_prober linger check ---
 
         # --- Get Tower Buff Auras (needed for DoT amplification) ---
         # Default to empty list if not provided

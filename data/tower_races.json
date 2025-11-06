@@ -893,8 +893,8 @@
           }
         },
         "knights_militia": {
-          "name": "Footman",
-          "description": "The footman takes up arms to defend the kingdom.",
+          "name": "Soldier",
+          "description": "The footmen takes up arms to defend the kingdom.",
           "grid_width": 1,
           "grid_height": 1,
           "cost": 6,
@@ -912,7 +912,7 @@
         },
         "knights_watchtower": {
           "name": "Watchtower",
-          "description": "The guards in the watchtower tirelessly guard the kingdom.",
+          "description": "The bowmen in the watchtower tirelessly guard the kingdom.",
           "grid_width": 1,
           "grid_height": 1,
           "cost": 15,
@@ -950,10 +950,10 @@
           ]
         },
         "knights_arrow_tower": {
-          "name": "Arrow Tower",
-          "description": "Armed with archers at the ready, the arrow tower prepares to defend the kingdom.",
-          "grid_width": 1,
-          "grid_height": 1,
+          "name": "Volley Tower",
+          "description": "Armed with archers at the ready, the volley tower prepares to defend the kingdom.",
+          "grid_width": 2,
+          "grid_height": 2,
           "cost": 68,
           "damage_min": 35,
           "damage_max": 65,
@@ -992,7 +992,7 @@
         },
         "knights_knight": {
           "name": "Knight",
-          "description": "The knight is a powerful melee unit that can execute his foes.",
+          "description": "The knight is a powerful melee unit that can instantly executelow HP foes.",
           "grid_width": 1,
           "grid_height": 1,
           "cost": 228,
@@ -3115,7 +3115,7 @@
           "damage_min": 180,
           "damage_max": 300,
           "damage_type": "siege",
-          "range": 750,
+          "range": 1750,
           "attack_interval": 1.5,
           "projectile_speed": 400,
           "attack_type": "projectile",

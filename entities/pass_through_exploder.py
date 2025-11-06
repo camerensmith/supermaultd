@@ -197,21 +197,21 @@ class PassThroughExploder:
         else:
             return None
 
-    def draw(self, screen, assets, offset_x, offset_y):
+    def draw(self, screen, assets, grid_offset_x, grid_offset_y):
         """
         Draw the travelling entity.
 
         Args:
             screen: The pygame surface to draw on.
             assets: The asset manager (e.g., projectile_assets) containing the visual.
-            offset_x: Grid offset X.
-            offset_y: Grid offset Y.
+            grid_offset_x: Grid offset X.
+            grid_offset_y: Grid offset Y.
         """
         if not self.is_active:
              return # Don't draw if inactive (already exploded)
 
-        draw_x = self.x + offset_x
-        draw_y = self.y + offset_y
+        draw_x = self.x + grid_offset_x
+        draw_y = self.y + grid_offset_y
 
         # Assuming projectile_assets handles drawing via asset_id
         try:

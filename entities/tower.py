@@ -1262,8 +1262,8 @@ class Tower:
                 target_ids = [t.enemy_id for t in actual_whip_targets]
                 #print(f"  DEBUG: Whip attacking targets: {target_ids}")
 
-                # Create visual path (adjusting for screen offset)
-                visual_path = [(self.x + grid_offset_x, self.y + grid_offset_y)] # Start at tower center (screen coords)
+                # Create visual path (using world coordinates, draw will apply camera offsets)
+                visual_path = [(self.x, self.y)] # Start at tower center (world coords)
                 
                 # Apply damage
                 for i, whip_target in enumerate(actual_whip_targets):
@@ -1280,8 +1280,8 @@ class Tower:
                     # Pass tower special for potential on-hit effects
                     whip_target.take_damage(final_damage, self.damage_type, source_special=self.special)
                     
-                    # Add target position to visual path (screen coords)
-                    visual_path.append((whip_target.x + grid_offset_x, whip_target.y + grid_offset_y))
+                    # Add target position to visual path (world coords)
+                    visual_path.append((whip_target.x, whip_target.y))
 
                 # Create whip visual effect
                 if len(visual_path) > 1:
@@ -1619,10 +1619,10 @@ class Tower:
                             dy = target.y - self.y
                             angle = math.degrees(math.atan2(-dy, dx))
                             
-                            # Create projectile-style effect
+                            # Create projectile-style effect (use world coordinates, draw will apply camera offsets)
                             projectile_effect = Effect(
-                                target.x + grid_offset_x,
-                                target.y + grid_offset_y,
+                                target.x,
+                                target.y,
                                 projectile_img,
                                 duration=0.1,  # Short duration
                                 target_size=(GRID_SIZE * 2, GRID_SIZE * 2),  # Scale up for storm generator
@@ -1640,9 +1640,9 @@ class Tower:
                         visual_img = visual_assets.get(visual_effect_name)
                         if visual_img:
                             #print(f"... creating instant visual effect '{visual_effect_name}' at target {target.enemy_id}")
-                            # Calculate screen coordinates
-                            effect_x = target.x + grid_offset_x
-                            effect_y = target.y + grid_offset_y
+                            # Use world coordinates (draw will apply camera offsets)
+                            effect_x = target.x
+                            effect_y = target.y
                             
                             # Get hold duration from tower data, default to 0.1 if not specified
                             hold_duration = self.tower_data.get("instant_hold", 0.1)
@@ -1673,10 +1673,10 @@ class Tower:
                                 # Get hold duration from tower data, default to 0.1 if not specified
                                 hold_duration = self.tower_data.get("instant_hold", 0.1)
                                 
-                                # Create lightning effect
+                                # Create lightning effect (use world coordinates, draw will apply camera offsets)
                                 lightning_effect = Effect(
-                                    target.x + grid_offset_x,
-                                    target.y + grid_offset_y,
+                                    target.x,
+                                    target.y,
                                     lightning_img,
                                     duration=0.1,  # Very short duration
                                     target_size=(GRID_SIZE * 2, GRID_SIZE * 2),  # Scale up the lightning
@@ -1685,13 +1685,16 @@ class Tower:
                                 # Store the rotation angle as a custom attribute
                                 lightning_effect.rotation_angle = angle
                                 # Override the draw method to handle rotation
+                                # Note: lightning_effect uses world coordinates, rotated_draw will apply camera offsets
                                 original_draw = lightning_effect.draw
-                                def rotated_draw(screen):
+                                def rotated_draw(screen, grid_offset_x=0, grid_offset_y=0):
                                     if not lightning_effect.finished and lightning_effect.image:
                                         # Create a rotated copy of the image
                                         rotated_img = pygame.transform.rotate(lightning_effect.image, lightning_effect.rotation_angle)
-                                        # Get the rect of the rotated image
-                                        rotated_rect = rotated_img.get_rect(center=lightning_effect.rect.center)
+                                        # Get the rect of the rotated image, applying camera offsets
+                                        center_x, center_y = lightning_effect.rect.center
+                                        adjusted_center = (center_x + grid_offset_x, center_y + grid_offset_y)
+                                        rotated_rect = rotated_img.get_rect(center=adjusted_center)
                                         # Draw the rotated image
                                         screen.blit(rotated_img, rotated_rect)
                                 lightning_effect.draw = rotated_draw
@@ -1782,9 +1785,8 @@ class Tower:
 
                         # Create the visual effect if chain jumped at least once
                         if len(chain_path_visual) > 2: 
-                            # Adjust coordinates for screen offset before creating visual
-                            adjusted_path = [(int(x + grid_offset_x), int(y + grid_offset_y)) for x, y in chain_path_visual]
-                            chain_effect = ChainLightningVisual(adjusted_path, duration=0.3) # Use existing visual
+                            # Use world coordinates (draw will apply camera offsets)
+                            chain_effect = ChainLightningVisual(chain_path_visual, duration=0.3) # Use existing visual
                             results['effects'].append(chain_effect)
                     # --- END Chain Lightning Logic ---
 
@@ -1889,7 +1891,7 @@ class Tower:
                 #print(f"... instant attack applied {dot_name} DoT ({base_dot_damage}/{dot_interval}s for {dot_duration}s) to {target.enemy_id}")
         # --- End DoT Effects ---
         
-    def draw(self, screen, tower_assets, offset_x=0, offset_y=0, actual_tile_width=None, actual_tile_height=None):
+    def draw(self, screen, tower_assets, grid_offset_x=0, grid_offset_y=0, actual_tile_width=None, actual_tile_height=None):
         """Draw the tower using its associated image, scaled to its grid footprint, with a border and offset."""
         # Use actual tile sizes if provided, otherwise fall back to GRID_SIZE
         tile_w = actual_tile_width if actual_tile_width is not None else GRID_SIZE
@@ -1898,8 +1900,8 @@ class Tower:
         # Use consistent tile size for positioning to maintain aspect ratio
         # Average tile size maintains proportional scaling and prevents squishing
         avg_tile_size = (tile_w + tile_h) // 2
-        draw_pixel_x = (self.top_left_grid_x * avg_tile_size) + offset_x
-        draw_pixel_y = (self.top_left_grid_y * avg_tile_size) + offset_y
+        draw_pixel_x = (self.top_left_grid_x * avg_tile_size) + grid_offset_x
+        draw_pixel_y = (self.top_left_grid_y * avg_tile_size) + grid_offset_y
         
         # Recalculate pixel dimensions and center position using actual tile sizes
         # Use consistent tile size to maintain aspect ratio (prevents squishing)
@@ -1939,8 +1941,8 @@ class Tower:
             # Draw the pulsing circle
             if self.pulse_radius > 0 and self.pulse_alpha > 0:
                 try:
-                    center_x = int(self.x + offset_x)
-                    center_y = int(self.y + offset_y)
+                    center_x = int(self.x + grid_offset_x)
+                    center_y = int(self.y + grid_offset_y)
                     
                     # Create a surface for alpha blending
                     temp_surface = pygame.Surface((self.pulse_radius * 2, self.pulse_radius * 2), pygame.SRCALPHA)
@@ -1961,8 +1963,8 @@ class Tower:
             # --- Draw Ground Effect Zone for Nuclear Silo ---
             if self.tower_id == 'industry_nuclear_silo' and self.aura_radius_pixels > 0:
                 try:
-                    center_x = int(self.x + offset_x)
-                    center_y = int(self.y + offset_y)
+                    center_x = int(self.x + grid_offset_x)
+                    center_y = int(self.y + grid_offset_y)
                     radius = int(self.aura_radius_pixels)
                     
                     # Create a surface for the ground effect zone
@@ -1979,8 +1981,8 @@ class Tower:
 
         # --- Draw Creep Colony Glow --- 
         elif self.tower_id == "zork_creep_colony" and self.aura_radius_pixels > 0:
-            center_x = int(self.x + offset_x)
-            center_y = int(self.y + offset_y)
+            center_x = int(self.x + grid_offset_x)
+            center_y = int(self.y + grid_offset_y)
             radius = int(self.aura_radius_pixels)
             # Use config PURPLE with low alpha for faintness
             glow_color = (*PURPLE[:3], 51) # Alpha 51 (20% of 255)
@@ -2000,8 +2002,8 @@ class Tower:
 
         # --- NEW: Draw Heaven Radiant Tower Aura --- 
         elif self.tower_id == "heaven_radiant_tower" and self.aura_radius_pixels > 0:
-            center_x = int(self.x + offset_x)
-            center_y = int(self.y + offset_y)
+            center_x = int(self.x + grid_offset_x)
+            center_y = int(self.y + grid_offset_y)
             radius = int(self.aura_radius_pixels)
             # Define a light blue color with some transparency
             aura_color = (173, 216, 230, 80) # Light blue with 80 alpha (approx 31% opaque)
@@ -2087,7 +2089,7 @@ class Tower:
                 if self.flash_active and self.flash_image:
                     # Scale flash to match the current pulsing aura size (using target_diameter)
                     flash_scaled = pygame.transform.smoothscale(self.flash_image, (target_diameter, target_diameter))
-                    flash_rect = flash_scaled.get_rect(center=(int(self.x + offset_x), int(self.y + offset_y)))
+                    flash_rect = flash_scaled.get_rect(center=(int(self.x + grid_offset_x), int(self.y + grid_offset_y)))
                     screen.blit(flash_scaled, flash_rect.topleft)
                 # --- End Lightning Flash --- 
                     
@@ -2136,7 +2138,7 @@ class Tower:
                     
                     # --- Draw the Final Image --- 
                     # Center the final visual on the tower's center pixel coords
-                    final_rect = final_scaled_image.get_rect(center=(int(self.x + offset_x), int(self.y + offset_y)))
+                    final_rect = final_scaled_image.get_rect(center=(int(self.x + grid_offset_x), int(self.y + grid_offset_y)))
                     screen.blit(final_scaled_image, final_rect.topleft)
                 except ValueError: 
                     pass 
@@ -2177,8 +2179,8 @@ class Tower:
             # No scaling calculation needed
             
             # Determine center point for blitting (center on tower's logical center)
-            center_x = int(self.x + offset_x)
-            center_y = int(self.y + offset_y)
+            center_x = int(self.x + grid_offset_x)
+            center_y = int(self.y + grid_offset_y)
             
             # Get rect centered correctly and blit the ROTATED image
             overlay_rect = overlay_image_to_draw.get_rect(center=(center_x, center_y))
@@ -2239,8 +2241,8 @@ class Tower:
                          center_x = draw_pixel_x + self.width_pixels // 2
                          center_y = draw_pixel_y + self.height_pixels // 2
                     else: # Use tower's logical center (self.x, self.y) + offset
-                        center_x = int(self.x + offset_x)
-                        center_y = int(self.y + offset_y)
+                        center_x = int(self.x + grid_offset_x)
+                        center_y = int(self.y + grid_offset_y)
                     
                     # Get rect centered correctly and blit
                     overlay_rect = scaled_rotated_overlay.get_rect(center=(center_x, center_y))
@@ -2615,7 +2617,6 @@ class Tower:
                                     fade_type='fade_out' # Default fade out is fine
                                 )
                                 self.game_scene_add_effect_callback(effect_instance)
-                                print(f"TIME MACHINE {self.tower_id}: Created rewind visual effect.")
                             except Exception as e:
                                 print(f"Error creating rewind visual effect: {e}")
  

@@ -105,18 +105,18 @@ class OrbitingDamager:
         # Return False indicates it should not be removed (unless lifetime is added)
         return False
 
-    def draw(self, screen, assets, offset_x, offset_y):
+    def draw(self, screen, assets, grid_offset_x, grid_offset_y):
         """
         Draw the orbiting damager.
 
         Args:
             screen: The pygame surface to draw on.
             assets: The asset manager (e.g., projectile_assets) containing the orb visual.
-            offset_x: Grid offset X.
-            offset_y: Grid offset Y.
+            grid_offset_x: Grid offset X.
+            grid_offset_y: Grid offset Y.
         """
-        draw_x = self.x + offset_x
-        draw_y = self.y + offset_y
+        draw_x = self.x + grid_offset_x
+        draw_y = self.y + grid_offset_y
         
         # Draw a simple orb instead of trying to load a projectile asset
         # Use a purple/magenta color for the orb

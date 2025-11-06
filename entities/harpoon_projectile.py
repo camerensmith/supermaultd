@@ -161,15 +161,15 @@ class HarpoonProjectile:
         """
         return self.update(time_delta, pygame.time.get_ticks() / 1000.0)
         
-    def draw(self, screen, projectile_assets, offset_x=0, offset_y=0):
+    def draw(self, screen, projectile_assets, grid_offset_x=0, grid_offset_y=0):
         """
         Draw the harpoon projectile and its chain.
         
         Args:
             screen: Pygame screen surface
             projectile_assets: ProjectileAssets instance
-            offset_x: X offset for drawing
-            offset_y: Y offset for drawing
+            grid_offset_x: X offset for drawing
+            grid_offset_y: Y offset for drawing
         """
         if not self.is_active:
             return
@@ -180,14 +180,14 @@ class HarpoonProjectile:
             # Calculate angle for harpoon head
             angle = math.degrees(math.atan2(-self.dir_y, self.dir_x)) - 90
             rotated_image = pygame.transform.rotate(harpoon_image, angle)
-            rect = rotated_image.get_rect(center=(self.target_enemy.x + offset_x, self.target_enemy.y + offset_y))
+            rect = rotated_image.get_rect(center=(self.target_enemy.x + grid_offset_x, self.target_enemy.y + grid_offset_y))
             screen.blit(rotated_image, rect)
             
         # Draw chain with fade effect
         chain_color = (200, 200, 200, self.chain_alpha)  # Light gray with alpha
         chain_width = 2
-        start_pos = (self.tower.x + offset_x, self.tower.y + offset_y)
-        end_pos = (self.target_enemy.x + offset_x, self.target_enemy.y + offset_y)
+        start_pos = (self.tower.x + grid_offset_x, self.tower.y + grid_offset_y)
+        end_pos = (self.target_enemy.x + grid_offset_x, self.target_enemy.y + grid_offset_y)
         
         # Create a surface for the chain with alpha
         chain_surface = pygame.Surface((screen.get_width(), screen.get_height()), pygame.SRCALPHA)
@@ -199,6 +199,6 @@ class HarpoonProjectile:
             effect_surface = pygame.Surface((screen.get_width(), screen.get_height()), pygame.SRCALPHA)
             effect_color = (255, 255, 255, int(100 * (1 - self.pull_progress)))
             pygame.draw.circle(effect_surface, effect_color, 
-                             (int(self.target_enemy.x + offset_x), int(self.target_enemy.y + offset_y)),
+                             (int(self.target_enemy.x + grid_offset_x), int(self.target_enemy.y + grid_offset_y)),
                              int(self.pull_effect_radius))
             screen.blit(effect_surface, (0, 0)) 

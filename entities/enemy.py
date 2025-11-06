@@ -350,11 +350,11 @@ class Enemy:
         
         #print(f"### MAX HP REDUCED for {self.enemy_id}: {old_max_health:.1f} -> {self.max_health:.1f} (-{reduction_amount:.1f}). Current HP: {self.health:.1f}")
 
-    def draw(self, screen, enemy_assets, offset_x=0, offset_y=0):
+    def draw(self, screen, enemy_assets, grid_offset_x=0, grid_offset_y=0):
         """Draw the enemy using its sprite and a health bar, applying grid offset."""
         # Calculate draw position with offset
-        draw_x = self.x + offset_x
-        draw_y = self.y + offset_y
+        draw_x = self.x + grid_offset_x
+        draw_y = self.y + grid_offset_y
 
         # Get the base image for this enemy
         base_image = enemy_assets.get_image(self.enemy_id)

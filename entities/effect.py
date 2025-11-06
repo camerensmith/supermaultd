@@ -10,13 +10,14 @@ class Effect:
         """
         Initialize the effect.
 
-        :param x: Center X position for the effect (absolute screen coordinates).
-        :param y: Center Y position for the effect (absolute screen coordinates).
+        :param x: Center X position for the effect (world-space coordinates).
+        :param y: Center Y position for the effect (world-space coordinates).
         :param base_image: The Pygame surface to display and fade.
         :param duration: Total duration (in seconds) the effect should last (includes hold + fade).
         :param target_size: Tuple (width, height) for the desired effect display size.
         :param fade_type: 'fade_out' or 'fade_in_out'
         :param hold_duration: Duration (in seconds) to keep the effect fully visible before starting fade.
+        Note: Effects use world-space coordinates. The draw() method applies camera offsets automatically.
         """
         if not base_image:
             print("Warning: Effect created with no base image.")
@@ -125,11 +126,12 @@ class ChainLightningVisual(Effect):
         """
         Initialize the chain lightning visual.
         
-        :param path_coords: List of (x, y) tuples representing the chain path (absolute screen coords).
+        :param path_coords: List of (x, y) tuples representing the chain path (world-space coordinates).
         :param duration: How long the visual effect lasts in seconds.
         :param color: The color of the lightning bolts. If None, uses default based on type.
         :param thickness: The thickness of the lightning lines.
         :param line_type: 'standard' (enemy bounce) or 'tower_link' (tower chain connection).
+        Note: path_coords should be in world-space coordinates. Camera offsets are applied in draw().
         """
         self.path_coords = path_coords
         self.duration = max(0.01, duration)
@@ -166,8 +168,11 @@ class ChainLightningVisual(Effect):
             
         return self.finished
 
-    def draw(self, screen):
-        """Draw the lightning segments."""
+    def draw(self, screen, grid_offset_x=0, grid_offset_y=0):
+        """Draw the lightning segments.
+        
+        path_coords are in world-space coordinates, so camera offsets are applied here.
+        """
         if self.finished or len(self.path_coords) < 2:
             return
             
@@ -177,8 +182,11 @@ class ChainLightningVisual(Effect):
 
         try:
             for i in range(len(self.path_coords) - 1):
-                start_pos = self.path_coords[i]
-                end_pos = self.path_coords[i+1]
+                # Apply camera offsets to world coordinates
+                start_world = self.path_coords[i]
+                end_world = self.path_coords[i+1]
+                start_pos = (int(start_world[0] + grid_offset_x), int(start_world[1] + grid_offset_y))
+                end_pos = (int(end_world[0] + grid_offset_x), int(end_world[1] + grid_offset_y))
                 pygame.draw.aaline(screen, current_color, start_pos, end_pos, self.thickness) # Use self.thickness
         except Exception as e:
              print(f"Error drawing chain lightning ({self.line_type}): {e}")
@@ -189,11 +197,12 @@ class WhipVisual(Effect):
         """
         Initialize the whip visual.
         
-        :param path_coords: List of (x, y) tuples representing the whip path (absolute screen coords).
+        :param path_coords: List of (x, y) tuples representing the whip path (world-space coordinates).
         :param duration: How long the visual effect lasts in seconds.
         :param color: The color of the whip lines. If None, uses default based on type.
         :param thickness: The thickness of the whip lines.
         :param line_type: Used to determine default color/thickness if not provided.
+        Note: path_coords should be in world-space coordinates. Camera offsets are applied in draw().
         """
         self.path_coords = path_coords
         self.duration = max(0.01, duration)
@@ -230,8 +239,11 @@ class WhipVisual(Effect):
             
         return self.finished
 
-    def draw(self, screen):
-        """Draw the whip segments."""
+    def draw(self, screen, grid_offset_x=0, grid_offset_y=0):
+        """Draw the whip segments.
+        
+        path_coords are in world-space coordinates, so camera offsets are applied here.
+        """
         if self.finished or len(self.path_coords) < 2:
             return
             
@@ -241,8 +253,11 @@ class WhipVisual(Effect):
 
         try:
             for i in range(len(self.path_coords) - 1):
-                start_pos = self.path_coords[i]
-                end_pos = self.path_coords[i+1]
+                # Apply camera offsets to world coordinates
+                start_world = self.path_coords[i]
+                end_world = self.path_coords[i+1]
+                start_pos = (int(start_world[0] + grid_offset_x), int(start_world[1] + grid_offset_y))
+                end_pos = (int(end_world[0] + grid_offset_x), int(end_world[1] + grid_offset_y))
                 # Use standard line for whip for now, can customize later
                 pygame.draw.aaline(screen, current_color, start_pos, end_pos, self.thickness) # Use self.thickness 
         except Exception as e:
@@ -382,7 +397,7 @@ class OrbitingOrbsEffect(Effect):
         
         return False
 
-    def draw(self, screen):
+    def draw(self, screen, grid_offset_x=0, grid_offset_y=0):
         """Draw the orbiting orbs around the target enemy."""
         if self.finished:
             return
@@ -397,14 +412,7 @@ class OrbitingOrbsEffect(Effect):
         current_alpha = int(255 * alpha_multiplier)
         current_color_with_alpha = (*self.color[:3], current_alpha)
         
-
-        try:
-            grid_offset_x = pygame.display.get_surface().get_rect().width * 0.01 # Crude guess for padding
-            grid_offset_y = pygame.display.get_surface().get_rect().height * 0.01 # Crude guess
-        except AttributeError:
-            grid_offset_x = 10 # Fallback
-            grid_offset_y = 10
-            
+        # Use provided camera offsets
         center_x = self.target_enemy.x + grid_offset_x 
         center_y = self.target_enemy.y + grid_offset_y
 
@@ -577,7 +585,7 @@ class RisingFadeEffect:
         self.life_remaining -= time_delta
         return self.life_remaining <= 0 # Return True when effect is done
 
-    def draw(self, screen):
+    def draw(self, screen, grid_offset_x=0, grid_offset_y=0):
         if self.life_remaining <= 0:
             return
 
@@ -599,8 +607,10 @@ class RisingFadeEffect:
                 # Set alpha
                 scaled_image.set_alpha(current_alpha)
                 
-                # Calculate draw position (centered)
-                draw_rect = scaled_image.get_rect(center=(int(self.x), int(self.y)))
+                # Calculate draw position (centered), applying camera offsets
+                draw_x = int(self.x + grid_offset_x)
+                draw_y = int(self.y + grid_offset_y)
+                draw_rect = scaled_image.get_rect(center=(draw_x, draw_y))
                 
                 # Draw
                 screen.blit(scaled_image, draw_rect)
@@ -831,11 +841,12 @@ class SuperchargedZapEffect(Effect):
         """
         Initialize the zap visual.
         
-        :param start_pos: Tuple (x, y) of the starting tower (absolute screen coords).
-        :param end_pos: Tuple (x, y) of the target enemy (absolute screen coords).
+        :param start_pos: Tuple (x, y) of the starting tower (world-space coordinates).
+        :param end_pos: Tuple (x, y) of the target enemy (world-space coordinates).
         :param duration: How long the visual effect lasts in seconds (should be short).
         :param color: The color of the zap.
         :param thickness: The thickness of the zap line.
+        Note: start_pos and end_pos should be in world-space coordinates. Camera offsets are applied in draw().
         """
         self.start_pos = start_pos
         self.end_pos = end_pos
@@ -862,8 +873,11 @@ class SuperchargedZapEffect(Effect):
             
         return self.finished
 
-    def draw(self, screen):
-        """Draw the zap line with fade."""
+    def draw(self, screen, grid_offset_x=0, grid_offset_y=0):
+        """Draw the zap line with fade.
+        
+        start_pos and end_pos are in world-space coordinates, so camera offsets are applied here.
+        """
         if self.finished:
             return
             
@@ -873,10 +887,13 @@ class SuperchargedZapEffect(Effect):
         current_color = (*self.color[:3], current_alpha) 
 
         try:
+            # Apply camera offsets to world coordinates
+            start_screen = (int(self.start_pos[0] + grid_offset_x), int(self.start_pos[1] + grid_offset_y))
+            end_screen = (int(self.end_pos[0] + grid_offset_x), int(self.end_pos[1] + grid_offset_y))
             # Draw a single thick anti-aliased line
-            pygame.draw.aaline(screen, current_color, self.start_pos, self.end_pos, self.thickness)
+            pygame.draw.aaline(screen, current_color, start_screen, end_screen, self.thickness)
             # Optional: Draw a slightly thinner inner line of brighter color?
-            # pygame.draw.aaline(screen, (255,255,255,current_alpha), self.start_pos, self.end_pos, max(1, self.thickness - 2))
+            # pygame.draw.aaline(screen, (255,255,255,current_alpha), start_screen, end_screen, max(1, self.thickness - 2))
         except Exception as e:
             #print(f"Error drawing SuperchargedZapEffect: {e}") 
             pass
@@ -1060,12 +1077,14 @@ class PulseImageEffect:
 
         return False # Not finished yet
 
-    def draw(self, screen):
+    def draw(self, screen, grid_offset_x=0, grid_offset_y=0):
         """
         Draws the effect on the screen.
 
         Args:
             screen (pygame.Surface): The surface to draw on.
+            grid_offset_x: Camera offset in X direction (for world-space coordinates).
+            grid_offset_y: Camera offset in Y direction (for world-space coordinates).
         """
         if self.finished or not self.image:
             return
@@ -1080,9 +1099,9 @@ class PulseImageEffect:
             image_copy.set_alpha(self.current_alpha)
 
             # Calculate draw position (top-left) based on the effect's center (x, y)
-            # and accounting for the grid's offset from the screen edge.
-            draw_x = (self.x + config.UI_PANEL_PADDING) - image_copy.get_width() // 2
-            draw_y = (self.y + config.UI_PANEL_PADDING) - image_copy.get_height() // 2
+            # Apply camera offsets for world-space coordinates
+            draw_x = (self.x + grid_offset_x) - image_copy.get_width() // 2
+            draw_y = (self.y + grid_offset_y) - image_copy.get_height() // 2
 
             screen.blit(image_copy, (draw_x, draw_y))
         except Exception as e:
@@ -1121,10 +1140,10 @@ class ExpandingCircleEffect:
             self.current_radius = self.max_radius * (elapsed_time / self.duration)
             return False
 
-    def draw(self, screen, offset_x=0, offset_y=0):
+    def draw(self, screen, grid_offset_x=0, grid_offset_y=0):
         if not self.finished and self.current_radius > 0:
-            draw_x = int(self.x + offset_x)
-            draw_y = int(self.y + offset_y)
+            draw_x = int(self.x + grid_offset_x)
+            draw_y = int(self.y + grid_offset_y)
             
             # Draw filled or outlined circle based on the filled parameter
             thickness = 0 if self.filled else self.thickness  # pygame uses 0 for filled circles
@@ -1217,7 +1236,7 @@ class FrostPulseEffect:
             return True
         return False
         
-    def draw(self, screen, offset_x=0, offset_y=0):
+    def draw(self, screen, grid_offset_x=0, grid_offset_y=0):
         """Draw the expanding frost pulse effect."""
         if self.finished:
             return
@@ -1239,5 +1258,5 @@ class FrostPulseEffect:
         
         # Blit the pulse surface to the screen
         screen.blit(pulse_surface, 
-                   (self.x - current_radius + offset_x, 
-                    self.y - current_radius + offset_y)) 
+                   (self.x - current_radius + grid_offset_x, 
+                    self.y - current_radius + grid_offset_y)) 

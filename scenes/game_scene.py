@@ -1762,23 +1762,31 @@ class GameScene:
             is_broadside = tower.special and tower.special.get("effect") == "broadside"
             if is_broadside:
                 if current_time - tower.last_attack_time >= effective_interval:
-                    #print(f"DEBUG: Broadside tower {tower.tower_id} firing based on interval.")
-                    pass
-                    grid_offset_x = 0  # Grid starts at left edge to fill space
-                    grid_offset_y = config.UI_PANEL_PADDING
-                    # Capture and process results for broadside
-                    # Pass self.towers for potential adjacency checks within attack
-                    attack_results = tower.attack(None, current_time, self.enemies, self.tower_buff_auras, grid_offset_x, grid_offset_y, all_towers=self.towers) 
-                    if isinstance(attack_results, dict):
-                        new_projectiles = attack_results.get('projectiles', [])
-                        if new_projectiles:
-                            self.projectiles.extend(new_projectiles)
-                            #print(f"Added {len(new_projectiles)} broadside projectiles.")
-                            pass
-                        new_effects = attack_results.get('effects', [])
-                        if new_effects:
-                            self.effects.extend(new_effects)
-                    # Attack method updates last_attack_time internally now
+                    # Check if there are any enemies within range before firing
+                    enemies_in_range = False
+                    for enemy in self.enemies:
+                        if enemy.health > 0 and enemy.type in tower.targets:
+                            if tower.is_in_range(enemy.x, enemy.y):
+                                enemies_in_range = True
+                                break
+                    
+                    # Only fire if enemies are in range
+                    if enemies_in_range:
+                        #print(f"DEBUG: Broadside tower {tower.tower_id} firing based on interval with enemies in range.")
+                        grid_offset_x = 0  # Grid starts at left edge to fill space
+                        grid_offset_y = config.UI_PANEL_PADDING
+                        # Capture and process results for broadside
+                        # Pass self.towers for potential adjacency checks within attack
+                        attack_results = tower.attack(None, current_time, self.enemies, self.tower_buff_auras, grid_offset_x, grid_offset_y, all_towers=self.towers) 
+                        if isinstance(attack_results, dict):
+                            new_projectiles = attack_results.get('projectiles', [])
+                            if new_projectiles:
+                                self.projectiles.extend(new_projectiles)
+                                #print(f"Added {len(new_projectiles)} broadside projectiles.")
+                            new_effects = attack_results.get('effects', [])
+                            if new_effects:
+                                self.effects.extend(new_effects)
+                        # Attack method updates last_attack_time internally now
             
             # --- Standard Attack Targeting Logic (Skip if Broadside handled above) ---
             elif not is_broadside:
@@ -1984,7 +1992,6 @@ class GameScene:
                                             # Use a small fixed duration for beam attacks
                                             fixed_slow_duration = 0.2
                                             target_enemy.apply_status_effect('slow', fixed_slow_duration, slow_multiplier, current_time)
-                                            print(f"DEBUG: Slow effect applied - {slow_percentage}% slow (multiplier: {slow_multiplier}) to {target_enemy.enemy_id}")
                                             effects_applied_this_tick = True
                                     # --- End Apply Slow ---
                                     
@@ -2183,8 +2190,6 @@ class GameScene:
                             if dist_sq <= radius_sq:
                                 # Apply the specific pulse effect
                                 if effect_type == 'slow_pulse_aura':
-                                    if tower.tower_id == 'igloo_frost_pulse':
-                                        print(f"FROST PULSE DEBUG: Applying slow effect to {enemy.enemy_id}")
                                     slow_percentage = special.get('slow_percentage', 0)
                                     duration = special.get('duration', 1.0)
                                     multiplier = 1.0 - (slow_percentage / 100.0)
@@ -2231,7 +2236,6 @@ class GameScene:
                                         slow_duration = special.get('duration', 1.0)
                                         slow_multiplier = 1.0 - (slow_percentage / 100.0)
                                         enemy.apply_status_effect('slow', slow_duration, slow_multiplier, current_time)
-                                        print(f"[DOT-SLOW] {tower.tower_id}: Applied {slow_percentage}% slow for {slow_duration}s to {enemy.enemy_id}")
                                     # --- END SLOW EFFECT CHECK ---
                                    
                                 # --- End DoT Pulse Aura ---
@@ -2245,6 +2249,7 @@ class GameScene:
             is_boomerang = type(proj).__name__ == 'OffsetBoomerangProjectile'
             is_grenade = type(proj).__name__ == 'GrenadeProjectile'
             is_cluster = type(proj).__name__ == 'ClusterProjectile'
+            is_harpoon = type(proj).__name__ == 'HarpoonProjectile'
 
             if is_boomerang:
                 # --- Update Boomerang (which manages its own 'finished' state) ---
@@ -2280,20 +2285,51 @@ class GameScene:
                         newly_created_effects.extend(detonation_result['new_effects'])
                     # Remove the cluster projectile
                     self.projectiles.remove(proj)
+            elif is_harpoon:
+                # --- Update Harpoon Projectile ---
+                # HarpoonProjectile has its own update logic
+                if hasattr(proj, 'update'):
+                    proj.update(time_delta, current_time)
+                if hasattr(proj, 'collided') and proj.collided:
+                    self.projectiles.remove(proj)
             else:
                 # --- Standard Projectile Update ---
-                proj.move(time_delta, self.enemies)
-                if proj.collided:
-                    # Get collision results
-                    collision_result = proj.on_collision(self.enemies, current_time, self.tower_buff_auras)
-                    # Add any new projectiles
-                    if collision_result.get('new_projectiles'):
-                        newly_created_projectiles.extend(collision_result['new_projectiles'])
-                    # Add any new effects
-                    if collision_result.get('new_effects'):
-                        newly_created_effects.extend(collision_result['new_effects'])
-                    # Remove the projectile
-                    self.projectiles.remove(proj)
+                # Check if projectile is a Projectile instance with lingering capability
+                is_standard_projectile = isinstance(proj, Projectile)
+                
+                # Check if projectile is lingering (collided but still visible)
+                # Only Projectile instances have the is_lingering attribute
+                if is_standard_projectile and hasattr(proj, 'is_lingering') and proj.is_lingering:
+                    # Update linger timer
+                    still_lingering = proj.update_linger(time_delta)
+                    if not still_lingering:
+                        # Linger timer expired, remove the projectile
+                        self.projectiles.remove(proj)
+                else:
+                    # Normal projectile movement
+                    if is_standard_projectile:
+                        proj.move(time_delta, self.enemies)
+                        if proj.collided:
+                            # Get collision results
+                            collision_result = proj.on_collision(self.enemies, current_time, self.tower_buff_auras)
+                            # Add any new projectiles
+                            if collision_result.get('new_projectiles'):
+                                newly_created_projectiles.extend(collision_result['new_projectiles'])
+                            # Add any new effects
+                            if collision_result.get('new_effects'):
+                                newly_created_effects.extend(collision_result['new_effects'])
+                            # Check if projectile should linger (e.g., alien_prober)
+                            # Only Projectile instances can linger
+                            if hasattr(proj, 'is_lingering') and not proj.is_lingering:
+                                # Remove the projectile immediately if not lingering
+                                self.projectiles.remove(proj)
+                    else:
+                        # Handle other projectile types (HarpoonProjectile, etc.)
+                        # These have their own update logic
+                        if hasattr(proj, 'move'):
+                            proj.move(time_delta, self.enemies)
+                        if hasattr(proj, 'collided') and proj.collided:
+                            self.projectiles.remove(proj)
 
         # Add any newly created items to the main lists AFTER iterating
         if newly_created_projectiles:
@@ -4320,7 +4356,7 @@ class GameScene:
                 duration = attack_results.get("duration", 0.2)
                 if len(visual_path) >= 2: # Need at least tower pos and one target
                     # Use the NEW WhipVisual class
-                    # Path coordinates are already screen-adjusted in Tower.attack
+                    # Path coordinates are in world-space (draw will apply camera offsets)
                     whip_effect = WhipVisual(visual_path, duration=duration) # No need to specify line_type, defaults to 'whip'
                     self.effects.append(whip_effect)
             # --- END Whip Visual Handling ---
@@ -4407,10 +4443,8 @@ class GameScene:
                 # --- Create Chain Link Visual --- 
                 tower_positions = []
                 for tower in longest_chain:
-                    # Use tower's center pixel coords + grid offset for visual path
-                    screen_x = int(tower.x + grid_offset_x)
-                    screen_y = int(tower.y + grid_offset_y)
-                    tower_positions.append((screen_x, screen_y))
+                    # Use world coordinates (draw will apply camera offsets)
+                    tower_positions.append((int(tower.x), int(tower.y)))
                 
                 if len(tower_positions) >= 2:
                     link_visual = ChainLightningVisual(tower_positions, duration=0.4, line_type='tower_link') # Use tower_link type
@@ -4418,8 +4452,9 @@ class GameScene:
                 # --- End Chain Link Visual ---
                 
                 # --- Create Supercharged Zap Visual --- 
-                start_pos = (int(end_node_tower.x + grid_offset_x), int(end_node_tower.y + grid_offset_y))
-                end_pos = (int(target.x + grid_offset_x), int(target.y + grid_offset_y))
+                # Use world coordinates (draw will apply camera offsets)
+                start_pos = (int(end_node_tower.x), int(end_node_tower.y))
+                end_pos = (int(target.x), int(target.y))
                 zap_visual = SuperchargedZapEffect(start_pos, end_pos, duration=0.25, thickness=5) # Adjust duration/thickness
                 self.effects.append(zap_visual)
                 # --- End Supercharged Zap Visual ---
@@ -4878,6 +4913,15 @@ class GameScene:
             self.show_coordinates = not self.show_coordinates
             status = "enabled" if self.show_coordinates else "disabled"
             print(f"Show coordinates: {status}")
+            return
+
+        if cmd in ("mainmenu", "menu", "main_menu"):
+            # Return to main menu / race selection screen
+            if hasattr(self.game, 'return_to_menu'):
+                self.game.return_to_menu()
+                print("Returning to main menu...")
+            else:
+                print("Error: Cannot return to menu (method not found)")
             return
 
         print(f"Unknown command: {cmd}")
