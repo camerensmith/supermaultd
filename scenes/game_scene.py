@@ -203,34 +203,41 @@ class GameScene:
             self.play_area_frame_image = None
         # --- End Play Area Frame Overlay Loading ---
 
-        # --- Placeholder Toggle Button ---
-        self.debug_toggle_state = False # State of the toggle
-        self.toggle_font = None
+        # --- Wave Menu Icon Toggle Button ---
+        self.debug_toggle_state = False # State of the toggle (False = OFF, True = ON)
         self.toggle_off_surface = None
         self.toggle_on_surface = None
         self.toggle_button_rect = None # Rect for clicking
         self.toggle_padding = 10 # Pixels from corner
         try:
-            from utils.fonts import get_font
-            self.toggle_font = get_font(18)
-            off_text = "Wave Menu OFF"
-            on_text = "Wave Menu ON"
-            text_color = (255, 255, 255) # White text
-            bg_color_off = (100, 0, 0) # Dark red background for OFF
-            bg_color_on = (0, 100, 0) # Dark green background for ON
-            # Render with antialiasing and background color
-            self.toggle_off_surface = self.toggle_font.render(off_text, True, text_color, bg_color_off)
-            self.toggle_on_surface = self.toggle_font.render(on_text, True, text_color, bg_color_on)
-            #print("[GameScene Init] Loaded font and created toggle button surfaces.")
-        except Exception as e:
-            #print(f"[GameScene Init] Error loading font or creating toggle surfaces: {e}")
-            # Fallback: Create simple placeholder surfaces if font fails
-            fallback_size = (80, 20)
-            self.toggle_off_surface = pygame.Surface(fallback_size)
-            self.toggle_off_surface.fill((100, 0, 0)) # Dark red
-            self.toggle_on_surface = pygame.Surface(fallback_size)
-            self.toggle_on_surface.fill((0, 100, 0)) # Dark green
-        # --- End Placeholder Toggle Button ---
+            # Load wave icon
+            wave_icon_path = os.path.join("assets", "images", "wave.png")
+            if os.path.exists(wave_icon_path):
+                base_icon = pygame.image.load(wave_icon_path).convert_alpha()
+                # Scale icon to a consistent UI size
+                icon_size = 40
+                base_icon = pygame.transform.smoothscale(base_icon, (icon_size, icon_size))
+                # On state: original icon
+                self.toggle_on_surface = base_icon
+                # Off state: dimmed icon
+                dim_icon = base_icon.copy()
+                dim_icon.fill((120, 120, 120, 255), special_flags=pygame.BLEND_RGBA_MULT)
+                self.toggle_off_surface = dim_icon
+            else:
+                # Fallback simple colored surfaces if icon not found
+                fallback_size = (40, 40)
+                self.toggle_off_surface = pygame.Surface(fallback_size, pygame.SRCALPHA)
+                self.toggle_off_surface.fill((100, 0, 0, 255))
+                self.toggle_on_surface = pygame.Surface(fallback_size, pygame.SRCALPHA)
+                self.toggle_on_surface.fill((0, 100, 0, 255))
+        except Exception:
+            # Robust fallback in case image load fails
+            fallback_size = (40, 40)
+            self.toggle_off_surface = pygame.Surface(fallback_size, pygame.SRCALPHA)
+            self.toggle_off_surface.fill((100, 0, 0, 255))
+            self.toggle_on_surface = pygame.Surface(fallback_size, pygame.SRCALPHA)
+            self.toggle_on_surface.fill((0, 100, 0, 255))
+        # --- End Wave Menu Icon Toggle Button ---
 
         # --- Debug Menu Panel --- 
         self.debug_menu_open = False # Is the menu visible?
@@ -349,6 +356,26 @@ class GameScene:
         self.game_state = GAME_STATE_RUNNING # Initial game state
         self.is_paused = False
         
+        # --- Wave Time Limit Timer ---
+        self.wave_time_limit_timer = 0.0 # 60-second timer per wave
+        self.wave_time_limit = 60.0 # 60 seconds to complete each wave
+        self.wave_time_limit_expired = False # Flag if timer expired
+        self.wave_bonus_gold = 0 # Bonus gold earned for completing wave in time
+        self.final_countdown_played = False # Flag to track if countdown sound was played for current wave
+        
+        # --- Load Final Countdown Sound ---
+        self.final_countdown_sound = None
+        try:
+            final_countdown_path = os.path.join("assets", "sounds", "finalcountdown.mp3")
+            if os.path.exists(final_countdown_path):
+                self.final_countdown_sound = pygame.mixer.Sound(final_countdown_path)
+                #print(f"[GameScene Init] Loaded final countdown sound: {final_countdown_path}")
+            else:
+                pass
+        except pygame.error as e:
+            pass
+        # --- End Final Countdown Sound Loading ---
+        
         # --- Story Overlay Text ---
         self.story_overlay_active = True
         self.story_overlay_timer = 0.0
@@ -385,15 +412,67 @@ class GameScene:
         # Panel dimensions based on percentage
         self.panel_pixel_width = int(self.screen_width * config.UI_PANEL_WIDTH_PERCENT)
         self.panel_pixel_height = self.screen_height - (config.UI_PANEL_PADDING * 2) # Use full height minus top/bottom padding
-        self.panel_x = self.screen_width - self.panel_pixel_width - config.UI_PANEL_PADDING
+        # Position panel at right edge
+        self.panel_x = self.screen_width - self.panel_pixel_width
         self.panel_y = config.UI_PANEL_PADDING
 
         # Grid dimensions: lock to fixed tile counts regardless of screen size
         self.grid_width = config.FIXED_TOTAL_GRID_WIDTH_TILES
         self.grid_height = config.FIXED_TOTAL_GRID_HEIGHT_TILES
-        # Compute pixel dimensions for drawing the grid area
-        self.usable_grid_pixel_width = self.grid_width * config.GRID_SIZE
-        self.usable_grid_pixel_height = self.grid_height * config.GRID_SIZE
+        
+        # Calculate playable area boundaries dynamically based on screen size
+        # Boundaries extend to entire screen edges with 1 square of padding on all sides
+        # Tower selector will overlay on top, so game area uses full screen
+        # 
+        # The grid must extend to full screen width with 1 square padding around:
+        # - Left: 1 square padding
+        # - Right: extends to screen edge (no padding)
+        # - Top: 1 square padding
+        # - Bottom: 1 square padding
+        #
+        # Calculate tile size: grid_width tiles fit in (screen_width - 1 tile padding on left)
+        # grid_width * tile_size = screen_width - tile_size
+        # (grid_width + 1) * tile_size = screen_width
+        # tile_size = screen_width / (grid_width + 1)
+        estimated_tile_width = self.screen_width / (self.grid_width + 1)  # +1 for left padding only
+        
+        # For height: grid_height tiles fit in (screen_height - 2 tile padding: top + bottom)
+        # grid_height * tile_size = screen_height - 2*tile_size
+        # (grid_height + 2) * tile_size = screen_height
+        # tile_size = screen_height / (grid_height + 2)
+        estimated_tile_height = self.screen_height / (self.grid_height + 2)  # +2 for top and bottom padding
+        
+        # Use the smaller tile size to ensure grid fits within bounds
+        final_tile_size = min(estimated_tile_width, estimated_tile_height)
+        
+        # Set boundaries with 1 tile padding on left/top/bottom, full screen width on right
+        padding = final_tile_size  # Use calculated tile size for padding
+        self.play_area_left = int(padding)  # 1 tile from left edge
+        self.play_area_top = int(padding)  # 1 tile from top edge
+        self.play_area_right = int(self.screen_width)  # Full screen width (extends to right edge)
+        self.play_area_bottom = int(self.screen_height - padding)  # 1 tile from bottom edge
+        
+        # Calculate available pixel space within the playable area boundaries
+        # Right boundary extends to full screen width, left has padding
+        play_area_width = self.play_area_right - self.play_area_left  # Full screen minus left padding
+        play_area_height = self.play_area_bottom - self.play_area_top
+        
+        # Use the calculated play area for tile sizes
+        # CRITICAL: usable_grid_pixel_width must extend to full screen minus left padding
+        # Force right boundary to screen width and recalculate width
+        self.play_area_right = int(self.screen_width)  # Force to full screen width
+        play_area_width = self.play_area_right - self.play_area_left  # Recalculate with full screen width
+        self.usable_grid_pixel_width = play_area_width  # Full screen minus left padding
+        self.usable_grid_pixel_height = play_area_height
+        
+        # Debug: Verify boundaries extend to full screen
+        # print(f"DEBUG: Screen width: {self.screen_width}, Play area left: {self.play_area_left}, Play area right: {self.play_area_right}, Play area width: {play_area_width}, Usable width: {self.usable_grid_pixel_width}")
+        # Calculate actual tile sizes based on the playable area bounds
+        # Tiles must fit exactly within the bounded area
+        self.actual_tile_width = self.usable_grid_pixel_width / self.grid_width
+        self.actual_tile_height = self.usable_grid_pixel_height / self.grid_height
+        # Use average tile size for coordinate conversions (matches tower placement)
+        self.avg_tile_size = (self.actual_tile_width + self.actual_tile_height) // 2
 
         # Align grid area with left padding and leave remaining space to the right for panel
         # Ensure panel position remains where it was computed above
@@ -420,20 +499,20 @@ class GameScene:
         self.spawn_area_x = (self.grid_width - config.SPAWN_AREA_WIDTH) // 2
         self.spawn_area_y = 0  # Top of the grid
         self.spawn_area_rect = pygame.Rect(
-            self.spawn_area_x * config.GRID_SIZE + config.UI_PANEL_PADDING,
-            self.spawn_area_y * config.GRID_SIZE + config.UI_PANEL_PADDING,
-            config.SPAWN_AREA_WIDTH * config.GRID_SIZE,
-            config.SPAWN_AREA_HEIGHT * config.GRID_SIZE
+            self.spawn_area_x * self.actual_tile_width,  # Grid starts at x=0 now
+            self.spawn_area_y * self.actual_tile_height + config.UI_PANEL_PADDING,
+            config.SPAWN_AREA_WIDTH * self.actual_tile_width,
+            config.SPAWN_AREA_HEIGHT * self.actual_tile_height
         )
 
         # Calculate objective area position (centered at bottom)
         self.objective_area_x = (self.grid_width - config.OBJECTIVE_AREA_WIDTH) // 2
         self.objective_area_y = self.grid_height - config.OBJECTIVE_AREA_HEIGHT  # Bottom of the grid
         self.objective_area_rect = pygame.Rect(
-            self.objective_area_x * config.GRID_SIZE + config.UI_PANEL_PADDING,
-            self.objective_area_y * config.GRID_SIZE + config.UI_PANEL_PADDING,
-            config.OBJECTIVE_AREA_WIDTH * config.GRID_SIZE,
-            config.OBJECTIVE_AREA_HEIGHT * config.GRID_SIZE
+            self.objective_area_x * self.actual_tile_width,  # Grid starts at x=0 now
+            self.objective_area_y * self.actual_tile_height + config.UI_PANEL_PADDING,
+            config.OBJECTIVE_AREA_WIDTH * self.actual_tile_width,
+            config.OBJECTIVE_AREA_HEIGHT * self.actual_tile_height
         )
 
         # Define Pathfinding Start/End Points (use grid coordinates)
@@ -447,8 +526,10 @@ class GameScene:
         # This should still be based on the visual spawn area, not the logical path start
         _visual_spawn_x_grid = self.spawn_area_x + config.SPAWN_AREA_WIDTH // 2
         _visual_spawn_x_grid = max(config.RESTRICTED_TOWER_AREA_WIDTH, min(self.grid_width - 1 - config.RESTRICTED_TOWER_AREA_WIDTH, _visual_spawn_x_grid))
-        self.visual_spawn_x_pixel = (_visual_spawn_x_grid * config.GRID_SIZE) + (config.GRID_SIZE // 2)
-        self.visual_spawn_y_pixel = (self.spawn_area_y * config.GRID_SIZE) + (config.GRID_SIZE // 2)
+        # Store grid-relative pixel coords (draw adds play area offsets)
+        self.visual_spawn_x_pixel = (_visual_spawn_x_grid * self.avg_tile_size) + (self.avg_tile_size // 2)
+        # Place spawn at the very top edge of the grid (restricted boundary)
+        self.visual_spawn_y_pixel = -15
 
         # Logical Path End (Target the last *walkable* row)
         self.path_end_x = self.objective_area_x + config.OBJECTIVE_AREA_WIDTH // 2 # Keep X centered
@@ -479,18 +560,54 @@ class GameScene:
         # Initialize pygame_gui Manager (Pass actual screen size)
         self.ui_manager = pygame_gui.UIManager((self.screen_width, self.screen_height), 'theme.json') 
         
-        # Load and scale background texture
+        # Load background textures (store original, will scale during draw)
+        self.original_background_image = None
+        self.original_background2_image = None
         try:
             # Use the correct relative path from the supermaultd working directory
-            background_image = pygame.image.load("assets/images/background.jpg").convert()
-            self.grid_background_texture = pygame.transform.scale(
-                background_image, 
-                (self.usable_grid_pixel_width, self.usable_grid_pixel_height)
-            )
+            self.original_background_image = pygame.image.load("assets/images/background.jpg").convert()
         except pygame.error as e:
             #print(f"Error loading background.jpg: {e}")
-            pass
-            self.grid_background_texture = None # Fallback
+            self.original_background_image = None # Fallback
+        try:
+            # Load the border/mountain background for non-playable areas
+            self.original_background2_image = pygame.image.load("assets/images/background2.jpg").convert()
+        except pygame.error as e:
+            #print(f"Error loading background2.jpg: {e}")
+            self.original_background2_image = None # Fallback
+        
+        # Load spawn and objective marker images
+        self.spawn_image = None
+        self.objective_image = None
+        try:
+            self.spawn_image = pygame.image.load("assets/images/spawn.png").convert_alpha()
+        except pygame.error as e:
+            #print(f"Error loading spawn.png: {e}")
+            self.spawn_image = None # Fallback
+        try:
+            self.objective_image = pygame.image.load("assets/images/objective.png").convert_alpha()
+        except pygame.error as e:
+            #print(f"Error loading objective.png: {e}")
+            self.objective_image = None # Fallback
+        
+        # --- Grid Visibility ---
+        # Get grid visibility from Game level (set in options menu)
+        self.show_grid = getattr(game, 'show_grid', getattr(config, 'SHOW_GRID', False))
+        
+        # --- Camera / Edge Scroll ---
+        # World camera for true panning (applied to grid/entities)
+        self.cam_x = 0.0
+        self.cam_y = 0.0
+        # Background parallax camera (visual, follows the same inputs)
+        self.bg_cam_x = 0.0
+        self.bg_cam_y = 0.0
+        self.bg_pan_range = 40  # Max pixels to pan background/frame (parallax)
+        # Allow world camera to pan farther than background, revealing black beyond art
+        self.cam_pan_range_x = int(self.screen_width)  # 1 screen width in each direction
+        self.cam_pan_range_y = int(self.screen_height) # 1 screen height in each direction
+        self.edge_scroll_margin = 24  # Pixels from screen edge to trigger scroll
+        # Get edge scroll speed from Game level (set in options menu)
+        self.edge_scroll_speed = getattr(game, 'edge_scroll_speed', 150.0)  # Pixels per second
         
         # --- Load Data using Constructed Paths --- 
         armor_file_path = os.path.join(data_dir, "armortypes.json")
@@ -633,6 +750,7 @@ class GameScene:
         # --- In-game Console State (backtick ` to toggle) ---
         self.console_active = False
         self.console_text = ""
+        self.show_coordinates = False  # Toggle for showing coordinates near cursor
 
     def handle_event(self, event):
         """Handle pygame events"""
@@ -717,24 +835,61 @@ class GameScene:
                 selected_tower_id = self.tower_selector.get_selected_tower()
                 if selected_tower_id:
                     mouse_x, mouse_y = event.pos
-                    grid_offset_x = config.UI_PANEL_PADDING
-                    grid_offset_y = config.UI_PANEL_PADDING
+                    grid_offset_x = self.play_area_left - int(self.cam_x)
+                    grid_offset_y = self.play_area_top - int(self.cam_y)
+                    # Use average tile size to match preview calculation
+                    avg_tile_size = (self.actual_tile_width + self.actual_tile_height) // 2
                     if (grid_offset_x <= mouse_x < grid_offset_x + self.usable_grid_pixel_width and
                         grid_offset_y <= mouse_y < grid_offset_y + self.usable_grid_pixel_height):
-                        grid_x = (mouse_x - grid_offset_x) // config.GRID_SIZE
-                        grid_y = (mouse_y - grid_offset_y) // config.GRID_SIZE
+                        rel_x = mouse_x - grid_offset_x
+                        rel_y = mouse_y - grid_offset_y
+                        sel_id = self.tower_selector.get_selected_tower()
+                        tw = 1
+                        th = 1
+                        if sel_id:
+                            td = self.available_towers.get(sel_id)
+                            if td:
+                                tw = int(td.get('grid_width', 1))
+                                th = int(td.get('grid_height', 1))
+                        # Center the tower footprint on cursor: derive start cell then anchor center
+                        center_gx = rel_x / avg_tile_size
+                        center_gy = rel_y / avg_tile_size
+                        start_x = int(round(center_gx - (tw / 2.0)))
+                        start_y = int(round(center_gy - (th / 2.0)))
+                        offset_x = (tw - 1) // 2
+                        offset_y = (th - 1) // 2
+                        grid_x = start_x + offset_x
+                        grid_y = start_y + offset_y
                         self.is_dragging = True
                         self.drag_start_pos = (grid_x, grid_y)
                         self.drag_preview_positions = [(grid_x, grid_y)]
                 
             elif event.button == 3:  # Right click
                 mouse_x, mouse_y = event.pos
-                grid_offset_x = config.UI_PANEL_PADDING
-                grid_offset_y = config.UI_PANEL_PADDING
+                grid_offset_x = self.play_area_left - int(self.cam_x)
+                grid_offset_y = self.play_area_top - int(self.cam_y)
+                # Use average tile size to match preview calculation
+                avg_tile_size = (self.actual_tile_width + self.actual_tile_height) // 2
                 if (grid_offset_x <= mouse_x < grid_offset_x + self.usable_grid_pixel_width and
                     grid_offset_y <= mouse_y < grid_offset_y + self.usable_grid_pixel_height):
-                    grid_x = (mouse_x - grid_offset_x) // config.GRID_SIZE
-                    grid_y = (mouse_y - grid_offset_y) // config.GRID_SIZE
+                    rel_x = mouse_x - grid_offset_x
+                    rel_y = mouse_y - grid_offset_y
+                    sel_id = self.tower_selector.get_selected_tower()
+                    tw = 1
+                    th = 1
+                    if sel_id:
+                        td = self.available_towers.get(sel_id)
+                        if td:
+                            tw = int(td.get('grid_width', 1))
+                            th = int(td.get('grid_height', 1))
+                    center_gx = rel_x / avg_tile_size
+                    center_gy = rel_y / avg_tile_size
+                    start_x = int(round(center_gx - (tw / 2.0)))
+                    start_y = int(round(center_gy - (th / 2.0)))
+                    offset_x = (tw - 1) // 2
+                    offset_y = (th - 1) // 2
+                    grid_x = start_x + offset_x
+                    grid_y = start_y + offset_y
                     
                     tower_at_location = None
                     for tower in self.towers:
@@ -757,13 +912,28 @@ class GameScene:
         elif event.type == pygame.MOUSEMOTION:
             if self.is_dragging and self.drag_start_pos:
                 mouse_x, mouse_y = event.pos
-                grid_offset_x = config.UI_PANEL_PADDING
-                grid_offset_y = config.UI_PANEL_PADDING
-                if (grid_offset_x <= mouse_x < grid_offset_x + self.usable_grid_pixel_width and
-                    grid_offset_y <= mouse_y < grid_offset_y + self.usable_grid_pixel_height):
-                    current_grid_x = (mouse_x - grid_offset_x) // config.GRID_SIZE
-                    current_grid_y = (mouse_y - grid_offset_y) // config.GRID_SIZE
-                    
+                # Use selected tower size for snapping calculation
+                sel_id = self.tower_selector.get_selected_tower()
+                tw = 1
+                th = 1
+                if sel_id:
+                    td = self.available_towers.get(sel_id)
+                    if td:
+                        tw = int(td.get('grid_width', 1))
+                        th = int(td.get('grid_height', 1))
+                
+                # Calculate snapped grid position with 20% threshold
+                snapped_x, snapped_y = self._calculate_snapped_grid_position(mouse_x, mouse_y, tw, th)
+                
+                if snapped_x is not None and snapped_y is not None:
+                    current_grid_x = snapped_x
+                    current_grid_y = snapped_y
+                else:
+                    # Outside grid bounds, skip drag preview
+                    current_grid_x = None
+                    current_grid_y = None
+                
+                if current_grid_x is not None and current_grid_y is not None:
                     start_x, start_y = self.drag_start_pos
                     positions = []
                     
@@ -788,16 +958,22 @@ class GameScene:
                             
                             if abs_dx > abs_dy:  # More horizontal movement
                                 # Place towers horizontally
-                                for x in range(start_x, current_grid_x + (1 if dx > 0 else -1), step_x):
+                                int_start_x = int(start_x)
+                                int_current_grid_x = int(current_grid_x)
+                                int_step_x = 1 if dx > 0 else -1
+                                for x in range(int_start_x, int_current_grid_x + int_step_x, int_step_x):
                                     positions.append((x, start_y))
                             elif abs_dy > abs_dx:  # More vertical movement
                                 # Place towers vertically
-                                for y in range(start_y, current_grid_y + (1 if dy > 0 else -1), step_y):
+                                int_start_y = int(start_y)
+                                int_current_grid_y = int(current_grid_y)
+                                int_step_y = 1 if dy > 0 else -1
+                                for y in range(int_start_y, int_current_grid_y + int_step_y, int_step_y):
                                     positions.append((start_x, y))
                             else:  # Equal movement (diagonal)
                                 # Place towers diagonally
-                                steps = min(abs_dx // abs(step_x), abs_dy // abs(step_y))
-                                for i in range(steps + 1):
+                                steps = int(min(abs_dx // abs(step_x), abs_dy // abs(step_y)))
+                                for i in range(int(steps) + 1):
                                     x = start_x + (i * step_x)
                                     y = start_y + (i * step_y)
                                     positions.append((x, y))
@@ -845,22 +1021,80 @@ class GameScene:
                 self.tower_selector.clear_selection()
                 self.selected_tower = None
                 self.tower_preview = None
+            elif event.key == pygame.K_t:
+                # Toggle tower selector panel visibility
+                self.tower_selector.toggle_panel()
+            elif event.key == pygame.K_w:
+                # Toggle wave/debug menu
+                self.debug_toggle_state = not self.debug_toggle_state
+                self.debug_menu_open = self.debug_toggle_state
             elif event.key == pygame.K_g:
                 self.spawn_test_enemy("crone")
             elif event.key == pygame.K_s:
                 self.spawn_test_enemy("quillpig")
-            elif event.key == pygame.K_t:
-                self.spawn_test_enemy("soldier")
+            # Tower selection keys: 1-9, 0, Shift+1-9, Shift+0
+            # Map keys to tower indices: 1->0, 2->1, ..., 9->8, 0->9
+            # Shift+1->10, Shift+2->11, ..., Shift+9->18, Shift+0->19
             elif event.key == pygame.K_1:
-                self.spawn_test_enemy("lord_supermaul")
+                if hasattr(self, 'tower_selector') and self.tower_selector:
+                    if event.mod & pygame.KMOD_SHIFT:
+                        self.tower_selector.select_tower_by_index(10)  # Shift+1 = index 10
+                    else:
+                        self.tower_selector.select_tower_by_index(0)  # 1 = index 0
             elif event.key == pygame.K_2:
-                self.spawn_test_enemy("doomlord")
+                if hasattr(self, 'tower_selector') and self.tower_selector:
+                    if event.mod & pygame.KMOD_SHIFT:
+                        self.tower_selector.select_tower_by_index(11)  # Shift+2 = index 11
+                    else:
+                        self.tower_selector.select_tower_by_index(1)  # 2 = index 1
             elif event.key == pygame.K_3:
-                self.spawn_test_enemy("dragon_whelp")
+                if hasattr(self, 'tower_selector') and self.tower_selector:
+                    if event.mod & pygame.KMOD_SHIFT:
+                        self.tower_selector.select_tower_by_index(12)  # Shift+3 = index 12
+                    else:
+                        self.tower_selector.select_tower_by_index(2)  # 3 = index 2
             elif event.key == pygame.K_4:
-                self.spawn_test_enemy("bloodfist_ogre")
+                if hasattr(self, 'tower_selector') and self.tower_selector:
+                    if event.mod & pygame.KMOD_SHIFT:
+                        self.tower_selector.select_tower_by_index(13)  # Shift+4 = index 13
+                    else:
+                        self.tower_selector.select_tower_by_index(3)  # 4 = index 3
             elif event.key == pygame.K_5:
-                self.spawn_test_enemy("village_peasant")
+                if hasattr(self, 'tower_selector') and self.tower_selector:
+                    if event.mod & pygame.KMOD_SHIFT:
+                        self.tower_selector.select_tower_by_index(14)  # Shift+5 = index 14
+                    else:
+                        self.tower_selector.select_tower_by_index(4)  # 5 = index 4
+            elif event.key == pygame.K_6:
+                if hasattr(self, 'tower_selector') and self.tower_selector:
+                    if event.mod & pygame.KMOD_SHIFT:
+                        self.tower_selector.select_tower_by_index(15)  # Shift+6 = index 15
+                    else:
+                        self.tower_selector.select_tower_by_index(5)  # 6 = index 5
+            elif event.key == pygame.K_7:
+                if hasattr(self, 'tower_selector') and self.tower_selector:
+                    if event.mod & pygame.KMOD_SHIFT:
+                        self.tower_selector.select_tower_by_index(16)  # Shift+7 = index 16
+                    else:
+                        self.tower_selector.select_tower_by_index(6)  # 7 = index 6
+            elif event.key == pygame.K_8:
+                if hasattr(self, 'tower_selector') and self.tower_selector:
+                    if event.mod & pygame.KMOD_SHIFT:
+                        self.tower_selector.select_tower_by_index(17)  # Shift+8 = index 17
+                    else:
+                        self.tower_selector.select_tower_by_index(7)  # 8 = index 7
+            elif event.key == pygame.K_9:
+                if hasattr(self, 'tower_selector') and self.tower_selector:
+                    if event.mod & pygame.KMOD_SHIFT:
+                        self.tower_selector.select_tower_by_index(18)  # Shift+9 = index 18
+                    else:
+                        self.tower_selector.select_tower_by_index(8)  # 9 = index 8
+            elif event.key == pygame.K_0:
+                if hasattr(self, 'tower_selector') and self.tower_selector:
+                    if event.mod & pygame.KMOD_SHIFT:
+                        self.tower_selector.select_tower_by_index(19)  # Shift+0 = index 19
+                    else:
+                        self.tower_selector.select_tower_by_index(9)   # 0 = index 9
             elif event.key == pygame.K_RETURN:
                 if self.wave_state == WAVE_STATE_IDLE and not self.wave_started:
                     self.wave_started = True
@@ -881,16 +1115,18 @@ class GameScene:
 
         # Tower Hover Detection
         mouse_x, mouse_y = pygame.mouse.get_pos()
-        grid_offset_x = config.UI_PANEL_PADDING
-        grid_offset_y = config.UI_PANEL_PADDING
+        grid_offset_x = self.play_area_left - int(self.cam_x)
+        grid_offset_y = self.play_area_top - int(self.cam_y)
         relative_mouse_x = mouse_x - grid_offset_x
         relative_mouse_y = mouse_y - grid_offset_y
         
         found_hover = None
         if (grid_offset_x <= mouse_x < grid_offset_x + self.usable_grid_pixel_width and
             grid_offset_y <= mouse_y < grid_offset_y + self.usable_grid_pixel_height):
-            hover_grid_x = relative_mouse_x // config.GRID_SIZE
-            hover_grid_y = relative_mouse_y // config.GRID_SIZE
+            # Use average tile size for grid coordinate conversion to match tower positioning (nearest center)
+            avg_tile_size = (self.actual_tile_width + self.actual_tile_height) // 2
+            hover_grid_x = (relative_mouse_x + (avg_tile_size // 2)) // avg_tile_size
+            hover_grid_y = (relative_mouse_y + (avg_tile_size // 2)) // avg_tile_size
             
             for tower in self.towers:
                 if (tower.top_left_grid_x <= hover_grid_x < tower.top_left_grid_x + tower.grid_width and
@@ -903,20 +1139,80 @@ class GameScene:
         # Update tower preview position
         if not self.is_dragging and self.tower_selector.get_selected_tower():
             mouse_x, mouse_y = pygame.mouse.get_pos()
-            grid_offset_x = config.UI_PANEL_PADDING
-            grid_offset_y = config.UI_PANEL_PADDING
-            relative_mouse_x = mouse_x - grid_offset_x
-            relative_mouse_y = mouse_y - grid_offset_y
+            selected_tower_id = self.tower_selector.get_selected_tower()
+            tower_data = self.available_towers.get(selected_tower_id) if selected_tower_id else None
+            grid_width = tower_data.get('grid_width', 1) if tower_data else 1
+            grid_height = tower_data.get('grid_height', 1) if tower_data else 1
             
-            grid_x = relative_mouse_x // config.GRID_SIZE
-            grid_y = relative_mouse_y // config.GRID_SIZE
+            # Calculate snapped grid position with 20% threshold
+            snapped_x, snapped_y = self._calculate_snapped_grid_position(mouse_x, mouse_y, grid_width, grid_height)
             
-            if 0 <= grid_x < self.grid_width and 0 <= grid_y < self.grid_height:
-                self.tower_preview = (grid_x, grid_y)
+            if snapped_x is not None and snapped_y is not None:
+                if 0 <= snapped_x < self.grid_width and 0 <= snapped_y < self.grid_height:
+                    self.tower_preview = (snapped_x, snapped_y)
+                else:
+                    self.tower_preview = None
             else:
                 self.tower_preview = None
         elif not self.is_dragging:
             self.tower_preview = None
+
+    def _calculate_snapped_grid_position(self, mouse_x, mouse_y, grid_width, grid_height):
+        """
+        Calculate snapped grid position with 20% threshold.
+        If mouse is at least 20% into the next grid square, snap to that square.
+        Otherwise, snap to the current square.
+        Returns (snapped_grid_x, snapped_grid_y) or (None, None) if outside grid bounds.
+        """
+        grid_offset_x = self.play_area_left - int(self.cam_x)
+        grid_offset_y = self.play_area_top - int(self.cam_y)
+        
+        # Check if mouse is within grid bounds
+        if not (grid_offset_x <= mouse_x < grid_offset_x + self.usable_grid_pixel_width and
+                grid_offset_y <= mouse_y < grid_offset_y + self.usable_grid_pixel_height):
+            return (None, None)
+        
+        # Use average tile size for consistency
+        avg_tile_size = (self.actual_tile_width + self.actual_tile_height) // 2
+        
+        # Calculate relative position within grid
+        rel_x = mouse_x - grid_offset_x
+        rel_y = mouse_y - grid_offset_y
+        
+        # Calculate grid position as float (center of tower)
+        center_gx = rel_x / avg_tile_size
+        center_gy = rel_y / avg_tile_size
+        
+        # Calculate the top-left grid cell that would contain the center
+        # For multi-tile towers, we need to account for the offset
+        offset_x = (grid_width - 1) // 2
+        offset_y = (grid_height - 1) // 2
+        start_x_float = center_gx - (grid_width / 2.0)
+        start_y_float = center_gy - (grid_height / 2.0)
+        
+        # Get the integer part (current cell) and fractional part
+        current_cell_x = int(start_x_float)
+        current_cell_y = int(start_y_float)
+        frac_x = start_x_float - current_cell_x
+        frac_y = start_y_float - current_cell_y
+        
+        # Apply 20% threshold: if >= 20% into next cell, snap to next cell
+        SNAP_THRESHOLD = 0.2
+        if frac_x >= SNAP_THRESHOLD:
+            snapped_start_x = current_cell_x + 1
+        else:
+            snapped_start_x = current_cell_x
+            
+        if frac_y >= SNAP_THRESHOLD:
+            snapped_start_y = current_cell_y + 1
+        else:
+            snapped_start_y = current_cell_y
+        
+        # Calculate the center grid position from the snapped start position
+        snapped_grid_x = snapped_start_x + offset_x
+        snapped_grid_y = snapped_start_y + offset_y
+        
+        return (snapped_grid_x, snapped_grid_y)
 
     def handle_tower_placement(self, grid_x, grid_y, is_drag_placement=False):
         """Handle tower placement on the grid, considering tower size."""
@@ -967,6 +1263,12 @@ class GameScene:
 
         # Mark occupied grid cells ONLY if not traversable
         if not is_traversable:
+            # Ensure grid coordinates are integers for grid indexing
+            grid_x = int(grid_x)
+            grid_y = int(grid_y)
+            grid_width = int(grid_width)
+            grid_height = int(grid_height)
+            
             # Calculate the true top-left corner based on center and dimensions
             actual_top_left_x = grid_x - (grid_width - 1) // 2
             actual_top_left_y = grid_y - (grid_height - 1) // 2
@@ -974,8 +1276,8 @@ class GameScene:
             # Loop from the calculated top-left for the full width/height
             for y_offset in range(grid_height):
                 for x_offset in range(grid_width):
-                    mark_x = actual_top_left_x + x_offset
-                    mark_y = actual_top_left_y + y_offset
+                    mark_x = int(actual_top_left_x + x_offset)
+                    mark_y = int(actual_top_left_y + y_offset)
                     # Check bounds within loop for safety
                     if 0 <= mark_y < self.grid_height and 0 <= mark_x < self.grid_width:
                         self.grid[mark_y][mark_x] = 1 # Mark as obstacle
@@ -997,9 +1299,9 @@ class GameScene:
         # Recalculate paths for all existing enemies ONLY if the placed tower is NOT traversable
         if not is_traversable:
             for enemy in self.enemies[:]:  # Use slice copy
-                # Get enemy's current grid position
-                current_grid_x = int(enemy.x // config.GRID_SIZE)
-                current_grid_y = int(enemy.y // config.GRID_SIZE)
+                # Get enemy's current grid position (use avg_tile_size for consistency)
+                current_grid_x = int(enemy.x // self.avg_tile_size)
+                current_grid_y = int(enemy.y // self.avg_tile_size)
                 
                 # Skip path recalculation for air units
                 if enemy.type == 'air':
@@ -1055,6 +1357,40 @@ class GameScene:
         # --- End Game State Check ---
 
         current_time = pygame.time.get_ticks() / 1000.0 # Get current time once
+
+        # --- Edge Scroll (Drives both camera and parallax) ---
+        try:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            dx = 0.0
+            dy = 0.0
+            if mouse_x < self.edge_scroll_margin:
+                dx = -1.0
+            elif mouse_x > (self.screen_width - self.edge_scroll_margin):
+                dx = 1.0
+            if mouse_y < self.edge_scroll_margin:
+                dy = -1.0
+            elif mouse_y > (self.screen_height - self.edge_scroll_margin):
+                dy = 1.0
+            if dx != 0.0 or dy != 0.0:
+                delta_x = dx * self.edge_scroll_speed * time_delta
+                delta_y = dy * self.edge_scroll_speed * time_delta
+                self.cam_x += delta_x
+                self.cam_y += delta_y
+                self.bg_cam_x += delta_x
+                self.bg_cam_y += delta_y
+                # Clamp world camera to a larger range (allows black zone)
+                if self.cam_x < -self.cam_pan_range_x: self.cam_x = -self.cam_pan_range_x
+                if self.cam_x > self.cam_pan_range_x: self.cam_x = self.cam_pan_range_x
+                if self.cam_y < -self.cam_pan_range_y: self.cam_y = -self.cam_pan_range_y
+                if self.cam_y > self.cam_pan_range_y: self.cam_y = self.cam_pan_range_y
+                # Clamp background parallax separately to smaller range
+                if self.bg_cam_x < -self.bg_pan_range: self.bg_cam_x = -self.bg_pan_range
+                if self.bg_cam_x > self.bg_pan_range: self.bg_cam_x = self.bg_pan_range
+                if self.bg_cam_y < -self.bg_pan_range: self.bg_cam_y = -self.bg_pan_range
+                if self.bg_cam_y > self.bg_pan_range: self.bg_cam_y = self.bg_pan_range
+        except Exception:
+            pass
+        # --- End Edge Scroll ---
 
         # --- Helper function to trigger game end state ---
         def trigger_game_end(is_victory):
@@ -1428,7 +1764,7 @@ class GameScene:
                 if current_time - tower.last_attack_time >= effective_interval:
                     #print(f"DEBUG: Broadside tower {tower.tower_id} firing based on interval.")
                     pass
-                    grid_offset_x = config.UI_PANEL_PADDING
+                    grid_offset_x = 0  # Grid starts at left edge to fill space
                     grid_offset_y = config.UI_PANEL_PADDING
                     # Capture and process results for broadside
                     # Pass self.towers for potential adjacency checks within attack
@@ -2165,12 +2501,36 @@ class GameScene:
 
             # --- Move Enemy --- 
             # Enemy.move() handles status updates internally
-            enemy.move(current_time)
+            # Pass avg_tile_size for consistent coordinate conversion
+            enemy.move(current_time, tile_size=self.avg_tile_size)
+            
+            # --- Continue moving towards objective midpoint if path finished ---
+            # Calculate midpoint of objective area in grid-relative pixel coordinates
+            objective_midpoint_x_grid = self.objective_area_x + config.OBJECTIVE_AREA_WIDTH // 2
+            objective_midpoint_y_grid = self.objective_area_y + config.OBJECTIVE_AREA_HEIGHT // 2
+            objective_midpoint_x = objective_midpoint_x_grid * self.avg_tile_size + (self.avg_tile_size // 2)
+            objective_midpoint_y = objective_midpoint_y_grid * self.avg_tile_size + (self.avg_tile_size // 2)
+            
+            # If enemy has finished the path but hasn't reached the midpoint yet, continue moving
+            if enemy.path_index >= len(enemy.grid_path):
+                # Calculate direction to midpoint
+                dx = objective_midpoint_x - enemy.x
+                dy = objective_midpoint_y - enemy.y
+                distance = math.sqrt(dx**2 + dy**2)
+                
+                if distance > 0:
+                    # Move towards midpoint (enemy.speed is already in pixels per frame, no time_delta needed)
+                    move_x = (dx / distance) * enemy.speed
+                    move_y = (dy / distance) * enemy.speed
+                    enemy.x += move_x
+                    enemy.y += move_y
+                    # Update rect position
+                    enemy.rect.center = (int(enemy.x), int(enemy.y))
             
             # --- Check for Walkover Tower Trigger --- 
             if enemy.health > 0:
-                current_grid_x = int(enemy.x // config.GRID_SIZE)
-                current_grid_y = int(enemy.y // config.GRID_SIZE)
+                current_grid_x = int(enemy.x // self.avg_tile_size)
+                current_grid_y = int(enemy.y // self.avg_tile_size)
                 
                 for tower in self.towers:
                     # Check if tower triggers on walkover and enemy is on its tile
@@ -2213,7 +2573,16 @@ class GameScene:
             # --- End Walkover Check --- 
 
             # --- Objective check --- 
-            if enemy.path_index >= len(enemy.grid_path):
+            # Reuse the midpoint calculation from above (already calculated before walkover check)
+            # Check if enemy has reached the midpoint of the objective area
+            # For Y: enemy must have reached or passed the midpoint (since enemies move top to bottom)
+            # For X: enemy should be within a reasonable range of the midpoint (within half the objective width)
+            x_tolerance = (config.OBJECTIVE_AREA_WIDTH * self.avg_tile_size) // 2
+            has_reached_objective = (enemy.y >= objective_midpoint_y and 
+                                    abs(enemy.x - objective_midpoint_x) <= x_tolerance)
+            
+            # If enemy has reached the midpoint, remove them
+            if has_reached_objective:
                 
                 # --- Check for Boss Reaching Objective (Loss Condition) ---
                 instant_loss = False
@@ -2289,10 +2658,10 @@ class GameScene:
                     # <<< END PLAY DEATH SOUND >>>
 
                     # Create blood splatter effect 
-                    grid_offset_x = config.UI_PANEL_PADDING
-                    grid_offset_y = config.UI_PANEL_PADDING
-                    effect_x = enemy.x + grid_offset_x 
-                    effect_y = enemy.y + grid_offset_y
+                    # Store world-space coordinates in the effect (enemy.x and enemy.y are in world space)
+                    # Camera offsets will be applied when drawing each frame
+                    effect_x = enemy.x
+                    effect_y = enemy.y
                     if self.blood_splatter_base_image:
                         splatter = Effect(effect_x, effect_y, 
                                           self.blood_splatter_base_image,
@@ -2328,59 +2697,195 @@ class GameScene:
         
         # --- Draw Lives Display (Removed from here) --- 
         
-        # Draw grid background 
-        grid_bg_surface = pygame.Surface((self.usable_grid_pixel_width, self.usable_grid_pixel_height))
-        if self.grid_background_texture:
-            grid_bg_surface.blit(self.grid_background_texture, (0, 0))
+        # Draw background2.jpg (border/mountain image) for the entire screen first
+        # This covers all non-playable areas
+        full_screen_width = self.screen_width
+        full_screen_height = self.screen_height
+        if self.original_background2_image:
+            # Tie background2 to world camera so it stays fixed relative to towers/grid
+            scaled_background2 = pygame.transform.scale(
+                self.original_background2_image,
+                (full_screen_width, full_screen_height)
+            )
+            offset_x = -int(self.cam_x)
+            offset_y = -int(self.cam_y)
+            screen.blit(scaled_background2, (offset_x, offset_y))
+        elif self.original_background_image:
+            # Fallback: use background.jpg if background2.jpg not available
+            scaled_background = pygame.transform.scale(
+                self.original_background_image,
+                (full_screen_width, full_screen_height)
+            )
+            offset_x = -int(self.cam_x)
+            offset_y = -int(self.cam_y)
+            screen.blit(scaled_background, (offset_x, offset_y))
         else:
-            grid_bg_surface.fill((20, 20, 20)) # Fallback dark background
+            screen.fill((20, 20, 20))  # Fallback dark background
         
-        # Draw restricted side columns overlay (fills only; outlines removed to let frame art show)
-        # Icy blue tint for restricted areas
-        restricted_col_color = (120, 180, 255, 200)
-        restricted_surface = pygame.Surface((self.usable_grid_pixel_width, self.usable_grid_pixel_height), pygame.SRCALPHA)
-        
-        # Top restricted area fill
-        top_rect = pygame.Rect(0, 0, self.usable_grid_pixel_width, config.RESTRICTED_TOWER_AREA_HEIGHT * config.GRID_SIZE)
-        pygame.draw.rect(restricted_surface, restricted_col_color, top_rect)
-
-        # Bottom restricted area fill (aligned to grid)
-        bottom_restricted_start_y_grid = self.grid_height - config.RESTRICTED_TOWER_AREA_HEIGHT
-        bottom_restricted_start_y_pixel = bottom_restricted_start_y_grid * config.GRID_SIZE
-        bottom_rect = pygame.Rect(0, bottom_restricted_start_y_pixel, 
-                                self.usable_grid_pixel_width, config.RESTRICTED_TOWER_AREA_HEIGHT * config.GRID_SIZE)
-        pygame.draw.rect(restricted_surface, restricted_col_color, bottom_rect)
-        
-        # Left restricted area fill
-        left_rect = pygame.Rect(0, 0, config.RESTRICTED_TOWER_AREA_WIDTH * config.GRID_SIZE, self.usable_grid_pixel_height)
-        pygame.draw.rect(restricted_surface, restricted_col_color, left_rect)
-        
-        # Right restricted area fill
-        right_rect = pygame.Rect(self.usable_grid_pixel_width - config.RESTRICTED_TOWER_AREA_WIDTH * config.GRID_SIZE, 0, config.RESTRICTED_TOWER_AREA_WIDTH * config.GRID_SIZE, self.usable_grid_pixel_height)
-        pygame.draw.rect(restricted_surface, restricted_col_color, right_rect)
-        
-        grid_bg_surface.blit(restricted_surface, (0, 0))
-
-        # Draw grid lines (on grid_bg_surface)
-        # Icy blue grid lines
-        icy_grid_color = (120, 180, 255)
-        for x_line in range(0, self.usable_grid_pixel_width + 1, config.GRID_SIZE):
-            pygame.draw.line(grid_bg_surface, icy_grid_color, (x_line, 0), (x_line, self.usable_grid_pixel_height))
-        for y_line in range(0, self.usable_grid_pixel_height + 1, config.GRID_SIZE):
-            pygame.draw.line(grid_bg_surface, icy_grid_color, (0, y_line), (self.usable_grid_pixel_width, y_line))
+        # Draw background.jpg only within the playable tower area (inside white borders)
+        if self.original_background_image:
+            # Calculate playable area bounds (same as border calculation)
+            avg_tile_size_bg = (self.actual_tile_width + self.actual_tile_height) // 2
+            placeable_left = self.play_area_left - int(self.cam_x) + (config.RESTRICTED_TOWER_AREA_WIDTH * avg_tile_size_bg)
+            placeable_top = self.play_area_top - int(self.cam_y) + (config.RESTRICTED_TOWER_AREA_HEIGHT * avg_tile_size_bg)
+            placeable_width = config.FIXED_PLACEABLE_WIDTH_TILES * avg_tile_size_bg
+            placeable_height = config.FIXED_PLACEABLE_HEIGHT_TILES * avg_tile_size_bg
             
-        # Blit the completed grid surface onto the main screen at top-left
-        grid_topleft = (config.UI_PANEL_PADDING, config.UI_PANEL_PADDING)
-        screen.blit(grid_bg_surface, grid_topleft) # Add top/left padding
+            # Create a subsurface or clip region for the playable area
+            # Scale background.jpg to cover the playable area
+            scaled_playable_bg = pygame.transform.scale(
+                self.original_background_image,
+                (int(placeable_width), int(placeable_height))
+            )
+            # Draw background.jpg only in the playable area
+            screen.blit(scaled_playable_bg, (int(placeable_left), int(placeable_top)))
+        
+        # Draw grid background (only for grid lines, restricted areas, etc.)
+        # Grid must be drawn at the play area boundaries to match placement calculations
+        # Grid extends to full screen width (tower selector overlays on top)
+        # CRITICAL: Force right boundary to full screen width and update usable width
+        self.play_area_right = int(self.screen_width)  # Force to full screen width
+        # Update usable width to match full screen (minus left padding only)
+        self.usable_grid_pixel_width = self.screen_width - self.play_area_left
+        # Calculate grid surface width from updated boundaries - MUST extend to full screen
+        grid_surface_width = self.screen_width - self.play_area_left  # Full screen minus left padding only
+        # Calculate EXACT height needed to fill from play area top to play area bottom
+        # Extend grid surface upward by two tiles to show top restricted area two squares higher
+        avg_tile_size_for_offset = (self.actual_tile_width + self.actual_tile_height) // 2
+        # Apply camera offset to grid
+        grid_topleft = (self.play_area_left - int(self.cam_x), self.play_area_top - (avg_tile_size_for_offset * 2) - int(self.cam_y))
+        # Grid should fill from play_area_top to play_area_bottom, plus two tiles above for top restricted area
+        grid_surface_height = self.play_area_bottom - self.play_area_top + (avg_tile_size_for_offset * 2)
+        # Ensure height is at least 1 pixel to avoid errors
+        if grid_surface_height < 1:
+            grid_surface_height = 1
+        
+        # Use pre-calculated actual tile sizes
+        actual_tile_width = self.actual_tile_width
+        actual_tile_height = self.actual_tile_height
+        
+        # Create grid surface for grid lines and restricted areas (transparent where not needed)
+        grid_bg_surface = pygame.Surface((grid_surface_width, grid_surface_height), pygame.SRCALPHA)
+        
+        # Optionally draw restricted perimeter overlays (light blue). Controlled by config.DRAW_RESTRICTED_OVERLAY.
+        if getattr(config, 'DRAW_RESTRICTED_OVERLAY', True):
+            restricted_col_color = (120, 180, 255, 200)
+            restricted_surface = pygame.Surface((grid_surface_width, grid_surface_height), pygame.SRCALPHA)
+            avg_tile_size_restricted = (actual_tile_width + actual_tile_height) // 2
+            # Top restricted area fill
+            top_rect = pygame.Rect(0, 0, grid_surface_width, config.RESTRICTED_TOWER_AREA_HEIGHT * avg_tile_size_restricted)
+            pygame.draw.rect(restricted_surface, restricted_col_color, top_rect)
+            # Bottom restricted area fill (account for two-tile extension at top)
+            bottom_restricted_start_y_grid = self.grid_height - config.RESTRICTED_TOWER_AREA_HEIGHT
+            bottom_restricted_start_y_pixel = (bottom_restricted_start_y_grid + 2) * avg_tile_size_restricted
+            bottom_rect = pygame.Rect(0, bottom_restricted_start_y_pixel, 
+                                    grid_surface_width, config.RESTRICTED_TOWER_AREA_HEIGHT * avg_tile_size_restricted)
+            pygame.draw.rect(restricted_surface, restricted_col_color, bottom_rect)
+            # Left restricted area fill
+            left_rect = pygame.Rect(0, 0, config.RESTRICTED_TOWER_AREA_WIDTH * avg_tile_size_restricted, grid_surface_height)
+            pygame.draw.rect(restricted_surface, restricted_col_color, left_rect)
+            # Right restricted area fill
+            right_rect = pygame.Rect(grid_surface_width - config.RESTRICTED_TOWER_AREA_WIDTH * avg_tile_size_restricted, 0, config.RESTRICTED_TOWER_AREA_WIDTH * avg_tile_size_restricted, grid_surface_height)
+            pygame.draw.rect(restricted_surface, restricted_col_color, right_rect)
+            grid_bg_surface.blit(restricted_surface, (0, 0))
 
-        # Draw play area frame overlay if available (scaled to usable grid area)
+        # Draw grid lines (on grid_bg_surface) - only if show_grid is enabled
+        if self.show_grid:
+            # Icy blue grid lines
+            icy_grid_color = (120, 180, 255)
+            # Use average tile size to match placement calculations (which use avg_tile_size)
+            avg_tile_size = (actual_tile_width + actual_tile_height) // 2
+            int_tile_size = int(avg_tile_size)
+            # Draw grid lines using the same tile size as placement calculations
+            # Ensure lines extend to the full grid surface width (full screen minus left padding)
+            # Note: Surface extends two tiles above the play area, so grid lines start at that offset
+            grid_line_start_y = int(avg_tile_size * 2)  # Start two tiles down from top of extended surface (must be int for range)
+            # Draw vertical grid lines
+            for x_line in range(0, grid_surface_width + 1, int_tile_size):
+                pygame.draw.line(grid_bg_surface, icy_grid_color, (x_line, 0), (x_line, grid_surface_height))
+            # Draw horizontal grid lines - start from the top of the actual playable grid (one tile down)
+            for y_line in range(grid_line_start_y, int(grid_surface_height) + 1, int_tile_size):
+                pygame.draw.line(grid_bg_surface, icy_grid_color, (0, y_line), (grid_surface_width, y_line))
+            # Draw the top edge line of the playable grid (one tile down from surface top)
+            pygame.draw.line(grid_bg_surface, icy_grid_color, (0, grid_line_start_y), (grid_surface_width, grid_line_start_y))
+            # Ensure final vertical line at right edge to visually extend to full screen
+            if grid_surface_width > 0:
+                pygame.draw.line(grid_bg_surface, icy_grid_color, (grid_surface_width - 1, 0), (grid_surface_width - 1, grid_surface_height))
+        
+        # Blit the completed grid surface onto the main screen at top-left (no left padding to fill space)
+        # Grid should fill from top padding all the way to just above enemy preview area
+        screen.blit(grid_bg_surface, grid_topleft)
+        
+        # --- TEMP: Draw solid border around tower-placeable area ---
+        if getattr(config, 'DRAW_PLACEABLE_BORDER', False):
+            try:
+                avg_tile_size_border = (self.actual_tile_width + self.actual_tile_height) // 2
+                placeable_left = self.play_area_left - int(self.cam_x) + (config.RESTRICTED_TOWER_AREA_WIDTH * avg_tile_size_border)
+                placeable_top = self.play_area_top - int(self.cam_y) + (config.RESTRICTED_TOWER_AREA_HEIGHT * avg_tile_size_border)
+                placeable_width = config.FIXED_PLACEABLE_WIDTH_TILES * avg_tile_size_border
+                placeable_height = config.FIXED_PLACEABLE_HEIGHT_TILES * avg_tile_size_border
+                border_rect = pygame.Rect(int(placeable_left), int(placeable_top), int(placeable_width), int(placeable_height))
+                pygame.draw.rect(screen, (255, 255, 255), border_rect, 3)
+            except Exception:
+                pass
+        
+        # --- Draw markers for spawn and objective areas ---
+        if getattr(config, 'DRAW_SPAWN_OBJECTIVE_MARKERS', False):
+            try:
+                avg_tile_size_m = (self.actual_tile_width + self.actual_tile_height) // 2
+                # Spawn area marker - draw spawn.png image
+                if self.spawn_image:
+                    spawn_px = self.play_area_left - int(self.cam_x) + (self.spawn_area_x * avg_tile_size_m)
+                    spawn_py = self.play_area_top - int(self.cam_y) + (self.spawn_area_y * avg_tile_size_m)
+                    spawn_w = config.SPAWN_AREA_WIDTH * avg_tile_size_m
+                    spawn_h = config.SPAWN_AREA_HEIGHT * avg_tile_size_m
+                    # Scale spawn image to match spawn area size
+                    scaled_spawn = pygame.transform.scale(self.spawn_image, (int(spawn_w), int(spawn_h)))
+                    screen.blit(scaled_spawn, (int(spawn_px), int(spawn_py)))
+                else:
+                    # Fallback to colored box if image not loaded
+                    spawn_px = self.play_area_left - int(self.cam_x) + (self.spawn_area_x * avg_tile_size_m)
+                    spawn_py = self.play_area_top - int(self.cam_y) + (self.spawn_area_y * avg_tile_size_m)
+                    spawn_w = config.SPAWN_AREA_WIDTH * avg_tile_size_m
+                    spawn_h = config.SPAWN_AREA_HEIGHT * avg_tile_size_m
+                    pygame.draw.rect(screen, getattr(config, 'SPAWN_MARKER_COLOR', (0,200,255)),
+                                     pygame.Rect(int(spawn_px), int(spawn_py), int(spawn_w), int(spawn_h)), 0)
+
+                # Objective area marker - draw objective.png image
+                if self.objective_image:
+                    obj_px = self.play_area_left - int(self.cam_x) + (self.objective_area_x * avg_tile_size_m)
+                    obj_py = self.play_area_top - int(self.cam_y) + (self.objective_area_y * avg_tile_size_m)
+                    obj_w = config.OBJECTIVE_AREA_WIDTH * avg_tile_size_m
+                    obj_h = config.OBJECTIVE_AREA_HEIGHT * avg_tile_size_m
+                    # Scale objective image to match objective area size
+                    scaled_objective = pygame.transform.scale(self.objective_image, (int(obj_w), int(obj_h)))
+                    screen.blit(scaled_objective, (int(obj_px), int(obj_py)))
+                else:
+                    # Fallback to colored box if image not loaded
+                    obj_px = self.play_area_left - int(self.cam_x) + (self.objective_area_x * avg_tile_size_m)
+                    obj_py = self.play_area_top - int(self.cam_y) + (self.objective_area_y * avg_tile_size_m)
+                    obj_w = config.OBJECTIVE_AREA_WIDTH * avg_tile_size_m
+                    obj_h = config.OBJECTIVE_AREA_HEIGHT * avg_tile_size_m
+                    pygame.draw.rect(screen, getattr(config, 'OBJECTIVE_MARKER_COLOR', (255,200,0)),
+                                     pygame.Rect(int(obj_px), int(obj_py), int(obj_w), int(obj_h)), 0)
+            except Exception:
+                pass
+        
+        # DEBUG: Verify grid fills correctly - uncomment to check
+        # expected_bottom_y = config.UI_PANEL_PADDING + grid_surface_height
+        # target_bottom_y = self.screen_height - config.ENEMY_PREVIEW_HEIGHT
+        # print(f"Grid top: {grid_topleft[1]}, Grid height: {grid_surface_height}, Expected bottom: {expected_bottom_y}, Target bottom: {target_bottom_y}, Screen height: {self.screen_height}, Enemy preview: {config.ENEMY_PREVIEW_HEIGHT}")
+
+        # Draw play area frame overlay tied to world camera as well
         if self.play_area_frame_image:
             try:
                 frame_scaled = pygame.transform.scale(
                     self.play_area_frame_image,
-                    (self.usable_grid_pixel_width, self.usable_grid_pixel_height)
+                    (full_screen_width, full_screen_height)
                 )
-                screen.blit(frame_scaled, grid_topleft)
+                offset_x = -int(self.cam_x)
+                offset_y = -int(self.cam_y)
+                screen.blit(frame_scaled, (offset_x, offset_y))
             except Exception:
                 pass
 
@@ -2389,12 +2894,16 @@ class GameScene:
         # --- End Spawn/Objective Drawing ---
 
         # Draw towers (coordinates are relative to grid, need offset)
-        grid_offset_x = config.UI_PANEL_PADDING
-        grid_offset_y = config.UI_PANEL_PADDING
+        # Grid is positioned at playable area boundaries
+        grid_offset_x = self.play_area_left - int(self.cam_x)
+        grid_offset_y = self.play_area_top - int(self.cam_y)
         for tower in self.towers:
-            tower.draw(screen, self.tower_assets, grid_offset_x, grid_offset_y)
+            tower.draw(screen, self.tower_assets, grid_offset_x, grid_offset_y, 
+                      actual_tile_width=self.actual_tile_width, 
+                      actual_tile_height=self.actual_tile_height)
             
         # Draw enemies using EnemyAssets
+        # Enemies store pixel coordinates directly, so they just need the grid offset
         for enemy in self.enemies:
             enemy.draw(screen, self.enemy_assets, grid_offset_x, grid_offset_y) # Pass enemy_assets and offsets
             
@@ -2430,7 +2939,9 @@ class GameScene:
             elif isinstance(effect, ExpandingCircleEffect): # Handle new effect type
                 effect.draw(screen, grid_offset_x, grid_offset_y) # Pass offsets
             elif hasattr(effect, 'draw'):
-                effect.draw(screen)
+                # For regular Effect objects (like blood splatter), pass camera offsets
+                # They will use stored offsets if available, or the passed offsets
+                effect.draw(screen, grid_offset_x, grid_offset_y)
             
         # Draw Active Beams 
         # This is where beam damage/effects per frame should be applied too
@@ -2588,60 +3099,45 @@ class GameScene:
                     for grid_x, grid_y in self.drag_preview_positions:
                         is_valid_placement = self.is_valid_tower_placement(grid_x, grid_y, grid_width, grid_height)
                         
-                        # Calculate preview position
+                        # Calculate preview position - center the tower on the grid cell
                         offset_x = (grid_width - 1) // 2
                         offset_y = (grid_height - 1) // 2
                         start_x = grid_x - offset_x
                         start_y = grid_y - offset_y
                         
-                        # Convert to pixel coordinates
-                        tower_left = (start_x * config.GRID_SIZE) + config.UI_PANEL_PADDING
-                        tower_top = (start_y * config.GRID_SIZE) + config.UI_PANEL_PADDING
+                        # Use average tile size to maintain aspect ratio
+                        avg_tile_size = (self.actual_tile_width + self.actual_tile_height) // 2
+                        
+                        # Convert to pixel coordinates using play area offset (grid starts at play area)
+                        tower_left = self.play_area_left - int(self.cam_x) + (start_x * avg_tile_size)
+                        tower_top = self.play_area_top - int(self.cam_y) + (start_y * avg_tile_size)
                         
                         # Calculate the absolute center point in pixels
-                        tower_pixel_width = grid_width * config.GRID_SIZE
-                        tower_pixel_height = grid_height * config.GRID_SIZE
-                        center_pixel_x = tower_left + (tower_pixel_width // 2)
-                        center_pixel_y = tower_top + (tower_pixel_height // 2)
+                        tower_pixel_width = grid_width * avg_tile_size
+                        tower_pixel_height = grid_height * avg_tile_size
                         
-                        # Calculate preview position so cursor is at true center
-                        preview_pixel_x = center_pixel_x - (tower_pixel_width // 2)
-                        preview_pixel_y = center_pixel_y - (tower_pixel_height // 2)
+                        # Preview position: use snapped grid position (where tower will actually be placed)
+                        # This snaps to grid squares with 20% threshold
+                        preview_pixel_x = tower_left
+                        preview_pixel_y = tower_top
                         
                         # Draw tower preview
                         self.tower_assets.draw_tower(screen, selected_tower_id,
-                                                  preview_pixel_x, preview_pixel_y,
-                                                  is_preview=True)
+                                                     preview_pixel_x, preview_pixel_y,
+                                                     width=tower_pixel_width,
+                                                     height=tower_pixel_height,
+                                                     is_preview=False)
                         
-                        # Draw cell outlines
+                        # Draw colored overlay box
+                        overlay_color = (0, 255, 0, 100) if is_valid_placement else (255, 0, 0, 100)
+                        overlay_surface = pygame.Surface((tower_pixel_width, tower_pixel_height), pygame.SRCALPHA)
+                        overlay_surface.fill(overlay_color)
+                        screen.blit(overlay_surface, (preview_pixel_x, preview_pixel_y))
+                        
+                        # Draw outline
                         indicator_color = config.GREEN if is_valid_placement else config.RED
-                        for y_offset in range(grid_height):
-                            for x_offset in range(grid_width):
-                                cell_x = start_x + x_offset
-                                cell_y = start_y + y_offset
-                                if 0 <= cell_x < self.grid_width and 0 <= cell_y < self.grid_height:
-                                    cell_rect = pygame.Rect(
-                                        (cell_x * config.GRID_SIZE) + config.UI_PANEL_PADDING, 
-                                        (cell_y * config.GRID_SIZE) + config.UI_PANEL_PADDING, 
-                                        config.GRID_SIZE, 
-                                        config.GRID_SIZE
-                                    )
-                                    pygame.draw.rect(screen, indicator_color, cell_rect, 2)
-                        
-                        # Draw range preview if applicable
-                        if tower_data.get('attack_type') != 'aura':
-                            range_units = tower_data.get('range', 0)
-                            if range_units > 0:
-                                range_pixels = int(range_units * (config.GRID_SIZE / 200.0))
-                                range_color = (0, 255, 0, 100)  # Green, semi-transparent
-                                pygame.draw.circle(screen, range_color, (int(center_pixel_x), int(center_pixel_y)), range_pixels, 2)
-                                
-                                # Draw min range if applicable
-                                min_range_units = tower_data.get('range_min', 0)
-                                if min_range_units > 0:
-                                    min_range_pixels = int(min_range_units * (config.GRID_SIZE / 200.0))
-                                    min_range_color = (255, 100, 0, 100)  # Orange, semi-transparent
-                                    pygame.draw.circle(screen, min_range_color, (int(center_pixel_x), int(center_pixel_y)), min_range_pixels, 2)
+                        outline_rect = pygame.Rect(preview_pixel_x, preview_pixel_y, tower_pixel_width, tower_pixel_height)
+                        pygame.draw.rect(screen, indicator_color, outline_rect, 2)
         elif self.tower_preview:
             grid_x, grid_y = self.tower_preview
             selected_tower_id = self.tower_selector.get_selected_tower()
@@ -2653,47 +3149,48 @@ class GameScene:
                     
                     is_valid_placement = self.is_valid_tower_placement(grid_x, grid_y, grid_width, grid_height)
 
-                    # --- Draw preview image centered on the SNAPPED grid cell --- 
-                    tower_pixel_width = grid_width * config.GRID_SIZE
-                    tower_pixel_height = grid_height * config.GRID_SIZE
+                    # --- Draw preview image at the snapped grid position (where it will actually be placed) ---
+                    # Use average tile size to maintain aspect ratio
+                    avg_tile_size_hover = (self.actual_tile_width + self.actual_tile_height) // 2
+                    tower_pixel_width = grid_width * avg_tile_size_hover
+                    tower_pixel_height = grid_height * avg_tile_size_hover
                     
-                    # Calculate the center point using the same method as tower placement
+                    # Calculate where the tower will actually be placed (snapped to grid)
                     offset_x = (grid_width - 1) // 2
                     offset_y = (grid_height - 1) // 2
                     start_x = grid_x - offset_x
                     start_y = grid_y - offset_y
                     
-                    # Convert to pixel coordinates
-                    tower_left = (start_x * config.GRID_SIZE) + config.UI_PANEL_PADDING
-                    tower_top = (start_y * config.GRID_SIZE) + config.UI_PANEL_PADDING
+                    # Convert to pixel coordinates using play area offset with camera applied
+                    tower_left = self.play_area_left - int(self.cam_x) + (start_x * avg_tile_size_hover)
+                    tower_top = self.play_area_top - int(self.cam_y) + (start_y * avg_tile_size_hover)
                     
-                    # Calculate the absolute center point in pixels
+                    # Preview position: use snapped grid position (where tower will actually be placed)
+                    # This snaps to grid squares with 20% threshold
+                    preview_pixel_x = tower_left
+                    preview_pixel_y = tower_top
+                    
+                    # Calculate center for range circles (use snapped position)
                     center_pixel_x = tower_left + (tower_pixel_width // 2)
                     center_pixel_y = tower_top + (tower_pixel_height // 2)
                     
-                    # Calculate preview position so cursor is at true center
-                    preview_pixel_x = center_pixel_x - (tower_pixel_width // 2)
-                    preview_pixel_y = center_pixel_y - (tower_pixel_height // 2)
-                    
-                    # Draw tower call (Level 4)
+                    # Draw tower preview with proper scaling to maintain aspect ratio
                     self.tower_assets.draw_tower(screen, selected_tower_id,
                                               preview_pixel_x, preview_pixel_y,
-                                              is_preview=True)
-
-                    # --- Draw cell outlines based on snapped grid position --- 
+                                              width=tower_pixel_width,
+                                              height=tower_pixel_height,
+                                              is_preview=False)  # Use normal draw with scaling
+                    
+                    # Draw colored overlay to indicate valid/invalid placement
+                    overlay_color = (0, 255, 0, 100) if is_valid_placement else (255, 0, 0, 100)  # Green or red with transparency
+                    overlay_surface = pygame.Surface((tower_pixel_width, tower_pixel_height), pygame.SRCALPHA)
+                    overlay_surface.fill(overlay_color)
+                    screen.blit(overlay_surface, (preview_pixel_x, preview_pixel_y))
+                    
+                    # Draw cell outline box at the SAME position as preview image (snapped to grid)
                     indicator_color = config.GREEN if is_valid_placement else config.RED
-                    for y_offset in range(grid_height):
-                        for x_offset in range(grid_width):
-                            cell_x = start_x + x_offset
-                            cell_y = start_y + y_offset
-                            if 0 <= cell_x < self.grid_width and 0 <= cell_y < self.grid_height:
-                                cell_rect = pygame.Rect(
-                                    (cell_x * config.GRID_SIZE) + config.UI_PANEL_PADDING, 
-                                    (cell_y * config.GRID_SIZE) + config.UI_PANEL_PADDING, 
-                                    config.GRID_SIZE, 
-                                    config.GRID_SIZE
-                                )
-                                pygame.draw.rect(screen, indicator_color, cell_rect, 2)
+                    outline_rect = pygame.Rect(preview_pixel_x, preview_pixel_y, tower_pixel_width, tower_pixel_height)
+                    pygame.draw.rect(screen, indicator_color, outline_rect, 2)
         
         # --- Draw Console Overlay ---
         if self.console_active:
@@ -2709,13 +3206,47 @@ class GameScene:
             display_text = "> " + self.console_text
             text_surf = font.render(display_text, True, (255, 255, 255))
             screen.blit(text_surf, (10, 8))
+        
+        # --- Draw Coordinates Display Near Cursor ---
+        if self.show_coordinates:
+            try:
+                coord_font = pygame.font.Font(None, 20)
+            except Exception:
+                coord_font = pygame.font.SysFont(None, 20)
+            
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            
+            # Calculate grid coordinates if within grid area
+            grid_offset_x = self.play_area_left
+            grid_offset_y = self.play_area_top
+            if (grid_offset_x <= mouse_x < grid_offset_x + self.usable_grid_pixel_width and
+                grid_offset_y <= mouse_y < grid_offset_y + self.usable_grid_pixel_height):
+                avg_tile_size = (self.actual_tile_width + self.actual_tile_height) // 2
+                rel_x = mouse_x - grid_offset_x
+                rel_y = mouse_y - grid_offset_y
+                grid_x = (rel_x + (avg_tile_size // 2)) // avg_tile_size
+                grid_y = (rel_y + (avg_tile_size // 2)) // avg_tile_size
+                coords_text = f"Screen: ({mouse_x}, {mouse_y}) | Grid: ({grid_x}, {grid_y})"
+            else:
+                coords_text = f"Screen: ({mouse_x}, {mouse_y})"
+            
+            # Position text near cursor (offset to avoid covering it)
+            text_surf = coord_font.render(coords_text, True, (255, 255, 0))  # Yellow text
+            # Draw background for readability
+            bg_rect = text_surf.get_rect()
+            bg_rect.x = mouse_x + 15
+            bg_rect.y = mouse_y + 15
+            bg_surface = pygame.Surface((bg_rect.width + 4, bg_rect.height + 4), pygame.SRCALPHA)
+            bg_surface.fill((0, 0, 0, 200))
+            screen.blit(bg_surface, (bg_rect.x - 2, bg_rect.y - 2))
+            screen.blit(text_surf, (bg_rect.x, bg_rect.y))
 
 
         # --- Draw Enemy Preview Area Placeholder ---
         # Dark gray placeholder removed as requested
         # TODO: Draw actual enemy previews here later
 
-        # --- Draw Countdown Timer ---
+        # --- Draw Countdown Timer (Delay Before Wave) ---
         if self.wave_state == WAVE_STATE_WAITING and self.timer_font:
             # Format the timer to one decimal place
             timer_text = f"Next Wave: {max(0, self.wave_timer):.1f}s"
@@ -2728,6 +3259,27 @@ class GameScene:
             )
             screen.blit(text_surface, text_rect)
         # -------------------------
+        
+        # --- Draw Wave Time Limit Timer (Centered at Top) ---
+        if self.wave_state in [WAVE_STATE_SPAWNING, WAVE_STATE_INTERMISSION] and self.timer_font:
+            remaining_seconds = max(0, int(self.wave_time_limit_timer))
+            # Format timer text
+            timer_text = f"{remaining_seconds}s"
+            
+            # Color based on remaining time
+            if remaining_seconds >= 20:
+                timer_color = (0, 255, 0) # Green for 20+ seconds
+            elif remaining_seconds >= 10:
+                timer_color = (255, 255, 0) # Yellow for 10-19 seconds
+            else:
+                timer_color = (255, 0, 0) # Red for <10 seconds
+            
+            text_surface = self.timer_font.render(timer_text, True, timer_color)
+            
+            # Center at the top of the screen
+            text_rect = text_surface.get_rect(center=(self.screen_width // 2, config.UI_PANEL_PADDING + 20))
+            screen.blit(text_surface, text_rect)
+        # -------------------------
 
         # --- Draw UI elements --- 
         self.ui_manager.draw_ui(screen)
@@ -2738,12 +3290,14 @@ class GameScene:
 
         # --- Draw Hovered Tower Range Indicator ---
         if self.hovered_tower:
-            grid_offset_x = config.UI_PANEL_PADDING # Get grid offset
-            grid_offset_y = config.UI_PANEL_PADDING
+            # Use the same grid offsets as tower drawing (accounts for camera and play area)
+            grid_offset_x = self.play_area_left - int(self.cam_x)
+            grid_offset_y = self.play_area_top - int(self.cam_y)
             
-            # Calculate the tower's center point in pixels
-            tower_center_x = (self.hovered_tower.top_left_grid_x * config.GRID_SIZE) + (self.hovered_tower.grid_width * config.GRID_SIZE) // 2 + grid_offset_x
-            tower_center_y = (self.hovered_tower.top_left_grid_y * config.GRID_SIZE) + (self.hovered_tower.grid_height * config.GRID_SIZE) // 2 + grid_offset_y
+            # Use tower's center pixel coordinates (already calculated in world space)
+            # tower.x and tower.y are the center coordinates in world space
+            tower_center_x = self.hovered_tower.x + grid_offset_x
+            tower_center_y = self.hovered_tower.y + grid_offset_y
             center_pos = (int(tower_center_x), int(tower_center_y))
 
             # --- Draw Aura Radius (if applicable) --- 
@@ -3322,6 +3876,12 @@ class GameScene:
 
     def is_valid_tower_placement(self, grid_x, grid_y, grid_width, grid_height):
         """Check if a tower can be placed at the given position"""
+        # Ensure grid coordinates are integers for range() operations
+        grid_x = int(grid_x)
+        grid_y = int(grid_y)
+        grid_width = int(grid_width)
+        grid_height = int(grid_height)
+        
         # Calculate footprint of the tower to be placed
         offset_x = (grid_width - 1) // 2
         offset_y = (grid_height - 1) // 2
@@ -3330,16 +3890,18 @@ class GameScene:
         new_start_y = grid_y - offset_y
         new_end_y = new_start_y + grid_height - 1 # Corrected calculation
 
-        # --- NEW: Prevent placement in spawn area and tiles below ---
+        # --- NEW: Prevent placement in spawn area and two squares directly in front ---
         spawn_area_start_x = self.spawn_area_x
         spawn_area_end_x = self.spawn_area_x + config.SPAWN_AREA_WIDTH - 1
         spawn_area_start_y = self.spawn_area_y
         spawn_area_end_y = self.spawn_area_y + config.SPAWN_AREA_HEIGHT - 1
 
+        # Restrict the TWO squares directly in front of spawn area (centered, like objective area)
+        # These are the same X columns as the spawn area, one row below
         below_spawn_start_x = self.spawn_area_x
         below_spawn_end_x = self.spawn_area_x + config.SPAWN_AREA_WIDTH - 1
         below_spawn_start_y = self.spawn_area_y + config.SPAWN_AREA_HEIGHT
-        below_spawn_end_y = below_spawn_start_y # Only one row
+        below_spawn_end_y = below_spawn_start_y  # Only one row
 
         # Check overlap with spawn area
         if not (new_end_x < spawn_area_start_x or new_start_x > spawn_area_end_x or
@@ -3347,7 +3909,7 @@ class GameScene:
             #print("Validation failed: Cannot place in spawn area.")
             return False # Overlaps with spawn area
 
-        # Check overlap with tiles below spawn area
+        # Check overlap with two squares directly in front of spawn area
         if not (new_end_x < below_spawn_start_x or new_start_x > below_spawn_end_x or
                 new_end_y < below_spawn_start_y or new_start_y > below_spawn_end_y):
             #print("Validation failed: Cannot place in area below spawn.")
@@ -3987,11 +4549,32 @@ class GameScene:
                             'initial_delay_timer': group_data.get('initial_delay', 0.0)
                         })
                     self.wave_state = WAVE_STATE_SPAWNING
+                    # Start the 60-second timer when wave begins spawning
+                    self.wave_time_limit_timer = self.wave_time_limit
+                    self.wave_time_limit_expired = False
+                    self.wave_bonus_gold = 0
+                    self.final_countdown_played = False # Reset countdown sound flag for new wave
                 else:
                     #print("ERROR: Invalid wave index. Transitioning back to IDLE.")
                     self.wave_state = WAVE_STATE_IDLE # Should not happen
         
         elif self.wave_state == WAVE_STATE_SPAWNING:
+            # Update wave time limit timer
+            if self.wave_time_limit_timer > 0:
+                self.wave_time_limit_timer -= delta_time
+                
+                # Play final countdown sound when 5 seconds remain (only once per wave)
+                if not self.final_countdown_played and self.wave_time_limit_timer <= 5.0:
+                    if self.final_countdown_sound:
+                        self.final_countdown_sound.play()
+                        self.final_countdown_played = True
+                
+                if self.wave_time_limit_timer <= 0:
+                    self.wave_time_limit_timer = 0.0
+                    self.wave_time_limit_expired = True
+                    # Immediately start next wave if timer expires
+                    # (but continue current wave spawning)
+            
             # Check if all groups have finished spawning
             if not self.spawning_groups:
                 #print(f"Wave {self.current_wave_index + 1} finished spawning. Total Spawned Counted: {self.enemies_alive_this_wave}") # DEBUG
@@ -4021,6 +4604,42 @@ class GameScene:
                         self.spawning_groups.remove(group)
 
         elif self.wave_state == WAVE_STATE_INTERMISSION: # CORRECTED BLOCK
+            # Update wave time limit timer during intermission
+            if self.wave_time_limit_timer > 0:
+                self.wave_time_limit_timer -= delta_time
+                
+                # Play final countdown sound when 5 seconds remain (only once per wave)
+                if not self.final_countdown_played and self.wave_time_limit_timer <= 5.0:
+                    if self.final_countdown_sound:
+                        self.final_countdown_sound.play()
+                        self.final_countdown_played = True
+                
+                if self.wave_time_limit_timer <= 0:
+                    self.wave_time_limit_timer = 0.0
+                    self.wave_time_limit_expired = True
+                    # If timer expires, immediately start next wave
+                    if self.current_wave_index + 1 < len(self.all_wave_data):
+                        self.current_wave_index += 1
+                        self.wave_state = WAVE_STATE_SPAWNING
+                        next_wave_data = self.all_wave_data[self.current_wave_index]
+                        self.spawning_groups = []
+                        self.enemies_alive_this_wave = 0
+                        self.wave_time_limit_timer = self.wave_time_limit
+                        self.wave_time_limit_expired = False
+                        self.wave_bonus_gold = 0
+                        self.final_countdown_played = False # Reset countdown sound flag for new wave
+                        
+                        for group_data in next_wave_data.get('enemies', []):
+                            self.spawning_groups.append({
+                                'type': group_data['type'],
+                                'remaining': group_data['count'],
+                                'interval': group_data['spawn_interval'],
+                                'interval_timer': group_data.get('initial_delay', 0.0),
+                                'initial_delay_timer': group_data.get('initial_delay', 0.0)
+                            })
+                        self.notify_wave_change()
+                        return # Stop processing for this frame
+            
             # In this state, we wait until all enemies spawned *in this wave* are gone
             # (enemies_alive_this_wave is decremented on death or objective reach)
             #print(f"DEBUG: In INTERMISSION. Checking enemies_alive_this_wave: {self.enemies_alive_this_wave}") # DEBUG
@@ -4036,7 +4655,49 @@ class GameScene:
                         self.money += bonus
                         self.tower_selector.update_money(self.money) # Update UI
                         #print(f"$$$ Wave Bonus Added: +{bonus}. Current Money: {self.money}")
-                        # Optional: Add a floating text effect for the bonus?
+                        
+                        # Create floating text effect for wave completion bonus
+                        try:
+                            # Position text near center of screen (slightly above center)
+                            text_x = self.screen_width // 2
+                            text_y = self.screen_height // 2 - 50
+                            bonus_text = f"Wave Complete: +{bonus} G"
+                            bonus_color = (0, 255, 0) # Green color for wave bonus
+                            text_effect = FloatingTextEffect(text_x, text_y, bonus_text, color=bonus_color, font_size=36, duration=3.5)
+                            self.effects.append(text_effect)
+                        except Exception as e:
+                            #print(f"Error creating wave bonus text effect: {e}")
+                            pass
+                
+                # --- Calculate and Award Time-Based Bonus Gold ---
+                # Calculate bonus based on remaining seconds (max 20 gold)
+                if self.wave_time_limit_timer > 0:
+                    remaining_seconds = int(self.wave_time_limit_timer)
+                    if remaining_seconds >= 20:
+                        # Max bonus: 20 gold for 20+ seconds remaining
+                        self.wave_bonus_gold = 20
+                    else:
+                        # Bonus decreases per second after 20 seconds
+                        self.wave_bonus_gold = remaining_seconds
+                    
+                    if self.wave_bonus_gold > 0:
+                        self.money += self.wave_bonus_gold
+                        self.tower_selector.update_money(self.money) # Update UI
+                        #print(f"$$$ Time Bonus Added: +{self.wave_bonus_gold}. Current Money: {self.money}")
+                        
+                        # Create floating text effect for time bonus
+                        try:
+                            # Position text near center of screen (slightly below wave bonus text)
+                            text_x = self.screen_width // 2
+                            text_y = self.screen_height // 2
+                            time_bonus_text = f"Time Bonus: +{self.wave_bonus_gold} G"
+                            time_bonus_color = (255, 215, 0) # Gold color for time bonus
+                            text_effect = FloatingTextEffect(text_x, text_y, time_bonus_text, color=time_bonus_color, font_size=36, duration=3.5)
+                            self.effects.append(text_effect)
+                        except Exception as e:
+                            #print(f"Error creating time bonus text effect: {e}")
+                            pass
+                # --- End Time-Based Bonus ---
                 # --- End Bonus Award --- 
                 
                 # Current wave is fully cleared, prepare for the next one
@@ -4046,14 +4707,17 @@ class GameScene:
                 # Notify race selector about wave change (for unlock system)
                 self.notify_wave_change()
                 
-                if self.current_wave_index < len(self.all_wave_data):
-                    next_wave_data = self.all_wave_data[self.current_wave_index]
-                    self.wave_timer = next_wave_data.get('delay_before_wave', 10.0)
-                    self.wave_state = WAVE_STATE_WAITING
-                    #print(f"Wave complete. Waiting {self.wave_timer:.1f}s for Wave {self.current_wave_index + 1}")
-                else:
-                    #print("--- All waves spawned! --- ")
-                    self.wave_state = WAVE_STATE_ALL_DONE # Or potentially WAVE_COMPLETE to wait for kills
+                # Only start delay_before_wave if timer hasn't expired
+                # If timer expired, next wave already started above
+                if not self.wave_time_limit_expired:
+                    if self.current_wave_index < len(self.all_wave_data):
+                        next_wave_data = self.all_wave_data[self.current_wave_index]
+                        self.wave_timer = next_wave_data.get('delay_before_wave', 10.0)
+                        self.wave_state = WAVE_STATE_WAITING
+                        #print(f"Wave complete. Waiting {self.wave_timer:.1f}s for Wave {self.current_wave_index + 1}")
+                    else:
+                        #print("--- All waves spawned! --- ")
+                        self.wave_state = WAVE_STATE_ALL_DONE # Or potentially WAVE_COMPLETE to wait for kills
                 return # Stop processing spawns for this frame
 
     def notify_wave_change(self):
@@ -4070,10 +4734,13 @@ class GameScene:
         """Unlock the second race's towers and update the tower selector."""
         if not self.locked_race_towers:
             return
+        
+        # Cache locked towers before clearing
+        newly_unlocked_towers = dict(self.locked_race_towers)
             
         # Add locked towers to available towers
-        self.available_towers.update(self.locked_race_towers)
-        print(f"[GameScene] Unlocked {len(self.locked_race_towers)} towers from second race at wave 10!")
+        self.available_towers.update(newly_unlocked_towers)
+        print(f"[GameScene] Unlocked {len(newly_unlocked_towers)} towers from second race at wave 10!")
         
         # Clear the locked towers
         self.locked_race_towers = {}
@@ -4081,8 +4748,14 @@ class GameScene:
         # Update the tower selector with new towers
         if hasattr(self, 'tower_selector') and self.tower_selector:
             self.tower_selector.available_towers = self.available_towers
-            # Rebuild the tower selector UI
-            self.tower_selector.create_tower_buttons()
+            # Precompute tooltip HTML for newly unlocked towers
+            for tower_id, tower_data in newly_unlocked_towers.items():
+                if tower_id not in self.tower_selector._tooltip_html_cache:
+                    self.tower_selector._tooltip_html_cache[tower_id] = self.tower_selector._build_tooltip_html(tower_data)
+            # Rebuild the tower selector UI (use create_icon_buttons for new UI)
+            self.tower_selector.create_icon_buttons()
+            # Update button states after adding new towers
+            self.tower_selector.update_button_states()
             print("[GameScene] Tower selector updated with unlocked towers!")
     
     # --- Spawn Enemy Helper --- 
@@ -4110,21 +4783,9 @@ class GameScene:
                          is_air_unit=is_air) # Pass the flag
 
         if path:
-            # --- Randomize Spawn X Position within Spawn Area --- \
-            # Calculate min/max grid X coords for spawn area\
-            min_grid_x = self.spawn_area_x
-            max_grid_x = self.spawn_area_x + config.SPAWN_AREA_WIDTH - 1
-            # Choose a random grid cell within the spawn width\
-            random_grid_x = random.randint(min_grid_x, max_grid_x)
-            # Convert random grid X to center pixel X\
-            random_spawn_x_pixel = (random_grid_x * config.GRID_SIZE) + (config.GRID_SIZE // 2)
-            # -----------------------------------------------------
-            # +++ ADDED DEBUG PRINT +++
-            #print(f"  SPAWN DEBUG: Spawn Area X={self.spawn_area_x}, Width={config.SPAWN_AREA_WIDTH}, Chosen Grid X={random_grid_x}, Pixel X={random_spawn_x_pixel}")
-            # ++++++++++++++++++++++++
-            \
-            # Use RANDOMIZED spawn X, but keep original visual spawn Y\
-            enemy = Enemy(random_spawn_x_pixel, self.visual_spawn_y_pixel, \
+            # Spawn at the visual spawn point (center of spawn area)
+            # Use the same coordinates as spawn_test_enemy() for consistency
+            enemy = Enemy(self.visual_spawn_x_pixel, self.visual_spawn_y_pixel, 
                           path, enemy_id, enemy_base_data, armor_type_name, damage_modifiers)
             self.enemies.append(enemy)
             self.enemies_alive_this_wave += 1 # Increment count for wave tracking
@@ -4211,6 +4872,12 @@ class GameScene:
                 if self.tower_selector:
                     self.tower_selector.update_lives(self.lives)
                 print(f"Adjusted lives by {amount}. Current Lives: {self.lives}")
+            return
+
+        if cmd in ("showcoordinates", "show_coordinates", "coords", "coordinates"):
+            self.show_coordinates = not self.show_coordinates
+            status = "enabled" if self.show_coordinates else "disabled"
+            print(f"Show coordinates: {status}")
             return
 
         print(f"Unknown command: {cmd}")

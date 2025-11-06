@@ -23,6 +23,8 @@ class Effect:
             self.finished = True
             self.image = None
             self.rect = None
+            self.x = x
+            self.y = y
             return
             
         # Scale the base image to the target size for this effect instance
@@ -42,6 +44,9 @@ class Effect:
 
         # self.base_image = base_image # Store original (Optional, no longer strictly needed unless we reuse)
         # self.image = self.base_image.copy() # Work with a copy (Now happens during scaling)
+        # Store x and y coordinates (world-space coordinates for camera-aware effects)
+        self.x = x
+        self.y = y
         self.rect = self.image.get_rect(center=(int(x), int(y)))
         self.duration = max(0.01, duration)
         self.hold_duration = max(0, hold_duration)
@@ -101,9 +106,17 @@ class Effect:
                 
         return self.finished
 
-    def draw(self, screen):
+    def draw(self, screen, grid_offset_x=0, grid_offset_y=0):
         """Draw the current animation frame."""
         if not self.finished and self.image:
+            # Apply camera-aware offsets if provided (for world-space coordinates)
+            # Always use provided offsets if they're non-zero (they're recalculated each frame)
+            if grid_offset_x != 0 or grid_offset_y != 0:
+                # Use provided offsets (recalculated each frame based on current camera position)
+                draw_x = self.x + grid_offset_x
+                draw_y = self.y + grid_offset_y
+                self.rect = self.image.get_rect(center=(int(draw_x), int(draw_y)))
+            # Otherwise use existing rect (for screen-space coordinates)
             screen.blit(self.image, self.rect)
 
 class ChainLightningVisual(Effect):
@@ -291,8 +304,12 @@ class FloatingTextEffect(Effect):
         
         return False
 
-    def draw(self, screen):
-        """Draw the floating text with fade."""
+    def draw(self, screen, grid_offset_x=0, grid_offset_y=0):
+        """Draw the floating text with fade.
+        
+        Note: FloatingTextEffect uses screen-space coordinates, so grid_offset_x and grid_offset_y
+        are ignored for compatibility with the generic effect drawing code.
+        """
         if self.finished:
             return
 
@@ -1158,8 +1175,12 @@ class FloatingTextEffect:
         
         return False
 
-    def draw(self, screen):
-        """Draw the floating text with fade."""
+    def draw(self, screen, grid_offset_x=0, grid_offset_y=0):
+        """Draw the floating text with fade.
+        
+        Note: FloatingTextEffect uses screen-space coordinates, so grid_offset_x and grid_offset_y
+        are ignored for compatibility with the generic effect drawing code.
+        """
         if self.finished:
             return
 

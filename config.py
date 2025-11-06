@@ -18,7 +18,7 @@ FPS = 60
 
 # Layout settings
 ENEMY_PREVIEW_HEIGHT = 64 # Height for bottom enemy preview area
-UI_PANEL_WIDTH_PERCENT = 0.40 # Panel takes 40% of the right side
+UI_PANEL_WIDTH_PERCENT = 0.20 # Panel takes 20% of the right side (battlefield takes 80%)
 UI_PANEL_PADDING = 10 # Padding around panel / between grid/panel
 
 # Colors
@@ -65,20 +65,34 @@ STARTING_LIVES_ADVANCED = 10
 RESTRICTED_TOWER_AREA_HEIGHT = 1  # Number of rows at top and bottom where towers cannot be placed
 RESTRICTED_TOWER_AREA_WIDTH = 1   # Number of columns at left and right where towers cannot be placed
 
-# Fixed grid sizing (lock placeable area to 26w x 24h regardless of screen)
-# Placeable area excludes the restricted border rows/columns defined above
-FIXED_PLACEABLE_WIDTH_TILES = 26
-FIXED_PLACEABLE_HEIGHT_TILES = 24
-FIXED_TOTAL_GRID_WIDTH_TILES = FIXED_PLACEABLE_WIDTH_TILES + (RESTRICTED_TOWER_AREA_WIDTH * 2)  # 28
-FIXED_TOTAL_GRID_HEIGHT_TILES = FIXED_PLACEABLE_HEIGHT_TILES + (RESTRICTED_TOWER_AREA_HEIGHT * 2)  # 26
+# Playing area boundaries (pixel coordinates where the grid should be bounded)
+# These can be adjusted for different screen sizes, but the grid should fit exactly within these bounds
+PLAY_AREA_LEFT = 44   # Left edge of playable area
+PLAY_AREA_TOP = 46    # Top edge of playable area
+PLAY_AREA_RIGHT = 1130  # Right edge of playable area (exclusive)
+PLAY_AREA_BOTTOM = 820  # Bottom edge of playable area (exclusive)
+
+# Fixed grid sizing: total grid is 36 x 20 tiles
+# Perimeter (1 tile on each side) is restricted/unplaceable, leaving 34 x 18 placeable
+FIXED_PLACEABLE_WIDTH_TILES = 33
+FIXED_PLACEABLE_HEIGHT_TILES = 18
+FIXED_TOTAL_GRID_WIDTH_TILES = FIXED_PLACEABLE_WIDTH_TILES + (RESTRICTED_TOWER_AREA_WIDTH * 2)  # 36 (34 + 1*2)
+FIXED_TOTAL_GRID_HEIGHT_TILES = FIXED_PLACEABLE_HEIGHT_TILES + (RESTRICTED_TOWER_AREA_HEIGHT * 2)  # 20 (18 + 1*2)
 
 # Dynamically compute GRID_SIZE so the fixed tile grid scales to any screen
 # Calculation accounts for the right UI panel and bottom enemy preview area
 def _compute_dynamic_grid_size(screen_width, screen_height):
-    # Available drawing area for the grid (exclude right UI panel and padding)
-    available_width = int(screen_width * (1.0 - UI_PANEL_WIDTH_PERCENT)) - (UI_PANEL_PADDING * 2)
-    # Exclude bottom enemy preview area and padding
-    available_height = int(screen_height - ENEMY_PREVIEW_HEIGHT) - (UI_PANEL_PADDING * 2)
+    # Available drawing area for the grid (exclude right UI panel, add one grid square padding on right)
+    # Grid extends to panel edge minus one tile's worth of padding
+    panel_width = int(screen_width * UI_PANEL_WIDTH_PERCENT)
+    available_space = screen_width - panel_width
+    # To have one grid square's worth of padding, calculate tile size as:
+    # tile_size = available_space / (grid_width + 1)
+    # This ensures grid_width tiles + 1 tile padding = available_space
+    tile_size_with_padding = available_space / (FIXED_TOTAL_GRID_WIDTH_TILES + 1)
+    available_width = int(FIXED_TOTAL_GRID_WIDTH_TILES * tile_size_with_padding)  # Grid width with padding
+    # Exclude bottom enemy preview area, keep top padding
+    available_height = int(screen_height - ENEMY_PREVIEW_HEIGHT) - UI_PANEL_PADDING
 
     # Protect against edge cases
     if available_width <= 0 or available_height <= 0:
@@ -87,10 +101,11 @@ def _compute_dynamic_grid_size(screen_width, screen_height):
     tiles_x = FIXED_TOTAL_GRID_WIDTH_TILES
     tiles_y = FIXED_TOTAL_GRID_HEIGHT_TILES
 
-    # Size per tile that fits both width and height
+    # Prioritize width to fill the battlefield area - use width-based calculation
     size_by_width = available_width // tiles_x
     size_by_height = available_height // tiles_y
-    dynamic_size = max(16, min(size_by_width, size_by_height))  # enforce a reasonable minimum
+    # Use width-based size to fill the available width (battlefield should fill space)
+    dynamic_size = max(16, size_by_width)  # Use width to fill the space
     return int(dynamic_size)
 
 # Apply dynamic GRID_SIZE now that dependencies are defined
@@ -105,6 +120,21 @@ SPAWN_AREA_COLOR = (105, 105, 105)  # Purple color for spawn area
 OBJECTIVE_AREA_WIDTH = 2  # Width of objective area in grid cells
 OBJECTIVE_AREA_HEIGHT = 1  # Height of objective area in grid cells
 OBJECTIVE_AREA_COLOR = (255, 0, 0)  # Red color for objective area
+
+# Rendering toggles
+# If False, do not draw the light-blue restricted perimeter overlays; grid lines still draw
+DRAW_RESTRICTED_OVERLAY = False
+
+# Debug rendering: draw a solid border around the tower-placeable area
+DRAW_PLACEABLE_BORDER = True
+
+# Debug markers for spawn/objective
+DRAW_SPAWN_OBJECTIVE_MARKERS = True
+SPAWN_MARKER_COLOR = (0, 200, 255)     # Cyan
+OBJECTIVE_MARKER_COLOR = (255, 200, 0) # Gold
+
+# Grid visibility (default: hidden/disabled)
+SHOW_GRID = False
 
 # Path settings
 ASSETS_DIR = "assets"
@@ -619,3 +649,9 @@ ENEMY_DATA = {
 }
 
 }
+
+
+# console commands:
+# addmoney <amount>
+# addlives <amount>
+# showcoordinates

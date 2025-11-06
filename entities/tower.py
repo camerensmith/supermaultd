@@ -86,6 +86,7 @@ class Tower:
         self.last_chain_participation_time = 0.0 # Game time when this tower last participated in a successful chain zap
         
         # Calculate derived position/size properties
+        # These will be updated by draw() method with actual tile sizes
         self.width_pixels = self.grid_width * GRID_SIZE
         self.height_pixels = self.grid_height * GRID_SIZE
         
@@ -96,6 +97,7 @@ class Tower:
         self.top_left_grid_y = self.center_grid_y - offset_y
 
         # Calculate center pixel position for logic (range, targeting)
+        # These will be recalculated with actual tile sizes in draw() method
         self.x = self.center_grid_x * GRID_SIZE + GRID_SIZE // 2 
         self.y = self.center_grid_y * GRID_SIZE + GRID_SIZE // 2
         
@@ -1887,10 +1889,30 @@ class Tower:
                 #print(f"... instant attack applied {dot_name} DoT ({base_dot_damage}/{dot_interval}s for {dot_duration}s) to {target.enemy_id}")
         # --- End DoT Effects ---
         
-    def draw(self, screen, tower_assets, offset_x=0, offset_y=0):
+    def draw(self, screen, tower_assets, offset_x=0, offset_y=0, actual_tile_width=None, actual_tile_height=None):
         """Draw the tower using its associated image, scaled to its grid footprint, with a border and offset."""
-        draw_pixel_x = (self.top_left_grid_x * GRID_SIZE) + offset_x
-        draw_pixel_y = (self.top_left_grid_y * GRID_SIZE) + offset_y
+        # Use actual tile sizes if provided, otherwise fall back to GRID_SIZE
+        tile_w = actual_tile_width if actual_tile_width is not None else GRID_SIZE
+        tile_h = actual_tile_height if actual_tile_height is not None else GRID_SIZE
+        
+        # Use consistent tile size for positioning to maintain aspect ratio
+        # Average tile size maintains proportional scaling and prevents squishing
+        avg_tile_size = (tile_w + tile_h) // 2
+        draw_pixel_x = (self.top_left_grid_x * avg_tile_size) + offset_x
+        draw_pixel_y = (self.top_left_grid_y * avg_tile_size) + offset_y
+        
+        # Recalculate pixel dimensions and center position using actual tile sizes
+        # Use consistent tile size to maintain aspect ratio (prevents squishing)
+        self.width_pixels = self.grid_width * avg_tile_size
+        self.height_pixels = self.grid_height * avg_tile_size
+        # Calculate center position: center_grid_x/y is the grid cell containing the center
+        # For multi-tile towers, the actual center is at the center of the tower's footprint
+        # Calculate the top-left grid position first, then add half the width/height
+        top_left_grid_x = self.center_grid_x - (self.grid_width - 1) // 2
+        top_left_grid_y = self.center_grid_y - (self.grid_height - 1) // 2
+        # Center is at top-left + half width/height
+        self.x = (top_left_grid_x * avg_tile_size) + (self.width_pixels // 2)
+        self.y = (top_left_grid_y * avg_tile_size) + (self.height_pixels // 2)
 
         # --- SPECIAL CASE: Pulse Animation for miasma_pillar and frost_pulse ---
         if self.tower_id in ['alchemists_miasma_pillar', 'igloo_frost_pulse']:

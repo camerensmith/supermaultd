@@ -164,18 +164,21 @@ class Enemy:
                 if dot_data['next_tick'] < current_time:
                     dot_data['next_tick'] = current_time + dot_data['interval']
 
-    def move(self, current_time):
+    def move(self, current_time, tile_size=None):
         """Move the enemy towards the next waypoint with wandering behavior."""
         self.update_status_effects(current_time) # Update effects first (slows)
         self.update_dots(current_time) # Process DoT effects
+        
+        # Use provided tile_size or fall back to GRID_SIZE for compatibility
+        use_tile_size = tile_size if tile_size is not None else GRID_SIZE
         
         if self.path_index < len(self.grid_path):
             # Get the target grid cell coordinates
             target_grid_x, target_grid_y = self.grid_path[self.path_index]
             
             # Convert target grid cell to target pixel coordinates (center of cell)
-            target_x_pixel = (target_grid_x * GRID_SIZE) + (GRID_SIZE // 2)
-            target_y_pixel = (target_grid_y * GRID_SIZE) + (GRID_SIZE // 2)
+            target_x_pixel = (target_grid_x * use_tile_size) + (use_tile_size // 2)
+            target_y_pixel = (target_grid_y * use_tile_size) + (use_tile_size // 2)
 
             # Calculate direction to target
             dx = target_x_pixel - self.x

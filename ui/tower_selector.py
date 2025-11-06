@@ -24,9 +24,8 @@ class TowerSelector:
         self.manager = manager
         self.selected_tower = None
         self.tower_buttons = {} 
-        self.tower_info_boxes = {}
         self.tower_images = {}
-        self.expanded_tower_id = None
+        self.selected_highlights = {}  # Store highlight overlays for selected state
         self.money = initial_money
         self.lives = initial_lives
         self.damage_type_data = damage_type_data # Store damage type data
@@ -53,16 +52,43 @@ class TowerSelector:
         self.panel_width = panel_rect.width
         self.panel_height = panel_rect.height
         
+        # Drawer animation state
+        self.is_open = True  # Panel starts open
+        self.is_animating = False
+        self.animation_progress = 1.0  # 1.0 = fully open, 0.0 = fully closed
+        self.animation_speed = 8.0  # Animation speed (higher = faster)
+        self.visible_x = panel_rect.x  # Visible position (when open)
+        self.hidden_x = panel_rect.x + panel_rect.width  # Hidden position (off-screen to the right)
+        self.toggle_button_screen_x = panel_rect.x  # Toggle button stays at left edge of panel area
+        
         # Create the main panel using the provided rect
         self.panel = pygame_gui.elements.UIPanel(
             relative_rect=self.panel_rect,
             manager=self.manager
         )
         
+        # Create toggle button (nib/arrow on left side)
+        # Position it on the left edge of the panel area, centered vertically
+        # Make it a small nib that extends slightly to the left of the panel
+        # Position it as a top-level element (not in panel container) so it stays visible
+        toggle_button_width = 25
+        toggle_button_height = 80
+        toggle_button_x = panel_rect.x - toggle_button_width  # Position on left edge, outside panel
+        toggle_button_y = panel_rect.y + (panel_rect.height - toggle_button_height) // 2  # Center vertically
+        self.toggle_button_screen_x = toggle_button_x  # Store screen position
+        
+        self.toggle_button = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect(toggle_button_x, toggle_button_y, toggle_button_width, toggle_button_height),
+            text=">",  # Will be updated by _update_toggle_button_text()
+            manager=self.manager,
+            object_id="#toggle_button"
+        )
+        
+        # Update toggle button text based on initial state
+        self._update_toggle_button_text()
+        
         # --- Internal Layout (relative to panel) ---
         current_y = 10 # Start Y for internal elements
-
-        # Remove previous title label ("Select Tower") to reclaim space
 
         # Add lives display (top of panel)
         lives_height = 28
@@ -88,131 +114,158 @@ class TowerSelector:
         )
         current_y += money_height + 12
         
-        # --- Create Scrolling Container for Buttons ---
-        # Calculate remaining height for the scroll container
-        scroll_container_top = current_y
-        scroll_container_height = self.panel_height - scroll_container_top - 10 # Add some bottom padding
-        scroll_container_rect = pygame.Rect(10, scroll_container_top, self.panel_width - 20, scroll_container_height)
+        # --- Split Panel into Two Sections ---
+        # Top section: Icon buttons (scrollable)
+        # Bottom section: Fixed info box
         
-        self.button_scroll_container = UIScrollingContainer(
-            relative_rect=scroll_container_rect,
+        # Calculate heights - Info box takes ~40% of remaining space, icons take ~60%
+        remaining_height = self.panel_height - current_y - 10  # 10px bottom padding
+        info_box_height = int(remaining_height * 0.4)
+        icons_area_height = remaining_height - info_box_height - 10  # 10px gap between sections
+        
+        # Create scrolling container for icon buttons (top section)
+        icon_container_rect = pygame.Rect(10, current_y, self.panel_width - 20, icons_area_height)
+        self.icon_scroll_container = UIScrollingContainer(
+            relative_rect=icon_container_rect,
             manager=self.manager,
             container=self.panel
         )
-        # --- End Scrolling Container ---
         
-        # Store starting Y for buttons
-        self.button_start_y = current_y 
-
+        # Create fixed info box (bottom section)
+        info_box_y = current_y + icons_area_height + 10
+        info_box_rect = pygame.Rect(10, info_box_y, self.panel_width - 20, info_box_height)
+        self.info_box = pygame_gui.elements.UITextBox(
+            html_text="<b>Select a tower to view details</b><br><i>Click on a tower icon above</i>",
+            relative_rect=info_box_rect,
+            manager=self.manager,
+            container=self.panel,
+            object_id='#tower_info_box'
+        )
+        
         # Precompute tooltip HTML once per tower for faster rebuilds
         for tower_id, tower_data in self.available_towers.items():
             if tower_id not in self._tooltip_html_cache:
                 self._tooltip_html_cache[tower_id] = self._build_tooltip_html(tower_data)
 
-        # Create buttons
-        self.create_tower_buttons()
+        # Create icon buttons
+        self.create_icon_buttons()
         
-    def create_tower_buttons(self):
-        """Create buttons inside the scrolling container"""
-        # Use scroll container's width for calculations
-        content_width = self.button_scroll_container.get_container().get_rect().width # Width of the scrollable area
-        # Adjust button height for image + name only
-        image_size = 60 # Slightly smaller image to fit better
-        padding = 10 
-        button_height = image_size + padding * 2 # Height based on image + padding 
-        text_x_rel = image_size + 15 # Text starts after image + padding
-        text_width = content_width - text_x_rel - 10 
-        line_height = 20 # Approx height of the name label font
+    def create_icon_buttons(self):
+        """Create icon-only buttons in the scrolling container"""
+        # Icon size - should be square
+        icon_size = 64  # Size of each icon button
+        padding = 8  # Padding between icons
+        icons_per_row = max(2, (self.panel_width - 40) // (icon_size + padding))  # Calculate how many fit per row
         
-        # Start Y position relative to the scroll container
-        current_y = padding 
-
+        content_width = self.icon_scroll_container.get_container().get_rect().width
+        
+        current_x = padding
+        current_y = padding
+        
         for index, (tower_id, tower_data) in enumerate(self.available_towers.items()):
-            # --- DEBUG PRINT --- 
-            #print(f"[TowerSelector Debug] ID: {tower_id}, Data: {tower_data}") 
-            # --- END DEBUG --- 
-
-            # Calculate top-left position for this tower entry
-            entry_x = 10
-            # Button covers the whole entry area, relative to panel
-            #button_rect = pygame.Rect(entry_x, current_y, content_width, button_height)
-
-            # --- Use cached tooltip HTML ---
-            tooltip_text = self._tooltip_html_cache.get(tower_id)
-            # Fallback safety: build on demand if missing
-            if tooltip_text is None:
-                tooltip_text = self._build_tooltip_html(tower_data)
-                self._tooltip_html_cache[tower_id] = tooltip_text
-
-            # Position button relative to the scroll container
-            button_rect = pygame.Rect(0, current_y, content_width, button_height) # X=0 for scroll container
-            # Button label uses tower name
-            name = tower_data.get('name', 'N/A')
-            button = pygame_gui.elements.UIButton(
-                relative_rect=button_rect,
-                text=name,
-                manager=self.manager,
-                container=self.button_scroll_container.get_container(), # Get the actual container surface
-                tool_tip_text=tooltip_text,
-                object_id="#tower_button"
-            )
-            self.tower_buttons[tower_id] = button
-
-            # Image
-            preview_image = self.tower_assets.get_tower_preview(tower_id)
-            if preview_image:
-                # Ensure opaque
-                if preview_image.get_alpha() is None: preview_image = preview_image.convert_alpha()
-                else: preview_image = preview_image.copy()
-                preview_image.set_alpha(255)
-
-                image_rel_x = 5 # Padding from left button edge (inside scroll area)
-                image_rel_y = (button_height - image_size) // 2 # Center vertically within button area
-                # Image position is relative to the scroll container
-                image_rect = pygame.Rect(image_rel_x, button_rect.top + image_rel_y, image_size, image_size)
-                img_elem = pygame_gui.elements.UIImage(
-                    relative_rect=image_rect, 
-                    image_surface=preview_image, 
-                    manager=self.manager, 
-                    container=self.button_scroll_container.get_container() # Add to scroll container
-                )
-                # Track image element for cleanup on rebuilds
-                self.tower_images[tower_id] = img_elem
-
-            # --- Expanded Info Box (accordion style) ---
-            if self.expanded_tower_id == tower_id:
-                inline_html = tooltip_text
-                # Estimate height by line count with caps
-                approx_lines = inline_html.count('<br>') + 1
-                line_px = 18
-                padding_px = 12
-                max_height = 420
-                info_height_local = min(max_height, padding_px + approx_lines * line_px)
-
-                info_rect = pygame.Rect(0, button_rect.bottom + 4, content_width, info_height_local)
-                info_box = pygame_gui.elements.UITextBox(
-                    html_text=inline_html,
-                    relative_rect=info_rect,
-                    manager=self.manager,
-                    container=self.button_scroll_container.get_container(),
-                    object_id='#tower_info_inline'
-                )
-                self.tower_info_boxes[tower_id] = info_box
-                current_y += button_height + padding + info_height_local + padding
-            else:
-                current_y += button_height + padding
+            # Start new row if needed
+            if current_x + icon_size > content_width:
+                current_x = padding
+                current_y += icon_size + padding
             
-        # --- Set Scrollable Area Size --- 
-        # After loop, current_y holds the total height needed + final padding
-        total_content_height = current_y
-        # Set the virtual size of the scrollable area
-        self.button_scroll_container.set_scrollable_area_dimensions((content_width, total_content_height))
-        # --- End Set Size --- 
+            # Create button rect for icon
+            button_rect = pygame.Rect(current_x, current_y, icon_size, icon_size)
+            
+            # Get tower image (use original, not preview, for better quality)
+            tower_image = self.tower_assets.get_tower_image(tower_id)
+            if tower_image:
+                # Scale image to fit button size (with some padding)
+                scaled_size = icon_size - 8  # Leave 4px padding on each side
+                scaled_image = pygame.transform.scale(tower_image, (scaled_size, scaled_size))
+                
+                # Create button with empty text (will draw image on top)
+                button = pygame_gui.elements.UIButton(
+                    relative_rect=button_rect,
+                    text="",  # Empty text - icon only
+                    manager=self.manager,
+                    container=self.icon_scroll_container.get_container(),
+                    object_id="#tower_icon_button"
+                )
+                self.tower_buttons[tower_id] = button
+                
+                # Add image on top of button
+                image_offset = 4  # 4px padding inside button
+                image_rect = pygame.Rect(
+                    current_x + image_offset,
+                    current_y + image_offset,
+                    scaled_size,
+                    scaled_size
+                )
+                img_elem = pygame_gui.elements.UIImage(
+                    relative_rect=image_rect,
+                    image_surface=scaled_image,
+                    manager=self.manager,
+                    container=self.icon_scroll_container.get_container()
+                )
+                self.tower_images[tower_id] = img_elem
+                
+                # Create selection highlight overlay (initially hidden)
+                # Create a bright border/highlight surface
+                highlight_surface = pygame.Surface((icon_size, icon_size), pygame.SRCALPHA)
+                # Draw outer border (bright yellow/gold)
+                pygame.draw.rect(highlight_surface, (255, 215, 0, 200), (0, 0, icon_size, icon_size), 4)
+                # Draw inner glow
+                pygame.draw.rect(highlight_surface, (255, 255, 100, 100), (2, 2, icon_size-4, icon_size-4), 3)
+                
+                highlight_rect = pygame.Rect(current_x, current_y, icon_size, icon_size)
+                highlight_elem = pygame_gui.elements.UIImage(
+                    relative_rect=highlight_rect,
+                    image_surface=highlight_surface,
+                    manager=self.manager,
+                    container=self.icon_scroll_container.get_container()
+                )
+                # Initially hide highlight
+                highlight_elem.hide()
+                self.selected_highlights[tower_id] = highlight_elem
+            else:
+                # Fallback: create button with tower name if image missing
+                button = pygame_gui.elements.UIButton(
+                    relative_rect=button_rect,
+                    text=tower_data.get('name', 'N/A')[:5],  # Truncated name
+                    manager=self.manager,
+                    container=self.icon_scroll_container.get_container(),
+                    object_id="#tower_icon_button"
+                )
+                self.tower_buttons[tower_id] = button
+                
+                # Create selection highlight for fallback button too
+                highlight_surface = pygame.Surface((icon_size, icon_size), pygame.SRCALPHA)
+                pygame.draw.rect(highlight_surface, (255, 215, 0, 200), (0, 0, icon_size, icon_size), 4)
+                pygame.draw.rect(highlight_surface, (255, 255, 100, 100), (2, 2, icon_size-4, icon_size-4), 3)
+                highlight_rect = pygame.Rect(current_x, current_y, icon_size, icon_size)
+                highlight_elem = pygame_gui.elements.UIImage(
+                    relative_rect=highlight_rect,
+                    image_surface=highlight_surface,
+                    manager=self.manager,
+                    container=self.icon_scroll_container.get_container()
+                )
+                highlight_elem.hide()
+                self.selected_highlights[tower_id] = highlight_elem
+            
+            # Move to next position
+            current_x += icon_size + padding
+            
+        # Set scrollable area size
+        total_content_height = current_y + icon_size + padding
+        self.icon_scroll_container.set_scrollable_area_dimensions((content_width, total_content_height))
 
     def handle_event(self, event):
         """Handle pygame_gui events"""
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             clicked_button = event.ui_element
+            
+            # Check if toggle button was clicked
+            if clicked_button == self.toggle_button:
+                self.toggle_panel()
+                if self.click_sound:
+                    self.click_sound.play()
+                return
+            
             clicked_tower_id = None
             
             # Find which tower button was clicked
@@ -222,43 +275,22 @@ class TowerSelector:
                     break
 
             if clicked_tower_id:
-                if self.click_sound: self.click_sound.play() # Play click sound
+                if self.click_sound: 
+                    self.click_sound.play()
                 
                 tower_data = self.available_towers.get(clicked_tower_id)
                 can_afford = tower_data and self.money >= tower_data['cost']
+                tower_limit = tower_data.get('limit') if tower_data else None
+                current_count = self.tower_counts.get(clicked_tower_id, 0)
+                at_limit = tower_limit is not None and current_count >= tower_limit
 
-                # Toggle accordion expansion independent of affordability
-                if self.expanded_tower_id == clicked_tower_id:
-                    self.expanded_tower_id = None
-                else:
-                    self.expanded_tower_id = clicked_tower_id
-
-                # Rebuild buttons and info boxes to reflect new layout
-                for button in list(self.tower_buttons.values()):
-                    try:
-                        button.kill()
-                    except Exception:
-                        pass
-                self.tower_buttons.clear()
-                for info in list(self.tower_info_boxes.values()):
-                    try:
-                        info.kill()
-                    except Exception:
-                        pass
-                self.tower_info_boxes.clear()
-                for img in list(self.tower_images.values()):
-                    try:
-                        img.kill()
-                    except Exception:
-                        pass
-                self.tower_images.clear()
-                self.create_tower_buttons()
-
+                # Handle selection
                 if clicked_tower_id == self.selected_tower:
                     # Clicked the already selected tower - Deselect it
                     self.selected_tower = None
-                    clicked_button.unselect() # Visually deselect
-                elif can_afford:
+                    self.update_info_box(None)
+                    self.update_selection_highlights(None)
+                elif can_afford and not at_limit:
                     # Clicked a new, affordable tower - Select it
                     self.selected_tower = clicked_tower_id
                     # Visually select the new one and deselect others
@@ -267,20 +299,113 @@ class TowerSelector:
                             btn.select()
                         else:
                             btn.unselect()
+                    # Update highlights and info box
+                    self.update_selection_highlights(clicked_tower_id)
+                    self.update_info_box(clicked_tower_id)
                 else:
-                    # Clicked an unaffordable tower - Play sound
+                    # Clicked an unaffordable or at-limit tower - Play sound
                     if self.cannot_select_sound: 
                         self.cannot_select_sound.play()
-                    # Ensure nothing is selected internally if can't afford
-                    if self.selected_tower == clicked_tower_id:
-                         self.selected_tower = None
-                         clicked_button.unselect()
+                    # Still show info and highlight even if can't afford (for preview)
+                    for t_id, btn in self.tower_buttons.items():
+                        if t_id == clicked_tower_id:
+                            btn.select()
+                        else:
+                            btn.unselect()
+                    self.update_selection_highlights(clicked_tower_id)
+                    self.update_info_box(clicked_tower_id)
         
         # Let the manager process the event regardless of our handling
         self.manager.process_events(event)
 
+    def update_selection_highlights(self, selected_tower_id):
+        """Update visual highlights for selected tower buttons"""
+        for tower_id, highlight in self.selected_highlights.items():
+            if tower_id == selected_tower_id:
+                highlight.show()
+            else:
+                highlight.hide()
+
+    def update_info_box(self, tower_id):
+        """Update the info box with tower details or placeholder"""
+        if tower_id is None:
+            # Show placeholder
+            placeholder_text = "<b>Select a tower to view details</b><br><i>Click on a tower icon above</i>"
+            self.info_box.html_text = placeholder_text
+            self.info_box.rebuild()
+        else:
+            # Show tower details
+            tower_data = self.available_towers.get(tower_id)
+            if tower_data:
+                tooltip_html = self._tooltip_html_cache.get(tower_id)
+                if tooltip_html is None:
+                    tooltip_html = self._build_tooltip_html(tower_data)
+                    self._tooltip_html_cache[tower_id] = tooltip_html
+                
+                # Check if affordable/at limit and add status
+                can_afford = self.money >= tower_data['cost']
+                tower_limit = tower_data.get('limit')
+                current_count = self.tower_counts.get(tower_id, 0)
+                at_limit = tower_limit is not None and current_count >= tower_limit
+                
+                status_html = ""
+                if at_limit:
+                    status_html = "<br><b style='color:#FF0000;'>LIMIT REACHED</b>"
+                elif not can_afford:
+                    status_html = f"<br><b style='color:#FFAA00;'>CANNOT AFFORD (Need ${tower_data['cost']})</b>"
+                else:
+                    status_html = "<br><b style='color:#00FF00;'>READY TO PLACE</b>"
+                
+                self.info_box.html_text = tooltip_html + status_html
+                self.info_box.rebuild()
+
+    def _update_toggle_button_text(self):
+        """Update toggle button text to show current state"""
+        if hasattr(self, 'toggle_button'):
+            # Show ">" when open (panel visible, arrow points right to indicate it can close)
+            # Show "<" when closed (panel hidden, arrow points left to indicate it can open)
+            self.toggle_button.set_text(">" if self.is_open else "<")
+    
+    def toggle_panel(self):
+        """Toggle panel visibility (show/hide)"""
+        self.is_open = not self.is_open
+        self.is_animating = True
+        self._update_toggle_button_text()
+    
     def update(self, time_delta):
-        """Update the UI manager"""
+        """Update the UI manager and handle drawer animation"""
+        # Handle drawer animation
+        if self.is_animating:
+            # Calculate target progress (1.0 = open, 0.0 = closed)
+            target_progress = 1.0 if self.is_open else 0.0
+            # Animate towards target
+            if self.is_open:
+                # Opening: increase progress
+                self.animation_progress += self.animation_speed * time_delta
+                if self.animation_progress >= 1.0:
+                    self.animation_progress = 1.0
+                    self.is_animating = False
+            else:
+                # Closing: decrease progress
+                self.animation_progress -= self.animation_speed * time_delta
+                if self.animation_progress <= 0.0:
+                    self.animation_progress = 0.0
+                    self.is_animating = False
+            
+            # Calculate current panel X position (interpolate between hidden and visible)
+            current_x = self.hidden_x + (self.visible_x - self.hidden_x) * self.animation_progress
+            
+            # Update panel position (pygame_gui uses set_position for absolute positioning)
+            new_rect = pygame.Rect(current_x, self.panel_rect.y, self.panel_width, self.panel_height)
+            self.panel.set_position((current_x, self.panel_rect.y))
+            self.panel_rect = new_rect
+            
+            # Update toggle button position to follow panel (stays on left edge of panel)
+            if hasattr(self, 'toggle_button'):
+                toggle_button_x = current_x - self.toggle_button.rect.width
+                toggle_button_y = self.panel_rect.y + (self.panel_height - self.toggle_button.rect.height) // 2
+                self.toggle_button.set_position((toggle_button_x, toggle_button_y))
+        
         self.manager.update(time_delta)
         
     def draw(self, surface):
@@ -290,10 +415,61 @@ class TowerSelector:
     def get_selected_tower(self):
         """Get the currently selected tower ID"""
         return self.selected_tower
+    
+    def select_tower_by_index(self, index):
+        """Select a tower by its index in the available_towers dictionary"""
+        # Get list of tower IDs in order (Python 3.7+ preserves insertion order)
+        tower_ids = list(self.available_towers.keys())
+        
+        if 0 <= index < len(tower_ids):
+            tower_id = tower_ids[index]
+            tower_data = self.available_towers.get(tower_id)
+            
+            if tower_data:
+                can_afford = self.money >= tower_data['cost']
+                tower_limit = tower_data.get('limit')
+                current_count = self.tower_counts.get(tower_id, 0)
+                at_limit = tower_limit is not None and current_count >= tower_limit
+                
+                # Handle selection similar to button click
+                if tower_id == self.selected_tower:
+                    # Same tower - deselect it
+                    self.selected_tower = None
+                    self.update_info_box(None)
+                    self.update_selection_highlights(None)
+                    for btn in self.tower_buttons.values():
+                        btn.unselect()
+                elif can_afford and not at_limit:
+                    # Select the new tower
+                    self.selected_tower = tower_id
+                    # Visually select the new one and deselect others
+                    for t_id, btn in self.tower_buttons.items():
+                        if t_id == tower_id:
+                            btn.select()
+                        else:
+                            btn.unselect()
+                    self.update_selection_highlights(tower_id)
+                    self.update_info_box(tower_id)
+                    if self.click_sound:
+                        self.click_sound.play()
+                else:
+                    # Can't afford or at limit - still show info/highlight but play sound
+                    if self.cannot_select_sound:
+                        self.cannot_select_sound.play()
+                    # Show info and highlight even if can't afford
+                    for t_id, btn in self.tower_buttons.items():
+                        if t_id == tower_id:
+                            btn.select()
+                        else:
+                            btn.unselect()
+                    self.update_selection_highlights(tower_id)
+                    self.update_info_box(tower_id)
         
     def clear_selection(self):
         """Clear the current tower selection and visually deselect all buttons."""
         self.selected_tower = None
+        self.update_info_box(None)
+        self.update_selection_highlights(None)
         # Loop through buttons and call unselect()
         for button in self.tower_buttons.values():
             button.unselect()
@@ -303,7 +479,10 @@ class TowerSelector:
         """Update the money display and refresh button states"""
         self.money = new_amount
         self.money_label.set_text(f'Money: ${self.money}')
-        self.update_button_states()  # Refresh button states based on new money amount 
+        self.update_button_states()  # Refresh button states based on new money amount
+        # Refresh info box if a tower is selected
+        if self.selected_tower:
+            self.update_info_box(self.selected_tower)
 
     def update_lives(self, new_lives):
         """Update the lives display label at the top of the panel."""
@@ -318,6 +497,9 @@ class TowerSelector:
         """Update the tower counts and refresh button states."""
         self.tower_counts = tower_counts
         self.update_button_states()
+        # Refresh info box if a tower is selected
+        if self.selected_tower:
+            self.update_info_box(self.selected_tower)
 
     def _build_tooltip_html(self, tower_data):
         """Build and return HTML tooltip for a tower_data dict (cached by caller)."""
@@ -456,12 +638,6 @@ class TowerSelector:
         for button in self.tower_buttons.values():
             button.kill()
         self.tower_buttons.clear()
-        for info in self.tower_info_boxes.values():
-            try:
-                info.kill()
-            except Exception:
-                pass
-        self.tower_info_boxes.clear()
         for img in self.tower_images.values():
             try:
                 img.kill()
@@ -469,11 +645,21 @@ class TowerSelector:
                 pass
         self.tower_images.clear()
 
-        # Recreate buttons
-        self.create_tower_buttons()
+        # Clear highlights too
+        for highlight in self.selected_highlights.values():
+            try:
+                highlight.kill()
+            except Exception:
+                pass
+        self.selected_highlights.clear()
         
-        # Update button states
+        # Recreate buttons
+        self.create_icon_buttons()
+        
+        # Update button states and restore selection highlight if needed
         self.update_button_states()
+        if self.selected_tower:
+            self.update_selection_highlights(self.selected_tower)
         
     def update_button_states(self):
         """Update button states based on money and tower limits."""
@@ -491,9 +677,3 @@ class TowerSelector:
                     button.disable()
                 else:
                     button.enable()  # Always enable for hover/interaction, even if can't afford
-                
-                # Update button text to show limit if applicable
-                if tower_limit is not None:
-                    button.set_text(f"{tower_data['name']} ({current_count}/{tower_limit})")
-                else:
-                    button.set_text(tower_data['name']) 

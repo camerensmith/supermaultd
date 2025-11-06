@@ -1,5 +1,6 @@
 import pygame
 import os
+import config
 from config import WIDTH, HEIGHT, FPS, WINDOWED_FULLSCREEN, FORCE_RESOLUTION, FIXED_WIDTH, FIXED_HEIGHT
 from scenes.game_scene import GameScene
 from ui.race_selector import RaceSelector
@@ -105,6 +106,15 @@ class Game:
         self.options_modal = None
         self.options_modal_visible = False
         # --- End Options Menu State ---
+        
+        # Controls modal state
+        self.controls_modal = None
+        self.controls_modal_visible = False
+        
+        # Store grid visibility preference at Game level (works in menu and game)
+        self.show_grid = getattr(config, 'SHOW_GRID', False)
+        # Store edge scroll speed preference at Game level (works in menu and game)
+        self.edge_scroll_speed = 150.0
         
         # Extract specific data sections for easier access (optional but recommended)
         self.ranges = game_data.get("ranges", {})
@@ -471,6 +481,19 @@ class Game:
             if event.type == pygame_gui.UI_SELECTION_LIST_NEW_SELECTION and hasattr(self, 'low_effects_listbox') and event.ui_element == self.low_effects_listbox:
                 self.low_effects_mode = self.low_effects_listbox.get_single_selection() == "Low Effects Mode"
             
+            # Handle options modal buttons (works in all game states)
+            if event.type == pygame_gui.UI_BUTTON_PRESSED:
+                # Handle show grid button toggle (works in all states)
+                if hasattr(self, 'show_grid_button') and event.ui_element == self.show_grid_button:
+                    # Toggle grid visibility at Game level
+                    self.show_grid = not self.show_grid
+                    # Update active game scene if it exists
+                    if hasattr(self, 'active_game_scene') and self.active_game_scene:
+                        self.active_game_scene.show_grid = self.show_grid
+                    # Update button text
+                    self.show_grid_button.set_text(f'Show Grid: {"ON" if self.show_grid else "OFF"}')
+                    print(f"[Options] Grid visibility toggled to: {self.show_grid}")
+            
             # Radio button logic for effects mode
             if event.type == pygame_gui.UI_BUTTON_PRESSED:
                 if hasattr(self, 'default_mode_button') and event.ui_element == self.default_mode_button:
@@ -491,6 +514,15 @@ class Game:
                     else:
                         self.default_mode_button.select()
                         self.low_effects_mode_button.unselect()
+                # Handle view controls button
+                if hasattr(self, 'view_controls_button') and event.ui_element == self.view_controls_button:
+                    self.toggle_controls_modal()
+                # Handle close button for options modal
+                if hasattr(self, 'close_options_button') and event.ui_element == self.close_options_button:
+                    self.toggle_options_modal()  # Close the modal
+                # Handle close button for controls modal
+                if hasattr(self, 'controls_close_button') and event.ui_element == self.controls_close_button:
+                    self.toggle_controls_modal()  # Close the controls modal
             # Then handle game state specific logic based on events
             if self.game_state == "race_selection":
                 # Allow RaceSelector to handle its internal button clicks
@@ -691,6 +723,16 @@ class Game:
                     self.invalid_placement_sound.set_volume(volume)
                 self.last_volume_value = current_value
         
+        # Handle edge scroll speed slider if modal is visible
+        if self.options_modal_visible and hasattr(self, 'edge_scroll_slider'):
+            current_value = self.edge_scroll_slider.get_current_value()
+            if current_value != self.last_edge_scroll_value:
+                # Update edge scroll speed at Game level and in active game scene
+                self.edge_scroll_speed = float(current_value)
+                if hasattr(self, 'active_game_scene') and self.active_game_scene:
+                    self.active_game_scene.edge_scroll_speed = float(current_value)
+                self.last_edge_scroll_value = current_value
+        
         if self.game_state == "race_selection":
             # RaceSelector UI is updated by the manager
             # Our new buttons are also updated by the manager
@@ -805,7 +847,7 @@ class Game:
             # Create modal and widgets only if they don't exist
             if not self.options_modal:
                 modal_width = 400
-                modal_height = 400
+                modal_height = 550
                 modal_x = (self.screen_width - modal_width) // 2
                 modal_y = (self.screen_height - modal_height) // 2
                 self.options_modal = pygame_gui.elements.UIWindow(
@@ -833,27 +875,60 @@ class Game:
                     container=self.options_modal,
                     object_id='#volume_label'
                 )
+                # Edge scroll speed slider
+                self.edge_scroll_slider = pygame_gui.elements.UIHorizontalSlider(
+                    relative_rect=pygame.Rect(button_x, 140, button_width, button_height),
+                    start_value=150,
+                    value_range=(50, 300),
+                    manager=self.ui_manager,
+                    container=self.options_modal,
+                    object_id='#edge_scroll_slider'
+                )
+                self.last_edge_scroll_value = 150
+                self.edge_scroll_label = pygame_gui.elements.UILabel(
+                    relative_rect=pygame.Rect(button_x, 110, button_width, 20),
+                    text='Edge Scroll Speed',
+                    manager=self.ui_manager,
+                    container=self.options_modal,
+                    object_id='#edge_scroll_label'
+                )
+                # Show Grid toggle button
+                self.show_grid_button = pygame_gui.elements.UIButton(
+                    relative_rect=pygame.Rect(button_x, 200, button_width, button_height),
+                    text='Show Grid: OFF',
+                    manager=self.ui_manager,
+                    container=self.options_modal,
+                    object_id='#show_grid_button'
+                )
                 # Radio-style buttons for effects mode
                 self.default_mode_button = pygame_gui.elements.UIButton(
-                    relative_rect=pygame.Rect(button_x, 110, button_width, button_height),
+                    relative_rect=pygame.Rect(button_x, 250, button_width, button_height),
                     text='Default',
                     manager=self.ui_manager,
                     container=self.options_modal,
                     object_id='#default_mode_button'
                 )
                 self.low_effects_mode_button = pygame_gui.elements.UIButton(
-                    relative_rect=pygame.Rect(button_x, 160, button_width, button_height),
+                    relative_rect=pygame.Rect(button_x, 300, button_width, button_height),
                     text='Low Effects Mode',
                     manager=self.ui_manager,
                     container=self.options_modal,
                     object_id='#low_effects_mode_button'
                 )
                 self.apply_options_button = pygame_gui.elements.UIButton(
-                    relative_rect=pygame.Rect(button_x, 220, button_width, button_height),
+                    relative_rect=pygame.Rect(button_x, 360, button_width, button_height),
                     text='Apply',
                     manager=self.ui_manager,
                     container=self.options_modal,
                     object_id='#apply_options_button'
+                )
+                # View Controls button
+                self.view_controls_button = pygame_gui.elements.UIButton(
+                    relative_rect=pygame.Rect(button_x, 410, button_width, button_height),
+                    text='View Controls',
+                    manager=self.ui_manager,
+                    container=self.options_modal,
+                    object_id='#view_controls_button'
                 )
                 self.close_options_button = pygame_gui.elements.UIButton(
                     relative_rect=pygame.Rect(button_x, modal_height - 60, button_width, button_height),
@@ -870,6 +945,15 @@ class Game:
             else:
                 self.default_mode_button.select()
                 self.low_effects_mode_button.unselect()
+            # Update edge scroll slider to current value (from Game level)
+            if hasattr(self, 'edge_scroll_slider') and self.edge_scroll_slider:
+                current_speed = int(self.edge_scroll_speed)
+                self.edge_scroll_slider.set_current_value(current_speed)
+                self.last_edge_scroll_value = current_speed
+            # Update grid visibility button text (from Game level)
+            if hasattr(self, 'show_grid_button') and self.show_grid_button:
+                grid_state = self.show_grid
+                self.show_grid_button.set_text(f'Show Grid: {"ON" if grid_state else "OFF"}')
             self.options_modal_visible = True
             self.options_modal.show()
         else:
@@ -885,7 +969,19 @@ class Game:
             self.options_modal_visible = False
             self.volume_slider = None
             self.volume_label = None
+            self.edge_scroll_slider = None
+            self.edge_scroll_label = None
+            self.show_grid_button = None
+            self.view_controls_button = None
             self.close_options_button = None
+        
+        # Clean up controls modal if it exists
+        if self.controls_modal:
+            self.controls_modal.kill()
+            self.controls_modal = None
+            self.controls_modal_visible = False
+            self.controls_text_box = None
+            self.controls_close_button = None
             
         # Clean up options button
         if self.options_button:
@@ -898,5 +994,84 @@ class Game:
                                          self.click_sound, self.placement_sound,
                                          self.cancel_sound, self.sell_sound,
                                          self.invalid_placement_sound)
+        # Sync preferences to newly created game scene
+        if hasattr(self, 'active_game_scene') and self.active_game_scene:
+            self.active_game_scene.show_grid = self.show_grid
+            self.active_game_scene.edge_scroll_speed = self.edge_scroll_speed
         self.game_state = "playing"
+    
+    def toggle_controls_modal(self):
+        """Toggle the controls modal overlay"""
+        if not self.controls_modal_visible:
+            # Create modal if it doesn't exist
+            if not self.controls_modal:
+                modal_width = 500
+                modal_height = 600
+                modal_x = (self.screen_width - modal_width) // 2
+                modal_y = (self.screen_height - modal_height) // 2
+                self.controls_modal = pygame_gui.elements.UIWindow(
+                    pygame.Rect(modal_x, modal_y, modal_width, modal_height),
+                    window_display_title='Controls',
+                    manager=self.ui_manager,
+                    object_id='#controls_modal'
+                )
+                
+                # Create text box with controls list
+                controls_text = """
+<b>GAMEPLAY CONTROLS</b>
+<br><br>
+<b>Tower Selection:</b>
+<br>1-9, 0 - Select towers 1-10
+<br>Shift+1-9, Shift+0 - Select towers 11-20
+<br>
+<br><b>Gameplay:</b>
+<br>T - Toggle tower selector panel
+<br>W - Toggle wave menu
+<br>Space - Pause/Unpause game
+<br>Enter - Start wave (when idle)
+<br>Escape - Cancel tower selection / Close menus
+<br>
+<br><b>Mouse:</b>
+<br>Left Click - Place/Select towers
+<br>Right Click - Cancel placement
+<br>Mouse at screen edges - Pan camera
+<br>
+<br><b>Debug (Development):</b>
+<br>` (Backtick) - Toggle debug console
+<br>G - Spawn test enemy (crone)
+<br>S - Spawn test enemy (quillpig)
+<br>
+<br><b>Options Menu:</b>
+<br>Open Options menu to access:
+<br>- Volume slider
+<br>- Edge scroll speed slider
+<br>- Show/Hide grid toggle
+<br>- Low effects mode
+"""
+                
+                text_box_rect = pygame.Rect(10, 10, modal_width - 40, modal_height - 80)
+                self.controls_text_box = pygame_gui.elements.UITextBox(
+                    html_text=controls_text,
+                    relative_rect=text_box_rect,
+                    manager=self.ui_manager,
+                    container=self.controls_modal,
+                    object_id='#controls_text_box'
+                )
+                
+                # Close button
+                button_width = 200
+                button_height = 40
+                button_x = (modal_width - button_width) // 2
+                self.controls_close_button = pygame_gui.elements.UIButton(
+                    relative_rect=pygame.Rect(button_x, modal_height - 60, button_width, button_height),
+                    text='Close',
+                    manager=self.ui_manager,
+                    container=self.controls_modal,
+                    object_id='#controls_close_button'
+                )
+            self.controls_modal_visible = True
+            self.controls_modal.show()
+        else:
+            self.controls_modal_visible = False
+            self.controls_modal.hide()
 
