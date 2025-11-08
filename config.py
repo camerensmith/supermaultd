@@ -187,7 +187,7 @@ ENEMY_DATA = {
         "armor_value": 5,
         "type": "ground"
     },
-    "red_flyer": {  #advanced only, value increases 2
+    "red_dragon": {  #advanced only, value increases 2 (renamed from red_flyer)
         "health": 440,
         "speed": 0.3,
         "value": 1, "armor_value": 6,
@@ -337,7 +337,7 @@ ENEMY_DATA = {
         "type": "ground"
     },
     "blue_dragon": { # advanced only, gold increase after wave
-        "health": 4600,
+        "health": 20000,
         "speed": 0.5,
         "value": 4, "armor_value": 30,
         "armor_type": "Unarmored",

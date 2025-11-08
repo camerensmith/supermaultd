@@ -9,7 +9,7 @@ ARMOR_CONSTANT = 0.06
 
 class Enemy:
     """Represents an enemy unit in the game."""
-    def __init__(self, x, y, grid_path, enemy_id, enemy_data, armor_type, damage_modifiers):
+    def __init__(self, x, y, grid_path, enemy_id, enemy_data, armor_type, damage_modifiers, wave_index=None):
         """
         Initialize an enemy.
 
@@ -20,6 +20,7 @@ class Enemy:
         :param enemy_data: Dictionary containing stats for this enemy type from config.ENEMY_DATA.
         :param armor_type: String name of the armor type (e.g., 'Light').
         :param damage_modifiers: Dictionary of damage type -> multiplier for this armor.
+        :param wave_index: Index of the wave this enemy belongs to (for tracking purposes).
         """
         self.x = x
         self.y = y
@@ -27,6 +28,7 @@ class Enemy:
         self.path_index = 0
         self.enemy_id = enemy_id
         self.image = None  # Will be set during draw based on assets
+        self.wave_index = wave_index  # Track which wave this enemy belongs to
 
         # --- ADDED: Rect for Collision Detection ---
         # Initialize rect with placeholder size, then center it

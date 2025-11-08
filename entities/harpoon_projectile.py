@@ -130,15 +130,22 @@ class HarpoonProjectile:
         target_x = self.initial_enemy_x - (self.initial_enemy_x - edge_x) * self.pull_progress
         target_y = self.initial_enemy_y - (self.initial_enemy_y - edge_y) * self.pull_progress
         
-        # Update enemy position
-        self.target_enemy.x = target_x
-        self.target_enemy.y = target_y
+        # Check if enemy is immune to harpoon effects (lord_supermaul and lord_supermaul_reborn)
+        immune_enemies = ['lord_supermaul', 'lord_supermaul_reborn']
+        is_immune = hasattr(self.target_enemy, 'enemy_id') and self.target_enemy.enemy_id in immune_enemies
+        
+        # Only update enemy position if not immune
+        if not is_immune:
+            # Update enemy position
+            self.target_enemy.x = target_x
+            self.target_enemy.y = target_y
         
         # Check if pull is complete
         if self.pull_progress >= 1.0:
-            # Apply stun effect after pull completes
-            stun_duration = 0.2  # 0.2 seconds of stun
-            self.target_enemy.apply_status_effect('stun', stun_duration, True, current_time)
+            # Apply stun effect after pull completes (only if not immune)
+            if not is_immune:
+                stun_duration = 0.2  # 0.2 seconds of stun
+                self.target_enemy.apply_status_effect('stun', stun_duration, True, current_time)
             
             # Release the enemy
             self.is_active = False

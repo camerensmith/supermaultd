@@ -256,6 +256,29 @@ class TowerSelector:
 
     def handle_event(self, event):
         """Handle pygame_gui events"""
+        # Handle right-click on tower icons
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:  # Right click
+            mouse_pos = event.pos
+            # Check if right-click is on any tower button
+            for tower_id, button in self.tower_buttons.items():
+                # Get the absolute screen position of the button
+                button_rect = button.get_abs_rect()
+                if button_rect.collidepoint(mouse_pos):
+                    # Right-clicked on a tower icon
+                    # If this tower is selected and cannot be placed, clear selection
+                    if tower_id == self.selected_tower:
+                        tower_data = self.available_towers.get(tower_id)
+                        if tower_data:
+                            can_afford = self.money >= tower_data['cost']
+                            tower_limit = tower_data.get('limit')
+                            current_count = self.tower_counts.get(tower_id, 0)
+                            at_limit = tower_limit is not None and current_count >= tower_limit
+                            
+                            # If cannot be placed (can't afford or at limit), clear selection
+                            if not can_afford or at_limit:
+                                self.clear_selection()
+                                return  # Don't process further
+        
         if event.type == pygame_gui.UI_BUTTON_PRESSED:
             clicked_button = event.ui_element
             
@@ -473,6 +496,38 @@ class TowerSelector:
         # Loop through buttons and call unselect()
         for button in self.tower_buttons.values():
             button.unselect()
+    
+    def is_point_in_ui(self, point):
+        """Check if a point (x, y) is within the tower selector UI area (panel or toggle button)."""
+        x, y = point
+        # Check if point is in the panel (use current panel position)
+        if hasattr(self, 'panel') and hasattr(self, 'panel_rect'):
+            # Get current panel position (accounts for animation)
+            try:
+                current_panel_rect = self.panel.get_abs_rect()
+                if current_panel_rect.collidepoint(x, y):
+                    return True
+            except Exception:
+                # Fallback to stored panel_rect if get_abs_rect fails
+                if self.panel_rect.collidepoint(x, y):
+                    return True
+        # Check if point is in the toggle button
+        if hasattr(self, 'toggle_button'):
+            try:
+                toggle_rect = self.toggle_button.get_abs_rect()
+                if toggle_rect.collidepoint(x, y):
+                    return True
+            except Exception:
+                pass
+        # Check if point is in any tower button
+        for button in self.tower_buttons.values():
+            try:
+                button_rect = button.get_abs_rect()
+                if button_rect.collidepoint(x, y):
+                    return True
+            except Exception:
+                pass
+        return False
         
     def update_money(self, new_amount):
         """Update the money display and refresh button states"""

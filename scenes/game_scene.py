@@ -385,6 +385,18 @@ class GameScene:
         self.story_font_large = None
         # --- End Story Overlay Text ---
         
+        # --- Difficulty Selection ---
+        self.difficulty_selection_active = False
+        self.difficulty_speed_modifier = 0.0  # 0.0 for standard, 0.2 for hard, 0.4 for brutal
+        self.difficulty_buttons = []  # List of (rect, text, difficulty) tuples
+        # --- End Difficulty Selection ---
+        
+        # --- Wave Mode Selection ---
+        self.wave_mode_selection_active = False
+        self.selected_wave_mode = None  # "standard", "extended", "extended_air"
+        self.wave_mode_buttons = []  # List of (rect, text, mode) tuples
+        # --- End Wave Mode Selection ---
+        
         # --- Hint Message System ---
         self.hint_message_active = False
         self.hint_message_start_time = 0.0
@@ -755,10 +767,42 @@ class GameScene:
     def handle_event(self, event):
         """Handle pygame events"""
         # --- Handle Story Overlay Dismissal ---
-        if self.story_overlay_active and event.type == pygame.KEYDOWN:
-            self.story_overlay_active = False
-            return  # Don't process other events while overlay is active
+        if self.story_overlay_active:
+            if event.type == pygame.KEYDOWN or (event.type == pygame.MOUSEBUTTONDOWN and event.button == 1):
+                self.story_overlay_active = False
+                self.difficulty_selection_active = True
+                # Create difficulty buttons
+                self._create_difficulty_buttons()
+                return  # Don't process other events while overlay is active
         # --- End Story Overlay Dismissal ---
+        
+        # --- Handle Difficulty Selection ---
+        if self.difficulty_selection_active:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Left click
+                mouse_pos = event.pos
+                for button_rect, button_text, difficulty in self.difficulty_buttons:
+                    if button_rect.collidepoint(mouse_pos):
+                        self._select_difficulty(difficulty)
+                        return
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                # Press Enter to skip and default to standard, then continue to wave start
+                self._select_difficulty(0.0)
+                # Don't return - let Enter continue to start waves
+        # --- End Difficulty Selection ---
+        
+        # --- Handle Wave Mode Selection ---
+        if self.wave_mode_selection_active:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Left click
+                mouse_pos = event.pos
+                for button_rect, button_text, mode in self.wave_mode_buttons:
+                    if button_rect.collidepoint(mouse_pos):
+                        self._select_wave_mode(mode)
+                        return
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                # Press Enter to skip and default to standard waves
+                self._select_wave_mode("standard")
+                # Don't return - let Enter continue to start waves
+        # --- End Wave Mode Selection ---
 
         # --- Toggle Console with Backtick (`) ---
         if event.type == pygame.KEYDOWN:
@@ -826,6 +870,10 @@ class GameScene:
         # Handle Toggle Button Click
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:  # Left click
+                # Check if click is on UI elements - if so, don't process as game field click
+                if self.tower_selector.is_point_in_ui(event.pos):
+                    return  # Click was on UI, don't process as game field interaction
+                
                 if self.toggle_button_rect and self.toggle_button_rect.collidepoint(event.pos):
                     self.debug_toggle_state = not self.debug_toggle_state
                     self.debug_menu_open = self.debug_toggle_state
@@ -991,6 +1039,15 @@ class GameScene:
                 
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1:  # Left mouse button release
+                # Check if mouse was released on UI - if so, don't place tower
+                if self.tower_selector.is_point_in_ui(event.pos):
+                    # Cancel drag if mouse was released on UI
+                    if self.is_dragging:
+                        self.is_dragging = False
+                        self.drag_start_pos = None
+                        self.drag_preview_positions = []
+                    return  # Don't process as game field interaction
+                
                 if self.is_dragging:
                     selected_tower_id = self.tower_selector.get_selected_tower()
                     if selected_tower_id and self.drag_preview_positions:
@@ -1013,7 +1070,7 @@ class GameScene:
                     self.drag_preview_positions = []
                     
                     self.tower_selector.clear_selection()
-                    self.selected_tower = None
+                    self.selected_tower = None 
                     self.tower_preview = None
                 
         elif event.type == pygame.KEYDOWN:
@@ -1032,6 +1089,8 @@ class GameScene:
                 self.spawn_test_enemy("crone")
             elif event.key == pygame.K_s:
                 self.spawn_test_enemy("quillpig")
+            elif event.key == pygame.K_l:
+                self.spawn_test_enemy("lord_supermaul")
             # Tower selection keys: 1-9, 0, Shift+1-9, Shift+0
             # Map keys to tower indices: 1->0, 2->1, ..., 9->8, 0->9
             # Shift+1->10, Shift+2->11, ..., Shift+9->18, Shift+0->19
@@ -2649,7 +2708,9 @@ class GameScene:
                         self.loss_life_sound.play()
                     # --- End Play Sound ---
                     #print(f"*** OBJECTIVE REACHED by {enemy.enemy_id}. Decrementing wave counter from {self.enemies_alive_this_wave}...") # DEBUG
-                    if self.enemies_alive_this_wave > 0: self.enemies_alive_this_wave -= 1
+                    # Only decrement if this enemy belongs to the current wave
+                    if hasattr(enemy, 'wave_index') and enemy.wave_index == self.current_wave_index:
+                        if self.enemies_alive_this_wave > 0: self.enemies_alive_this_wave -= 1
                     self.enemies.remove(enemy)
                     #print(f"Enemy reached objective. Lives remaining: {self.lives}")
                     #print(f"  Enemies left this wave NOW: {self.enemies_alive_this_wave}") # DEBUG
@@ -2660,8 +2721,10 @@ class GameScene:
                     # --- End Lives Check ---
                 elif enemy in self.enemies: # Only remove if not already removed by state change
                     # Remove enemy even if game ended, but don't process further
-                    self.enemies.remove(enemy)
-                    if self.enemies_alive_this_wave > 0: self.enemies_alive_this_wave -= 1 
+                    # Only decrement if this enemy belongs to the current wave
+                    if hasattr(enemy, 'wave_index') and enemy.wave_index == self.current_wave_index:
+                        if self.enemies_alive_this_wave > 0: self.enemies_alive_this_wave -= 1
+                    self.enemies.remove(enemy) 
                 
                 # Continue to next enemy in the loop regardless of state change this iteration
                 continue # Skip death check below if enemy reached objective 
@@ -2716,15 +2779,19 @@ class GameScene:
                     self.tower_selector.update_money(self.money)
                     
                     # Decrement wave counter and remove enemy
+                    # Only decrement if this enemy belongs to the current wave
                     #print(f"*** ENEMY KILLED: {enemy.enemy_id}. Decrementing wave counter from {self.enemies_alive_this_wave}...")
-                    if self.enemies_alive_this_wave > 0: self.enemies_alive_this_wave -= 1 
+                    if hasattr(enemy, 'wave_index') and enemy.wave_index == self.current_wave_index:
+                        if self.enemies_alive_this_wave > 0: self.enemies_alive_this_wave -= 1 
                     self.enemies.remove(enemy)
                     #print(f"Enemy {enemy.enemy_id} defeated. Gained ${reward}. Current Money: ${self.money}") 
                     #print(f"  Enemies left this wave NOW: {self.enemies_alive_this_wave}") 
                 elif enemy in self.enemies: # Only remove if not already removed by state change
                     # Remove enemy even if game ended due to win, but don't process reward/effects
-                    self.enemies.remove(enemy)
-                    if self.enemies_alive_this_wave > 0: self.enemies_alive_this_wave -= 1 
+                    # Only decrement if this enemy belongs to the current wave
+                    if hasattr(enemy, 'wave_index') and enemy.wave_index == self.current_wave_index:
+                        if self.enemies_alive_this_wave > 0: self.enemies_alive_this_wave -= 1
+                    self.enemies.remove(enemy) 
             
     def draw(self, screen, time_delta, current_time):
         """Draw the game scene"""
@@ -3174,6 +3241,28 @@ class GameScene:
                         indicator_color = config.GREEN if is_valid_placement else config.RED
                         outline_rect = pygame.Rect(preview_pixel_x, preview_pixel_y, tower_pixel_width, tower_pixel_height)
                         pygame.draw.rect(screen, indicator_color, outline_rect, 2)
+                        
+                        # Draw range radius circle
+                        center_pixel_x = tower_left + (tower_pixel_width // 2)
+                        center_pixel_y = tower_top + (tower_pixel_height // 2)
+                        center_pos = (int(center_pixel_x), int(center_pixel_y))
+                        
+                        # Get range from tower data and convert to pixels
+                        json_range = tower_data.get('range', 200)  # Default to 200 units (1 tile)
+                        range_pixels = int(json_range * (config.GRID_SIZE / 200.0))
+                        
+                        if range_pixels > 0:
+                            # Draw range circle (matching style of hovered tower range)
+                            range_color = (100, 200, 255)  # Light blue
+                            pygame.draw.circle(screen, range_color, center_pos, range_pixels, 2)
+                            
+                            # Draw min range (dead zone) if it exists
+                            json_range_min = tower_data.get('range_min', 0)
+                            if json_range_min > 0:
+                                min_range_pixels = int(json_range_min * (config.GRID_SIZE / 200.0))
+                                if min_range_pixels > 0:
+                                    dead_zone_color = (255, 100, 0)  # Orange-ish
+                                    pygame.draw.circle(screen, dead_zone_color, center_pos, min_range_pixels, 2)
         elif self.tower_preview:
             grid_x, grid_y = self.tower_preview
             selected_tower_id = self.tower_selector.get_selected_tower()
@@ -3209,6 +3298,7 @@ class GameScene:
                     # Calculate center for range circles (use snapped position)
                     center_pixel_x = tower_left + (tower_pixel_width // 2)
                     center_pixel_y = tower_top + (tower_pixel_height // 2)
+                    center_pos = (int(center_pixel_x), int(center_pixel_y))
                     
                     # Draw tower preview with proper scaling to maintain aspect ratio
                     self.tower_assets.draw_tower(screen, selected_tower_id,
@@ -3222,6 +3312,24 @@ class GameScene:
                     overlay_surface = pygame.Surface((tower_pixel_width, tower_pixel_height), pygame.SRCALPHA)
                     overlay_surface.fill(overlay_color)
                     screen.blit(overlay_surface, (preview_pixel_x, preview_pixel_y))
+                    
+                    # Draw range radius circle
+                    # Get range from tower data and convert to pixels
+                    json_range = tower_data.get('range', 200)  # Default to 200 units (1 tile)
+                    range_pixels = int(json_range * (config.GRID_SIZE / 200.0))
+                    
+                    if range_pixels > 0:
+                        # Draw range circle (matching style of hovered tower range)
+                        range_color = (100, 200, 255)  # Light blue
+                        pygame.draw.circle(screen, range_color, center_pos, range_pixels, 2)
+                        
+                        # Draw min range (dead zone) if it exists
+                        json_range_min = tower_data.get('range_min', 0)
+                        if json_range_min > 0:
+                            min_range_pixels = int(json_range_min * (config.GRID_SIZE / 200.0))
+                            if min_range_pixels > 0:
+                                dead_zone_color = (255, 100, 0)  # Orange-ish
+                                pygame.draw.circle(screen, dead_zone_color, center_pos, min_range_pixels, 2)
                     
                     # Draw cell outline box at the SAME position as preview image (snapped to grid)
                     indicator_color = config.GREEN if is_valid_placement else config.RED
@@ -3822,12 +3930,60 @@ class GameScene:
                 line_rect = line_surface.get_rect(center=(self.screen_width // 2, start_y + i * line_height))
                 screen.blit(line_surface, line_rect)
             
-            # Draw "Press any key to continue" text
-            continue_text = "Press any key to continue..."
+            # Draw "Click or press any key to continue" text
+            continue_text = "Click or press any key to continue..."
             continue_surface = self.story_font.render(continue_text, True, (200, 200, 100))  # Slightly dimmer yellow
             continue_rect = continue_surface.get_rect(center=(self.screen_width // 2, self.screen_height // 2 + 150))
             screen.blit(continue_surface, continue_rect)
         # --- End Story Overlay ---
+        
+        # --- Draw Difficulty Selection Buttons ---
+        if self.difficulty_selection_active and self.story_font:
+            # Draw title above buttons
+            title_text = "Difficulty"
+            title_surface = self.story_font.render(title_text, True, (255, 255, 150))  # Light yellow
+            title_rect = title_surface.get_rect(left=20, top=110)
+            screen.blit(title_surface, title_rect)
+            
+            # Draw buttons (no background overlay - players can see the game)
+            for button_rect, button_text, difficulty in self.difficulty_buttons:
+                # Draw button background with slight transparency
+                button_surface = pygame.Surface((button_rect.width, button_rect.height), pygame.SRCALPHA)
+                button_surface.fill((80, 80, 80, 200))  # Dark grey with transparency
+                screen.blit(button_surface, button_rect)
+                
+                # Draw button border
+                pygame.draw.rect(screen, (150, 150, 150), button_rect, 2)  # Light grey border
+                
+                # Draw button text
+                text_surface = self.story_font.render(button_text, True, (255, 255, 150))  # Light yellow
+                text_rect = text_surface.get_rect(center=button_rect.center)
+                screen.blit(text_surface, text_rect)
+        # --- End Difficulty Selection Buttons ---
+        
+        # --- Draw Wave Mode Selection Buttons ---
+        if self.wave_mode_selection_active and self.story_font:
+            # Draw title above buttons
+            title_text = "Wave Mode"
+            title_surface = self.story_font.render(title_text, True, (255, 255, 150))  # Light yellow
+            title_rect = title_surface.get_rect(left=20, top=110)
+            screen.blit(title_surface, title_rect)
+            
+            # Draw buttons (no background overlay - players can see the game)
+            for button_rect, button_text, mode in self.wave_mode_buttons:
+                # Draw button background with slight transparency
+                button_surface = pygame.Surface((button_rect.width, button_rect.height), pygame.SRCALPHA)
+                button_surface.fill((80, 80, 80, 200))  # Dark grey with transparency
+                screen.blit(button_surface, button_rect)
+                
+                # Draw button border
+                pygame.draw.rect(screen, (150, 150, 150), button_rect, 2)  # Light grey border
+                
+                # Draw button text (may need to wrap if too long)
+                text_surface = self.story_font.render(button_text, True, (255, 255, 150))  # Light yellow
+                text_rect = text_surface.get_rect(center=button_rect.center)
+                screen.blit(text_surface, text_rect)
+        # --- End Wave Mode Selection Buttons ---
 
         # --- Draw Pulsing "Press Enter to begin..." Text ---
         if not self.story_overlay_active and not self.wave_started and self.pulse_font:
@@ -4054,8 +4210,13 @@ class GameScene:
             #print(f"Warning: Enemy data not found for ID '{enemy_id}' in config.ENEMY_DATA. Cannot spawn.")
             return
         
+        # Apply difficulty speed modifier
+        enemy_data_with_modifier = enemy_data.copy()
+        base_speed = enemy_data_with_modifier.get("speed", 1.0)
+        enemy_data_with_modifier["speed"] = base_speed + self.difficulty_speed_modifier
+        
         # Determine if the unit is an air unit
-        is_air = enemy_data.get("type", "ground") == "air"
+        is_air = enemy_data_with_modifier.get("type", "ground") == "air"
         
         # Get armor details based on enemy data
         armor_type_name = enemy_data.get("armor_type", "Unarmored") # Default to Unarmored if missing
@@ -4078,12 +4239,14 @@ class GameScene:
             return
 
         # Create the enemy with specific data including armor
+        # Test enemies don't belong to any wave, so pass None for wave_index
         enemy = Enemy(self.visual_spawn_x_pixel, self.visual_spawn_y_pixel, 
                       grid_path, 
                       enemy_id=enemy_id, 
-                      enemy_data=enemy_data, 
+                      enemy_data=enemy_data_with_modifier, 
                       armor_type=armor_type_name, # Pass armor name
-                      damage_modifiers=damage_modifiers) # Pass modifiers dict
+                      damage_modifiers=damage_modifiers,
+                      wave_index=None) # Test enemies don't count toward wave completion
         self.enemies.append(enemy)
         #print(f"Spawned test enemy: {enemy_id} (Armor: {armor_type_name}) with path length {len(grid_path)}")
 
@@ -4793,6 +4956,92 @@ class GameScene:
             self.tower_selector.update_button_states()
             print("[GameScene] Tower selector updated with unlocked towers!")
     
+    # --- Difficulty Selection Helpers ---
+    def _create_difficulty_buttons(self):
+        """Create the difficulty selection buttons, stacked vertically on the left side."""
+        self.difficulty_buttons = []
+        button_width = 150
+        button_height = 50
+        button_spacing = 15
+        left_margin = 20
+        start_y = 150  # Start below any UI elements at the top
+        
+        difficulties = [
+            ("Standard", 0.0),
+            ("Hard", 0.5),
+            ("Brutal", 1.50)
+        ]
+        
+        for i, (text, modifier) in enumerate(difficulties):
+            button_y = start_y + i * (button_height + button_spacing)
+            button_rect = pygame.Rect(
+                left_margin,
+                button_y,
+                button_width,
+                button_height
+            )
+            self.difficulty_buttons.append((button_rect, text, modifier))
+    
+    def _select_difficulty(self, speed_modifier):
+        """Select difficulty and apply speed modifier."""
+        self.difficulty_speed_modifier = speed_modifier
+        self.difficulty_selection_active = False
+        self.difficulty_buttons = []
+        # Show wave mode selection after difficulty is selected
+        self.wave_mode_selection_active = True
+        self._create_wave_mode_buttons()
+        #print(f"Difficulty selected: Speed modifier = {speed_modifier}")
+    
+    def _create_wave_mode_buttons(self):
+        """Create the wave mode selection buttons, stacked vertically on the left side."""
+        self.wave_mode_buttons = []
+        button_width = 150
+        button_height = 50
+        button_spacing = 15
+        left_margin = 20
+        start_y = 150  # Start below any UI elements at the top
+        
+        wave_modes = [
+            ("38 waves", "standard"),
+            ("53 waves", "extended"),
+            ("58 waves/air", "extended_air")
+        ]
+        
+        for i, (text, mode) in enumerate(wave_modes):
+            button_y = start_y + i * (button_height + button_spacing)
+            button_rect = pygame.Rect(
+                left_margin,
+                button_y,
+                button_width,
+                button_height
+            )
+            self.wave_mode_buttons.append((button_rect, text, mode))
+    
+    def _select_wave_mode(self, mode):
+        """Select wave mode and update wave file path."""
+        self.selected_wave_mode = mode
+        self.wave_mode_selection_active = False
+        self.wave_mode_buttons = []
+        
+        # Update wave file path based on selection
+        if mode == "standard":
+            # Use waves.json (standard/default waves)
+            self.wave_file_path = os.path.join("data", "waves.json")
+            # Reload wave data
+            self.all_wave_data = self.load_wave_data(self.wave_file_path)
+        elif mode == "extended":
+            # Use waves_plus.json (advanced without air waves)
+            self.wave_file_path = os.path.join("data", "waves_plus.json")
+            # Reload wave data
+            self.all_wave_data = self.load_wave_data(self.wave_file_path)
+        elif mode == "extended_air":
+            # Use waves_advanced.json (advanced with air waves)
+            self.wave_file_path = os.path.join("data", "waves_advanced.json")
+            # Reload wave data
+            self.all_wave_data = self.load_wave_data(self.wave_file_path)
+        #print(f"Wave mode selected: {mode}, using {self.wave_file_path}")
+    # --- End Difficulty Selection Helpers ---
+    
     # --- Spawn Enemy Helper --- 
     def spawn_enemy(self, enemy_id):
         """Spawns a single enemy of the specified type at the visual spawn point."""
@@ -4802,14 +5051,19 @@ class GameScene:
             #print(f"ERROR: Could not find enemy data for ID: {enemy_id}")
             return
 
+        # Apply difficulty speed modifier
+        enemy_data_with_modifier = enemy_base_data.copy()
+        base_speed = enemy_data_with_modifier.get("speed", 1.0)
+        enemy_data_with_modifier["speed"] = base_speed + self.difficulty_speed_modifier
+
         # Get armor data
-        armor_type_name = enemy_base_data.get('armor_type', 'Unarmored')
+        armor_type_name = enemy_data_with_modifier.get('armor_type', 'Unarmored')
         armor_info = self.armor_data.get(armor_type_name, {})
         damage_modifiers = armor_info.get('damage_modifiers', {})
 
         # --- Determine if enemy is air unit ---
-        is_air = enemy_base_data.get("type", "ground") == "air"
-        #print(f"DEBUG Spawn: Spawning {enemy_id}, Type={enemy_base_data.get('type', 'ground')}, Is Air? {is_air}") # DEBUG
+        is_air = enemy_data_with_modifier.get("type", "ground") == "air"
+        #print(f"DEBUG Spawn: Spawning {enemy_id}, Type={enemy_data_with_modifier.get('type', 'ground')}, Is Air? {is_air}") # DEBUG
         # -------------------------------------
 
         # Find initial path, passing air unit status
@@ -4821,7 +5075,8 @@ class GameScene:
             # Spawn at the visual spawn point (center of spawn area)
             # Use the same coordinates as spawn_test_enemy() for consistency
             enemy = Enemy(self.visual_spawn_x_pixel, self.visual_spawn_y_pixel, 
-                          path, enemy_id, enemy_base_data, armor_type_name, damage_modifiers)
+                          path, enemy_id, enemy_data_with_modifier, armor_type_name, damage_modifiers,
+                          wave_index=self.current_wave_index)  # Track which wave this enemy belongs to
             self.enemies.append(enemy)
             self.enemies_alive_this_wave += 1 # Increment count for wave tracking
             #print(f"Spawned enemy: {enemy_id} (Wave: {self.current_wave_index + 1})")
@@ -4922,6 +5177,26 @@ class GameScene:
                 print("Returning to main menu...")
             else:
                 print("Error: Cannot return to menu (method not found)")
+            return
+
+        if cmd in ("bumrush", "bum_rush"):
+            # Set all enemy units to 2.5 speed
+            count = 0
+            for enemy in self.enemies:
+                if enemy.health > 0:
+                    enemy.base_speed = 2.5
+                    # Clear status effects that might affect speed (stuns, slows)
+                    if 'stun' in enemy.status_effects:
+                        del enemy.status_effects['stun']
+                    if 'slow' in enemy.status_effects:
+                        del enemy.status_effects['slow']
+                    # Recalculate speed to ensure it's 2.5
+                    if hasattr(enemy, 'recalculate_speed'):
+                        enemy.recalculate_speed()
+                    else:
+                        enemy.speed = 2.5
+                    count += 1
+            print(f"Bumrush activated: Set {count} enemies to 2.5 speed")
             return
 
         print(f"Unknown command: {cmd}")

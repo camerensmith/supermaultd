@@ -513,7 +513,7 @@ class Tower:
                 try:
                     # Load image directly here, similar to sounds
                     self.rewind_visual_surface = pygame.image.load(visual_path).convert_alpha()
-                    print(f"Loaded rewind visual for {self.tower_id} from {visual_path}")
+                    #print(f"Loaded rewind visual for {self.tower_id} from {visual_path}")
                 except pygame.error as e:
                     #print(f"Error loading rewind visual {visual_path}: {e}")
                     pass
@@ -1295,6 +1295,15 @@ class Tower:
 
             # --- Harpoon Attack Logic ---
             elif self.attack_type == 'harpoon':
+                # Check if target is immune to harpoon effects (lord_supermaul and lord_supermaul_reborn)
+                immune_enemies = ['lord_supermaul', 'lord_supermaul_reborn']
+                is_immune = hasattr(target, 'enemy_id') and target.enemy_id in immune_enemies
+                
+                # Don't create harpoon for immune enemies
+                if is_immune:
+                    # Skip harpoon attack for immune enemies
+                    return results
+                
                 # <<< PLAY SOUND >>>
                 if self.attack_sound:
                     self.attack_sound.play()
@@ -2578,6 +2587,14 @@ class Tower:
                 max_path_index = -1
 
                 for enemy in all_enemies:
+                    # Check if enemy is immune to time machine effects (lord_supermaul and lord_supermaul_reborn)
+                    immune_enemies = ['lord_supermaul', 'lord_supermaul_reborn']
+                    is_immune = hasattr(enemy, 'enemy_id') and enemy.enemy_id in immune_enemies
+                    
+                    # Skip immune enemies
+                    if is_immune:
+                        continue
+                    
                     # Check if enemy is alive, of a valid target type, and in range
                     if (enemy.health > 0 and 
                         enemy.type in self.targets and 
@@ -2593,8 +2610,14 @@ class Tower:
                     waypoints_to_rewind = self.special.get("waypoints_to_rewind", 3)
                     #print(f"TIME MACHINE {self.tower_id}: Targeting {best_target.enemy_id} (at waypoint {best_target.path_index}). Rewinding {waypoints_to_rewind} waypoints.")
                     
-                    # Call the enemy's rewind method
-                    best_target.rewind_waypoints(waypoints_to_rewind)
+                    # Check if enemy is immune to time machine effects (lord_supermaul and lord_supermaul_reborn)
+                    immune_enemies = ['lord_supermaul', 'lord_supermaul_reborn']
+                    is_immune = hasattr(best_target, 'enemy_id') and best_target.enemy_id in immune_enemies
+                    
+                    # Only rewind if not immune
+                    if not is_immune:
+                        # Call the enemy's rewind method
+                        best_target.rewind_waypoints(waypoints_to_rewind)
                     
                     # <<< PLAY REWIND SOUND >>>
                     if hasattr(self, 'rewind_sound') and self.rewind_sound:
@@ -2608,12 +2631,17 @@ class Tower:
                     if hasattr(self, 'rewind_visual_surface') and self.rewind_visual_surface:
                         if hasattr(self, 'game_scene_add_effect_callback') and callable(self.game_scene_add_effect_callback):
                             try:
+                                # Make the effect much bigger - 3x the tower size
+                                effect_size_multiplier = 3.0
+                                effect_width = int(self.width_pixels * effect_size_multiplier)
+                                effect_height = int(self.height_pixels * effect_size_multiplier)
+                                
                                 effect_instance = Effect(
-                                    self.x, # Center effect on tower's X
-                                    self.y, # Center effect on tower's Y
+                                    best_target.x, # Center effect on enemy's X
+                                    best_target.y, # Center effect on enemy's Y
                                     self.rewind_visual_surface, # Use pre-loaded image
                                     duration=0.5, # Quick fade-out duration
-                                    target_size=(self.width_pixels, self.height_pixels), # Match tower size
+                                    target_size=(effect_width, effect_height), # Much larger size
                                     fade_type='fade_out' # Default fade out is fine
                                 )
                                 self.game_scene_add_effect_callback(effect_instance)
